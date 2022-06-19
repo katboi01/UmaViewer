@@ -28,6 +28,7 @@ GraphicsSettings:
   m_LensFlare:
     m_Mode: 1
     m_Shader: {fileID: 102, guid: 0000000000000000f000000000000000, type: 0}
+  m_VideoShadersIncludeMode: 2
   m_AlwaysIncludedShaders:
   - {fileID: 7, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 15104, guid: 0000000000000000f000000000000000, type: 0}
@@ -39,8 +40,8 @@ GraphicsSettings:
   - {fileID: 16001, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 17000, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 4800000, guid: 5ab62aa7fc808ce438fddff06ba6cfcc, type: 3}
-  - {fileID: 4800000, guid: e3ec72c447c574843985008b8c3a9eb6, type: 3}
-  - {fileID: 4800000, guid: bafb718b94eb1fd4583c32f845efd992, type: 3}
+  - {fileID: 4800000, guid: 0f906fb5c12bff84fbbd0e789a01014c, type: 3}
+  - {fileID: 4800000, guid: 7ec653cb0fc8e8a4fab3acba9f70478c, type: 3}
   m_PreloadedShaders: []
   m_SpritesDefaultMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000,
     type: 0}
@@ -65,5 +66,5 @@ GraphicsSettings:
   m_AlbedoSwatchInfos: []
   m_LightsUseLinearIntensity: 0
   m_LightsUseColorTemperature: 0
+  m_DefaultRenderingLayerMask: 1
   m_LogWhenShaderIsCompiled: 0
-  m_AllowEnlightenSupportForUpgradedProject: 0

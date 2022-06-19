@@ -57,22 +57,26 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadNormalUma(int id, string costumeId)
     {
         JObject charaData = CurrentContainer.CharaData;
-        bool genericCostume = CurrentContainer.IsGeneric = costumeId.Length == 4;
-        string[] vars = null;
+        bool genericCostume = CurrentContainer.IsGeneric = costumeId.Length >= 4;
         string skin = (string)charaData["skin"],
+               height = (string)charaData["height"],
                socks = (string)charaData["socks"],
-               bust = (string)charaData["bust"];
+               bust = (string)charaData["bust"],
+               costumeIdShort = "";
 
         UmaDatabaseEntry asset = null;
         if (genericCostume)
         {
-            CurrentContainer.GenericVariables = vars = new string[6] { costumeId, "00", "00", skin, socks, bust };
-            for (int i = 0; i < 3; i++)
-            {
-                string body = UmaDatabaseController.BodyPath + $"bdy{costumeId}_00/pfb_bdy{costumeId}_00_0{i}_{0}_{0}_{bust}";
-                asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
-                if (asset != null) break;
-            }
+            costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
+            CurrentContainer.VarCostumeIdShort = costumeIdShort;
+            CurrentContainer.VarCostumeIdLong = costumeId;
+            CurrentContainer.VarBust = bust;
+            CurrentContainer.VarSkin = skin;
+            CurrentContainer.VarSocks = socks;
+            CurrentContainer.VarHeight = height;
+            string body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{height}_{0}_{bust}";
+            Debug.Log("Looking for " + body);
+            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
         }
         else asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/pfb_bdy{id}_{costumeId}");
 
@@ -84,19 +88,23 @@ public class UmaViewerBuilder : MonoBehaviour
         else if (genericCostume)
         {
             string texPattern1 = "", texPattern2 = "";
-            switch (costumeId)
+            switch (costumeId.Split('_')[0])
             {
                 case "0001":
-                    texPattern1 = $"tex_bdy{costumeId}_00_{"00"}_{skin}_{socks}_0{bust}";
-                    texPattern2 = $"tex_bdy{costumeId}_00_00_0_{socks}_00_";
+                    texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_0{bust}";
+                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_";
+                    break;
+                case "0003":
+                    texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}";
+                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{bust}";
                     break;
                 case "0006": //last var is color?
-                    texPattern1 = $"tex_bdy{costumeId}_00_{"00"}_{skin}_{bust}_0{0}";
-                    texPattern2 = $"tex_bdy{costumeId}_00_00_0_{bust}_00_";
+                    texPattern1 = $"tex_bdy{costumeId}_{skin}_{bust}_0{0}";
+                    texPattern2 = $"tex_bdy{costumeId}_0_{bust}_00_";
                     break;
                 default:
-                    texPattern1 = $"tex_bdy{costumeId}_00_{"00"}_{skin}_{bust}";
-                    texPattern2 = $"tex_bdy{costumeId}_00_00_0_{bust}";
+                    texPattern1 = $"tex_bdy{costumeId}_{skin}_{bust}";
+                    texPattern2 = $"tex_bdy{costumeId}_0_{bust}";
                     break;
             }
             Debug.Log(texPattern1 + " " + texPattern2);
@@ -156,24 +164,20 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         JObject charaData = CurrentContainer.CharaData;
         CurrentContainer.IsMini = true;
-        bool isGeneric = CurrentContainer.IsGeneric = costumeId.Length == 4;
-        bool customHead = true;
-        string[] vars = null;
+        bool isGeneric = CurrentContainer.IsGeneric = costumeId.Length >= 4;
         string skin = (string)charaData["skin"],
+               height = (string)charaData["height"],
                socks = (string)charaData["socks"],
                bust = (string)charaData["bust"],
-               cos0003 = costumeId == "0003" ? "1" : "0";
+               costumeIdShort = "";
+        bool customHead = true;
 
         UmaDatabaseEntry asset = null;
         if (isGeneric)
         {
-            CurrentContainer.GenericVariables = vars = new string[6] { costumeId, "00", "00", skin, socks, bust };
-            for (int i = 0; i < 3; i++)
-            {
-                string body = $"3d/chara/mini/body/mbdy{costumeId}_0{i}/pfb_mbdy{costumeId}_0{i}_0{cos0003}_0";
-                asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
-                if (asset != null) break;
-            }
+            costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
+            string body = $"3d/chara/mini/body/mbdy{costumeIdShort}/pfb_mbdy{costumeId}_0";
+            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
         }
         else asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == $"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}");
         if (asset == null)
@@ -183,7 +187,16 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (isGeneric)
         {
-            string texPattern1 = $"tex_mbdy{costumeId}_0{cos0003}_{"00"}_{skin}_{0}";
+            string texPattern1 = "";
+            switch (costumeId.Split('_')[0])
+            {
+                case "0003":
+                    texPattern1 = $"tex_mbdy{costumeIdShort}_00_{skin}_{0}";
+                    break;
+                default:
+                    texPattern1 = $"tex_mbdy{costumeId}_{skin}_{0}";
+                    break;
+            }
             //Load Body Textures
             foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith("3d/chara/mini/body/") && a.Name.Contains(texPattern1)))
             {
@@ -352,12 +365,12 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentContainer.IsGeneric)
         {
             List<Texture2D> textures = CurrentContainer.GenericBodyTextures;
-            string costumeId = CurrentContainer.GenericVariables[0],
-                   var1 = CurrentContainer.GenericVariables[1],
-                   var2 = CurrentContainer.GenericVariables[2],
-                   skin = CurrentContainer.GenericVariables[3],
-                   socks = CurrentContainer.GenericVariables[4],
-                   bust = CurrentContainer.GenericVariables[5];
+            string costumeIdShort = CurrentContainer.VarCostumeIdShort,
+                   costumeIdLong = CurrentContainer.VarCostumeIdLong,
+                   height = CurrentContainer.VarHeight,
+                   skin = CurrentContainer.VarSkin,
+                   socks = CurrentContainer.VarSocks,
+                   bust = CurrentContainer.VarBust;
 
             foreach (Renderer r in CurrentContainer.Body.GetComponentsInChildren<Renderer>())
             {
@@ -371,28 +384,35 @@ public class UmaViewerBuilder : MonoBehaviour
                     else
                     {
                         m.shader = Shader.Find("Nars/UmaMusume/Body");
-                        switch (costumeId) //costume ID
+                        switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
-                                mainTex = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{socks}_{bust.PadLeft(2, '0')}_diff";
-                                toonMap = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{socks}_{bust.PadLeft(2, '0')}_shad_c";
-                                tripleMap = $"tex_bdy{costumeId}_00_00_0_{socks}_00_base";
-                                optionMap = $"tex_bdy{costumeId}_00_00_0_{socks}_00_ctrl";
+                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_{bust.PadLeft(2, '0')}_diff";
+                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_{bust.PadLeft(2, '0')}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_base";
+                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_ctrl";
+                                break;
+                            case "0003":
+                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_diff";
+                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_base";
+                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_ctrl";
                                 break;
                             case "0006":
-                                mainTex = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{bust}_{"00"}_diff";
-                                toonMap = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{bust}_{"00"}_shad_c";
-                                tripleMap = $"tex_bdy{costumeId}_00_00_0_{bust}_00_base";
-                                optionMap = $"tex_bdy{costumeId}_00_00_0_{bust}_00_ctrl";
+                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
+                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
+                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_ctrl";
                                 break;
                             default:
-                                mainTex = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{bust}_diff";
-                                toonMap = $"tex_bdy{costumeId}_{var1}_{var2}_{skin}_{bust}_shad_c";
-                                tripleMap = $"tex_bdy{costumeId}_00_00_0_{bust}_base";
-                                optionMap = $"tex_bdy{costumeId}_00_00_0_{bust}_ctrl";
+                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_diff";
+                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_base";
+                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_ctrl";
                                 break;
 
                         }
+                        Debug.Log("Looking for texture " + mainTex);
                         m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name == mainTex));
                         m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name == toonMap));
                         m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name == tripleMap));
@@ -452,26 +472,36 @@ public class UmaViewerBuilder : MonoBehaviour
                         m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("mayu")));
                     }
                 }
-                switch (m.shader.name)
+                else
                 {
-                    case "Gallop/3D/Chara/MultiplyCheek":
-                        m.CopyPropertiesFromMaterial(InvisibleMaterial);
-                        break;
-                    case "Gallop/3D/Chara/ToonEye/T":
-                    case "Nars/UmaMusume/Eyes":
-                        m.shader = Shader.Find("Nars/UmaMusume/Eyes");
-                        break;
-                    case "Gallop/3D/Chara/ToonFace/TSER":
-                    case "Nars/UmaMusume/Face":
-                        m.shader = Shader.Find("Nars/UmaMusume/Face");
-                        break;
-                    case "Gallop/3D/Chara/ToonHair/TSER":
-                        m.shader = Shader.Find("Nars/UmaMusume/Body");
-                        break;
-                    default:
-                        Debug.LogError(m.shader.name);
-                        // m.shader = Shader.Find("Nars/UmaMusume/Body");
-                        break;
+                    switch (m.shader.name)
+                    {
+                        case "Gallop/3D/Chara/MultiplyCheek":
+                            m.CopyPropertiesFromMaterial(InvisibleMaterial);
+                            break;
+                        case "Gallop/3D/Chara/ToonEye/T":
+                        case "Nars/UmaMusume/Eyes":
+                            m.shader = Shader.Find("Nars/UmaMusume/Eyes");
+                            foreach(var tex in m.GetTexturePropertyNames())
+                            {
+                                if(m.GetTexture(tex) != null)
+                                {
+                                    m.GetTexture(tex).wrapMode = TextureWrapMode.Repeat;
+                                }
+                            }
+                            break;
+                        case "Gallop/3D/Chara/ToonFace/TSER":
+                        case "Nars/UmaMusume/Face":
+                            m.shader = Shader.Find("Nars/UmaMusume/Face");
+                            break;
+                        case "Gallop/3D/Chara/ToonHair/TSER":
+                            m.shader = Shader.Find("Nars/UmaMusume/Body");
+                            break;
+                        default:
+                            Debug.LogError(m.shader.name);
+                            // m.shader = Shader.Find("Nars/UmaMusume/Body");
+                            break;
+                    }
                 }
             }
         }

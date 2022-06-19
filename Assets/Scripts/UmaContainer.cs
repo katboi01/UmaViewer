@@ -14,8 +14,7 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Generic")]
     public bool IsGeneric = false;
-    /// <summary> 0 - costume ID, 1 - ?, 2 - ?, 3 - skin color, 4 - socks, 5 - bust </summary>
-    public string[] GenericVariables;
+    public string VarCostumeIdShort, VarCostumeIdLong, VarSkin, VarHeight, VarSocks, VarBust;
     public List<Texture2D> GenericBodyTextures = new List<Texture2D>();
 
     [Header("Mini")]

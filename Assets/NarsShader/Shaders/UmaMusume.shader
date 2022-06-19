@@ -26,7 +26,7 @@ Shader "Nars/UmaMusume/Body"
 	SubShader
 	{
 		Tags{ "RenderType" = "TransparentCutout"  "Queue" = "AlphaTest+0"}
-		Cull Front
+		Cull Back
 		CGPROGRAM
 		#pragma target 3.0
 		#pragma surface outlineSurf Outline nofog  keepalpha noshadow noambient novertexlights nolightmap nodynlightmap nodirlightmap nometa noforwardadd vertex:outlineVertexDataFunc 

@@ -53,7 +53,7 @@ public class UmaViewerUI : MonoBehaviour
         if (LoadedAssetCount > 1)
             LoadedAssetsText.text += "\n";
         LoadedAssetsText.text += asset;
-        LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 20);
+        LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * LoadedAssetsText.fontSize * 2.4f);
     }
 
     public void LoadedAssetsClear()
@@ -145,16 +145,17 @@ public class UmaViewerUI : MonoBehaviour
             });
         }
         //Common costumes
-        List<int> costumes = new List<int>();
+        List<string> costumes = new List<string>();
         nameVar = mini ? "pfb_mbdy0" : $"pfb_bdy0";
         foreach (var entry in Main.AbList.Where(a => a.Name.StartsWith("3d/chara/") && a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
         {
-            int id = int.Parse(Path.GetFileName(entry.Name).Split('_')[1].Substring(mini? 4: 3));
+            string id = Path.GetFileName(entry.Name);
+            id = id.Split('_')[1].Substring(mini ? 4 : 3) + "_" + id.Split('_')[2] + "_" + id.Split('_')[3];
             if (!costumes.Contains(id))
             {
                 costumes.Add(id);
                 var container = Instantiate(UmaContainerPrefab, costumeList.content).GetComponent<UmaUIContainer>();
-                string costumeId = container.Name.text = container.name = id.ToString().PadLeft(4,'0');
+                string costumeId = container.Name.text = container.name = id;
                 container.Button.onClick.AddListener(() => {
                     HighlightChildImage(costumeList.content, container.GetComponent<Image>());
                     StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
