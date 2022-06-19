@@ -15,7 +15,7 @@ Shader "Nars/UmaMusume/Body"
 		_SpecularSmoothness("Specular Smoothness", Float) = 1.03
 		_ViewDirY("ViewDir Y", Range( -200 , 200)) = 0
 		_Float2("Float 2", Float) = 0.5
-		_SpecularBrightness("Specular Brightness", Range( -30 , 30)) = -30
+		_SpecularBrightness("Specular Brightness", Range( -30 , 30)) = 30
 		_ViewDirX("ViewDir X", Range( -200 , 200)) = 0
 		_SpecSize("Spec Size", Range( 0 , 10)) = 5
 		_FallBackBrightness("FallBack Brightness", Range( 0 , 1)) = 0.6

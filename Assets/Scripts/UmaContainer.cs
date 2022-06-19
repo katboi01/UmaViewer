@@ -1,31 +1,45 @@
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
-    public Transform UmaNeckBone;
-    public Transform UmaHeadBone;
-    public Transform HeadNeckBone;
-    public Transform HeadHeadBone;
+    public JObject CharaData;
     public GameObject Body;
     public GameObject Tail;
     public List<Texture2D> TailTextures = new List<Texture2D>();
-    public GameObject Head;
     public Animator UmaAnimator;
     public AnimatorOverrideController OverrideController;
 
+    [Header("Generic")]
+    public bool IsGeneric = false;
+    /// <summary> 0 - costume ID, 1 - ?, 2 - ?, 3 - skin color, 4 - socks, 5 - bust </summary>
+    public string[] GenericVariables;
+    public List<Texture2D> GenericBodyTextures = new List<Texture2D>();
+
+    [Header("Mini")]
+    public bool IsMini = false;
+    public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
+
+    [Header("Head Assembly")]
+    public Transform UmaNeckBone;
+    public Transform UmaHeadBone;
+    public List<GameObject> Heads = new List<GameObject>();
+    public List<Transform> HeadNeckBones = new List<Transform>();
+    public List<Transform> HeadHeadBones = new List<Transform>();
 
     private void LateUpdate()
     {
-        if (Body != null && Head != null)
+        if (Body != null && Heads.Count > 0)
         {
             if (UmaNeckBone == null) UmaNeckBone = FindBoneInChildren(Body.transform, "Neck");
             if (UmaHeadBone == null) UmaHeadBone = FindBoneInChildren(Body.transform, "Head");
-            if (HeadNeckBone == null) HeadNeckBone = FindBoneInChildren(Head.transform, "Neck");
-            if (HeadHeadBone == null) HeadHeadBone = FindBoneInChildren(Head.transform, "Head");
-            HeadNeckBone.transform.SetPositionAndRotation(UmaNeckBone.position, UmaNeckBone.rotation);
-            HeadHeadBone.transform.SetPositionAndRotation(UmaHeadBone.position, UmaHeadBone.rotation);
+            for (int i = 0; i < Heads.Count; i++)
+            {
+                HeadNeckBones[i].transform.SetPositionAndRotation(UmaNeckBone.position, UmaNeckBone.rotation);
+                HeadHeadBones[i].transform.SetPositionAndRotation(UmaHeadBone.position, UmaHeadBone.rotation);
+            }
         }
     }
 

@@ -45,86 +45,15 @@ public class UmaViewerMain : MonoBehaviour
                 }
             }
 
-            var container = Instantiate(UI.UmaContainerPrefab, UI.AnimationSetList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = container.name = "type00";
-            var imageInstance = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                UI.HighlightChildImage(UI.AnimationSetList.content, imageInstance);
-                ListAnimations(-1);
-            });
-
-            foreach (var chara in Characters.OrderBy(c => c.Id))
-            {
-                var charaInstance = chara;
-                container = Instantiate(UI.UmaContainerPrefab, UI.CharactersList.content).GetComponent<UmaUIContainer>();
-                container.Name.text = container.name = chara.Id + " " + chara.Name;
-                var imageInstance1 = container.GetComponent<Image>();
-                container.Button.onClick.AddListener(() => {
-                    UI.HighlightChildImage(UI.CharactersList.content, imageInstance1);
-                    ListCostumes(charaInstance.Id);
-                });
-
-                container = Instantiate(UI.UmaContainerPrefab, UI.AnimationSetList.content).GetComponent<UmaUIContainer>();
-                container.Name.text = container.name = chara.Id + " " + chara.Name;
-                var imageInstance2 = container.GetComponent<Image>();
-                container.Button.onClick.AddListener(() => {
-                    UI.HighlightChildImage(UI.AnimationSetList.content, imageInstance2);
-                    ListAnimations(charaInstance.Id);
-                });
-            }
+            UI.LoadModelPanels();
+            UI.LoadMiniModelPanels();
 
         });
     }
 
-    void ListCostumes(int umaId)
+    public void OpenUrl(string url)
     {
-        for(int i = UI.CostumeList.content.childCount - 1; i >=0; i--)
-        {
-            Destroy(UI.CostumeList.content.GetChild(i).gameObject);
-        }
-        foreach(var entry in AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains($"pfb_bdy{umaId}")))
-        {
-            var container = Instantiate(UI.UmaContainerPrefab, UI.CostumeList.content).GetComponent<UmaUIContainer>();
-            string[] split = entry.Name.Split('_');
-            string costumeId = split[split.Length - 1];
-            container.Name.text = container.name = costumeId;
-            container.Button.onClick.AddListener(() => {
-                UI.HighlightChildImage(UI.CostumeList.content, container.GetComponent<Image>());
-                StartCoroutine(Builder.LoadUma(umaId, costumeId));
-            });
-        }
-    }
-
-    void ListAnimations(int umaId)
-    {
-        for (int i = UI.AnimationList.content.childCount - 1; i >= 0; i--)
-        {
-            Destroy(UI.AnimationList.content.GetChild(i).gameObject);
-        }
-        if(umaId == -1)
-        {
-            foreach (var entry in AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && a.Name.Contains($"/type00") && !a.Name.Contains($"mirror") && !a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UI.UmaContainerPrefab, UI.AnimationList.content).GetComponent<UmaUIContainer>();
-                container.Name.text = container.name = Path.GetFileName(entry.Name);
-                container.Button.onClick.AddListener(() => {
-                    UI.HighlightChildImage(UI.AnimationList.content, container.GetComponent<Image>());
-                    Builder.LoadAsset(entryInstance);
-                });
-            }
-        }
-        else
-            foreach (var entry in AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains($"mirror") && !a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UI.UmaContainerPrefab, UI.AnimationList.content).GetComponent<UmaUIContainer>();
-                container.Name.text = container.name = Path.GetFileName(entry.Name);
-                container.Button.onClick.AddListener(() => {
-                UI.HighlightChildImage(UI.AnimationList.content, container.GetComponent<Image>());
-                Builder.LoadAsset(entryInstance);
-            });
-        }
+        Application.OpenURL(url);
     }
 
     [System.Serializable]

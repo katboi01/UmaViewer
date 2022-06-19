@@ -42,7 +42,7 @@ public class UmaDatabaseController
     /// </summary>
     public static string HeadPath = "3d/chara/head/";
     /// <summary>
-    /// 3d/motion/event/body/
+    /// 3d/motion/
     /// </summary>
     public static string MotionPath = "3d/motion/";
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
