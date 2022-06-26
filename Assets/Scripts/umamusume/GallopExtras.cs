@@ -11,7 +11,7 @@ public class AssetTable
 [System.Serializable]
 public class AssetTableValue
 {
-    public List<StringValuePair> i;
+    public List<StringValuePair> list;
 }
 
 

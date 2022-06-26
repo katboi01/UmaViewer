@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Gallop;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +15,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public List<AssetBundle> Loaded;
     public List<Shader> ShaderList = new List<Shader>();
-    public Material InvisibleMaterial;
+    public Material TransMaterialCharas;
+    public Material TransMaterialProps;
     private UmaContainer CurrentContainer;
 
     public AnimatorOverrideController OverrideController;
@@ -62,6 +64,7 @@ public class UmaViewerBuilder : MonoBehaviour
                height = (string)charaData["height"],
                socks = (string)charaData["socks"],
                bust = (string)charaData["bust"],
+               sex = (string)charaData["sex"],
                costumeIdShort = "";
 
         UmaDatabaseEntry asset = null;
@@ -74,7 +77,12 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentContainer.VarSkin = skin;
             CurrentContainer.VarSocks = socks;
             CurrentContainer.VarHeight = height;
-            string body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{height}_{0}_{bust}";
+            //Not sure about the pattern, some models are missing
+            string body = "";
+            if (costumeId.Split('_')[2] == "03")
+                body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{sex}_{0}_{(bust == "0"? "1" : bust == "4"? "3" : bust)}";
+            else
+                body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{sex}_{0}_{(bust == "0" ? "1" : bust == "4" ? "3" : bust)}";
             Debug.Log("Looking for " + body);
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
         }
@@ -91,8 +99,8 @@ public class UmaViewerBuilder : MonoBehaviour
             switch (costumeId.Split('_')[0])
             {
                 case "0001":
-                    texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_0{bust}";
-                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_";
+                    texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_0{socks}";
+                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_";
                     break;
                 case "0003":
                     texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}";
@@ -147,7 +155,7 @@ public class UmaViewerBuilder : MonoBehaviour
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == tailPfb);
             if (asset != null)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{id}")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
                 {
                     RecursiveLoadAsset(asset1);
                 }
@@ -169,6 +177,7 @@ public class UmaViewerBuilder : MonoBehaviour
                height = (string)charaData["height"],
                socks = (string)charaData["socks"],
                bust = (string)charaData["bust"],
+               sex = (string)charaData["sex"],
                costumeIdShort = "";
         bool customHead = true;
 
@@ -251,6 +260,24 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
+    public void LoadProp(UmaDatabaseEntry entry)
+    {
+        if (CurrentContainer != null)
+        {
+            Destroy(CurrentContainer);
+        }
+
+        foreach (var bundle in Main.LoadedBundles)
+        {
+            bundle.Value.Unload(true);
+        }
+        Main.LoadedBundles.Clear();
+        UI.LoadedAssetsClear();
+
+        CurrentContainer = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainer>();
+        RecursiveLoadAsset(entry);
+    }
+
     private void RecursiveLoadAsset(UmaDatabaseEntry entry)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -262,7 +289,6 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         LoadAsset(entry);
     }
-
 
     public void LoadAsset(UmaDatabaseEntry entry)
     {
@@ -291,12 +317,14 @@ public class UmaViewerBuilder : MonoBehaviour
             if(Main.ShadersLoaded) return;
             else Main.ShadersLoaded = true;
         }
-                
+
         foreach (string name in bundle.GetAllAssetNames())
         {
             object asset = bundle.LoadAsset(name);
             if (asset == null) { continue; }
-            if (asset.GetType() == typeof(AnimationClip))
+            Debug.Log(bundle.name + "/" + name + $" ({asset.GetType()})");
+            Type aType = asset.GetType();
+            if (aType == typeof(AnimationClip))
             {
                 if (CurrentContainer.Body)
                 {
@@ -311,7 +339,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     UnloadBundle(bundle, true);
                 }
             }
-            else if (asset.GetType() == typeof(GameObject))
+            else if (aType == typeof(GameObject))
             {
                 if (bundle.name.Contains("/head/"))
                 {
@@ -327,18 +355,18 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 else
                 {
-                    UnloadBundle(bundle, true);
+                    LoadProp(asset as GameObject);
                 }
-                //else if (aaa.GetType() == typeof(FaceDrivenKeyTarget))
-                //{
-                //    Debug.LogError(name);
-                //}
             }
-            else if (asset.GetType() == typeof(Shader))
+            else if (aType == typeof(FaceDrivenKeyTarget))
+            {
+                //CurrentContainer.FaceDrivenKeyTargets.Add(Instantiate(asset as FaceDrivenKeyTarget));
+            }
+            else if (aType == typeof(Shader))
             {
                 ShaderList.Add(asset as Shader);
             }
-            else if (asset.GetType() == typeof(Texture2D))
+            else if (aType == typeof(Texture2D))
             {
                 if (bundle.name.Contains("/mini/head"))
                 {
@@ -387,10 +415,10 @@ public class UmaViewerBuilder : MonoBehaviour
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
-                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_{bust.PadLeft(2, '0')}_diff";
-                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{socks}_{bust.PadLeft(2, '0')}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_base";
-                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{socks}_00_ctrl";
+                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_diff";
+                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_base";
+                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_ctrl";
                                 break;
                             case "0003":
                                 mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_diff";
@@ -456,7 +484,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     }
                     if (r.name == "M_Cheek")
                     {
-                        m.CopyPropertiesFromMaterial(InvisibleMaterial);
+                        m.CopyPropertiesFromMaterial(TransMaterialCharas);
                         m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("cheek")));
                     }
                     if (r.name == "M_Mouth")
@@ -477,7 +505,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.CopyPropertiesFromMaterial(InvisibleMaterial);
+                            m.CopyPropertiesFromMaterial(TransMaterialCharas);
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
                         case "Nars/UmaMusume/Eyes":
@@ -505,6 +533,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
             }
         }
+
+        //foreach (var anim in Main.AbList.Where(a => a.Name.StartsWith("3d/chara/head/chr0001_00/facial/")))
+        //{
+        //    RecursiveLoadAsset(anim);
+        //}
     }
 
     private void LoadTail(GameObject gameObject)
@@ -526,7 +559,20 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
+    private void LoadProp(GameObject go)
+    {
+        var prop = Instantiate(go, CurrentContainer.transform);
+        foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
+        {
+            foreach (Material m in r.sharedMaterials)
+            {
+                //Shaders can be differentiated by checking m.shader.name
+                m.shader = Shader.Find("Unlit/Transparent Cutout");
+            }
+        }
+    }
+
+    private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
         var entry = Main.LoadedBundles.FirstOrDefault(b=>b.Value == bundle);
         if (entry.Key != null)

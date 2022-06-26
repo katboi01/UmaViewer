@@ -84,11 +84,11 @@ public class UmaDatabaseController
             {
                 UmaDatabaseEntry entry = new UmaDatabaseEntry()
                 {
-                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader.GetValue(0) as String),
-                    Name = sqlite_datareader.GetValue(1) as String,
-                    Url = sqlite_datareader.GetValue(2) as String,
-                    Checksum = sqlite_datareader.GetInt64(3).ToString(),
-                    Prerequisites = sqlite_datareader.GetValue(4) as String
+                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as String),
+                    Name = sqlite_datareader["n"] as String,
+                    Url = sqlite_datareader["h"] as String,
+                    Checksum = sqlite_datareader["c"].ToString(),
+                    Prerequisites = sqlite_datareader["d"] as String
                 };
                 entries.Add(entry);
             }
@@ -107,7 +107,7 @@ public class UmaDatabaseController
         {
             UmaCharaData entry = new UmaCharaData()
             {
-                id = sqlite_datareader.GetInt32(0).ToString(),
+                id = sqlite_datareader.GetInt32(0),
                 tail_model_id = sqlite_datareader.GetInt32(1).ToString(),
             };
             yield return entry;

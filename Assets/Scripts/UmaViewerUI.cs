@@ -21,6 +21,12 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect MiniCostumeList;
     public ScrollRect MiniAnimationSetList;
     public ScrollRect MiniAnimationList;
+    //other
+    public ScrollRect PropList;
+    public ScrollRect SceneList;
+
+    //settings
+    public TMPro.TMP_InputField SSWidth, SSHeight;
 
     public List<GameObject> TogglablePanels = new List<GameObject>();
 
@@ -39,7 +45,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void HighlightChildImage(Transform mainObject, Image child)
     {
-        Debug.Log("Looking for " + child.name + " in " + mainObject.name);
+        //Debug.Log("Looking for " + child.name + " in " + mainObject.name);
         foreach(var t in mainObject.GetComponentsInChildren<Image>())
         {
             if (t.transform.parent != mainObject) continue;
@@ -125,6 +131,36 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void LoadPropPanel()
+    {
+        foreach (var prop in Main.AbList.Where(a=>a.Name.Contains("pfb_chr_prop") && !a.Name.Contains("clothes")))
+        {
+            var propInstance = prop;
+            var container = Instantiate(UmaContainerPrefab, PropList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = container.name = Path.GetFileName(prop.Name);
+            var imageInstance1 = container.GetComponent<Image>();
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(PropList.content, imageInstance1);
+                Builder.LoadProp(propInstance);
+            });
+        }
+    }
+
+    public void LoadMapPanel()
+    {
+        foreach (var scene in Main.AbList.Where(a => a.Name.StartsWith("3d/env") && Path.GetFileName(a.Name).StartsWith("pfb_")))
+        {
+            var sceneInstance = scene;
+            var container = Instantiate(UmaContainerPrefab, SceneList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = container.name = Path.GetFileName(scene.Name);
+            var imageInstance1 = container.GetComponent<Image>();
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(SceneList.content, imageInstance1);
+                Builder.LoadProp(sceneInstance);
+            });
+        }
+    }
+
     void ListCostumes(int umaId, bool mini)
     {
         ScrollRect costumeList = mini ? MiniCostumeList : CostumeList;
@@ -138,7 +174,7 @@ public class UmaViewerUI : MonoBehaviour
             var container = Instantiate(UmaContainerPrefab, costumeList.content).GetComponent<UmaUIContainer>();
             string[] split = entry.Name.Split('_');
             string costumeId = split[split.Length - 1];
-            container.Name.text = container.name = costumeId;
+            container.Name.text = container.name = GetCostumeName(costumeId);
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(costumeList.content, container.GetComponent<Image>());
                 StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
@@ -154,13 +190,51 @@ public class UmaViewerUI : MonoBehaviour
             if (!costumes.Contains(id))
             {
                 costumes.Add(id);
+                string costumeId = id;
                 var container = Instantiate(UmaContainerPrefab, costumeList.content).GetComponent<UmaUIContainer>();
-                string costumeId = container.Name.text = container.name = id;
+                container.Name.text = container.name = GetCostumeName(id);
                 container.Button.onClick.AddListener(() => {
                     HighlightChildImage(costumeList.content, container.GetComponent<Image>());
                     StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
                 });
             }
+        }
+    }
+
+    public static string GetCostumeName(string costumeId)
+    {
+        switch (costumeId)
+        {
+            case "00":
+                return "Default";
+            case "90":
+                return "Upgraded";
+            case "0001_00_01":
+                return "Race Shorts";
+            case "0001_00_02":
+                return "Race Bloomers";
+            case "0002_00_00":
+                return "School Short Sleeves";
+            case "0002_00_03":
+                return "School Short Sleeves Big Belly";
+            case "0002_01_00":
+                return "School Long Sleeves";
+            case "0002_01_03":
+                return "School Long Sleeves Big Belly";
+            case "0003_00_01":
+                return "Tracksuit Shorts";
+            case "0003_00_02":
+                return "Tracksuit Bloomers";
+            case "0003_01_01":
+                return "Tracksuit Long Pants";
+            case "0003_01_02":
+                return "Tracksuit Rolled Up Pants";
+            case "0004_00_00":
+                return "Swimsuit";
+            case "0004_01_00":
+                return "Towel";
+            default:
+                return costumeId;
         }
     }
 
@@ -216,5 +290,22 @@ public class UmaViewerUI : MonoBehaviour
         {
             panel.SetActive(panel == go);
         }
+    }
+
+    public void ChangeBackground(int index)
+    {
+        if(index == 0)
+        {
+            Camera.main.clearFlags = CameraClearFlags.Skybox;
+        }
+        else
+        {
+            Camera.main.clearFlags = CameraClearFlags.SolidColor;
+        }
+    }
+
+    public void ChangeBackgroundColor(Color color)
+    {
+        Camera.main.backgroundColor = color;
     }
 }

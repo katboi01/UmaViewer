@@ -1,3 +1,4 @@
+using Gallop;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +12,10 @@ public class UmaContainer : MonoBehaviour
     public List<Texture2D> TailTextures = new List<Texture2D>();
     public Animator UmaAnimator;
     public AnimatorOverrideController OverrideController;
+
+    [Header("Face")]
+    public List<AnimationClip> FacialClips = new List<AnimationClip>();
+    public List<FaceDrivenKeyTarget> FaceDrivenKeyTargets = new List<FaceDrivenKeyTarget>();
 
     [Header("Generic")]
     public bool IsGeneric = false;

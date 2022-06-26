@@ -47,7 +47,8 @@ public class UmaViewerMain : MonoBehaviour
 
             UI.LoadModelPanels();
             UI.LoadMiniModelPanels();
-
+            UI.LoadPropPanel();
+            UI.LoadMapPanel();
         });
     }
 

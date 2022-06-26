@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//DO NOT SERIALIZE OR FPS DIES
 public class UmaDatabaseEntry
 {
     public UmaFileType Type;
@@ -14,8 +13,8 @@ public class UmaDatabaseEntry
 
 public class UmaCharaData
 {
-    public string id { get; set; }
-    public string tail_model_id { get; set; }
+    public int id;
+    public string tail_model_id;
 }
 
 public enum UmaFileType
