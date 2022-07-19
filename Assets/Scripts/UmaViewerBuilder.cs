@@ -95,12 +95,14 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (genericCostume)
         {
-            string texPattern1 = "", texPattern2 = "";
+            string texPattern1 = "", texPattern2 = "", texPattern3 = "", texPattern4 = "";
             switch (costumeId.Split('_')[0])
             {
                 case "0001":
                     texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_0{socks}";
                     texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_";
+                    texPattern3 = $"tex_bdy{costumeIdShort}_00_waku";
+                    texPattern4 = $"tex_bdy{costumeIdShort}_num";
                     break;
                 case "0003":
                     texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}";
@@ -117,7 +119,11 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             Debug.Log(texPattern1 + " " + texPattern2);
             //Load Body Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath) && (a.Name.Contains(texPattern1) || a.Name.Contains(texPattern2))))
+            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath)
+                && (a.Name.Contains(texPattern1)
+                || a.Name.Contains(texPattern2)
+                || (string.IsNullOrEmpty(texPattern3)? false : a.Name.Contains(texPattern3))
+                || (string.IsNullOrEmpty(texPattern4)? false : a.Name.Contains(texPattern4)))))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -415,10 +421,27 @@ public class UmaViewerBuilder : MonoBehaviour
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
-                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_diff";
-                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_base";
-                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_ctrl";
+                                switch (r.sharedMaterials.ToList().IndexOf(m))
+                                {
+                                    case 0:
+                                        mainTex = $"tex_bdy{costumeIdShort}_00_waku0_diff";
+                                        toonMap = $"tex_bdy{costumeIdShort}_00_waku0_shad_c";
+                                        tripleMap = $"tex_bdy{costumeIdShort}_00_waku0_base";
+                                        optionMap = $"tex_bdy{costumeIdShort}_00_waku0_ctrl";
+                                        break;
+                                    case 1:
+                                        mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_diff";
+                                        toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_shad_c";
+                                        tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_base";
+                                        optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_ctrl";
+                                        break;
+                                    case 2:
+                                        mainTex = $"tex_bdy0001_00_num01";
+                                        toonMap = $"tex_bdy0001_00_num01";
+                                        tripleMap = $"tex_bdy0001_00_num01";
+                                        optionMap = $"tex_bdy0001_00_num01";
+                                        break;
+                                }
                                 break;
                             case "0003":
                                 mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_diff";
