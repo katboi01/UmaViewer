@@ -1,5 +1,7 @@
 # UmaViewer
-Asset Viewer for Uma Musume forked from katboi01/UmaViewer
+Asset Viewer for Uma Musume 
+
+forked from katboi01/UmaViewer
 
 Add FacialTarget Support
 
