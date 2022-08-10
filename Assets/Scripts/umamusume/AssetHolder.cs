@@ -6,7 +6,7 @@ namespace Gallop
 {
     public class AssetHolder : MonoBehaviour
     {
-        [SerializeField] private AssetTable _assetTable;
+        [SerializeField] public AssetTable _assetTable;
         [SerializeField] private AssetTableValue _assetTableValue;
     }
 }

@@ -22,7 +22,7 @@ public class UmaViewerMain : MonoBehaviour
 
     private void Awake()
     {
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = -1;
         Instance = this;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
     }

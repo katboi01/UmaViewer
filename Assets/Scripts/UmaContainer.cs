@@ -1,5 +1,6 @@
 using Gallop;
 using Newtonsoft.Json.Linq;
+using RootMotion.Dynamics;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,8 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Face")]
     public List<AnimationClip> FacialClips = new List<AnimationClip>();
-    public List<FaceDrivenKeyTarget> FaceDrivenKeyTargets = new List<FaceDrivenKeyTarget>();
+    public FaceDrivenKeyTarget FaceDrivenKeyTargets;
+
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -32,7 +34,6 @@ public class UmaContainer : MonoBehaviour
     public List<GameObject> Heads = new List<GameObject>();
     public List<Transform> HeadNeckBones = new List<Transform>();
     public List<Transform> HeadHeadBones = new List<Transform>();
-
     private void LateUpdate()
     {
         if (Body != null && Heads.Count > 0)
@@ -66,6 +67,11 @@ public class UmaContainer : MonoBehaviour
 
     public void OnDestroy()
     {
-        Destroy(gameObject);
+        if (TryGetComponent<PuppetMaster>(out PuppetMaster t))
+        {
+            Destroy(this);
+        }
+        else { Destroy(gameObject); }
+        
     }
 }
