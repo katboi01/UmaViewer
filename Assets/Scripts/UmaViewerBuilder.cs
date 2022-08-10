@@ -130,6 +130,8 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             //Load Body
             RecursiveLoadAsset(asset);
+
+            //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes")))
             {
                 if (asset1.Name.Contains("cloth00")&& asset1.Name.Contains("bust"+ bust) )
@@ -139,6 +141,8 @@ public class UmaViewerBuilder : MonoBehaviour
         else
         {
             RecursiveLoadAsset(asset);
+
+            //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
                 if (asset1.Name.Contains("cloth00"))
@@ -167,6 +171,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Head
             RecursiveLoadAsset(asset);
 
+            //Load Physics
             if (isDefaultHead)
             {
                 foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{id}_00/clothes")))
@@ -201,6 +206,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 RecursiveLoadAsset(asset);
                 
+
+                //Load Physics
                 foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
@@ -212,7 +219,20 @@ public class UmaViewerBuilder : MonoBehaviour
                 Debug.Log("no tail");
             }
         }
-       
+
+        //Load FacialMorph
+        if (CurrentContainer.Heads.Count > 0)
+        {
+            var firsehead = CurrentContainer.Heads[0];
+            var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
+            var newFaceDriven = firsehead.AddComponent<FaceDrivenKeyTarget>();
+            newFaceDriven._eyebrowTarget = FaceDriven._eyebrowTarget;
+            newFaceDriven._eyeTarget = FaceDriven._eyeTarget;
+            newFaceDriven._mouthTarget = FaceDriven._mouthTarget;
+            CurrentContainer.FaceDrivenKeyTargets = newFaceDriven;
+        }
+        
+
     }
 
     private void LoadMiniUma(int id, string costumeId)
@@ -548,24 +568,12 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-
     private void LoadHead(GameObject go)
     {
         GameObject head = Instantiate(go, CurrentContainer.transform);
         CurrentContainer.Heads.Add(head);
         CurrentContainer.HeadNeckBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Neck"));
         CurrentContainer.HeadHeadBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Head"));
-
-        var FaceDriven = head.GetComponent<AssetHolder>()._assetTable.list.Find(
-            a => { return a.Key == "facial_target"; }
-            ).Value as FaceDrivenKeyTarget;
-
-        var newFaceDriven = head.AddComponent<FaceDrivenKeyTarget>();
-        newFaceDriven._eyebrowTarget = FaceDriven._eyebrowTarget;
-        newFaceDriven._eyeTarget = FaceDriven._eyeTarget;
-        newFaceDriven._mouthTarget = FaceDriven._mouthTarget;
-        CurrentContainer.FaceDrivenKeyTargets = newFaceDriven;
-        
              
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
