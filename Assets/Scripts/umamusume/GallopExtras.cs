@@ -34,11 +34,11 @@ public class StringValuePair
 public class TrsArray
 {
     public string _path;
-    public int _isValidScaleTransform;
+    public bool _isValidScaleTransform;
     public Vector3 _position;
     public Vector3 _scale;
     public Vector3 _rotation;
-    public int IsOverrideTarget;
+    public bool IsOverrideTarget;
 }
 
 [System.Serializable]

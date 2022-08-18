@@ -67,13 +67,15 @@ namespace Gallop
             }
         }
 
-        private void Update()
+       
+        private void FixedUpdate()
         {
+            bool changed = false;
             for (int i = 0; i < EyeBrowMorphs.Count; i++)
             {
                 if(EyeBrowMorphs[i].LastWeight!= EyeBrowMorphs[i].Weight)
                 {
-                    ChangeMorph();
+                    changed = true;
                     EyeBrowMorphs[i].LastWeight = EyeBrowMorphs[i].Weight;
                 }
             }
@@ -81,7 +83,7 @@ namespace Gallop
             {
                 if (EyeMorphs[i].LastWeight != EyeMorphs[i].Weight)
                 {
-                    ChangeMorph();
+                    changed = true;
                     EyeMorphs[i].LastWeight = EyeMorphs[i].Weight;
                 }
             }
@@ -89,10 +91,12 @@ namespace Gallop
             {
                 if (MouthMorphs[i].LastWeight != MouthMorphs[i].Weight)
                 {
-                    ChangeMorph();
+                    changed = true;
                     MouthMorphs[i].LastWeight = MouthMorphs[i].Weight;
                 }
             }
+
+            if (changed)ChangeMorph();
         }
 
         public void ChangeMorph()
@@ -105,17 +109,13 @@ namespace Gallop
                     var bone = Objs.Find(ani => ani.name.Equals(trs._path));
                     if (bone)
                     {
-                        if (trs.IsOverrideTarget==1)
+                        if (!trs.IsOverrideTarget)
                         {
-                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(OriRots[Objs.IndexOf(bone)].eulerAngles, trs._rotation, morph.Weight));
-                            bone.localPosition = Vector3.Lerp(OriTrans[Objs.IndexOf(bone)],trs._position,morph.Weight);
-                            bone.localScale = Vector3.Lerp(OriScal[Objs.IndexOf(bone)],trs._scale, morph.Weight);
-                        }
-                        else
-                        {
-                            bone.localRotation = Quaternion.Euler(bone.localRotation.eulerAngles+ (trs._rotation* morph.Weight));
-                            bone.localPosition += trs._position*morph.Weight;
-                            bone.localScale += trs._scale* morph.Weight;
+                            var tmp = bone.localRotation.eulerAngles;
+                            tmp += (trs._rotation * morph.Weight);
+                            bone.localRotation = Quaternion.Euler(bone.localRotation.eulerAngles + (trs._rotation * morph.Weight));
+                            bone.localPosition += trs._position * morph.Weight;
+                            bone.localScale += trs._scale * morph.Weight;
                         }
                     };
                 }
@@ -128,13 +128,7 @@ namespace Gallop
                     var bone = Objs.Find(ani => ani.name.Equals(trs._path));
                     if (bone)
                     {
-                        if (trs.IsOverrideTarget == 1)
-                        {
-                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(OriRots[Objs.IndexOf(bone)].eulerAngles, trs._rotation, morph.Weight));
-                            bone.localPosition = Vector3.Lerp(OriTrans[Objs.IndexOf(bone)], trs._position, morph.Weight);
-                            bone.localScale = Vector3.Lerp(OriScal[Objs.IndexOf(bone)], trs._scale, morph.Weight);
-                        }
-                        else
+                        if (!trs.IsOverrideTarget)
                         {
                             bone.localRotation = Quaternion.Euler(bone.localRotation.eulerAngles + (trs._rotation * morph.Weight));
                             bone.localPosition += trs._position * morph.Weight;
@@ -151,17 +145,63 @@ namespace Gallop
                     var bone = Objs.Find(ani => ani.name.Equals(trs._path));
                     if (bone)
                     {
-                        if (trs.IsOverrideTarget == 1)
-                        {
-                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(OriRots[Objs.IndexOf(bone)].eulerAngles, trs._rotation, morph.Weight));
-                            bone.localPosition = Vector3.Lerp(OriTrans[Objs.IndexOf(bone)], trs._position, morph.Weight);
-                            bone.localScale = Vector3.Lerp(OriScal[Objs.IndexOf(bone)], trs._scale, morph.Weight);
-                        }
-                        else
+                        if (!trs.IsOverrideTarget)
                         {
                             bone.localRotation = Quaternion.Euler(bone.localRotation.eulerAngles + (trs._rotation * morph.Weight));
                             bone.localPosition += trs._position * morph.Weight;
                             bone.localScale += trs._scale * morph.Weight;
+                        }
+                    };
+                }
+            }
+            
+
+            foreach (FacialMorph morph in EyeBrowMorphs)//处理覆盖表情
+            {
+                foreach (TrsArray trs in morph.trsArray)
+                {
+                    var bone = Objs.Find(ani => ani.name.Equals(trs._path));
+                    if (bone)
+                    {
+                        if (trs.IsOverrideTarget)
+                        {
+                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(bone.localRotation.eulerAngles, trs._rotation, morph.Weight));
+                            bone.localPosition = Vector3.Lerp(bone.localPosition, trs._position, morph.Weight);
+                            bone.localScale = Vector3.Lerp(bone.localScale, trs._scale, morph.Weight);
+                        }
+                    };
+                }
+            }
+
+            foreach (FacialMorph morph in EyeMorphs)
+            {
+                foreach (TrsArray trs in morph.trsArray)
+                {
+                    var bone = Objs.Find(ani => ani.name.Equals(trs._path));
+                    if (bone)
+                    {
+                        if (trs.IsOverrideTarget)
+                        {
+                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(bone.localRotation.eulerAngles, trs._rotation, morph.Weight));
+                            bone.localPosition = Vector3.Lerp(bone.localPosition, trs._position, morph.Weight);
+                            bone.localScale = Vector3.Lerp(bone.localScale, trs._scale, morph.Weight);
+                        }
+                    };
+                }
+            }
+
+            foreach (FacialMorph morph in MouthMorphs)
+            {
+                foreach (TrsArray trs in morph.trsArray)
+                {
+                    var bone = Objs.Find(ani => ani.name.Equals(trs._path));
+                    if (bone)
+                    {
+                        if (trs.IsOverrideTarget)
+                        {
+                            bone.localRotation = Quaternion.Euler(Vector3.Lerp(bone.localRotation.eulerAngles, trs._rotation, morph.Weight));
+                            bone.localPosition = Vector3.Lerp(bone.localPosition, trs._position, morph.Weight);
+                            bone.localScale = Vector3.Lerp(bone.localScale, trs._scale, morph.Weight);
                         }
                     };
                 }
