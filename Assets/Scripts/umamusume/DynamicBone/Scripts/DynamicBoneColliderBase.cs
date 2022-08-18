@@ -2,6 +2,7 @@
 
 public class DynamicBoneColliderBase : MonoBehaviour
 {
+    public string ColliderName;
     public enum Direction
     {
         X, Y, Z
