@@ -124,11 +124,11 @@ public class CameraOrbit : MonoBehaviour
         Camera.main.fieldOfView = OrbitCamFovSlider.value;
         Vector3 position = transform.position;
 
-        if (Input.GetMouseButtonDown(2) && !eventSystem.IsPointerOverGameObject())
+        if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
         {
             controlOn = true;
         }
-        if (Input.GetMouseButton(2) && controlOn)
+        if (Input.GetMouseButton(0) && controlOn)
         {
             position -= Input.GetAxis("Mouse X") * transform.right * OrbitCamSpeedSlider.value;
             OrbitCamZoomSlider.value -= Input.mouseScrollDelta.y * OrbitCamZoomSpeedSlider.value;

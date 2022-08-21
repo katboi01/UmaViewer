@@ -83,10 +83,7 @@ public class DynamicBone : MonoBehaviour
 #endif
     public Vector3 m_Force = Vector3.zero;
 	
-#if UNITY_5_3_OR_NEWER
-	[Tooltip("Collider objects interact with the bones.")]
-#endif
-    public List<DynamicBoneColliderBase> m_Colliders = null;
+
 	
 #if UNITY_5_3_OR_NEWER
 	[Tooltip("Bones exclude from physics simulation.")]
@@ -109,6 +106,7 @@ public class DynamicBone : MonoBehaviour
     public bool m_DistantDisable = false;
     public Transform m_ReferenceObject = null;
     public float m_DistanceToObject = 20;
+    public List<Particle> m_Particles = new List<Particle>();
 
     Vector3 m_LocalGravity = Vector3.zero;
     Vector3 m_ObjectMove = Vector3.zero;
@@ -119,8 +117,10 @@ public class DynamicBone : MonoBehaviour
     float m_Weight = 1.0f;
     bool m_DistantDisabled = false;
 
-    class Particle
+    
+    public class Particle
     {
+        public List<DynamicBoneColliderBase> m_Colliders = new List<DynamicBoneColliderBase>();
         public Transform m_Transform = null;
         public int m_ParentIndex = -1;
         public float m_Damping = 0;
@@ -139,11 +139,11 @@ public class DynamicBone : MonoBehaviour
         public Quaternion m_InitLocalRotation = Quaternion.identity;
     }
 
-    List<Particle> m_Particles = new List<Particle>();
+    
 
-    void Start()
+   void Awake()
     {
-        SetupParticles();
+        //SetupParticles();
     }
 
     void FixedUpdate()
@@ -554,12 +554,12 @@ public class DynamicBone : MonoBehaviour
             }
 
             // collide
-            if (m_Colliders != null)
+            if (p.m_Colliders != null)
             {
                 float particleRadius = p.m_Radius * m_ObjectScale;
-                for (int j = 0; j < m_Colliders.Count; ++j)
+                for (int j = 0; j < p.m_Colliders.Count; ++j)
                 {
-                    DynamicBoneColliderBase c = m_Colliders[j];
+                    DynamicBoneColliderBase c = p.m_Colliders[j];
                     if (c != null && c.enabled)                    
                         p.m_isCollide |= c.Collide(ref p.m_Position, particleRadius);                    
                 }

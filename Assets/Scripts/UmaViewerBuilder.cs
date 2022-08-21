@@ -233,6 +233,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         
 
+        LoadAsset(UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
     private void LoadMiniUma(int id, string costumeId)

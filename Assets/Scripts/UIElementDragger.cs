@@ -6,7 +6,6 @@ public class UIElementDragger : EventTrigger
     private bool dragging;
     public Transform alsoDrag;
     public Vector3 alsoDragOffset = Vector3.zero;
-
     private void Start()
     {
         alsoDrag = transform.parent.GetChild(0);

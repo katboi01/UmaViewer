@@ -33,7 +33,7 @@ namespace Gallop
         {
 			List<Transform> gameObjects = new List<Transform>();
 			Dictionary<string, DynamicBoneColliderBase> DynamicBoneColliders = new Dictionary<string, DynamicBoneColliderBase>();
-		    gameObjects.AddRange(transform.parent.GetComponentsInChildren<Transform>());
+		    gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
 			foreach (CySpringCollisionData collider in collisionParam)
 			{
 				if (collider._isInner) continue;
@@ -80,29 +80,33 @@ namespace Gallop
                 {
 					var dynamic = bone.gameObject.AddComponent<DynamicBone>();
 					dynamic.m_Root = bone;
-					dynamic.m_Gravity = new Vector3(0, -spring._gravity/70000, 0);
-					dynamic.m_Stiffness = spring._stiffnessForce/7000;
+					dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
+					dynamic.SetupParticles();
+					dynamic.m_Gravity = new Vector3(0, -spring._gravity/80000, 0);
+					dynamic.m_Stiffness = spring._stiffnessForce/8000;
 					dynamic.m_Elasticity = spring._dragForce/9000;
 					dynamic.m_Radius = spring._collisionRadius;
-					dynamic.m_Colliders = new List<DynamicBoneColliderBase>();
 					foreach (string collisionName in spring._collisionNameList)
                     {
-						if(DynamicBoneColliders.TryGetValue(collisionName,out DynamicBoneColliderBase val))
+						if (DynamicBoneColliders.TryGetValue(collisionName,out DynamicBoneColliderBase val))
                         {
-							if (!dynamic.m_Colliders.Contains(val))
-								dynamic.m_Colliders.Add(val);
+							dynamic.m_Particles[0].m_Colliders.Add(val);
 						}
                     }
 					foreach (CySpringParamDataChildElement Childcollision in spring._childElements)
 					{
-                        foreach (string collisionName in Childcollision._collisionNameList)
+						var tempParticle = dynamic.m_Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
+                        if (tempParticle != null)
                         {
-							if (DynamicBoneColliders.TryGetValue(collisionName, out DynamicBoneColliderBase val))
+							foreach (string collisionName in Childcollision._collisionNameList)
 							{
-								if(!dynamic.m_Colliders.Contains(val))
-									dynamic.m_Colliders.Add(val);
+								if (DynamicBoneColliders.TryGetValue(collisionName, out DynamicBoneColliderBase val))
+								{
+									tempParticle.m_Colliders.Add(val);
+								}
 							}
 						}
+						
 					}
 				}
             }

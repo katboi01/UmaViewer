@@ -65,6 +65,8 @@ namespace Gallop
                     MouthMorphs.Add(morph);
                 }
             }
+
+            MouthMorphs[4].Weight = 1;
         }
 
        
