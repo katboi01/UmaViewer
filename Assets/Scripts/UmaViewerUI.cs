@@ -1,6 +1,8 @@
 using Gallop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -35,9 +37,9 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public GameObject UmaContainerPrefab;
     public GameObject UmaContainerSliderPrefab;
+    public GameObject UmaContainerAssetsPrefab;
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;
-    [SerializeField] private TMPro.TextMeshProUGUI LoadedAssetsText;
 
     public Color UIColor1, UIColor2;
 
@@ -56,19 +58,23 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         }
     }
 
-    public void LoadedAssetsAdd(string asset)
+    public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
         LoadedAssetCount++;
-        if (LoadedAssetCount > 1)
-            LoadedAssetsText.text += "\n";
-        LoadedAssetsText.text += asset;
-        LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * LoadedAssetsText.fontSize * 2.4f);
+        string filePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        var container =  Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
+        container.Name.text = Path.GetFileName(entry.Name) + "\n" + entry.Url;
+        container.Button.onClick.AddListener(() => { Process.Start("explorer.exe", "/select," + filePath);});
+        LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 35);
     }
 
     public void LoadedAssetsClear()
     {
         LoadedAssetCount = 0;
-        LoadedAssetsText.text = "";
+        foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
+        {
+            Destroy(ui.gameObject);
+        }
         LoadedAssetsPanel.sizeDelta = Vector2.zero;
     }
 

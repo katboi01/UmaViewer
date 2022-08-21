@@ -374,7 +374,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 return;
             }
             Main.LoadedBundles.Add(entry.Name, bundle);
-            UI.LoadedAssetsAdd(Path.GetFileName(entry.Name) + " : " + Path.GetFileName(entry.Url));
+            UI.LoadedAssetsAdd(entry);
             LoadBundle(bundle);
         }
     }
