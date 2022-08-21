@@ -63,7 +63,7 @@ namespace Gallop
 						case CySpringCollisionData.CollisionType.Sphere:
 							var Spheredynamic = child.AddComponent<DynamicBoneCollider>();
 							Spheredynamic.ColliderName = collider._collisionName;
-							Spheredynamic.m_Center = collider._offset;
+							child.transform.localPosition = collider._offset;
 							Spheredynamic.m_Radius = collider._radius;
 							Spheredynamic.m_Height = collider._distance;
 							Spheredynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
@@ -72,7 +72,7 @@ namespace Gallop
 						case CySpringCollisionData.CollisionType.Plane:
 							var planedynamic = child.AddComponent<DynamicBonePlaneCollider>();
 							planedynamic.ColliderName = collider._collisionName;
-							planedynamic.m_Center = collider._offset*0.1f;
+							child.transform.localPosition = collider._offset;
 							planedynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
 							DynamicBoneColliders.Add(collider._collisionName, planedynamic);
 							break;
