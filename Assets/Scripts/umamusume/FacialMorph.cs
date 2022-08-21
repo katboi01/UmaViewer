@@ -16,6 +16,7 @@ namespace Gallop
         public float Weight;
         [HideInInspector]public float LastWeight;
         [HideInInspector] public List<TrsArray> trsArray;
+
         public void SetFace(FaceDrivenKeyTarget faceTarget)
         {
             face = faceTarget;

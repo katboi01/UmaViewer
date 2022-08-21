@@ -226,6 +226,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var firsehead = CurrentContainer.Heads[0];
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
             var newFaceDriven = firsehead.AddComponent<FaceDrivenKeyTarget>();
+            newFaceDriven.callBack = UmaViewerUI.Instance;
             newFaceDriven._eyebrowTarget = FaceDriven._eyebrowTarget;
             newFaceDriven._eyeTarget = FaceDriven._eyeTarget;
             newFaceDriven._mouthTarget = FaceDriven._mouthTarget;
@@ -391,7 +392,7 @@ public class UmaViewerBuilder : MonoBehaviour
             object asset = bundle.LoadAsset(name);
             
             if (asset == null) { continue; }
-            Debug.Log("##"+bundle.name + "/" + name + $" ({asset.GetType()})");
+            Debug.Log("Bundle:"+bundle.name + "/" + name + $" ({asset.GetType()})");
             Type aType = asset.GetType();
             if (aType == typeof(AnimationClip))
             {

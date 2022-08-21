@@ -34,6 +34,7 @@ public class StringValuePair
 public class TrsArray
 {
     public string _path;
+    public Transform transform;
     public bool _isValidScaleTransform;
     public Vector3 _position;
     public Vector3 _scale;

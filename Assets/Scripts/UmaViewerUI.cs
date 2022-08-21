@@ -1,3 +1,4 @@
+using Gallop;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -5,7 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UmaViewerUI : MonoBehaviour
+public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 {
     public static UmaViewerUI Instance;
     private UmaViewerMain Main => UmaViewerMain.Instance;
@@ -25,13 +26,15 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public ScrollRect SceneList;
 
+    public ScrollRect FacialList;
+
     //settings
     public TMPro.TMP_InputField SSWidth, SSHeight;
 
     public List<GameObject> TogglablePanels = new List<GameObject>();
 
     public GameObject UmaContainerPrefab;
-
+    public GameObject UmaContainerSliderPrefab;
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;
     [SerializeField] private TMPro.TextMeshProUGUI LoadedAssetsText;
@@ -97,6 +100,41 @@ public class UmaViewerUI : MonoBehaviour
                 HighlightChildImage(AnimationSetList.content, imageInstance2);
                 ListAnimations(charaInstance.Id, false);
             });
+        }
+    }
+
+    public void LoadFacialPanels(FaceDrivenKeyTarget target)
+    {
+        foreach (UmaUIContainer ui in FacialList.content.GetComponentsInChildren<UmaUIContainer>())
+        {
+            Destroy(ui.gameObject);
+        }
+        foreach (FacialMorph morph in target.EyeBrowMorphs)
+        {
+           var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = morph.name;
+            container.Slider.value = morph.Weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a;});
+        }
+        foreach (FacialMorph morph in target.EyeMorphs)
+        {
+            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = morph.name;
+            container.Slider.value = morph.Weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a; });
+        }
+        foreach (FacialMorph morph in target.MouthMorphs)
+        {
+            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = morph.name;
+            container.Slider.value = morph.Weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a; });
         }
     }
 
@@ -307,5 +345,10 @@ public class UmaViewerUI : MonoBehaviour
     public void ChangeBackgroundColor(Color color)
     {
         Camera.main.backgroundColor = color;
+    }
+
+    public void CallBack(FaceDrivenKeyTarget target)
+    {
+        LoadFacialPanels(target);
     }
 }
