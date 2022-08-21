@@ -14984,7 +14984,7 @@ MonoBehaviour:
   m_MinValue: 1
   m_MaxValue: 15
   m_WholeNumbers: 0
-  m_Value: 5
+  m_Value: 3
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -15539,7 +15539,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 5
+  m_Text: 3
 --- !u!114 &6878219666299351047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18516,7 +18516,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 60
+  m_Text: 40
 --- !u!114 &6878219667278035829
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19984,7 +19984,7 @@ MonoBehaviour:
   m_MinValue: 10
   m_MaxValue: 180
   m_WholeNumbers: 1
-  m_Value: 60
+  m_Value: 40
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -21065,7 +21065,6 @@ GameObject:
   - component: {fileID: 8918259399633999298}
   - component: {fileID: 8918259399633999299}
   - component: {fileID: 6878219667401439304}
-  - component: {fileID: 8918259399633999297}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -21073,22 +21072,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!54 &8918259399633999297
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8918259399633999296}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!20 &8918259399633999298
 Camera:
   m_ObjectHideFlags: 0
@@ -21114,7 +21097,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 60
+  field of view: 40
   orthographic: 0
   orthographic size: 400
   m_Depth: 0
