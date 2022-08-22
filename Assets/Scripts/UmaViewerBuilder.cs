@@ -401,6 +401,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     AnimationClip bbb = asset as AnimationClip;
                     bbb.wrapMode = WrapMode.Loop;
                     CurrentContainer.OverrideController["clip"] = bbb;
+
                     CurrentContainer.UmaAnimator.Play("clip", 0, 0);
                     UnloadBundle(bundle, false);
                 }

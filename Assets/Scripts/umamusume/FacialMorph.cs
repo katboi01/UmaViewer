@@ -11,15 +11,21 @@ namespace Gallop
     public class FacialMorph
     {
         public string name;
-        private FaceDrivenKeyTarget face;
-        [Range(0, 1)]
-        public float Weight;
-        [HideInInspector]public float LastWeight;
-        [HideInInspector] public List<TrsArray> trsArray;
-
-        public void SetFace(FaceDrivenKeyTarget faceTarget)
+        public bool direction;
+        public FaceDrivenKeyTarget target;
+        private float _weight;
+        public float Weight
         {
-            face = faceTarget;
-        }
+            get
+            {
+                return _weight;
+            }
+            set
+            {
+                _weight = value;
+                target.ChangeMorph();
+            }
+         }
+        [HideInInspector] public List<TrsArray> trsArray;
     }
 }
