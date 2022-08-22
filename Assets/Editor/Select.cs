@@ -251,10 +251,11 @@ class SelectAllOfTag : ScriptableWizard
             {
                 AssetDatabase.CreateFolder(folder_name, "Avatar");
             }
-
+            
             Debug.Log(av.name);
             Debug.Log(AssetDatabase.IsValidFolder(av_parent));
             AssetDatabase.RemoveObjectFromAsset(av);
+            
             AssetDatabase.CreateAsset(av, folder_name + "/Avatar/" + av.name + ".asset");
         }
 

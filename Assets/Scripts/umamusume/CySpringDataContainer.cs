@@ -94,9 +94,9 @@ namespace Gallop
                     dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
                     dynamic.SetupParticles();
                     dynamic.m_Gravity = new Vector3(0, -spring._gravity / 80000, 0);
-                    dynamic.m_Damping = 0.6f;
+                    dynamic.m_Damping = 0.2f;
                     dynamic.m_Stiffness = spring._stiffnessForce / 8000;
-                    dynamic.m_Elasticity = spring._dragForce / 5000;
+                    dynamic.m_Elasticity = spring._dragForce / 4000;
                     dynamic.m_Radius = spring._collisionRadius;
                     foreach (string collisionName in spring._collisionNameList)
                     {
@@ -110,9 +110,9 @@ namespace Gallop
                         var tempParticle = dynamic.m_Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
                         if (tempParticle != null)
                         {
-                            tempParticle.m_Damping = 0.6f;
+                            tempParticle.m_Damping = 0.2f;
                             tempParticle.m_Stiffness = Childcollision._stiffnessForce / 8000;
-                            tempParticle.m_Elasticity = Childcollision._dragForce / 5000;
+                            tempParticle.m_Elasticity = Childcollision._dragForce / 4000;
                             tempParticle.m_Radius = Childcollision._collisionRadius;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
