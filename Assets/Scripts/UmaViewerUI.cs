@@ -357,4 +357,16 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         LoadFacialPanels(target);
     }
+
+    public void SetDynamicBoneEnable(bool isOn)
+    {
+        if (Builder.CurrentContainer)
+        {
+            foreach(CySpringDataContainer cySpring in Builder.CurrentContainer.GetComponentsInChildren<CySpringDataContainer>())
+            {
+                cySpring.EnablePhysics(isOn);
+            }
+            
+        }
+    }
 }

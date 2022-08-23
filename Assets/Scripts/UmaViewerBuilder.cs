@@ -18,7 +18,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<Shader> ShaderList = new List<Shader>();
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
-    private UmaContainer CurrentContainer;
+    public UmaContainer CurrentContainer;
 
     public AnimatorOverrideController OverrideController;
 
@@ -631,8 +631,11 @@ public class UmaViewerBuilder : MonoBehaviour
                         case "Gallop/3D/Chara/ToonHair/TSER":
                             m.shader = Shader.Find("Nars/UmaMusume/Body");
                             break;
+                        case "Gallop/3D/Chara/ToonHair/TSEREm":
+                            m.shader = Shader.Find("Nars/UmaMusume/Body");
+                            break;
                         default:
-                            Debug.LogError(m.shader.name);
+                            Debug.Log(m.shader.name);
                             // m.shader = Shader.Find("Nars/UmaMusume/Body");
                             break;
                     }

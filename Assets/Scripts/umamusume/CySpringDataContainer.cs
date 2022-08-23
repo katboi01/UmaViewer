@@ -25,14 +25,16 @@ namespace Gallop
         public float HipMoveInfluenceDistance;
         public float HipMoveInfluenceMaxDistance;
 
-        private void Start()
+        public List<DynamicBone> DynamicBones = new List<DynamicBone>();
+        
+        private void Awake()
         {
-            SetPhysics();
+            InitializePhysics();
         }
-        public void SetPhysics()
+        public void InitializePhysics()
         {
+            DynamicBones.Clear();
             List<Transform> gameObjects = new List<Transform>();
-            Dictionary<string, DynamicBoneColliderBase> DynamicBoneColliders = new Dictionary<string, DynamicBoneColliderBase>();
             gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
             foreach (CySpringCollisionData collider in collisionParam)
             {
@@ -59,7 +61,6 @@ namespace Gallop
                             dynamic.m_Height = (collider._offset - collider._offset2).magnitude + collider._radius;
                             dynamic.m_Radius = collider._radius;
                             dynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            DynamicBoneColliders.Add(collider._collisionName, dynamic);
                             break;
                         case CySpringCollisionData.CollisionType.Sphere:
                             var Spheredynamic = child.AddComponent<DynamicBoneCollider>();
@@ -68,14 +69,12 @@ namespace Gallop
                             Spheredynamic.m_Radius = collider._radius;
                             Spheredynamic.m_Height = collider._distance;
                             Spheredynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            DynamicBoneColliders.Add(collider._collisionName, Spheredynamic);
                             break;
                         case CySpringCollisionData.CollisionType.Plane:
                             var planedynamic = child.AddComponent<DynamicBonePlaneCollider>();
                             planedynamic.ColliderName = collider._collisionName;
                             child.transform.localPosition = collider._offset;
                             planedynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            DynamicBoneColliders.Add(collider._collisionName, planedynamic);
                             break;
                         case CySpringCollisionData.CollisionType.None:
                             break;
@@ -83,7 +82,8 @@ namespace Gallop
                 }
             }
 
-
+            gameObjects.Clear();
+            gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
             foreach (CySpringParamDataElement spring in springParam)
             {
                 var bone = gameObjects.Find(a => { return a.name == spring._boneName; });
@@ -92,38 +92,51 @@ namespace Gallop
                     var dynamic = gameObject.AddComponent<DynamicBone>();
                     dynamic.m_Root = bone;
                     dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
-                    dynamic.SetupParticles();
-                    dynamic.m_Gravity = new Vector3(0, -spring._gravity / 80000, 0);
+                    dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-spring._gravity / 80000), 0);
                     dynamic.m_Damping = 0.2f;
-                    dynamic.m_Stiffness = spring._stiffnessForce / 1000;
-                    dynamic.m_Elasticity = spring._dragForce / 4000;
+                    dynamic.m_Stiffness = Mathf.Clamp01(spring._stiffnessForce / 900);
+                    dynamic.m_Elasticity = Mathf.Clamp01(spring._dragForce / 4000);
                     dynamic.m_Radius = spring._collisionRadius;
+                    dynamic.SetupParticles();
+                    DynamicBones.Add(dynamic);
+                    
                     foreach (string collisionName in spring._collisionNameList)
                     {
-                        if (DynamicBoneColliders.TryGetValue(collisionName, out DynamicBoneColliderBase val))
+                        var tmp = gameObjects.Find(a => { return a.name == collisionName; });
+                        if (tmp)
                         {
-                            dynamic.m_Particles[0].m_Colliders.Add(val);
+                            dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                         }
                     }
                     foreach (CySpringParamDataChildElement Childcollision in spring._childElements)
                     {
-                        var tempParticle = dynamic.m_Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
+                        var tempParticle = dynamic.Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
                         if (tempParticle != null)
                         {
                             tempParticle.m_Damping = 0.2f;
-                            tempParticle.m_Stiffness = Childcollision._stiffnessForce / 1000;
-                            tempParticle.m_Elasticity = Childcollision._dragForce / 4000;
+                            tempParticle.m_Stiffness = Mathf.Clamp01(Childcollision._stiffnessForce / 900);
+                            tempParticle.m_Elasticity = Mathf.Clamp01(Childcollision._dragForce / 4000);
                             tempParticle.m_Radius = Childcollision._collisionRadius;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
-                                if (DynamicBoneColliders.TryGetValue(collisionName, out DynamicBoneColliderBase val))
+                                var tmp = gameObjects.Find(a => { return a.name == collisionName; });
+                                if (tmp)
                                 {
-                                    tempParticle.m_Colliders.Add(val);
+                                    tempParticle.m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                                 }
                             }
                         }
                     }
+                    
                 }
+            }
+        }
+
+        public void EnablePhysics(bool isOn)
+        {
+            foreach(DynamicBone dynamic in DynamicBones)
+            {
+                dynamic.enabled = isOn;
             }
         }
     }

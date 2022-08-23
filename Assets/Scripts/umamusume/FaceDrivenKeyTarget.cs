@@ -129,9 +129,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs.transform.localRotation.eulerAngles + (trs._rotation * morph.Weight));
                     trs.transform.localPosition += trs._position * morph.Weight;
                     trs.transform.localScale += trs._scale * morph.Weight;
+                    trs.transform.localRotation = Quaternion.Euler(trs.transform.localRotation.eulerAngles + (trs._rotation * morph.Weight));
                 };
             }
         }
@@ -142,9 +142,10 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
+                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
                 };
             }
 
@@ -152,9 +153,10 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
+                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
                 };
             }
 
@@ -162,9 +164,10 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
+                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
                 };
             }
 
@@ -172,9 +175,10 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
+                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
                 };
             }
 
@@ -182,9 +186,10 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
+                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
                 };
             }
         }
