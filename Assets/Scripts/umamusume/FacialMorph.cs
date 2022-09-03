@@ -25,7 +25,7 @@ namespace Gallop
                 _weight = value;
                 target.ChangeMorph();
             }
-         }
-        [HideInInspector] public List<TrsArray> trsArray;
+        }
+        public List<TrsArray> trsArray;
     }
 }

@@ -33,7 +33,7 @@ namespace Gallop
                     FacialMorph morph = new FacialMorph();
                     morph.target = this;
                     morph.direction = j > 0;
-                    morph.name = "EyeBrow_" + i + "_" + (morph.direction ? "R" : "L");
+                    morph.name = "EyeBrow_" + i + "_" + (morph.direction ? "L" : "R");
                     morph.trsArray = _eyebrowTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
@@ -58,7 +58,7 @@ namespace Gallop
                     FacialMorph morph = new FacialMorph();
                     morph.target = this;
                     morph.direction = j > 0;
-                    morph.name = "Eye_" + i + "_" + (morph.direction ? "R" : "L");
+                    morph.name = "Eye_" + i + "_" + (morph.direction ? "L" : "R");
                     morph.trsArray = _eyeTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
@@ -129,9 +129,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localPosition += trs._position * morph.Weight;
                     trs.transform.localScale += trs._scale * morph.Weight;
-                    trs.transform.localRotation = Quaternion.Euler(trs.transform.localRotation.eulerAngles + (trs._rotation * morph.Weight));
+                    trs.transform.localPosition += trs._position * morph.Weight;
+                    trs.transform.localEulerAngles += trs._rotation * morph.Weight;
                 };
             }
         }
@@ -145,7 +145,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+                    trs.transform.localEulerAngles = trs._rotation;
                 };
             }
 
@@ -156,7 +156,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+                    trs.transform.localEulerAngles = trs._rotation;
                 };
             }
 
@@ -167,7 +167,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+                    trs.transform.localEulerAngles = trs._rotation;
                 };
             }
 
@@ -178,7 +178,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+                    trs.transform.localEulerAngles = trs._rotation;
                 };
             }
 
@@ -189,7 +189,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localRotation = Quaternion.Euler(trs._rotation);
+                    trs.transform.localEulerAngles = trs._rotation;
                 };
             }
         }

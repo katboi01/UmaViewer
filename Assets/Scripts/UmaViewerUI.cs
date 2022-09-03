@@ -29,6 +29,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public ScrollRect SceneList;
 
     public ScrollRect FacialList;
+    public ScrollRect LiveList;
 
     //settings
     public TMPro.TMP_InputField SSWidth, SSHeight;
@@ -38,6 +39,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public GameObject UmaContainerPrefab;
     public GameObject UmaContainerSliderPrefab;
     public GameObject UmaContainerAssetsPrefab;
+    public GameObject UmaContainerNoTMPPrefab;
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;
 
@@ -141,6 +143,22 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a; });
+        }
+    }
+
+    public void LoadLivePanels()
+    {
+        foreach (var live in Main.Lives.OrderBy(c => c.MusicId))
+        {
+            var liveInstance = live;
+            var container = Instantiate(UmaContainerNoTMPPrefab, LiveList.content).GetComponent<UmaUIContainer>();
+            container.GetComponentInChildren<Text>().text = " "+ live.MusicId + " " + live.songName;
+            var imageInstance1 = container.GetComponent<Image>();
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(LiveList.content, imageInstance1);
+                Builder.LoadLive(live.MusicId);
+            });
+
         }
     }
 
@@ -368,5 +386,11 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             }
             
         }
+    }
+
+    public void ClearCache()
+    {
+        PlayerPrefs.DeleteAll();
+        Application.Quit();
     }
 }

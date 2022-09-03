@@ -65,11 +65,9 @@ public class UmaDatabaseController
         metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
         metaDb.Open();
         MetaEntries = ReadMeta(metaDb);
-        Debug.Log("1");
         masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
         masterDb.Open();
         CharaData = ReadMaster(masterDb);
-        Debug.Log("2");
     }
 
     static IEnumerable<UmaDatabaseEntry> ReadMeta(SqliteConnection conn)

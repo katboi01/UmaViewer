@@ -1,4 +1,5 @@
 ﻿using Gallop;
+using Gallop.Live.Cutt;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -19,6 +20,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
     public UmaContainer CurrentContainer;
+    public LiveTimelineWorkSheet CurrentLiveSheet;
 
     public AnimatorOverrideController OverrideController;
 
@@ -233,7 +235,6 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentContainer.FaceDrivenKeyTargets = newFaceDriven;
         }
 
-
         LoadAsset(UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
@@ -347,6 +348,12 @@ public class UmaViewerBuilder : MonoBehaviour
         RecursiveLoadAsset(entry);
     }
 
+    public void LoadLive(int id)
+    {
+       var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("son"+id+"_camera"));
+       LoadAsset(asset);
+    }
+
     private void RecursiveLoadAsset(UmaDatabaseEntry entry)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -445,6 +452,10 @@ public class UmaViewerBuilder : MonoBehaviour
                     LoadProp(asset as GameObject);
                 }
             }
+            else if (aType == typeof(LiveTimelineWorkSheet))
+            {
+                LoadLiveSheet(asset as LiveTimelineWorkSheet);
+            }
             else if (aType == typeof(FaceDrivenKeyTarget))
             {
                 //CurrentContainer.FaceDrivenKeyTargets.Add(Instantiate(asset as FaceDrivenKeyTarget));
@@ -532,6 +543,12 @@ public class UmaViewerBuilder : MonoBehaviour
                                 optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_ctrl";
                                 break;
                             case "0006":
+                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
+                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
+                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
+                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_ctrl";
+                                break;
+                            case "0009":
                                 mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
                                 toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
                                 tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
@@ -681,6 +698,11 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
+    private void LoadLiveSheet(LiveTimelineWorkSheet sheet)
+    {
+        CurrentLiveSheet = sheet;
+        GameObject gameObject = new GameObject("LiveSheet");
+    }
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
         var entry = Main.LoadedBundles.FirstOrDefault(b => b.Value == bundle);
