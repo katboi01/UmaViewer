@@ -701,7 +701,6 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadLiveSheet(LiveTimelineWorkSheet sheet)
     {
         CurrentLiveSheet = sheet;
-        GameObject gameObject = new GameObject("LiveSheet");
     }
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
