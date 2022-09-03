@@ -227,12 +227,9 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             var firsehead = CurrentContainer.Heads[0];
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
-            var newFaceDriven = firsehead.AddComponent<FaceDrivenKeyTarget>();
-            newFaceDriven.callBack = UmaViewerUI.Instance;
-            newFaceDriven._eyebrowTarget = FaceDriven._eyebrowTarget;
-            newFaceDriven._eyeTarget = FaceDriven._eyeTarget;
-            newFaceDriven._mouthTarget = FaceDriven._mouthTarget;
-            CurrentContainer.FaceDrivenKeyTargets = newFaceDriven;
+            CurrentContainer.FaceDrivenKeyTargets = FaceDriven;
+            FaceDriven.callBack = UmaViewerUI.Instance;
+            FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
         }
 
         LoadAsset(UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));

@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Gallop
 {
-    public class FaceDrivenKeyTarget : MonoBehaviour
+    public class FaceDrivenKeyTarget : ScriptableObject
     {
         public List<EyeTarget> _eyeTarget;
         public List<EyebrowTarget> _eyebrowTarget;
         public List<MouthTarget> _mouthTarget;
 
-        public List<Transform> Objs = new List<Transform>();
+        public List<Transform> Objs;
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
         private FacialMorph BaseMouthMorph;
@@ -21,10 +21,9 @@ namespace Gallop
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
         public FaceLoadCallBack callBack;
-        private void Start()
+        public void Initialize(List<Transform> objs)
         {
-
-            Objs.AddRange(GetComponentsInChildren<Transform>());
+            Objs = objs;
 
             for (int i = 0; i < _eyebrowTarget.Count; i++)
             {
