@@ -18,9 +18,12 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<Shader> ShaderList = new List<Shader>();
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
-    public UmaContainer CurrentContainer;
+    public UmaContainer CurrentUMAContainer;
+    public UmaContainer CurrentLiveContainer;
+    public UmaContainer CurrentOtherContainer;
 
     public AnimatorOverrideController OverrideController;
+
 
     private void Awake()
     {
@@ -29,23 +32,18 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public IEnumerator LoadUma(int id, string costumeId, bool mini)
     {
-        if (CurrentContainer != null)
+        if (CurrentUMAContainer != null)
         {
-            Destroy(CurrentContainer);
+            Destroy(CurrentUMAContainer);
         }
-        CurrentContainer = new GameObject($"{id}_{costumeId}").AddComponent<UmaContainer>();
+        CurrentUMAContainer = new GameObject($"{id}_{costumeId}").AddComponent<UmaContainer>();
 
-        foreach (var bundle in Main.LoadedBundles)
-        {
-            bundle.Value.Unload(true);
-        }
-        Main.LoadedBundles.Clear();
-        UI.LoadedAssetsClear();
+        UnloadAllBundle();
 
         yield return UmaViewerDownload.DownloadText($"https://www.tracenacademy.com/api/CharaData/{id}", txt =>
         {
             Debug.Log(txt);
-            CurrentContainer.CharaData = JObject.Parse(txt);
+            CurrentUMAContainer.CharaData = JObject.Parse(txt);
             if (mini)
             {
                 LoadMiniUma(id, costumeId);
@@ -59,8 +57,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadNormalUma(int id, string costumeId)
     {
-        JObject charaData = CurrentContainer.CharaData;
-        bool genericCostume = CurrentContainer.IsGeneric = costumeId.Length >= 4;
+        JObject charaData = CurrentUMAContainer.CharaData;
+        bool genericCostume = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
         string skin = (string)charaData["skin"],
                height = (string)charaData["height"],
                socks = (string)charaData["socks"],
@@ -72,12 +70,12 @@ public class UmaViewerBuilder : MonoBehaviour
         if (genericCostume)
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
-            CurrentContainer.VarCostumeIdShort = costumeIdShort;
-            CurrentContainer.VarCostumeIdLong = costumeId;
-            CurrentContainer.VarBust = bust;
-            CurrentContainer.VarSkin = skin;
-            CurrentContainer.VarSocks = socks;
-            CurrentContainer.VarHeight = height;
+            CurrentUMAContainer.VarCostumeIdShort = costumeIdShort;
+            CurrentUMAContainer.VarCostumeIdLong = costumeId;
+            CurrentUMAContainer.VarBust = bust;
+            CurrentUMAContainer.VarSkin = skin;
+            CurrentUMAContainer.VarSocks = socks;
+            CurrentUMAContainer.VarHeight = height;
             //Not sure about the pattern, some models are missing
             string body = "";
             if (costumeId.Split('_')[2] == "03")
@@ -221,11 +219,11 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         //Load FacialMorph
-        if (CurrentContainer.Heads.Count > 0)
+        if (CurrentUMAContainer.Heads.Count > 0)
         {
-            var firsehead = CurrentContainer.Heads[0];
+            var firsehead = CurrentUMAContainer.Heads[0];
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
-            CurrentContainer.FaceDrivenKeyTargets = FaceDriven;
+            CurrentUMAContainer.FaceDrivenKeyTargets = FaceDriven;
             FaceDriven.callBack = UmaViewerUI.Instance;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
         }
@@ -235,9 +233,9 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadMiniUma(int id, string costumeId)
     {
-        JObject charaData = CurrentContainer.CharaData;
-        CurrentContainer.IsMini = true;
-        bool isGeneric = CurrentContainer.IsGeneric = costumeId.Length >= 4;
+        JObject charaData = CurrentUMAContainer.CharaData;
+        CurrentUMAContainer.IsMini = true;
+        bool isGeneric = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
         string skin = (string)charaData["skin"],
                height = (string)charaData["height"],
                socks = (string)charaData["socks"],
@@ -327,40 +325,25 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadProp(UmaDatabaseEntry entry)
     {
-        if (CurrentContainer != null)
+        if (CurrentOtherContainer != null)
         {
-            Destroy(CurrentContainer);
+            Destroy(CurrentOtherContainer);
         }
+        UnloadAllBundle();
 
-        foreach (var bundle in Main.LoadedBundles)
-        {
-            bundle.Value.Unload(true);
-        }
-        Main.LoadedBundles.Clear();
-        UI.LoadedAssetsClear();
-
-        CurrentContainer = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainer>();
+        CurrentOtherContainer = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(entry);
     }
 
     public void LoadLive(int id)
     {
-       var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son"+id));
-        //LoadAsset(asset);
-
-        if (CurrentContainer != null)
+        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son"+id));
+        if (CurrentLiveContainer != null)
         {
-            Destroy(CurrentContainer);
+            Destroy(CurrentLiveContainer);
         }
-
-        foreach (var bundle in Main.LoadedBundles)
-        {
-            bundle.Value.Unload(true);
-        }
-        Main.LoadedBundles.Clear();
-        UI.LoadedAssetsClear();
-
-        CurrentContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
+        UnloadAllBundle();
+        CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
 
     }
@@ -414,19 +397,17 @@ public class UmaViewerBuilder : MonoBehaviour
             Type aType = asset.GetType();
             if (aType == typeof(AnimationClip))
             {
-                if (CurrentContainer.Body)
+                if (CurrentUMAContainer&&CurrentUMAContainer.Body)
                 {
                     AnimationClip bbb = asset as AnimationClip;
                     bbb.wrapMode = WrapMode.Loop;
-                    CurrentContainer.OverrideController["clip"] = bbb;
+                    CurrentUMAContainer.OverrideController["clip"] = bbb;
+                    CurrentUMAContainer.UmaAnimator.Play("clip", 0, 0);
+                    
+                }
 
-                    CurrentContainer.UmaAnimator.Play("clip", 0, 0);
-                    UnloadBundle(bundle, false);
-                }
-                else
-                {
-                    UnloadBundle(bundle, true);
-                }
+                if(!CurrentLiveContainer)
+                UnloadBundle(bundle, false);
             }
             else if (aType == typeof(GameObject))
             {
@@ -434,15 +415,15 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     if (bundle.name.Contains("chr"))
                     {
-                        GameObject head = Instantiate(asset as GameObject, CurrentContainer.Heads[0].transform);
+                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Heads[0].transform);
                     }
                     else if (bundle.name.Contains("bdy"))
                     {
-                        GameObject head = Instantiate(asset as GameObject, CurrentContainer.Body.transform);
+                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Body.transform);
                     }
                     else if (bundle.name.Contains("tail"))
                     {
-                        GameObject head = Instantiate(asset as GameObject, CurrentContainer.Tail.transform);
+                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Tail.transform);
                     }
 
                 }
@@ -478,15 +459,15 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 if (bundle.name.Contains("/mini/head"))
                 {
-                    CurrentContainer.MiniHeadTextures.Add(asset as Texture2D);
+                    CurrentUMAContainer.MiniHeadTextures.Add(asset as Texture2D);
                 }
                 else if (bundle.name.Contains("/tail/"))
                 {
-                    CurrentContainer.TailTextures.Add(asset as Texture2D);
+                    CurrentUMAContainer.TailTextures.Add(asset as Texture2D);
                 }
                 else if (bundle.name.Contains("bdy0"))
                 {
-                    CurrentContainer.GenericBodyTextures.Add(asset as Texture2D);
+                    CurrentUMAContainer.GenericBodyTextures.Add(asset as Texture2D);
                 }
             }
         }
@@ -494,26 +475,26 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadBody(GameObject go)
     {
-        CurrentContainer.Body = Instantiate(go, CurrentContainer.transform);
-        CurrentContainer.UmaAnimator = CurrentContainer.Body.GetComponent<Animator>();
-        CurrentContainer.UmaAnimator.runtimeAnimatorController = CurrentContainer.OverrideController = Instantiate(OverrideController);
+        CurrentUMAContainer.Body = Instantiate(go, CurrentUMAContainer.transform);
+        CurrentUMAContainer.UmaAnimator = CurrentUMAContainer.Body.GetComponent<Animator>();
+        CurrentUMAContainer.UmaAnimator.runtimeAnimatorController = CurrentUMAContainer.OverrideController = Instantiate(OverrideController);
 
-        if (CurrentContainer.IsGeneric)
+        if (CurrentUMAContainer.IsGeneric)
         {
-            List<Texture2D> textures = CurrentContainer.GenericBodyTextures;
-            string costumeIdShort = CurrentContainer.VarCostumeIdShort,
-                   costumeIdLong = CurrentContainer.VarCostumeIdLong,
-                   height = CurrentContainer.VarHeight,
-                   skin = CurrentContainer.VarSkin,
-                   socks = CurrentContainer.VarSocks,
-                   bust = CurrentContainer.VarBust;
+            List<Texture2D> textures = CurrentUMAContainer.GenericBodyTextures;
+            string costumeIdShort = CurrentUMAContainer.VarCostumeIdShort,
+                   costumeIdLong = CurrentUMAContainer.VarCostumeIdLong,
+                   height = CurrentUMAContainer.VarHeight,
+                   skin = CurrentUMAContainer.VarSkin,
+                   socks = CurrentUMAContainer.VarSocks,
+                   bust = CurrentUMAContainer.VarBust;
 
-            foreach (Renderer r in CurrentContainer.Body.GetComponentsInChildren<Renderer>())
+            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
             {
                 foreach (Material m in r.sharedMaterials)
                 {
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "";
-                    if (CurrentContainer.IsMini)
+                    if (CurrentUMAContainer.IsMini)
                     {
 
                         m.SetTexture("_MainTex", textures[0]);
@@ -585,7 +566,7 @@ public class UmaViewerBuilder : MonoBehaviour
         else
         {
 
-            foreach (Renderer r in CurrentContainer.Body.GetComponentsInChildren<Renderer>())
+            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
             {
                 foreach (Material m in r.sharedMaterials)
                 {
@@ -600,10 +581,10 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadHead(GameObject go)
     {
-        GameObject head = Instantiate(go, CurrentContainer.transform);
-        CurrentContainer.Heads.Add(head);
-        CurrentContainer.HeadNeckBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Neck"));
-        CurrentContainer.HeadHeadBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Head"));
+        GameObject head = Instantiate(go, CurrentUMAContainer.transform);
+        CurrentUMAContainer.Heads.Add(head);
+        CurrentUMAContainer.HeadNeckBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Neck"));
+        CurrentUMAContainer.HeadHeadBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Head"));
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
@@ -613,24 +594,24 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     if (r.name == "M_Face")
                     {
-                        m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("face") && t.name.Contains("diff")));
+                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("face") && t.name.Contains("diff")));
                     }
                     if (r.name == "M_Cheek")
                     {
                         m.CopyPropertiesFromMaterial(TransMaterialCharas);
-                        m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("cheek")));
+                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("cheek")));
                     }
                     if (r.name == "M_Mouth")
                     {
-                        m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("mouth")));
+                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("mouth")));
                     }
                     if (r.name == "M_Eye")
                     {
-                        m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("eye")));
+                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("eye")));
                     }
                     if (r.name.StartsWith("M_Mayu_"))
                     {
-                        m.SetTexture("_MainTex", CurrentContainer.MiniHeadTextures.First(t => t.name.Contains("mayu")));
+                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("mayu")));
                     }
                 }
                 else
@@ -678,11 +659,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadTail(GameObject gameObject)
     {
-        Transform hHip = UmaContainer.FindBoneInChildren(CurrentContainer.Body.transform, "Hip");
+        Transform hHip = UmaContainer.FindBoneInChildren(CurrentUMAContainer.Body.transform, "Hip");
         if (hHip == null) return;
-        CurrentContainer.Tail = Instantiate(gameObject, hHip);
-        var textures = CurrentContainer.TailTextures;
-        foreach (Renderer r in CurrentContainer.Tail.GetComponentsInChildren<Renderer>())
+        CurrentUMAContainer.Tail = Instantiate(gameObject, hHip);
+        var textures = CurrentUMAContainer.TailTextures;
+        foreach (Renderer r in CurrentUMAContainer.Tail.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
             {
@@ -697,7 +678,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadProp(GameObject go)
     {
-        var prop = Instantiate(go, CurrentContainer.transform);
+        var prop = Instantiate(go, (go.name.Contains("Cutt_son")?CurrentLiveContainer:CurrentOtherContainer).transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -717,5 +698,21 @@ public class UmaViewerBuilder : MonoBehaviour
             Main.LoadedBundles.Remove(entry.Key);
         }
         bundle.Unload(unloadAllObjects);
+    }
+
+    public void UnloadAllBundle(bool unloadAllObjects = false)
+    {
+        foreach (var bundle in Main.LoadedBundles)
+        {
+            bundle.Value.Unload(unloadAllObjects);
+        }
+        if (unloadAllObjects)
+        {
+            if (CurrentUMAContainer) Destroy(CurrentUMAContainer);
+            if (CurrentLiveContainer) Destroy(CurrentLiveContainer);
+            if (CurrentOtherContainer) Destroy(CurrentOtherContainer);
+        }
+        Main.LoadedBundles.Clear();
+        UI.LoadedAssetsClear();
     }
 }
