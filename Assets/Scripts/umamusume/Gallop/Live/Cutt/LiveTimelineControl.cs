@@ -25,13 +25,13 @@ namespace Gallop.Live.Cutt
 
         public void InitializeTimeLineData()
         {
-            var LoadData = gameObject.AddComponent<LiveTimelineData>();
-            CopyValues(data, LoadData);
-            foreach(LiveTimelineWorkSheet worksheet in LoadData.worksheetList)
-            {
-                var LoadSheet = gameObject.AddComponent<LiveTimelineWorkSheet>();
-                CopyValues(worksheet, LoadSheet);
-            }
+            //var LoadData = gameObject.AddComponent<LiveTimelineData>();
+            //CopyValues(data, LoadData);
+            //foreach(LiveTimelineWorkSheet worksheet in LoadData.worksheetList)
+            //{
+            //    var LoadSheet = gameObject.AddComponent<LiveTimelineWorkSheet>();
+            //    CopyValues(worksheet, LoadSheet);
+            //}
         }
     }
 

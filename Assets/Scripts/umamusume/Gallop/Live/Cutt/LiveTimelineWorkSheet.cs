@@ -234,7 +234,7 @@ namespace Gallop.Live.Cutt
 	}
 
 
-	public class LiveTimelineWorkSheet : MonoBehaviour
+	public class LiveTimelineWorkSheet : ScriptableObject
     {
 		public string version;
 		public int targetCameraIndex;

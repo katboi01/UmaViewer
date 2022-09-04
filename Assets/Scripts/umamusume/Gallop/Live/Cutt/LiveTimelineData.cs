@@ -176,7 +176,7 @@ namespace Gallop.Live.Cutt
         public bool isCheckCharacterPosition;
     }
 
-    public class LiveTimelineData : MonoBehaviour
+    public class LiveTimelineData : ScriptableObject
     {
         public enum CharacterPositionMode
         {
