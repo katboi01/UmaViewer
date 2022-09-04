@@ -1,5 +1,4 @@
 ﻿using Gallop;
-using Gallop.Live.Cutt;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -20,7 +19,6 @@ public class UmaViewerBuilder : MonoBehaviour
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
     public UmaContainer CurrentContainer;
-    public LiveTimelineWorkSheet CurrentLiveSheet;
 
     public AnimatorOverrideController OverrideController;
 
@@ -347,23 +345,39 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(int id)
     {
-       var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("son"+id+"_camera"));
-       LoadAsset(asset);
+       var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son"+id));
+        //LoadAsset(asset);
+
+        if (CurrentContainer != null)
+        {
+            Destroy(CurrentContainer);
+        }
+
+        foreach (var bundle in Main.LoadedBundles)
+        {
+            bundle.Value.Unload(true);
+        }
+        Main.LoadedBundles.Clear();
+        UI.LoadedAssetsClear();
+
+        CurrentContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
+        RecursiveLoadAsset(asset);
+
     }
 
-    private void RecursiveLoadAsset(UmaDatabaseEntry entry)
+    private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
         {
             foreach (string prerequisite in entry.Prerequisites.Split(';'))
             {
-                RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite));
+                RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true);
             }
         }
-        LoadAsset(entry);
+        LoadAsset(entry, IsSubAsset);
     }
 
-    public void LoadAsset(UmaDatabaseEntry entry)
+    public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
@@ -379,11 +393,11 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             Main.LoadedBundles.Add(entry.Name, bundle);
             UI.LoadedAssetsAdd(entry);
-            LoadBundle(bundle);
+            LoadBundle(bundle, IsSubAsset);
         }
     }
 
-    private void LoadBundle(AssetBundle bundle)
+    private void LoadBundle(AssetBundle bundle, bool IsSubAsset = false)
     {
         if (bundle.name == "shader.a")
         {
@@ -446,12 +460,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 else
                 {
-                    LoadProp(asset as GameObject);
+                    if (!IsSubAsset)
+                    {
+                        LoadProp(asset as GameObject);
+                    }
                 }
-            }
-            else if (aType == typeof(LiveTimelineWorkSheet))
-            {
-                LoadLiveSheet(asset as LiveTimelineWorkSheet);
             }
             else if (aType == typeof(FaceDrivenKeyTarget))
             {
@@ -695,10 +708,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadLiveSheet(LiveTimelineWorkSheet sheet)
-    {
-        CurrentLiveSheet = sheet;
-    }
+
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
         var entry = Main.LoadedBundles.FirstOrDefault(b => b.Value == bundle);
