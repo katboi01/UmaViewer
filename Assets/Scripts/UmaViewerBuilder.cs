@@ -1,10 +1,15 @@
-﻿using Gallop;
+﻿using CriWareFormats;
+using Gallop;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using UmaMusumeAudio;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,7 +26,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentUMAContainer;
     public UmaContainer CurrentLiveContainer;
     public UmaContainer CurrentOtherContainer;
-
+    public AudioSource CurrentAudioSource;
     public AnimatorOverrideController OverrideController;
 
 
@@ -337,15 +342,56 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(int id)
     {
-        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son"+id));
+        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + id));
         if (CurrentLiveContainer != null)
         {
-            Destroy(CurrentLiveContainer);
+            Destroy(CurrentLiveContainer.gameObject);
         }
         UnloadAllBundle();
         CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
 
+    }
+
+    public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
+    {
+        if (CurrentAudioSource)
+        {
+            Destroy(CurrentAudioSource.gameObject);
+        }
+        AudioClip clip = LoadAudio(SongAwb);
+        if (clip != null)
+        {
+            CurrentAudioSource = new GameObject("SoundController").AddComponent<AudioSource>();
+            CurrentAudioSource.clip = clip;
+            CurrentAudioSource.Play();
+        }
+    }
+
+    public AudioClip LoadAudio(UmaDatabaseEntry awb)
+    {
+        UmaViewerUI.Instance.LoadedAssetsAdd(awb);
+
+        string awbPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{awb.Url.Substring(0, 2)}\\{awb.Url}";
+        if (!File.Exists(awbPath)) return null;
+
+        FileStream awbFile = File.OpenRead(awbPath);
+        AwbReader awbReader = new AwbReader(awbFile);
+        
+
+        var stream = new UmaWaveStream(awbReader, 0);
+        MemoryStream outputStream = new MemoryStream();
+        WaveFileWriter.WriteWavFileToStream(outputStream, stream);
+
+        WAV wav = new WAV(outputStream.ToArray());
+        AudioClip clip = AudioClip.Create(Path.GetFileName(awb.Name).Replace(".awb", ""),wav.SampleCount,wav.ChannelCount,wav.Frequency,false);
+        clip.SetData(wav.ChannelCount > 1 ? wav.StereoChannel : wav.LeftChannel, 0);
+
+        awbReader.Dispose();
+        awbFile.Dispose();
+        outputStream.Dispose();
+
+        return clip;
     }
 
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
@@ -397,17 +443,17 @@ public class UmaViewerBuilder : MonoBehaviour
             Type aType = asset.GetType();
             if (aType == typeof(AnimationClip))
             {
-                if (CurrentUMAContainer&&CurrentUMAContainer.Body)
+                if (CurrentUMAContainer && CurrentUMAContainer.Body)
                 {
                     AnimationClip bbb = asset as AnimationClip;
                     bbb.wrapMode = WrapMode.Loop;
                     CurrentUMAContainer.OverrideController["clip"] = bbb;
                     CurrentUMAContainer.UmaAnimator.Play("clip", 0, 0);
-                    
+
                 }
 
-                if(!CurrentLiveContainer)
-                UnloadBundle(bundle, false);
+                if (!CurrentLiveContainer)
+                    UnloadBundle(bundle, false);
             }
             else if (aType == typeof(GameObject))
             {
@@ -678,7 +724,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadProp(GameObject go)
     {
-        var prop = Instantiate(go, (go.name.Contains("Cutt_son")?CurrentLiveContainer:CurrentOtherContainer).transform);
+        var prop = Instantiate(go, (go.name.Contains("Cutt_son") ? CurrentLiveContainer : CurrentOtherContainer).transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)

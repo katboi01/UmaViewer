@@ -30,6 +30,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public ScrollRect FacialList;
     public ScrollRect LiveList;
+    public ScrollRect LiveSoundList;
+    public ScrollRect LiveCharaSoundList;
 
     //settings
     public TMPro.TMP_InputField SSWidth, SSHeight;
@@ -117,7 +119,11 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         {
             Destroy(ui.gameObject);
         }
-        foreach (FacialMorph morph in target.EyeBrowMorphs)
+        List<FacialMorph> tempMorph = new List<FacialMorph>();
+        tempMorph.AddRange(target.EyeBrowMorphs);
+        tempMorph.AddRange(target.EyeMorphs);
+        tempMorph.AddRange(target.MouthMorphs);
+        foreach (FacialMorph morph in tempMorph)
         {
            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
             container.Name.text = morph.name;
@@ -125,24 +131,6 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a;});
-        }
-        foreach (FacialMorph morph in target.EyeMorphs)
-        {
-            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = morph.name;
-            container.Slider.value = morph.Weight;
-            container.Slider.maxValue = 1;
-            container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a; });
-        }
-        foreach (FacialMorph morph in target.MouthMorphs)
-        {
-            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = morph.name;
-            container.Slider.value = morph.Weight;
-            container.Slider.maxValue = 1;
-            container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a; });
         }
     }
 
@@ -159,7 +147,17 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 Builder.LoadLive(live.MusicId);
             });
 
+            var CharaContainer = Instantiate(UmaContainerNoTMPPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
+            CharaContainer.GetComponentInChildren<Text>().text = " " + live.MusicId + " " + live.songName;
+            var CharaimageInstance1 = container.GetComponent<Image>();
+            CharaContainer.Button.onClick.AddListener(() => {
+                HighlightChildImage(LiveList.content, imageInstance1);
+                ListLiveSounds(live.MusicId);
+            });
+            
         }
+
+        
     }
 
     public void LoadMiniModelPanels()
@@ -261,6 +259,32 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 });
             }
         }
+    }
+
+    void ListLiveSounds(int songid)
+    {
+        for (int i = LiveCharaSoundList.content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(LiveCharaSoundList.content.GetChild(i).gameObject);
+        }
+        string nameVar = $"snd_bgm_live_{songid}_chara";
+        foreach (var entry in Main.AbList.Where(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb")))
+        {
+            var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
+            string[] split = entry.Name.Split('_');
+            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1].Replace(".awb","");
+            container.Name.text = name;
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
+                Builder.LoadLiveSound(songid, entry);
+            });
+        }
+    }
+
+    string getCharaName(string id)
+    {
+        var entry = Main.Characters.FirstOrDefault(a => a.Id.ToString().Equals(id));
+        return (entry == null) ? id.ToString() : entry.Name;
     }
 
     public static string GetCostumeName(string costumeId)
