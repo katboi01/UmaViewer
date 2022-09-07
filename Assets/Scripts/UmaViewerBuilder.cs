@@ -26,7 +26,10 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentUMAContainer;
     public UmaContainer CurrentLiveContainer;
     public UmaContainer CurrentOtherContainer;
+
     public AudioSource CurrentAudioSource;
+    public AudioSource CurrentBGAudioSource;
+
     public AnimatorOverrideController OverrideController;
 
 
@@ -353,12 +356,15 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
-    public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
+    public void LoadLiveSound(int songid,UmaDatabaseEntry SongAwb)
     {
         if (CurrentAudioSource)
         {
             Destroy(CurrentAudioSource.gameObject);
+            UI.ResetPlayer();
         }
+
+        
         AudioClip clip = LoadAudio(SongAwb);
         if (clip != null)
         {
@@ -366,6 +372,21 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentAudioSource.clip = clip;
             CurrentAudioSource.Play();
         }
+
+        string nameVar = $"snd_bgm_live_{songid}_oke";
+        UmaDatabaseEntry BGawb = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
+        if (BGawb != null)
+        {
+            AudioClip BGclip = LoadAudio(BGawb);
+            if (BGclip)
+            {
+                CurrentBGAudioSource = CurrentAudioSource.gameObject.AddComponent<AudioSource>();
+                CurrentBGAudioSource.clip = BGclip;
+                CurrentBGAudioSource.Play();
+            }
+        }
+        
+        
     }
 
     public AudioClip LoadAudio(UmaDatabaseEntry awb)

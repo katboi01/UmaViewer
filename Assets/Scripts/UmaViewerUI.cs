@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,8 +34,14 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
 
+    //audios
+    public Slider AudioSlider;
+    public Button AudioPlayButton;
+    public TextMeshProUGUI TitleText;
+    public TextMeshProUGUI ProgressText;
+
     //settings
-    public TMPro.TMP_InputField SSWidth, SSHeight;
+    public TMP_InputField SSWidth, SSHeight;
 
     public List<GameObject> TogglablePanels = new List<GameObject>();
 
@@ -50,6 +57,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     private void Awake()
     {
         Instance = this;
+        AudioPlayButton.onClick.AddListener(AudioPause);
+        AudioSlider.onValueChanged.AddListener(AudioProgressChange);
     }
 
     public void HighlightChildImage(Transform mainObject, Image child)
@@ -154,10 +163,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 HighlightChildImage(LiveList.content, imageInstance1);
                 ListLiveSounds(live.MusicId);
             });
-            
         }
-
-        
     }
 
     public void LoadMiniModelPanels()
@@ -279,6 +285,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 Builder.LoadLiveSound(songid, entry);
             });
         }
+
     }
 
     string getCharaName(string id)
@@ -416,5 +423,77 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         PlayerPrefs.DeleteAll();
         Application.Quit();
+    }
+
+    public void AudioPause()
+    {
+        if (Builder.CurrentAudioSource)
+        {
+            AudioSource source = Builder.CurrentAudioSource;
+            if (source.isPlaying)
+            {
+                source.Pause();
+                if (Builder.CurrentBGAudioSource)
+                    Builder.CurrentBGAudioSource.Pause();
+            }
+            else if(source.clip)
+            {
+                source.Play();
+                if (Builder.CurrentBGAudioSource)
+                    Builder.CurrentBGAudioSource.Play();
+            }
+            else
+            {
+                source.Stop();
+                if (Builder.CurrentBGAudioSource)
+                    Builder.CurrentBGAudioSource.Stop();
+            }
+        }
+    }
+
+    public void AudioProgressChange(float val)
+    {
+        if (Builder.CurrentAudioSource)
+        {
+            AudioSource source = Builder.CurrentAudioSource;
+            if (Builder.CurrentAudioSource.clip)
+            {
+                source.time = source.clip.length * val;
+
+                if (Builder.CurrentBGAudioSource)
+                    Builder.CurrentBGAudioSource.time = source.clip.length * val;
+            }
+        }
+    }
+
+    private void Update()
+    {
+        if (Builder.CurrentAudioSource)
+        {
+            AudioSource source = Builder.CurrentAudioSource;
+            if (Builder.CurrentAudioSource.clip)
+            {
+                TitleText.text = source.clip.name;
+                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(source.time), ToTimeFormat(source.clip.length));
+                AudioSlider.SetValueWithoutNotify(source.time/ source.clip.length);
+            }
+        }
+    }
+
+    public void ResetPlayer()
+    {
+        TitleText.text = "No Audio";
+        ProgressText.text = "00:00:00 / 00:00:00";
+        AudioSlider.SetValueWithoutNotify(0);
+    }
+
+    public static string ToTimeFormat(float time)
+    {
+        
+        int seconds = (int)time;
+        int hour = seconds / 3600;
+        int minute = seconds % 3600 / 60;
+        seconds = seconds % 3600 % 60;
+        return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
     }
 }
