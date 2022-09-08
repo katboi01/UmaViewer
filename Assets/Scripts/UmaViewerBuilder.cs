@@ -683,14 +683,18 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     switch (m.shader.name)
                     {
+                        case "Gallop/3D/Chara/MultiplyCheek":
+                            m.CopyPropertiesFromMaterial(TransMaterialCharas);
+                            break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
-                            m.SetFloat("_CylinderBlend", 0.5f);
+                            m.SetFloat("_CylinderBlend", 0.25f);
+                            m.SetColor("_RimColor", new Color(0, 0, 0, 0));
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
-                            m.SetFloat("_CylinderBlend", 0.5f);
+                            m.SetFloat("_CylinderBlend", 0.25f);
                             break;
                         case "Gallop/3D/Chara/ToonHair/TSER":
-                            m.SetFloat("_CylinderBlend", 0.5f);
+                            m.SetFloat("_CylinderBlend", 0.25f);
                             break;
 
                         default:
