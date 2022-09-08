@@ -1,0 +1,3 @@
+[submodule "Assets/Scripts/Criware"]
+	path = Assets/Scripts/Criware
+	url = https://github.com/lcilmlp/_CRICONTENT.git
