@@ -1,0 +1,21 @@
+{
+    "name": "CriMw.CriWare.Runtime",
+    "references": [
+        "Unity.Timeline"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.timeline",
+            "expression": "1.0.0",
+            "define": "CRIWARE_TIMELINE_1_OR_NEWER"
+        }
+    ]
+}

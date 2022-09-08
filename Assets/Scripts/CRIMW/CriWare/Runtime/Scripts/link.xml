@@ -1,0 +1,17 @@
+<linker>
+	<!-- w/o asmdef, user defined location -->
+	<assembly fullname="Assembly-CSharp" ignoreIfMissing="1">
+		<namespace fullname="CriMana.Detail" preserve="all"/>
+		<type fullname="CriAtomOculusAudio" preserve="all"/>\
+	</assembly>
+	<!-- w/o asmdef, Assets/Plugins -->
+	<assembly fullname="Assembly-CSharp-firstpass" ignoreIfMissing="1">
+		<namespace fullname="CriMana.Detail" preserve="all"/>
+		<type fullname="CriAtomOculusAudio" preserve="all"/>\
+	</assembly>
+	<!-- w/ asmdef defined by CRIWARE -->
+	<assembly fullname="CriMw.CriWare.Runtime" ignoreIfMissing="1">
+		<!-- w/ CriWare namespace -->
+		<namespace fullname="CriWare.CriMana.Detail" preserve="all"/>
+	</assembly>
+</linker>

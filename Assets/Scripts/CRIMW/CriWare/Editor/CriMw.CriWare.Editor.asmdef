@@ -1,0 +1,25 @@
+{
+    "name": "CriMw.CriWare.Editor",
+    "references": [
+        "CriMw.CriWare.Runtime",
+        "Unity.Timeline",
+        "Unity.Timeline.Editor"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.timeline",
+            "expression": "1.0.0",
+            "define": "CRIWARE_TIMELINE_1_OR_NEWER"
+        }
+    ]
+}
