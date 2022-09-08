@@ -5,29 +5,29 @@ using System.Collections.Generic;
 
 public class GlobalValue : EditorWindow
 {
-    float _Global_MaxDensity = 0.0f;
-    float _Global_MaxHeight = 0.0f;
+    float _Global_MaxDensity = 1.0f;
+    float _Global_MaxHeight = 10.0f;
     float _GlobalOutlineOffest = 0.0f;
-    float _GlobalOutlineWidth = 0.0f;
+    float _GlobalOutlineWidth = 1.0f;
     float _GlobalCameraFov = 0.0f;
     float _CylinderBlend = 0.0f;
-    Color _GlobalToonColor;
+    Color _GlobalToonColor = new Color(1, 1, 1, 0);
     Color _Global_FogColor;
     Color _GlobalDirtRimSpecularColor;
     Color _GlobalDirtToonColor;
-    Color _GlobalRimColor;
+    Color _GlobalRimColor = new Color(1, 1, 1, 0);
     Color _GlobalDirtColor;
     Color _RimColor2;
     List<Vector4> _MainParam = new List<Vector4>();
     Vector4 _MainParam_0;
     Vector4 _MainParam_1;
     List<Vector4> _HighParam1 = new List<Vector4>();
-    Vector4 _HighParam1_0;
-    Vector4 _HighParam1_1;
+    Vector4 _HighParam1_0 = new Vector4(0, 0, 0, 1);
+    Vector4 _HighParam1_1 = new Vector4(0, 0, 0, 1);
     Vector4 _HighParam1_2;
     List<Vector4> _HighParam2 = new List<Vector4>();
-    Vector4 _HighParam2_0;
-    Vector4 _HighParam2_1;
+    Vector4 _HighParam2_0 = new Vector4(0, 0, 0, 1);
+    Vector4 _HighParam2_1 = new Vector4(0, 0, 0, 1);
 
     List<Vector4> _ColorArray = new List<Vector4>();
     Vector4 _ColorArray_0;

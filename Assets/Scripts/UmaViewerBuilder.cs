@@ -581,7 +581,6 @@ public class UmaViewerBuilder : MonoBehaviour
                     }
                     else
                     {
-                        m.shader = Shader.Find("Nars/UmaMusume/Body");
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
@@ -643,20 +642,6 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
             }
         }
-        else
-        {
-
-            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
-            {
-                foreach (Material m in r.sharedMaterials)
-                {
-                    if (!m.shader.name.Contains("Mini"))
-                    {
-                        m.shader = Shader.Find("Nars/UmaMusume/Body");
-                    }
-                }
-            }
-        }
     }
 
     private void LoadHead(GameObject go)
@@ -698,30 +683,16 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     switch (m.shader.name)
                     {
-                        case "Gallop/3D/Chara/MultiplyCheek":
-                            m.CopyPropertiesFromMaterial(TransMaterialCharas);
+                        case "Gallop/3D/Chara/ToonFace/TSER":
+                            m.SetFloat("_CylinderBlend", 0.5f);
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
-                        case "Nars/UmaMusume/Eyes":
-                            m.shader = Shader.Find("Nars/UmaMusume/Eyes");
-                            foreach (var tex in m.GetTexturePropertyNames())
-                            {
-                                if (m.GetTexture(tex) != null)
-                                {
-                                    m.GetTexture(tex).wrapMode = TextureWrapMode.Repeat;
-                                }
-                            }
-                            break;
-                        case "Gallop/3D/Chara/ToonFace/TSER":
-                        case "Nars/UmaMusume/Face":
-                            m.shader = Shader.Find("Nars/UmaMusume/Face");
+                            m.SetFloat("_CylinderBlend", 0.5f);
                             break;
                         case "Gallop/3D/Chara/ToonHair/TSER":
-                            m.shader = Shader.Find("Nars/UmaMusume/Body");
+                            m.SetFloat("_CylinderBlend", 0.5f);
                             break;
-                        case "Gallop/3D/Chara/ToonHair/TSEREm":
-                            m.shader = Shader.Find("Nars/UmaMusume/Body");
-                            break;
+
                         default:
                             Debug.Log(m.shader.name);
                             // m.shader = Shader.Find("Nars/UmaMusume/Body");
@@ -747,7 +718,6 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             foreach (Material m in r.sharedMaterials)
             {
-                m.shader = Shader.Find("Nars/UmaMusume/Body");
                 m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
                 m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
                 m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("base")));
