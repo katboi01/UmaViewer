@@ -413,17 +413,22 @@ public class UmaViewerBuilder : MonoBehaviour
         foreach (Wave wave in awbReader.Waves)
         {
             var stream = new UmaWaveStream(awbReader, wave.WaveId);
-            MemoryStream outputStream = new MemoryStream();
-            WaveFileWriter.WriteWavFileToStream(outputStream, stream);
-            WAV wav = new WAV(outputStream.ToArray());
-            AudioClip clip = AudioClip.Create(Path.GetFileName(awb.Name).Replace(".awb", wave.WaveId.ToString()), wav.SampleCount, wav.ChannelCount, wav.Frequency, false);
-            clip.SetData(wav.ChannelCount > 1 ? wav.StereoChannel : wav.LeftChannel, 0);
-            clips.Add(clip);
-            outputStream.Dispose();
-        }
+            var sampleProvider = stream.ToSampleProvider();
 
-        awbReader.Dispose();
-        awbFile.Dispose();
+            int channels = stream.WaveFormat.Channels;
+            int bytesPerSample =  stream.WaveFormat.BitsPerSample / 8;
+            int sampleRate = stream.WaveFormat.SampleRate;
+
+            AudioClip clip = AudioClip.Create(
+                Path.GetFileName(awb.Name).Replace(".awb", wave.WaveId.ToString()),
+                (int)(stream.Length / channels / bytesPerSample),
+                channels,
+                sampleRate,
+                true,
+                data => sampleProvider.Read(data, 0, data.Length),
+                position => stream.Position = position * channels * bytesPerSample);
+            clips.Add(clip);
+        }
 
         return clips;
     }
