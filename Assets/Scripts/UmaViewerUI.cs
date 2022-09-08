@@ -427,55 +427,53 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public void AudioPause()
     {
-        if (Builder.CurrentAudioSource)
+        if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource source = Builder.CurrentAudioSource;
-            if (source.isPlaying)
+            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            foreach (AudioSource source in Builder.CurrentAudioSources)
             {
-                source.Pause();
-                if (Builder.CurrentBGAudioSource)
-                    Builder.CurrentBGAudioSource.Pause();
-            }
-            else if(source.clip)
-            {
-                source.Play();
-                if (Builder.CurrentBGAudioSource)
-                    Builder.CurrentBGAudioSource.Play();
-            }
-            else
-            {
-                source.Stop();
-                if (Builder.CurrentBGAudioSource)
-                    Builder.CurrentBGAudioSource.Stop();
+                if (MianSource.isPlaying)
+                {
+                    source.Pause();
+                }
+                else if (MianSource.clip)
+                {
+                    source.Play();
+                }
+                else
+                {
+                    MianSource.Stop();
+                }
             }
         }
     }
 
     public void AudioProgressChange(float val)
     {
-        if (Builder.CurrentAudioSource)
+        if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource source = Builder.CurrentAudioSource;
-            if (Builder.CurrentAudioSource.clip)
+            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            foreach (AudioSource source in Builder.CurrentAudioSources)
             {
-                source.time = source.clip.length * val;
-
-                if (Builder.CurrentBGAudioSource)
-                    Builder.CurrentBGAudioSource.time = source.clip.length * val;
+                if (source.clip)
+                {
+                    source.time = source.clip.length * val;
+                }
             }
+            
         }
     }
 
     private void Update()
     {
-        if (Builder.CurrentAudioSource)
+        if (Builder.CurrentAudioSources.Count > 0)
         {
-            AudioSource source = Builder.CurrentAudioSource;
-            if (Builder.CurrentAudioSource.clip)
+            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            if (MianSource.clip)
             {
-                TitleText.text = source.clip.name;
-                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(source.time), ToTimeFormat(source.clip.length));
-                AudioSlider.SetValueWithoutNotify(source.time/ source.clip.length);
+                TitleText.text = MianSource.clip.name;
+                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
+                AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
             }
         }
     }

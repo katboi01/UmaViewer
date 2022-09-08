@@ -27,8 +27,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentLiveContainer;
     public UmaContainer CurrentOtherContainer;
 
-    public AudioSource CurrentAudioSource;
-    public AudioSource CurrentBGAudioSource;
+    public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
 
     public AnimatorOverrideController OverrideController;
 
@@ -356,63 +355,77 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
-    public void LoadLiveSound(int songid,UmaDatabaseEntry SongAwb)
+    public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
-        if (CurrentAudioSource)
+        if (CurrentAudioSources.Count > 0)
         {
-            Destroy(CurrentAudioSource.gameObject);
+            var tmp = CurrentAudioSources[0];
+            CurrentAudioSources.Clear();
+            Destroy(tmp.gameObject);
             UI.ResetPlayer();
         }
 
-        
-        AudioClip clip = LoadAudio(SongAwb);
-        if (clip != null)
+
+        foreach (AudioClip clip in LoadAudio(SongAwb))
         {
-            CurrentAudioSource = new GameObject("SoundController").AddComponent<AudioSource>();
-            CurrentAudioSource.clip = clip;
-            CurrentAudioSource.Play();
+            AddAudioSource(clip);
         }
 
         string nameVar = $"snd_bgm_live_{songid}_oke";
         UmaDatabaseEntry BGawb = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
         if (BGawb != null)
         {
-            AudioClip BGclip = LoadAudio(BGawb);
-            if (BGclip)
+            var BGclip = LoadAudio(BGawb);
+            if (BGclip.Count>0)
             {
-                CurrentBGAudioSource = CurrentAudioSource.gameObject.AddComponent<AudioSource>();
-                CurrentBGAudioSource.clip = BGclip;
-                CurrentBGAudioSource.Play();
+                AddAudioSource(BGclip[0]);
             }
         }
-        
-        
     }
 
-    public AudioClip LoadAudio(UmaDatabaseEntry awb)
+    private void AddAudioSource(AudioClip clip)
     {
-        UmaViewerUI.Instance.LoadedAssetsAdd(awb);
+        AudioSource source;
+        if (CurrentAudioSources.Count > 0)
+        {
 
+            if (Mathf.Abs(CurrentAudioSources[0].clip.length - clip.length) > 3) return;
+            source = CurrentAudioSources[0].gameObject.AddComponent<AudioSource>();
+        }
+        else
+        {
+            source = new GameObject("SoundController").AddComponent<AudioSource>();
+        }
+        CurrentAudioSources.Add(source);
+        source.clip = clip;
+        source.Play();
+    }
+
+    public List<AudioClip> LoadAudio(UmaDatabaseEntry awb)
+    {
+        List<AudioClip> clips = new List<AudioClip>();
+        UmaViewerUI.Instance.LoadedAssetsAdd(awb);
         string awbPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{awb.Url.Substring(0, 2)}\\{awb.Url}";
-        if (!File.Exists(awbPath)) return null;
+        if (!File.Exists(awbPath)) return clips;
 
         FileStream awbFile = File.OpenRead(awbPath);
         AwbReader awbReader = new AwbReader(awbFile);
-        
-
-        var stream = new UmaWaveStream(awbReader, 0);
-        MemoryStream outputStream = new MemoryStream();
-        WaveFileWriter.WriteWavFileToStream(outputStream, stream);
-
-        WAV wav = new WAV(outputStream.ToArray());
-        AudioClip clip = AudioClip.Create(Path.GetFileName(awb.Name).Replace(".awb", ""),wav.SampleCount,wav.ChannelCount,wav.Frequency,false);
-        clip.SetData(wav.ChannelCount > 1 ? wav.StereoChannel : wav.LeftChannel, 0);
+        foreach (Wave wave in awbReader.Waves)
+        {
+            var stream = new UmaWaveStream(awbReader, wave.WaveId);
+            MemoryStream outputStream = new MemoryStream();
+            WaveFileWriter.WriteWavFileToStream(outputStream, stream);
+            WAV wav = new WAV(outputStream.ToArray());
+            AudioClip clip = AudioClip.Create(Path.GetFileName(awb.Name).Replace(".awb", wave.WaveId.ToString()), wav.SampleCount, wav.ChannelCount, wav.Frequency, false);
+            clip.SetData(wav.ChannelCount > 1 ? wav.StereoChannel : wav.LeftChannel, 0);
+            clips.Add(clip);
+            outputStream.Dispose();
+        }
 
         awbReader.Dispose();
         awbFile.Dispose();
-        outputStream.Dispose();
 
-        return clip;
+        return clips;
     }
 
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
