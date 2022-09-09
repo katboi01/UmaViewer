@@ -33,7 +33,7 @@ public class UmaViewerMain : MonoBehaviour
             AndroidJavaObject activity = new AndroidJavaObject("com.Katboi01.UmaViewer.MainActivity");
             activity.Call("GetRoot");
         }
-        Debug.LogError(1605 + " " + Directory.GetDirectories("/data/data/jp.co.cygames.umamusume"));
+
         Application.targetFrameRate = -1;
         Instance = this;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
