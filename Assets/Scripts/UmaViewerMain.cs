@@ -28,12 +28,6 @@ public class UmaViewerMain : MonoBehaviour
     }
     private void Awake()
     {
-        if(Application.platform == RuntimePlatform.Android)
-        {
-            AndroidJavaObject activity = new AndroidJavaObject("com.Katboi01.UmaViewer.MainActivity");
-            activity.Call("GetRoot");
-        }
-
         Application.targetFrameRate = -1;
         Instance = this;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
