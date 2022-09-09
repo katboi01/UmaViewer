@@ -57,6 +57,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
 
     void setGlobal()
     {
+        
         //Color
         Shader.SetGlobalColor("_GlobalToonColor", _GlobalToonColor);
         Shader.SetGlobalColor("_Global_FogColor", _Global_FogColor);

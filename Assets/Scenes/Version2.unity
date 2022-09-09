@@ -7178,8 +7178,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1564959568}
-        m_TargetAssemblyTypeName: UmaViewerBuilder, umamusume
+      - m_Target: {fileID: 1564959567}
+        m_TargetAssemblyTypeName: UmaViewerUI, umamusume
         m_MethodName: SetCriWare
         m_Mode: 6
         m_Arguments:
@@ -10278,8 +10278,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1564959568}
-        m_TargetAssemblyTypeName: UmaViewerBuilder, umamusume
+      - m_Target: {fileID: 1564959567}
+        m_TargetAssemblyTypeName: UmaViewerUI, umamusume
         m_MethodName: SetCriWare
         m_Mode: 6
         m_Arguments:
@@ -15186,6 +15186,7 @@ MonoBehaviour:
   LoadedAssetsPanel: {fileID: 2126459761}
   UIColor1: {r: 1, g: 1, b: 1, a: 0.39215687}
   UIColor2: {r: 1, g: 1, b: 1, a: 1}
+  isCirware: 0
 --- !u!114 &1564959568
 MonoBehaviour:
   m_ObjectHideFlags: 0

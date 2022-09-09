@@ -1,4 +1,5 @@
-﻿using CriWareFormats;
+﻿using CriWare;
+using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
@@ -29,8 +30,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
-
-    public bool isCirware = false;
 
     public AnimatorOverrideController OverrideController;
 
@@ -358,11 +357,49 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
-    public void SetCriWare(bool value)
+    //Use CriWare Library
+    public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
     {
-        isCirware = value;
+        //清理
+        if (CurrentAudioSources.Count > 0)
+        {
+            var tmp = CurrentAudioSources[0];
+            CurrentAudioSources.Clear();
+            Destroy(tmp.gameObject);
+            UI.ResetAudioPlayer();
+        }
+
+        //获取Acb文件和Awb文件的路径
+        string nameVar = SongAwb.Name.Split('.')[0].Split('/').Last();
+
+        //使用Live的Bgm
+        nameVar = $"snd_bgm_live_{songid}_oke";
+
+        LoadSound Loader = (LoadSound)ScriptableObject.CreateInstance("LoadSound");
+        LoadSound.UmaSoundInfo soundInfo = Loader.getSoundPath(nameVar);
+
+        //音频组件添加路径，载入音频
+        CriAtom.AddCueSheet(nameVar, soundInfo.acbPath, soundInfo.awbPath);
+
+        //获得当前音频信息
+        CriAtomEx.CueInfo[] cueInfoList;
+        List<string> cueNameList = new List<string>();
+        cueInfoList = CriAtom.GetAcb(nameVar).GetCueInfoList();
+        foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
+        {
+            cueNameList.Add(cueInfo.name);
+        }
+
+        //创建播放器
+        CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
+        source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
+        source.cueSheet = nameVar;
+
+        //播放
+        source.Play(cueNameList[0]);
     }
 
+    //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
         if (CurrentAudioSources.Count > 0)
@@ -822,7 +859,7 @@ public class UmaViewerBuilder : MonoBehaviour
         UI.LoadedAssetsClear();
     }
 
-    private static string GetABPath(UmaDatabaseEntry entry)
+    public static string GetABPath(UmaDatabaseEntry entry)
     {
         return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
     }

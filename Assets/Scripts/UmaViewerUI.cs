@@ -55,6 +55,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public Color UIColor1, UIColor2;
 
+    public bool isCirware = false;
+
     private void Awake()
     {
         Instance = this;
@@ -268,6 +270,12 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         }
     }
 
+
+    public void SetCriWare(bool value)
+    {
+        isCirware = value;
+    }
+
     void ListLiveSounds(int songid)
     {
         for (int i = LiveCharaSoundList.content.childCount - 1; i >= 0; i--)
@@ -283,7 +291,14 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             container.Name.text = name;
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
-                Builder.LoadLiveSound(songid, entry);
+                if (isCirware)
+                {
+                    Builder.LoadLiveSoundCri(songid, entry);
+                }
+                else
+                {
+                    Builder.LoadLiveSound(songid, entry);
+                }
             });
         }
 
