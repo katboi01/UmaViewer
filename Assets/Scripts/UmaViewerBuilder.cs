@@ -30,6 +30,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
+    public bool isCirware = false;
+
     public AnimatorOverrideController OverrideController;
 
 
@@ -356,6 +358,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
+    public void SetCriWare(bool value)
+    {
+        isCirware = value;
+    }
+
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
         if (CurrentAudioSources.Count > 0)
@@ -447,9 +454,18 @@ public class UmaViewerBuilder : MonoBehaviour
             string filePath = GetABPath(lyricsAsset);
             if (File.Exists(filePath))
             {
-                UI.LoadedAssetsAdd(lyricsAsset);
-                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
-                Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                AssetBundle bundle;
+                if (Main.LoadedBundles.ContainsKey(lyricsAsset.Name))
+                {
+                    bundle = Main.LoadedBundles[lyricsAsset.Name];
+                }
+                else
+                {
+                    UI.LoadedAssetsAdd(lyricsAsset);
+                    bundle = AssetBundle.LoadFromFile(filePath);
+                    Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                }
+               
                 TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
                 string[] lines = asset.text.Split("\n"[0]);
                 for (int i = 1; i < lines.Length; i++) 
