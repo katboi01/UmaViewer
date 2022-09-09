@@ -28,6 +28,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentOtherContainer;
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
+    public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
     public AnimatorOverrideController OverrideController;
 
@@ -381,20 +382,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        string lyricsVar = $"live/musicscores/m{songid}/m{songid}_lyrics";
-        UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar));
-        if(lyricsAsset != null)
-        {
-            string filePath = GetABPath(lyricsAsset);
-            if (File.Exists(filePath))
-            {
-                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
-                Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
-                UI.LoadedAssetsAdd(lyricsAsset);
-                TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileName(lyricsVar));
-                Debug.Log(asset.text);
-            }
-        }
+        LoadLiveLyrics(songid);
     }
 
     private void AddAudioSource(AudioClip clip)
@@ -435,7 +423,7 @@ public class UmaViewerBuilder : MonoBehaviour
             int sampleRate = stream.WaveFormat.SampleRate;
 
             AudioClip clip = AudioClip.Create(
-                Path.GetFileName(awb.Name).Replace(".awb", wave.WaveId.ToString()),
+                Path.GetFileNameWithoutExtension(awb.Name)+"_"+wave.WaveId.ToString(),
                 (int)(stream.Length / channels / bytesPerSample),
                 channels,
                 sampleRate,
@@ -447,8 +435,37 @@ public class UmaViewerBuilder : MonoBehaviour
 
         return clips;
     }
-   
 
+    public void LoadLiveLyrics(int songid)
+    {
+        if (CurrentLyrics.Count > 0) CurrentLyrics.Clear();
+
+        string lyricsVar = $"live/musicscores/m{songid}/m{songid}_lyrics";
+        UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(lyricsVar));
+        if (lyricsAsset != null)
+        {
+            string filePath = GetABPath(lyricsAsset);
+            if (File.Exists(filePath))
+            {
+                UI.LoadedAssetsAdd(lyricsAsset);
+                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
+                string[] lines = asset.text.Split("\n"[0]);
+                for (int i = 1; i < lines.Length; i++) 
+                {
+                    string[] words = lines[i].Split(',');
+                    UmaLyricsData lyricsData = new UmaLyricsData()
+                    {
+                        time = float.Parse(words[0])/1000,
+                        text = words[1].Replace("[COMMA]","，")
+                    };
+                    CurrentLyrics.Add(lyricsData);
+                }
+            }
+        }
+    }
+   
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -504,7 +521,6 @@ public class UmaViewerBuilder : MonoBehaviour
                     bbb.wrapMode = WrapMode.Loop;
                     CurrentUMAContainer.OverrideController["clip"] = bbb;
                     CurrentUMAContainer.UmaAnimator.Play("clip", 0, 0);
-
                 }
 
                 if (!CurrentLiveContainer)

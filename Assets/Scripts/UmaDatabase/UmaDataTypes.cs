@@ -17,6 +17,12 @@ public class UmaCharaData
     public string tail_model_id;
 }
 
+public class UmaLyricsData
+{
+    public float time;
+    public string text;
+}
+
 public enum UmaFileType
 {
     _3d_cutt,

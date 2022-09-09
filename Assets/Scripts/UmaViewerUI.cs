@@ -39,6 +39,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public Button AudioPlayButton;
     public TextMeshProUGUI TitleText;
     public TextMeshProUGUI ProgressText;
+    public Text LyricsText;
 
     //settings
     public TMP_InputField SSWidth, SSHeight;
@@ -277,8 +278,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         foreach (var entry in Main.AbList.Where(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb")))
         {
             var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
-            string[] split = entry.Name.Split('_');
-            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1].Replace(".awb","");
+            string[] split = Path.GetFileNameWithoutExtension(entry.Name).Split('_');
+            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1];
             container.Name.text = name;
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
@@ -475,6 +476,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 TitleText.text = MianSource.clip.name;
                 ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
                 AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
+                LyricsText.text =  GetCurrentLyrics(MianSource.time);
             }
         }
     }
@@ -484,6 +486,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         TitleText.text = "No Audio";
         ProgressText.text = "00:00:00 / 00:00:00";
         AudioSlider.SetValueWithoutNotify(0);
+        LyricsText.text = "";
     }
 
     public static string ToTimeFormat(float time)
@@ -494,5 +497,17 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         int minute = seconds % 3600 / 60;
         seconds = seconds % 3600 % 60;
         return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
+    }
+
+    public string GetCurrentLyrics(float time)
+    {
+        for(int i = Builder.CurrentLyrics.Count-1; i >=0; i--)
+        {
+            if(Builder.CurrentLyrics[i].time< time)
+            {
+                return Builder.CurrentLyrics[i].text;
+            }
+        }
+        return "";
     }
 }
