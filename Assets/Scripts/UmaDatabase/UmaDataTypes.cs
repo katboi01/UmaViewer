@@ -51,4 +51,7 @@ public enum UmaFileType
     storyevent,
     supportcard,
     uianimation,
+    transferevent,
+    teambuilding,
+    challengematch
 }

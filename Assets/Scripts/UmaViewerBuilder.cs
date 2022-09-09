@@ -380,6 +380,21 @@ public class UmaViewerBuilder : MonoBehaviour
                 AddAudioSource(BGclip[0]);
             }
         }
+
+        string lyricsVar = $"live/musicscores/m{songid}/m{songid}_lyrics";
+        UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar));
+        if(lyricsAsset != null)
+        {
+            string filePath = GetABPath(lyricsAsset);
+            if (File.Exists(filePath))
+            {
+                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                UI.LoadedAssetsAdd(lyricsAsset);
+                TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileName(lyricsVar));
+                Debug.Log(asset.text);
+            }
+        }
     }
 
     private void AddAudioSource(AudioClip clip)
@@ -404,7 +419,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         List<AudioClip> clips = new List<AudioClip>();
         UmaViewerUI.Instance.LoadedAssetsAdd(awb);
-        string awbPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{awb.Url.Substring(0, 2)}\\{awb.Url}";
+        string awbPath = GetABPath(awb); ;
         if (!File.Exists(awbPath)) return clips;
 
         FileStream awbFile = File.OpenRead(awbPath);
@@ -432,6 +447,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         return clips;
     }
+   
 
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
@@ -450,7 +466,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
 
-        string filePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        string filePath = GetABPath(entry);
         if (File.Exists(filePath))
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
@@ -748,7 +764,6 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
         var entry = Main.LoadedBundles.FirstOrDefault(b => b.Value == bundle);
@@ -773,5 +788,10 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         Main.LoadedBundles.Clear();
         UI.LoadedAssetsClear();
+    }
+
+    private static string GetABPath(UmaDatabaseEntry entry)
+    {
+        return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
     }
 }
