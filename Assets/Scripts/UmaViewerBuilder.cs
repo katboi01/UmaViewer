@@ -1,16 +1,13 @@
 ﻿using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UmaMusumeAudio;
-using UnityEditor;
 using UnityEngine;
 
 public class UmaViewerBuilder : MonoBehaviour
@@ -808,6 +805,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private static string GetABPath(UmaDatabaseEntry entry)
     {
+        if(Application.platform == RuntimePlatform.Android)
+        {
+            return $"/data/data/jp.co.cygames.umamusume/files/dat/{entry.Url.Substring(0, 2)}/{entry.Url}";
+        }
+
         return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
     }
 }
