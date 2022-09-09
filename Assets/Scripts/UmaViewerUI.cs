@@ -429,20 +429,21 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            AudioSource MainSource = Builder.CurrentAudioSources[0];
+            var state = MainSource.isPlaying;
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
-                if (MianSource.isPlaying)
+                if (state)
                 {
                     source.Pause();
                 }
-                else if (MianSource.clip)
+                else if (source.clip)
                 {
                     source.Play();
                 }
                 else
                 {
-                    MianSource.Stop();
+                    source.Stop();
                 }
             }
         }
@@ -452,7 +453,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            AudioSource MiaiSource = Builder.CurrentAudioSources[0];
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
                 if (source.clip)
@@ -478,7 +479,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         }
     }
 
-    public void ResetPlayer()
+    public void ResetAudioPlayer()
     {
         TitleText.text = "No Audio";
         ProgressText.text = "00:00:00 / 00:00:00";

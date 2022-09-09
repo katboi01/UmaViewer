@@ -362,9 +362,8 @@ public class UmaViewerBuilder : MonoBehaviour
             var tmp = CurrentAudioSources[0];
             CurrentAudioSources.Clear();
             Destroy(tmp.gameObject);
-            UI.ResetPlayer();
+            UI.ResetAudioPlayer();
         }
-
 
         foreach (AudioClip clip in LoadAudio(SongAwb))
         {
@@ -410,6 +409,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         FileStream awbFile = File.OpenRead(awbPath);
         AwbReader awbReader = new AwbReader(awbFile);
+
         foreach (Wave wave in awbReader.Waves)
         {
             var stream = new UmaWaveStream(awbReader, wave.WaveId);
