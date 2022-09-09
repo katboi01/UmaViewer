@@ -1,4 +1,5 @@
-﻿using CriWareFormats;
+﻿using CriWare;
+using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
 using Newtonsoft.Json.Linq;
@@ -353,6 +354,49 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
+    //Use CriWare Library
+    public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
+    {
+        //清理
+        if (CurrentAudioSources.Count > 0)
+        {
+            var tmp = CurrentAudioSources[0];
+            CurrentAudioSources.Clear();
+            Destroy(tmp.gameObject);
+            UI.ResetAudioPlayer();
+        }
+
+        //获取Acb文件和Awb文件的路径
+        string nameVar = SongAwb.Name.Split('.')[0].Split('/').Last();
+
+        //使用Live的Bgm
+        nameVar = $"snd_bgm_live_{songid}_oke";
+
+        LoadSound Loader = (LoadSound)ScriptableObject.CreateInstance("LoadSound");
+        LoadSound.UmaSoundInfo soundInfo = Loader.getSoundPath(nameVar);
+
+        //音频组件添加路径，载入音频
+        CriAtom.AddCueSheet(nameVar, soundInfo.acbPath, soundInfo.awbPath);
+
+        //获得当前音频信息
+        CriAtomEx.CueInfo[] cueInfoList;
+        List<string> cueNameList = new List<string>();
+        cueInfoList = CriAtom.GetAcb(nameVar).GetCueInfoList();
+        foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
+        {
+            cueNameList.Add(cueInfo.name);
+        }
+
+        //创建播放器
+        CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
+        source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
+        source.cueSheet = nameVar;
+
+        //播放
+        source.Play(cueNameList[0]);
+    }
+
+    //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
         if (CurrentAudioSources.Count > 0)
@@ -444,9 +488,18 @@ public class UmaViewerBuilder : MonoBehaviour
             string filePath = GetABPath(lyricsAsset);
             if (File.Exists(filePath))
             {
-                UI.LoadedAssetsAdd(lyricsAsset);
-                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
-                Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                AssetBundle bundle;
+                if (Main.LoadedBundles.ContainsKey(lyricsAsset.Name))
+                {
+                    bundle = Main.LoadedBundles[lyricsAsset.Name];
+                }
+                else
+                {
+                    UI.LoadedAssetsAdd(lyricsAsset);
+                    bundle = AssetBundle.LoadFromFile(filePath);
+                    Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                }
+               
                 TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
                 string[] lines = asset.text.Split("\n"[0]);
                 for (int i = 1; i < lines.Length; i++) 
@@ -803,7 +856,7 @@ public class UmaViewerBuilder : MonoBehaviour
         UI.LoadedAssetsClear();
     }
 
-    private static string GetABPath(UmaDatabaseEntry entry)
+    public static string GetABPath(UmaDatabaseEntry entry)
     {
         if(Application.platform == RuntimePlatform.Android)
         {
