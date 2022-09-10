@@ -344,6 +344,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadLive(int id)
     {
         var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + id));
+        if (asset == null) return;
+
         if (CurrentLiveContainer != null)
         {
             Destroy(CurrentLiveContainer.gameObject);
@@ -503,15 +505,23 @@ public class UmaViewerBuilder : MonoBehaviour
                
                 TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
                 string[] lines = asset.text.Split("\n"[0]);
+
                 for (int i = 1; i < lines.Length; i++) 
                 {
                     string[] words = lines[i].Split(',');
-                    UmaLyricsData lyricsData = new UmaLyricsData()
+                    if (words.Length > 0)
                     {
-                        time = float.Parse(words[0])/1000,
-                        text = words[1].Replace("[COMMA]","，")
-                    };
-                    CurrentLyrics.Add(lyricsData);
+                        try
+                        {
+                            UmaLyricsData lyricsData = new UmaLyricsData()
+                            {
+                                time = float.Parse(words[0]) / 1000,
+                                text = (words.Length > 1) ? words[1].Replace("[COMMA]", "，") : ""
+                            };
+                            CurrentLyrics.Add(lyricsData);
+                        }
+                        catch{}
+                    }
                 }
             }
         }

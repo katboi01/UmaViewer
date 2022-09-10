@@ -12030,7 +12030,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5800894
+  m_Size: 0.58008933
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -15204,6 +15204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94327bb2c8a0f0a418a2eb8912da68d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasScaler: {fileID: 0}
   CharactersList: {fileID: 1558324558}
   CostumeList: {fileID: 270183827}
   AnimationSetList: {fileID: 92965282}

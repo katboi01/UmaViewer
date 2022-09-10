@@ -70,7 +70,6 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public void HighlightChildImage(Transform mainObject, Image child)
     {
-        //Debug.Log("Looking for " + child.name + " in " + mainObject.name);
         foreach(var t in mainObject.GetComponentsInChildren<Image>())
         {
             if (t.transform.parent != mainObject) continue;
@@ -165,9 +164,9 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
             var CharaContainer = Instantiate(UmaContainerNoTMPPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
             CharaContainer.GetComponentInChildren<Text>().text = " " + live.MusicId + " " + live.songName;
-            var CharaimageInstance1 = container.GetComponent<Image>();
+            var CharaimageInstance1 = CharaContainer.GetComponent<Image>();
             CharaContainer.Button.onClick.AddListener(() => {
-                HighlightChildImage(LiveList.content, imageInstance1);
+                HighlightChildImage(LiveSoundList.content, CharaimageInstance1);
                 ListLiveSounds(live.MusicId);
             });
         }
