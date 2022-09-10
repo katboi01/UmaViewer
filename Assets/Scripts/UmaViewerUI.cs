@@ -77,10 +77,10 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
         LoadedAssetCount++;
-        string filePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        string filePath = UmaDatabaseController.GetABPath(entry);
         var container =  Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
         container.Name.text = Path.GetFileName(entry.Name) + "\n" + entry.Url;
-        container.Button.onClick.AddListener(() => { Process.Start("explorer.exe", "/select," + filePath);});
+        container.Button.onClick.AddListener(() => {Process.Start("explorer.exe", "/select," + filePath);});
         LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 35);
     }
 

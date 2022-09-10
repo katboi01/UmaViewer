@@ -448,7 +448,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         List<AudioClip> clips = new List<AudioClip>();
         UmaViewerUI.Instance.LoadedAssetsAdd(awb);
-        string awbPath = GetABPath(awb); ;
+        string awbPath = UmaDatabaseController.GetABPath(awb); ;
         if (!File.Exists(awbPath)) return clips;
 
         FileStream awbFile = File.OpenRead(awbPath);
@@ -485,7 +485,7 @@ public class UmaViewerBuilder : MonoBehaviour
         UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(lyricsVar));
         if (lyricsAsset != null)
         {
-            string filePath = GetABPath(lyricsAsset);
+            string filePath = UmaDatabaseController.GetABPath(lyricsAsset);
             if (File.Exists(filePath))
             {
                 AssetBundle bundle;
@@ -533,7 +533,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
 
-        string filePath = GetABPath(entry);
+        string filePath = UmaDatabaseController.GetABPath(entry);
         if (File.Exists(filePath))
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
@@ -856,13 +856,5 @@ public class UmaViewerBuilder : MonoBehaviour
         UI.LoadedAssetsClear();
     }
 
-    public static string GetABPath(UmaDatabaseEntry entry)
-    {
-        if(Application.platform == RuntimePlatform.Android)
-        {
-            return $"/data/data/jp.co.cygames.umamusume/files/dat/{entry.Url.Substring(0, 2)}/{entry.Url}";
-        }
-
-        return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-    }
+ 
 }
