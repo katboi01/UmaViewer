@@ -117,7 +117,7 @@ public class CriWareBuildPreprocessExcecutor :
 				propertyDisableUnityAudio.boolValue = false;
 			}
 		} else {
-			propertyDisableUnityAudio.boolValue = true;
+			propertyDisableUnityAudio.boolValue = false;
 		}
 
 		audioManager.ApplyModifiedProperties();
