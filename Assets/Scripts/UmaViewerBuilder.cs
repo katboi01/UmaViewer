@@ -471,6 +471,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 true,
                 data => sampleProvider.Read(data, 0, data.Length),
                 position => stream.Position = position * channels * bytesPerSample);
+
             clips.Add(clip);
         }
 
