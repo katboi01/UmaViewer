@@ -14,6 +14,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public static UmaViewerUI Instance;
     private UmaViewerMain Main => UmaViewerMain.Instance;
     private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
+    
+    public CanvasScaler canvasScaler;
 
     //normal models
     public ScrollRect CharactersList;
@@ -62,6 +64,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         Instance = this;
         AudioPlayButton.onClick.AddListener(AudioPause);
         AudioSlider.onValueChanged.AddListener(AudioProgressChange);
+        if (Application.platform == RuntimePlatform.Android)
+            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
 
     public void HighlightChildImage(Transform mainObject, Image child)
