@@ -5,7 +5,6 @@ using UnityEngine;
 public class Screenshot : MonoBehaviour
 {
     public static Screenshot Instance;
-    bool recording = false;
 
     private void Awake()
     {

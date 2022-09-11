@@ -31,11 +31,11 @@ public class UmaViewerMain : MonoBehaviour
     {
         Application.targetFrameRate = -1;
         Instance = this;
+        AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
     }
 
     IEnumerator Start()
     {
-        AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
         {
             UmaCharaData = JArray.Parse(txt);
