@@ -29,7 +29,7 @@ namespace Gallop
         
         private void Awake()
         {
-            InitializePhysics();
+            //InitializePhysics();
         }
         public void InitializePhysics()
         {
