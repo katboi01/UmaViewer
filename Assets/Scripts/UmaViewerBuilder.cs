@@ -832,11 +832,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadAnimation(AnimationClip clip)
     {
-        CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
-        var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
         bool needTransit = false;
-
         if (clip.name.EndsWith("_loop"))
         {
             var motion_s = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
@@ -847,6 +843,9 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_e);
                 RecursiveLoadAsset(motion_s);
             }
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
@@ -860,9 +859,13 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else
         {
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
+
     }
 
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
