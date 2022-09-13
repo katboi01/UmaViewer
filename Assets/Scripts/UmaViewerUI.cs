@@ -358,10 +358,14 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             Destroy(animationList.content.GetChild(i).gameObject);
         }
 
-        var filteredList = mini ?
-            Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && !a.Name.Contains($"mirror") && a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam"))
-            :
-            Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && !a.Name.Contains($"mirror") && !a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam"));
+        var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
+        && !a.Name.Contains($"mirror")
+        && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
+        && !a.Name.Contains($"facial")
+        && !a.Name.Contains($"_cam")
+        && !a.Name.EndsWith($"_s")
+        && !a.Name.EndsWith($"_e")
+        );
         
         if (umaId == -1)
         {

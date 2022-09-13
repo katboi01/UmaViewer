@@ -582,10 +582,7 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator)
                 {
-                    AnimationClip bbb = asset as AnimationClip;
-                    bbb.wrapMode = WrapMode.Loop;
-                    CurrentUMAContainer.OverrideController["clip"] = bbb;
-                    CurrentUMAContainer.UmaAnimator.Play("clip", 0, 0);
+                    LoadAnimation(asset as AnimationClip);
                 }
 
                 if (!CurrentLiveContainer)
@@ -830,6 +827,41 @@ public class UmaViewerBuilder : MonoBehaviour
                 //Shaders can be differentiated by checking m.shader.name
                 m.shader = Shader.Find("Unlit/Transparent Cutout");
             }
+        }
+    }
+
+    private void LoadAnimation(AnimationClip clip)
+    {
+        CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+        var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+        bool needTransit = false;
+
+        if (clip.name.EndsWith("_loop"))
+        {
+            var motion_s = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            var motion_e = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            needTransit = (motion_s != null && motion_e != null);
+            if (needTransit)
+            {
+                RecursiveLoadAsset(motion_e);
+                RecursiveLoadAsset(motion_s);
+            }
+            CurrentUMAContainer.OverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+        }
+        else if(clip.name.EndsWith("_S"))
+        {
+            CurrentUMAContainer.OverrideController["clip_s"] = clip;
+        }
+        else if(clip.name.EndsWith("_E"))
+        {
+            CurrentUMAContainer.OverrideController["clip_e"] = clip;
+        }
+        else
+        {
+            CurrentUMAContainer.OverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
     }
 

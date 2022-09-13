@@ -29,8 +29,9 @@ public class UmaViewerMain : MonoBehaviour
     }
     private void Awake()
     {
-        Application.targetFrameRate = -1;
         Instance = this;
+        Application.targetFrameRate = -1;
+        if (!Application.isEditor) Debug.unityLogger.logEnabled = false;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
     }
 
