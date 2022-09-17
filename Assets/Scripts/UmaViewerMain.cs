@@ -31,7 +31,6 @@ public class UmaViewerMain : MonoBehaviour
     {
         Instance = this;
         Application.targetFrameRate = -1;
-        if (!Application.isEditor) Debug.unityLogger.logEnabled = false;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
     }
 

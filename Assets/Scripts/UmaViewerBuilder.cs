@@ -843,6 +843,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_e);
                 RecursiveLoadAsset(motion_s);
             }
+
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
@@ -894,5 +895,5 @@ public class UmaViewerBuilder : MonoBehaviour
         UI.LoadedAssetsClear();
     }
 
- 
+    
 }
