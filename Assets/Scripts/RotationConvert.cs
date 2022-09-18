@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RotationConvert : MonoBehaviour
 {
-    public static Quaternion fromMaya(Vector3 euler_angle)
+    public static Vector3 fromMaya(Vector3 euler_angle)
     {
         euler_angle.x *= Mathf.Deg2Rad;
         euler_angle.y *= Mathf.Deg2Rad;
@@ -22,6 +22,11 @@ public class RotationConvert : MonoBehaviour
         float z = c * d * h - f * g * e;
         float w = c * d * e + f * g * h;
 
-        return new Quaternion(x, y, z, w);
+        Vector3 realAngle = new Quaternion(x, y, z, w).eulerAngles;
+        if (realAngle.x > 180) realAngle.x -= 360;
+        if (realAngle.y > 180) realAngle.y -= 360;
+        if (realAngle.z > 180) realAngle.z -= 360;
+
+        return realAngle;
     }
 }

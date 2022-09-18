@@ -130,7 +130,7 @@ namespace Gallop
                 {
                     trs.transform.localScale += trs._scale * morph.Weight;
                     trs.transform.localPosition += trs._position * morph.Weight;
-                    trs.transform.localEulerAngles += RotationConvert.fromMaya(trs._rotation).eulerAngles * morph.Weight;
+                    trs.transform.localEulerAngles += RotationConvert.fromMaya(trs._rotation) * morph.Weight;
                 };
             }
         }
@@ -144,7 +144,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation).eulerAngles;
+                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
                 };
             }
 
@@ -155,7 +155,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation).eulerAngles;
+                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
                 };
             }
 
@@ -166,7 +166,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation).eulerAngles;
+                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
                 };
             }
 
@@ -177,7 +177,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation).eulerAngles;
+                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
                 };
             }
 
@@ -188,7 +188,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation).eulerAngles;
+                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
                 };
             }
         }
