@@ -23,10 +23,9 @@ public class RotationConvert : MonoBehaviour
         float w = c * d * e + f * g * h;
 
         Vector3 realAngle = new Quaternion(x, y, z, w).eulerAngles;
-        if (realAngle.x > 180) realAngle.x -= 360;
-        if (realAngle.y > 180) realAngle.y -= 360;
-        if (realAngle.z > 180) realAngle.z -= 360;
-
+        realAngle.x = Mathf.Repeat(realAngle.x + 180, 360) - 180;
+        realAngle.y = Mathf.Repeat(realAngle.y + 180, 360) - 180;
+        realAngle.z = Mathf.Repeat(realAngle.z + 180 ,360) - 180;
         return realAngle;
     }
 }
