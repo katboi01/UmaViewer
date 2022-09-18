@@ -20,6 +20,8 @@ namespace Gallop
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
+        Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
+
         public FaceLoadCallBack callBack;
         public void Initialize(List<Transform> objs)
         {
@@ -37,6 +39,10 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        if (i == 0 && trs.transform)
+                        {
+                            RotationRecorder[trs.transform] = trs._rotation;
+                        }
                     }
                     if (i == 0)
                     {
@@ -62,6 +68,10 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        if(i == 0 && trs.transform)
+                        {
+                            RotationRecorder[trs.transform] = trs._rotation;
+                        }
                     }
                     if (i == 0)
                     {
@@ -87,6 +97,10 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        if (i == 0 && trs.transform)
+                        {
+                            RotationRecorder[trs.transform] = trs._rotation;
+                        }
                     }
                     if (i == 0)
                     {
@@ -121,6 +135,8 @@ namespace Gallop
             {
                 ProcessMorph(morph);
             }
+
+            applyRotation();
         }
         private void ProcessMorph(FacialMorph morph)
         {
@@ -130,7 +146,7 @@ namespace Gallop
                 {
                     trs.transform.localScale += trs._scale * morph.Weight;
                     trs.transform.localPosition += trs._position * morph.Weight;
-                    trs.transform.localEulerAngles += RotationConvert.fromMaya(trs._rotation) * morph.Weight;
+                    RotationRecorder[trs.transform] += trs._rotation * morph.Weight;
                 };
             }
         }
@@ -144,7 +160,7 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
+                    RotationRecorder[trs.transform] = trs._rotation;
                 };
             }
 
@@ -152,10 +168,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
+                    RotationRecorder[trs.transform] = trs._rotation;
                 };
             }
 
@@ -163,10 +178,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
+                    RotationRecorder[trs.transform] = trs._rotation;
                 };
             }
 
@@ -174,10 +188,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
+                    RotationRecorder[trs.transform] = trs._rotation;
                 };
             }
 
@@ -188,13 +201,25 @@ namespace Gallop
 
                     trs.transform.localPosition = trs._position;
                     trs.transform.localScale = trs._scale;
-                    trs.transform.localEulerAngles = RotationConvert.fromMaya(trs._rotation);
+                    RotationRecorder[trs.transform] = trs._rotation;
                 };
+            }
+
+            applyRotation();
+        }
+
+        //trs.transform.localEulerAngles
+
+        public void applyRotation(){
+            foreach (var trs in RotationRecorder)
+            {
+                trs.Key.localEulerAngles = RotationConvert.fromMaya(trs.Value);
             }
         }
 
 
-    }
+
+}
 
 
 
