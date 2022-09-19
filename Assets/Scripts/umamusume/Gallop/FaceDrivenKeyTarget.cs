@@ -197,7 +197,7 @@ namespace Gallop
         public void ApplyRotation(){
             foreach (var trs in RotationRecorder)
             {
-                trs.Key.localEulerAngles = RotationConvert.fromMaya(trs.Value);
+                trs.Key.localRotation = RotationConvert.fromMaya(trs.Value);
             }
         }
 
