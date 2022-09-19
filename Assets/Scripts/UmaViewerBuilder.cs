@@ -230,7 +230,6 @@ public class UmaViewerBuilder : MonoBehaviour
             var firsehead = CurrentUMAContainer.Head;
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
             CurrentUMAContainer.FaceDrivenKeyTargets = FaceDriven;
-            FaceDriven.callBack = UmaViewerUI.Instance;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
         }
 

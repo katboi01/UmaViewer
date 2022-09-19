@@ -9,7 +9,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
+public class UmaViewerUI : MonoBehaviour
 {
     public static UmaViewerUI Instance;
     private UmaViewerMain Main => UmaViewerMain.Instance;
@@ -423,11 +423,6 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public void ChangeBackgroundColor(Color color)
     {
         Camera.main.backgroundColor = color;
-    }
-
-    public void CallBack(FaceDrivenKeyTarget target)
-    {
-        LoadFacialPanels(target);
     }
 
     public void SetDynamicBoneEnable(bool isOn)

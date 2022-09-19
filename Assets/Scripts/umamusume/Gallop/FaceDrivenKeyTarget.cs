@@ -21,8 +21,6 @@ namespace Gallop
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
         Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
-
-        public FaceLoadCallBack callBack;
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
@@ -39,10 +37,6 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
-                        if (i == 0 && trs.transform)
-                        {
-                            RotationRecorder[trs.transform] = trs._rotation;
-                        }
                     }
                     if (i == 0)
                     {
@@ -68,10 +62,6 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
-                        if(i == 0 && trs.transform)
-                        {
-                            RotationRecorder[trs.transform] = trs._rotation;
-                        }
                     }
                     if (i == 0)
                     {
@@ -97,10 +87,6 @@ namespace Gallop
                     foreach (TrsArray trs in morph.trsArray)
                     {
                         trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
-                        if (i == 0 && trs.transform)
-                        {
-                            RotationRecorder[trs.transform] = trs._rotation;
-                        }
                     }
                     if (i == 0)
                     {
@@ -114,7 +100,7 @@ namespace Gallop
             }
             FacialReset();
             MouthMorphs[3].Weight = 1;
-            if (callBack != null) { callBack.CallBack(this); }
+            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.LoadFacialPanels(this); }
         }
         
         public void ChangeMorph()
@@ -136,7 +122,7 @@ namespace Gallop
                 ProcessMorph(morph);
             }
 
-            applyRotation();
+            ApplyRotation();
         }
         private void ProcessMorph(FacialMorph morph)
         {
@@ -205,12 +191,10 @@ namespace Gallop
                 };
             }
 
-            applyRotation();
+            ApplyRotation();
         }
 
-        //trs.transform.localEulerAngles
-
-        public void applyRotation(){
+        public void ApplyRotation(){
             foreach (var trs in RotationRecorder)
             {
                 trs.Key.localEulerAngles = RotationConvert.fromMaya(trs.Value);
