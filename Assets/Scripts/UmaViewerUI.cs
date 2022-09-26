@@ -381,6 +381,8 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
         else
+        {
+            //Common animations
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}")))
             {
                 var entryInstance = entry;
@@ -391,6 +393,19 @@ public class UmaViewerUI : MonoBehaviour
                     Builder.LoadAsset(entryInstance);
                 });
             }
+
+            //Skill animations
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"card/body/crd{umaId}")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name.text = container.name = Path.GetFileName(entry.Name);
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
+                    Builder.LoadAsset(entryInstance);
+                });
+            }
+        }
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
