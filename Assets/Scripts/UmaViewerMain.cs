@@ -61,18 +61,32 @@ public class UmaViewerMain : MonoBehaviour
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicLiveDataInfo", txt =>
         {
             UmaLiveData = JArray.Parse(txt);
-            foreach (var item in UmaLiveData)
+            var asset = AbList.FirstOrDefault(a => a.Name.Equals("livesettings"));
+            if(asset != null)
             {
-                if (!Lives.Where(c => c.MusicId == (int)item["musicId"]).Any())
+                string filePath = UmaDatabaseController.GetABPath(asset);
+                if (File.Exists(filePath))
                 {
-                    Lives.Add(new LiveEntry()
+                    AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                    foreach (var item in UmaLiveData)
                     {
-                        MusicId = (int)item["musicId"],
-                        songName = (string)item["songName"]
-                    });
+                        if (!Lives.Where(c => c.MusicId == (int)item["musicId"]).Any())
+                        {
+                            if (bundle.Contains((string)item["musicId"]))
+                            {
+                                TextAsset liveData = bundle.LoadAsset<TextAsset>((string)item["musicId"]);
+
+                                Lives.Add(new LiveEntry(liveData.text)
+                                {
+                                    MusicId = (int)item["musicId"],
+                                    songName = (string)item["songName"]
+                                });
+                            }
+                        }
+                    }
+                    UI.LoadLivePanels();
                 }
             }
-            UI.LoadLivePanels();
         });
     }
 
@@ -93,5 +107,18 @@ public class UmaViewerMain : MonoBehaviour
     {
         public int MusicId;
         public string songName;
+        public string BackGroundId;
+        public List<string[]> LiveSettings = new List<string[]>();
+
+        public LiveEntry(string data)
+        {
+            string[] lines = data.Split("\n"[0]);
+            for (int i = 1; i < lines.Length; i++)
+            {
+                LiveSettings.Add(lines[i].Split(','));
+            }
+            BackGroundId = LiveSettings[1][2];
+        }
     }
+    
 }

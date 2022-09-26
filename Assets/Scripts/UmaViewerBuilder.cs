@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
+using static UmaViewerMain;
 
 public class UmaViewerBuilder : MonoBehaviour
 {
@@ -344,10 +345,11 @@ public class UmaViewerBuilder : MonoBehaviour
         RecursiveLoadAsset(entry);
     }
 
-    public void LoadLive(int id)
+    public void LoadLive(LiveEntry live)
     {
-        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + id));
-        if (asset == null) return;
+        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + live.MusicId));
+        var BGasset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"pfb_env_live{live.BackGroundId}_controller000"));
+        if (asset == null|| BGasset == null) return;
 
         if (CurrentLiveContainer != null)
         {
@@ -356,6 +358,7 @@ public class UmaViewerBuilder : MonoBehaviour
         UnloadAllBundle();
         CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
+        RecursiveLoadAsset(BGasset);
 
     }
 
@@ -818,7 +821,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadProp(GameObject go)
     {
-        var prop = Instantiate(go, (go.name.Contains("Cutt_son") ? CurrentLiveContainer : CurrentOtherContainer).transform);
+        var container = (go.name.Contains("Cutt_son") || go.name.Contains("pfb_env_live")) ? CurrentLiveContainer : CurrentOtherContainer;
+        var prop = Instantiate(go, container.transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)

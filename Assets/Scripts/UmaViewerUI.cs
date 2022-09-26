@@ -159,7 +159,7 @@ public class UmaViewerUI : MonoBehaviour
             var imageInstance1 = container.GetComponent<Image>();
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveList.content, imageInstance1);
-                Builder.LoadLive(live.MusicId);
+                Builder.LoadLive(live);
             });
 
             var CharaContainer = Instantiate(UmaContainerNoTMPPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
