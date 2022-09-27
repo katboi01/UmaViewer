@@ -45,8 +45,10 @@ public class UmaViewerUI : MonoBehaviour
 
     //animations
     public Slider AnimationSlider;
+    public Slider AnimationSpeedSlider;
     public Button AnimationPlayButton;
-    public TextMeshProUGUI AnimationText;
+    public TextMeshProUGUI AnimationTitleText;
+    public TextMeshProUGUI AnimationSpeedText;
     public TextMeshProUGUI AnimationProgressText;
 
     //settings
@@ -73,6 +75,7 @@ public class UmaViewerUI : MonoBehaviour
         AudioSlider.onValueChanged.AddListener(AudioProgressChange);
         AnimationPlayButton.onClick.AddListener(AnimationPause);
         AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
+        AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
         if (Application.platform == RuntimePlatform.Android)
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
@@ -400,6 +403,7 @@ public class UmaViewerUI : MonoBehaviour
                 container.Button.onClick.AddListener(() => {
                     HighlightChildImage(animationList.content, container.GetComponent<Image>());
                     Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
                 });
             }
         }
@@ -414,6 +418,7 @@ public class UmaViewerUI : MonoBehaviour
                 container.Button.onClick.AddListener(() => {
                     HighlightChildImage(animationList.content, container.GetComponent<Image>());
                     Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
                 });
             }
 
@@ -426,9 +431,17 @@ public class UmaViewerUI : MonoBehaviour
                 container.Button.onClick.AddListener(() => {
                     HighlightChildImage(animationList.content, container.GetComponent<Image>());
                     Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
                 });
             }
         }
+    }
+
+    public void LoadedAnimation()
+    {
+        AnimationSlider.value = 0f;
+        // Reset settings by Panel
+        Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -526,18 +539,20 @@ public class UmaViewerUI : MonoBehaviour
         if (Builder.OverrideController.animationClips.Length > 0)
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
-            var state = animator.speed == 1;
+            var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
+            var state = animator.speed > 0f;
             if (state)
             {
                 animator.speed = 0;
             }
-            else if (animator.isInitialized)
+            else if (AnimeState.normalizedTime < 1f)
             {
-                animator.speed = 1;
+                animator.speed = AnimationSpeedSlider.value;
             }
             else
             {
-                animator.speed = 0;
+                animator.speed = AnimationSpeedSlider.value;
+                animator.Play(0, -1, 0);
             }
             
         }
@@ -550,7 +565,19 @@ public class UmaViewerUI : MonoBehaviour
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
             Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
-            animator.Play(0, -1, val * AnimeClip.length);
+            animator.Play(0, -1, val);
+
+            AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(val * AnimeClip.length), ToTimeFormat(AnimeClip.length));
+        }
+    }
+
+    public void AnimationSpeedChange(float val)
+    {
+        var animator = Builder.CurrentUMAContainer.UmaAnimator;
+        if (animator != null)
+        {
+            Builder.CurrentUMAContainer.UmaAnimator.speed = val;
+            AnimationSpeedText.text = $"Animation Speed: {val}";
         }
     }
 
@@ -568,15 +595,15 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
 
-        if (Builder.CurrentUMAContainer.OverrideController["clip_2"] != null && Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
         {
             var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-            if (AnimeClip)
+            if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
             {
-                AnimationText.text = AnimeClip.name;
-                AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(AnimeClip.length), ToTimeFormat(AnimeClip.length));
-                AnimationSlider.SetValueWithoutNotify(AnimeState.normalizedTime * AnimeClip.length);
+                AnimationTitleText.text = AnimeClip.name;
+                AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(AnimeState.normalizedTime * AnimeClip.length), ToTimeFormat(AnimeClip.length));
+                AnimationSlider.SetValueWithoutNotify(AnimeState.normalizedTime);
             }
         }
     }
