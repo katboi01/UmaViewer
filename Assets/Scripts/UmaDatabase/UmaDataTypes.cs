@@ -21,6 +21,7 @@ public class UmaHeadData
 {
     public int id;
     public string costumeId;
+    public int tailId;
 }
 
 public class UmaLyricsData
