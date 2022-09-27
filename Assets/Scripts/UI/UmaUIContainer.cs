@@ -8,5 +8,5 @@ public class UmaUIContainer : MonoBehaviour
     public TMPro.TextMeshProUGUI Name;
     public Button Button;
     public Slider Slider;
-
+    public Image Image;
 }

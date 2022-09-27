@@ -934,5 +934,21 @@ public class UmaViewerBuilder : MonoBehaviour
         UI.LoadedAssetsClear();
     }
 
-    
+    public Sprite LoadCharaIcon(string id)
+    {
+        string value = $"chara/chr{id}/chr_icon_{id}";
+        var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
+        string path = UmaDatabaseController.GetABPath(entry);
+        if (File.Exists(path))
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
+            if (assetBundle.Contains($"chr_icon_{id}"))
+            {
+                Texture2D texture = (Texture2D)assetBundle.LoadAsset($"chr_icon_{id}");
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                return sprite;
+            }
+        }
+        return null;
+    }
 }

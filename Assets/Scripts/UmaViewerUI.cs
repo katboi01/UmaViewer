@@ -111,6 +111,8 @@ public class UmaViewerUI : MonoBehaviour
         foreach (var chara in Main.Characters.OrderBy(c => c.Id))
         {
             var charaInstance = chara;
+            var charaIcon = UmaViewerBuilder.Instance.LoadCharaIcon(charaInstance.Id.ToString());
+
             container = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
             container.Name.text = container.name = chara.Id + " " + chara.Name;
             var imageInstance1 = container.GetComponent<Image>();
@@ -118,6 +120,12 @@ public class UmaViewerUI : MonoBehaviour
                 HighlightChildImage(CharactersList.content, imageInstance1);
                 ListCostumes(charaInstance.Id, false);
             });
+
+            if (charaIcon)
+            {
+                container.Image.sprite = charaIcon;
+                container.Image.enabled = true;
+            }
 
             container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
             container.Name.text = container.name = chara.Id + " " + chara.Name;
