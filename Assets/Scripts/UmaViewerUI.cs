@@ -43,6 +43,12 @@ public class UmaViewerUI : MonoBehaviour
     public TextMeshProUGUI ProgressText;
     public Text LyricsText;
 
+    //animations
+    public Slider AnimationSlider;
+    public Button AnimationPlayButton;
+    public TextMeshProUGUI AnimationText;
+    public TextMeshProUGUI AnimationProgressText;
+
     //settings
     public TMP_InputField SSWidth, SSHeight;
 
@@ -65,6 +71,8 @@ public class UmaViewerUI : MonoBehaviour
         Instance = this;
         AudioPlayButton.onClick.AddListener(AudioPause);
         AudioSlider.onValueChanged.AddListener(AudioProgressChange);
+        AnimationPlayButton.onClick.AddListener(AnimationPause);
+        AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
         if (Application.platform == RuntimePlatform.Android)
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
@@ -513,6 +521,39 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void AnimationPause()
+    {
+        if (Builder.OverrideController.animationClips.Length > 0)
+        {
+            var animator = Builder.CurrentUMAContainer.UmaAnimator;
+            var state = animator.speed == 1;
+            if (state)
+            {
+                animator.speed = 0;
+            }
+            else if (animator.isInitialized)
+            {
+                animator.speed = 1;
+            }
+            else
+            {
+                animator.speed = 0;
+            }
+            
+        }
+    }
+
+    public void AnimationProgressChange(float val)
+    {
+        var animator = Builder.CurrentUMAContainer.UmaAnimator;
+        if (animator != null)
+        {
+            var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+            Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
+            animator.Play(0, -1, val * AnimeClip.length);
+        }
+    }
+
     private void Update()
     {
         if (Builder.CurrentAudioSources.Count > 0)
@@ -524,6 +565,18 @@ public class UmaViewerUI : MonoBehaviour
                 ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
                 AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
                 LyricsText.text =  GetCurrentLyrics(MianSource.time);
+            }
+        }
+
+        if (Builder.CurrentUMAContainer.OverrideController["clip_2"] != null && Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+        {
+            var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+            var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+            if (AnimeClip)
+            {
+                AnimationText.text = AnimeClip.name;
+                AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(AnimeClip.length), ToTimeFormat(AnimeClip.length));
+                AnimationSlider.SetValueWithoutNotify(AnimeState.normalizedTime * AnimeClip.length);
             }
         }
     }
