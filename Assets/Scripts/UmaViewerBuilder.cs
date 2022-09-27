@@ -172,10 +172,12 @@ public class UmaViewerBuilder : MonoBehaviour
         // Record Head Data
         int head_id;
         string head_costumeId;
+        int tailId = (int)charaData["tailModelId"];
         if (UI.isHeadFix && CurrentHead != null)
         {
             head_id = CurrentHead.id;
             head_costumeId = CurrentHead.costumeId;
+            tailId = CurrentHead.tailId;
         }
         else
         {
@@ -185,13 +187,14 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentHead = new UmaHeadData();
             CurrentHead.id = id;
             CurrentHead.costumeId = costumeId;
+            CurrentHead.tailId = tailId;
         }
 
         string head = UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/pfb_chr{head_id}_{head_costumeId}";
         asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == head);
         bool isDefaultHead = false;
         //Some costumes don't have custom heads
-        if (costumeId != "00" && asset == null)
+        if (head_costumeId != "00" && asset == null)
         {
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.HeadPath + $"chr{head_id}_00/pfb_chr{head_id}_00");
             isDefaultHead = true;
@@ -227,7 +230,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
 
-        int tailId = (int)charaData["tailModelId"];
+        
+
         if (tailId != 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
@@ -236,7 +240,7 @@ public class UmaViewerBuilder : MonoBehaviour
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == tailPfb);
             if (asset != null)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
                 {
                     RecursiveLoadAsset(asset1);
                 }
