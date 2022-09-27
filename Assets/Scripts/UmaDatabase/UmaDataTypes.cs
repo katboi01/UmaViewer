@@ -17,6 +17,12 @@ public class UmaCharaData
     public string tail_model_id;
 }
 
+public class UmaHeadData
+{
+    public int id;
+    public string costumeId;
+}
+
 public class UmaLyricsData
 {
     public float time;

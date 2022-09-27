@@ -57,7 +57,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public Color UIColor1, UIColor2;
 
-    public bool isCirware = false;
+    public bool isCriware = false;
+    public bool isHeadFix = false;
 
     private void Awake()
     {
@@ -276,7 +277,13 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetCriWare(bool value)
     {
-        isCirware = value;
+        isCriware = value;
+    }
+
+    public void SetHeadFix(bool value)
+    {
+        isHeadFix = value;
+        UnityEngine.Debug.Log(isHeadFix);
     }
 
     void ListLiveSounds(int songid)
@@ -294,7 +301,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Name.text = name;
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
-                if (isCirware)
+                if (isCriware)
                 {
                     Builder.LoadLiveSoundCri(songid, entry);
                 }

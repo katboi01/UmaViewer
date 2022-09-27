@@ -26,6 +26,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentLiveContainer;
     public UmaContainer CurrentOtherContainer;
 
+    public UmaHeadData CurrentHead;
+
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
@@ -167,20 +169,38 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
 
-        string head = UmaDatabaseController.HeadPath + $"chr{id}_{costumeId}/pfb_chr{id}_{costumeId}";
+        // Record Head Data
+        int head_id;
+        string head_costumeId;
+        if (UI.isHeadFix && CurrentHead != null)
+        {
+            head_id = CurrentHead.id;
+            head_costumeId = CurrentHead.costumeId;
+        }
+        else
+        {
+            head_id = id;
+            head_costumeId = costumeId;
+
+            CurrentHead = new UmaHeadData();
+            CurrentHead.id = id;
+            CurrentHead.costumeId = costumeId;
+        }
+
+        string head = UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/pfb_chr{head_id}_{head_costumeId}";
         asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == head);
         bool isDefaultHead = false;
         //Some costumes don't have custom heads
         if (costumeId != "00" && asset == null)
         {
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.HeadPath + $"chr{id}_00/pfb_chr{id}_00");
+            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.HeadPath + $"chr{head_id}_00/pfb_chr{head_id}_00");
             isDefaultHead = true;
         }
 
         if (asset != null)
         {
             //Load Hair Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{id}_{costumeId}/textures")))
+            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/textures")))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -190,7 +210,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             if (isDefaultHead)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{id}_00/clothes")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_00/clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
                         RecursiveLoadAsset(asset1);
@@ -198,13 +218,14 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             else
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{id}_{costumeId}/clothes")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
                         RecursiveLoadAsset(asset1);
                 }
             }
         }
+
 
         int tailId = (int)charaData["tailModelId"];
         if (tailId != 0)
