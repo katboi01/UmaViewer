@@ -9,11 +9,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
+public class UmaViewerUI : MonoBehaviour
 {
     public static UmaViewerUI Instance;
     private UmaViewerMain Main => UmaViewerMain.Instance;
     private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
+    
+    public CanvasScaler canvasScaler;
 
     //normal models
     public ScrollRect CharactersList;
@@ -39,6 +41,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public Button AudioPlayButton;
     public TextMeshProUGUI TitleText;
     public TextMeshProUGUI ProgressText;
+    public Text LyricsText;
 
     //settings
     public TMP_InputField SSWidth, SSHeight;
@@ -54,16 +57,19 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
 
     public Color UIColor1, UIColor2;
 
+    public bool isCirware = false;
+
     private void Awake()
     {
         Instance = this;
         AudioPlayButton.onClick.AddListener(AudioPause);
         AudioSlider.onValueChanged.AddListener(AudioProgressChange);
+        if (Application.platform == RuntimePlatform.Android)
+            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
 
     public void HighlightChildImage(Transform mainObject, Image child)
     {
-        //Debug.Log("Looking for " + child.name + " in " + mainObject.name);
         foreach(var t in mainObject.GetComponentsInChildren<Image>())
         {
             if (t.transform.parent != mainObject) continue;
@@ -74,10 +80,10 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
         LoadedAssetCount++;
-        string filePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        string filePath = UmaDatabaseController.GetABPath(entry);
         var container =  Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
         container.Name.text = Path.GetFileName(entry.Name) + "\n" + entry.Url;
-        container.Button.onClick.AddListener(() => { Process.Start("explorer.exe", "/select," + filePath);});
+        container.Button.onClick.AddListener(() => {Process.Start("explorer.exe", "/select," + filePath);});
         LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 35);
     }
 
@@ -153,14 +159,14 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             var imageInstance1 = container.GetComponent<Image>();
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveList.content, imageInstance1);
-                Builder.LoadLive(live.MusicId);
+                Builder.LoadLive(live);
             });
 
             var CharaContainer = Instantiate(UmaContainerNoTMPPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
             CharaContainer.GetComponentInChildren<Text>().text = " " + live.MusicId + " " + live.songName;
-            var CharaimageInstance1 = container.GetComponent<Image>();
+            var CharaimageInstance1 = CharaContainer.GetComponent<Image>();
             CharaContainer.Button.onClick.AddListener(() => {
-                HighlightChildImage(LiveList.content, imageInstance1);
+                HighlightChildImage(LiveSoundList.content, CharaimageInstance1);
                 ListLiveSounds(live.MusicId);
             });
         }
@@ -267,6 +273,12 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         }
     }
 
+
+    public void SetCriWare(bool value)
+    {
+        isCirware = value;
+    }
+
     void ListLiveSounds(int songid)
     {
         for (int i = LiveCharaSoundList.content.childCount - 1; i >= 0; i--)
@@ -277,12 +289,19 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         foreach (var entry in Main.AbList.Where(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb")))
         {
             var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
-            string[] split = entry.Name.Split('_');
-            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1].Replace(".awb","");
+            string[] split = Path.GetFileNameWithoutExtension(entry.Name).Split('_');
+            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1];
             container.Name.text = name;
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
-                Builder.LoadLiveSound(songid, entry);
+                if (isCirware)
+                {
+                    Builder.LoadLiveSoundCri(songid, entry);
+                }
+                else
+                {
+                    Builder.LoadLiveSound(songid, entry);
+                }
             });
         }
 
@@ -339,10 +358,14 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             Destroy(animationList.content.GetChild(i).gameObject);
         }
 
-        var filteredList = mini ?
-            Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && !a.Name.Contains($"mirror") && a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam"))
-            :
-            Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath) && !a.Name.Contains($"mirror") && !a.Name.Contains($"mini") && !a.Name.Contains($"facial") && !a.Name.Contains($"_cam"));
+        var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
+        && !a.Name.Contains($"mirror")
+        && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
+        && !a.Name.Contains($"facial")
+        && !a.Name.Contains($"_cam")
+        && !a.Name.EndsWith($"_s")
+        && !a.Name.EndsWith($"_e")
+        );
         
         if (umaId == -1)
         {
@@ -358,6 +381,8 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
             }
         }
         else
+        {
+            //Common animations
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}")))
             {
                 var entryInstance = entry;
@@ -368,6 +393,19 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                     Builder.LoadAsset(entryInstance);
                 });
             }
+
+            //Skill animations
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"card/body/crd{umaId}")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name.text = container.name = Path.GetFileName(entry.Name);
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
+                    Builder.LoadAsset(entryInstance);
+                });
+            }
+        }
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -402,11 +440,6 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         Camera.main.backgroundColor = color;
     }
 
-    public void CallBack(FaceDrivenKeyTarget target)
-    {
-        LoadFacialPanels(target);
-    }
-
     public void SetDynamicBoneEnable(bool isOn)
     {
         if (Builder.CurrentUMAContainer)
@@ -429,20 +462,21 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            AudioSource MainSource = Builder.CurrentAudioSources[0];
+            var state = MainSource.isPlaying;
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
-                if (MianSource.isPlaying)
+                if (state)
                 {
                     source.Pause();
                 }
-                else if (MianSource.clip)
+                else if (source.clip)
                 {
                     source.Play();
                 }
                 else
                 {
-                    MianSource.Stop();
+                    source.Stop();
                 }
             }
         }
@@ -452,7 +486,7 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            AudioSource MiaiSource = Builder.CurrentAudioSources[0];
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
                 if (source.clip)
@@ -474,15 +508,17 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
                 TitleText.text = MianSource.clip.name;
                 ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
                 AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
+                LyricsText.text =  GetCurrentLyrics(MianSource.time);
             }
         }
     }
 
-    public void ResetPlayer()
+    public void ResetAudioPlayer()
     {
         TitleText.text = "No Audio";
         ProgressText.text = "00:00:00 / 00:00:00";
         AudioSlider.SetValueWithoutNotify(0);
+        LyricsText.text = "";
     }
 
     public static string ToTimeFormat(float time)
@@ -493,5 +529,17 @@ public class UmaViewerUI : MonoBehaviour,FaceLoadCallBack
         int minute = seconds % 3600 / 60;
         seconds = seconds % 3600 % 60;
         return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
+    }
+
+    public string GetCurrentLyrics(float time)
+    {
+        for(int i = Builder.CurrentLyrics.Count-1; i >=0; i--)
+        {
+            if(Builder.CurrentLyrics[i].time< time)
+            {
+                return Builder.CurrentLyrics[i].text;
+            }
+        }
+        return "";
     }
 }

@@ -56,18 +56,33 @@ public class UmaDatabaseController
     /// Master Database Connection
     /// </summary>
     private SqliteConnection masterDb;
-
     /// <summary>
     /// Loads the file database
     /// </summary>
     public UmaDatabaseController()
     {
-        metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
-        metaDb.Open();
-        MetaEntries = ReadMeta(metaDb);
-        masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
-        masterDb.Open();
-        CharaData = ReadMaster(masterDb);
+        try
+        {
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                metaDb = new SqliteConnection($@"Data Source={GetGameRootPath()}/meta;");
+                masterDb = new SqliteConnection($@"Data Source={GetGameRootPath()}/master/master.mdb;");
+            }
+            else
+            {
+                metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
+                masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
+            }
+            metaDb.Open();
+            MetaEntries = ReadMeta(metaDb);
+            masterDb.Open();
+            CharaData = ReadMaster(masterDb);
+        }
+        catch
+        {
+            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{GetGameRootPath()}/meta\n{GetGameRootPath()}/master/master.mdb";
+            UmaViewerUI.Instance.LyricsText.color = Color.red;
+        }
     }
 
     static IEnumerable<UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
@@ -111,5 +126,24 @@ public class UmaDatabaseController
             yield return entry;
         }
         //conn.Close();
+    }
+
+    public static string GetABPath(UmaDatabaseEntry entry)
+    {
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            return $"{GetGameRootPath()}/dat/{entry.Url.Substring(0, 2)}/{entry.Url}";
+        }
+
+        return $"{GetGameRootPath()}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+    }
+
+    public static string GetGameRootPath()
+    {
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            return Application.persistentDataPath;
+        }
+        return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume";
     }
 }

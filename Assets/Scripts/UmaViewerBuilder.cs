@@ -1,17 +1,16 @@
-﻿using CriWareFormats;
+﻿using CriWare;
+using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UmaMusumeAudio;
-using UnityEditor;
 using UnityEngine;
+using static UmaViewerMain;
 
 public class UmaViewerBuilder : MonoBehaviour
 {
@@ -28,6 +27,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public UmaContainer CurrentOtherContainer;
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
+    public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
     public AnimatorOverrideController OverrideController;
 
@@ -43,7 +43,7 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             Destroy(CurrentUMAContainer);
         }
-        CurrentUMAContainer = new GameObject($"{id}_{costumeId}").AddComponent<UmaContainer>();
+        CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainer>();
 
         UnloadAllBundle();
 
@@ -107,6 +107,7 @@ public class UmaViewerBuilder : MonoBehaviour
             Debug.LogError("No body, can't load!");
             return;
         }
+
         else if (genericCostume)
         {
             string texPattern1 = "", texPattern2 = "", texPattern3 = "", texPattern4 = "", texPattern5 = "";
@@ -203,7 +204,6 @@ public class UmaViewerBuilder : MonoBehaviour
                         RecursiveLoadAsset(asset1);
                 }
             }
-
         }
 
         int tailId = (int)charaData["tailModelId"];
@@ -236,15 +236,16 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         //Load FacialMorph
-        if (CurrentUMAContainer.Heads.Count > 0)
+        if (CurrentUMAContainer.Head)
         {
-            var firsehead = CurrentUMAContainer.Heads[0];
+            var firsehead = CurrentUMAContainer.Head;
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
             CurrentUMAContainer.FaceDrivenKeyTargets = FaceDriven;
-            FaceDriven.callBack = UmaViewerUI.Instance;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
         }
 
+        CurrentUMAContainer.MergeModel();
+        CurrentUMAContainer.LoadPhysics();
         LoadAsset(UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
@@ -338,6 +339,8 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Head
             RecursiveLoadAsset(asset);
         }
+
+        CurrentUMAContainer.MergeModel();
     }
 
     public void LoadProp(UmaDatabaseEntry entry)
@@ -352,9 +355,12 @@ public class UmaViewerBuilder : MonoBehaviour
         RecursiveLoadAsset(entry);
     }
 
-    public void LoadLive(int id)
+    public void LoadLive(LiveEntry live)
     {
-        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + id));
+        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + live.MusicId));
+        var BGasset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"pfb_env_live{live.BackGroundId}_controller000"));
+        if (asset == null|| BGasset == null) return;
+
         if (CurrentLiveContainer != null)
         {
             Destroy(CurrentLiveContainer.gameObject);
@@ -362,9 +368,53 @@ public class UmaViewerBuilder : MonoBehaviour
         UnloadAllBundle();
         CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
+        RecursiveLoadAsset(BGasset);
 
     }
 
+    //Use CriWare Library
+    public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
+    {
+        //清理
+        if (CurrentAudioSources.Count > 0)
+        {
+            var tmp = CurrentAudioSources[0];
+            CurrentAudioSources.Clear();
+            Destroy(tmp.gameObject);
+            UI.ResetAudioPlayer();
+        }
+
+        //获取Acb文件和Awb文件的路径
+        string nameVar = SongAwb.Name.Split('.')[0].Split('/').Last();
+
+        //使用Live的Bgm
+        nameVar = $"snd_bgm_live_{songid}_oke";
+
+        LoadSound Loader = (LoadSound)ScriptableObject.CreateInstance("LoadSound");
+        LoadSound.UmaSoundInfo soundInfo = Loader.getSoundPath(nameVar);
+
+        //音频组件添加路径，载入音频
+        CriAtom.AddCueSheet(nameVar, soundInfo.acbPath, soundInfo.awbPath);
+
+        //获得当前音频信息
+        CriAtomEx.CueInfo[] cueInfoList;
+        List<string> cueNameList = new List<string>();
+        cueInfoList = CriAtom.GetAcb(nameVar).GetCueInfoList();
+        foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
+        {
+            cueNameList.Add(cueInfo.name);
+        }
+
+        //创建播放器
+        CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
+        source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
+        source.cueSheet = nameVar;
+
+        //播放
+        source.Play(cueNameList[0]);
+    }
+
+    //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
         if (CurrentAudioSources.Count > 0)
@@ -372,9 +422,8 @@ public class UmaViewerBuilder : MonoBehaviour
             var tmp = CurrentAudioSources[0];
             CurrentAudioSources.Clear();
             Destroy(tmp.gameObject);
-            UI.ResetPlayer();
+            UI.ResetAudioPlayer();
         }
-
 
         foreach (AudioClip clip in LoadAudio(SongAwb))
         {
@@ -391,6 +440,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 AddAudioSource(BGclip[0]);
             }
         }
+
+        LoadLiveLyrics(songid);
     }
 
     private void AddAudioSource(AudioClip clip)
@@ -415,11 +466,12 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         List<AudioClip> clips = new List<AudioClip>();
         UmaViewerUI.Instance.LoadedAssetsAdd(awb);
-        string awbPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{awb.Url.Substring(0, 2)}\\{awb.Url}";
+        string awbPath = UmaDatabaseController.GetABPath(awb); ;
         if (!File.Exists(awbPath)) return clips;
 
         FileStream awbFile = File.OpenRead(awbPath);
         AwbReader awbReader = new AwbReader(awbFile);
+
         foreach (Wave wave in awbReader.Waves)
         {
             var stream = new UmaWaveStream(awbReader, wave.WaveId);
@@ -430,19 +482,67 @@ public class UmaViewerBuilder : MonoBehaviour
             int sampleRate = stream.WaveFormat.SampleRate;
 
             AudioClip clip = AudioClip.Create(
-                Path.GetFileName(awb.Name).Replace(".awb", wave.WaveId.ToString()),
+                Path.GetFileNameWithoutExtension(awb.Name)+"_"+wave.WaveId.ToString(),
                 (int)(stream.Length / channels / bytesPerSample),
                 channels,
                 sampleRate,
                 true,
                 data => sampleProvider.Read(data, 0, data.Length),
                 position => stream.Position = position * channels * bytesPerSample);
+
             clips.Add(clip);
         }
 
         return clips;
     }
 
+    public void LoadLiveLyrics(int songid)
+    {
+        if (CurrentLyrics.Count > 0) CurrentLyrics.Clear();
+
+        string lyricsVar = $"live/musicscores/m{songid}/m{songid}_lyrics";
+        UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(lyricsVar));
+        if (lyricsAsset != null)
+        {
+            string filePath = UmaDatabaseController.GetABPath(lyricsAsset);
+            if (File.Exists(filePath))
+            {
+                AssetBundle bundle;
+                if (Main.LoadedBundles.ContainsKey(lyricsAsset.Name))
+                {
+                    bundle = Main.LoadedBundles[lyricsAsset.Name];
+                }
+                else
+                {
+                    UI.LoadedAssetsAdd(lyricsAsset);
+                    bundle = AssetBundle.LoadFromFile(filePath);
+                    Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
+                }
+               
+                TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
+                string[] lines = asset.text.Split("\n"[0]);
+
+                for (int i = 1; i < lines.Length; i++) 
+                {
+                    string[] words = lines[i].Split(',');
+                    if (words.Length > 0)
+                    {
+                        try
+                        {
+                            UmaLyricsData lyricsData = new UmaLyricsData()
+                            {
+                                time = float.Parse(words[0]) / 1000,
+                                text = (words.Length > 1) ? words[1].Replace("[COMMA]", "，") : ""
+                            };
+                            CurrentLyrics.Add(lyricsData);
+                        }
+                        catch{}
+                    }
+                }
+            }
+        }
+    }
+   
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -460,7 +560,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
 
-        string filePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        string filePath = UmaDatabaseController.GetABPath(entry);
         if (File.Exists(filePath))
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
@@ -492,13 +592,9 @@ public class UmaViewerBuilder : MonoBehaviour
             Type aType = asset.GetType();
             if (aType == typeof(AnimationClip))
             {
-                if (CurrentUMAContainer && CurrentUMAContainer.Body)
+                if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator)
                 {
-                    AnimationClip bbb = asset as AnimationClip;
-                    bbb.wrapMode = WrapMode.Loop;
-                    CurrentUMAContainer.OverrideController["clip"] = bbb;
-                    CurrentUMAContainer.UmaAnimator.Play("clip", 0, 0);
-
+                    LoadAnimation(asset as AnimationClip);
                 }
 
                 if (!CurrentLiveContainer)
@@ -508,19 +604,12 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 if (bundle.name.Contains("cloth"))
                 {
-                    if (bundle.name.Contains("chr"))
+                    if (!CurrentUMAContainer.PhysicsController)
                     {
-                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Heads[0].transform);
+                        CurrentUMAContainer.PhysicsController = new GameObject("PhysicsController");
+                        CurrentUMAContainer.PhysicsController.transform.SetParent(CurrentUMAContainer.transform);
                     }
-                    else if (bundle.name.Contains("bdy"))
-                    {
-                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Body.transform);
-                    }
-                    else if (bundle.name.Contains("tail"))
-                    {
-                        GameObject head = Instantiate(asset as GameObject, CurrentUMAContainer.Tail.transform);
-                    }
-
+                    Instantiate(asset as GameObject, CurrentUMAContainer.PhysicsController.transform);
                 }
                 else if (bundle.name.Contains("/head/"))
                 {
@@ -541,10 +630,6 @@ public class UmaViewerBuilder : MonoBehaviour
                         LoadProp(asset as GameObject);
                     }
                 }
-            }
-            else if (aType == typeof(FaceDrivenKeyTarget))
-            {
-                //CurrentContainer.FaceDrivenKeyTargets.Add(Instantiate(asset as FaceDrivenKeyTarget));
             }
             else if (aType == typeof(Shader))
             {
@@ -572,7 +657,6 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         CurrentUMAContainer.Body = Instantiate(go, CurrentUMAContainer.transform);
         CurrentUMAContainer.UmaAnimator = CurrentUMAContainer.Body.GetComponent<Animator>();
-        CurrentUMAContainer.UmaAnimator.runtimeAnimatorController = CurrentUMAContainer.OverrideController = Instantiate(OverrideController);
 
         if (CurrentUMAContainer.IsGeneric)
         {
@@ -667,9 +751,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadHead(GameObject go)
     {
         GameObject head = Instantiate(go, CurrentUMAContainer.transform);
-        CurrentUMAContainer.Heads.Add(head);
-        CurrentUMAContainer.HeadNeckBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Neck"));
-        CurrentUMAContainer.HeadHeadBones.Add(UmaContainer.FindBoneInChildren(head.transform, "Head"));
+        CurrentUMAContainer.Head=head;
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
@@ -677,6 +759,10 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 if (head.name.Contains("mchr"))
                 {
+                    if (r.name.Contains("Hair"))
+                    {
+                        CurrentUMAContainer.Tail = head;
+                    }
                     if (r.name == "M_Face")
                     {
                         m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("face") && t.name.Contains("diff")));
@@ -734,9 +820,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadTail(GameObject gameObject)
     {
-        Transform hHip = UmaContainer.FindBoneInChildren(CurrentUMAContainer.Body.transform, "Hip");
-        if (hHip == null) return;
-        CurrentUMAContainer.Tail = Instantiate(gameObject, hHip);
+        CurrentUMAContainer.Tail = Instantiate(gameObject, CurrentUMAContainer.transform);
         var textures = CurrentUMAContainer.TailTextures;
         foreach (Renderer r in CurrentUMAContainer.Tail.GetComponentsInChildren<Renderer>())
         {
@@ -752,7 +836,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadProp(GameObject go)
     {
-        var prop = Instantiate(go, (go.name.Contains("Cutt_son") ? CurrentLiveContainer : CurrentOtherContainer).transform);
+        var container = (go.name.Contains("Cutt_son") || go.name.Contains("pfb_env_live")) ? CurrentLiveContainer : CurrentOtherContainer;
+        var prop = Instantiate(go, container.transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -763,6 +848,44 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
+    private void LoadAnimation(AnimationClip clip)
+    {
+        bool needTransit = false;
+        if (clip.name.EndsWith("_loop"))
+        {
+            var motion_s = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            var motion_e = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            needTransit = (motion_s != null && motion_e != null);
+            if (needTransit)
+            {
+                RecursiveLoadAsset(motion_e);
+                RecursiveLoadAsset(motion_s);
+            }
+
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            CurrentUMAContainer.OverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+        }
+        else if(clip.name.EndsWith("_S"))
+        {
+            CurrentUMAContainer.OverrideController["clip_s"] = clip;
+        }
+        else if(clip.name.EndsWith("_E"))
+        {
+            CurrentUMAContainer.OverrideController["clip_e"] = clip;
+        }
+        else
+        {
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            CurrentUMAContainer.OverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+        }
+
+    }
 
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
@@ -789,4 +912,6 @@ public class UmaViewerBuilder : MonoBehaviour
         Main.LoadedBundles.Clear();
         UI.LoadedAssetsClear();
     }
+
+    
 }

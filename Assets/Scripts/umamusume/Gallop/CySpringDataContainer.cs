@@ -29,7 +29,7 @@ namespace Gallop
         
         private void Awake()
         {
-            InitializePhysics();
+            //InitializePhysics();
         }
         public void InitializePhysics()
         {
@@ -84,7 +84,7 @@ namespace Gallop
 
             gameObjects.Clear();
             gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
-            foreach (CySpringParamDataElement spring in springParam)
+            foreach(CySpringParamDataElement spring in springParam)
             {
                 var bone = gameObjects.Find(a => { return a.name == spring._boneName; });
                 if (bone)
