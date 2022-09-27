@@ -71,6 +71,7 @@ public class UmaViewerBuilder : MonoBehaviour
                socks = (string)charaData["socks"],
                bust = (string)charaData["bust"],
                sex = (string)charaData["sex"],
+               shape = (string)charaData["shape"],
                costumeIdShort = "";
 
         UmaDatabaseEntry asset = null;
@@ -83,12 +84,19 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.VarSkin = skin;
             CurrentUMAContainer.VarSocks = socks;
             CurrentUMAContainer.VarHeight = height;
-            //Not sure about the pattern, some models are missing
+
+            // Pattern for generic body type is as follows:
+            //
+            // (costume id)_(body_type_sub)_(body_setting)_(height)_(shape)_(bust)
+            //
+            // body_type_sub is used for variants like the summer/winter uniform or the swimsuit/towel
+            // body_setting is used for subvariants of each variant like the big belly version of the uniform, and the genders for the tracksuits
+            //
+            // Some models will naturally be missing due to how this system is designed.
+
             string body = "";
-            if (costumeId.Split('_')[2] == "03")
-                body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{sex}_{0}_{(bust == "0" ? "1" : bust == "4" ? "3" : bust)}";
-            else
-                body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{sex}_{0}_{(bust == "0" ? "1" : bust == "4" ? "3" : bust)}";
+            body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{height}_{shape}_{bust}";
+
             Debug.Log("Looking for " + body);
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
         }
@@ -101,14 +109,15 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (genericCostume)
         {
-            string texPattern1 = "", texPattern2 = "", texPattern3 = "", texPattern4 = "";
+            string texPattern1 = "", texPattern2 = "", texPattern3 = "", texPattern4 = "", texPattern5 = "";
             switch (costumeId.Split('_')[0])
             {
                 case "0001":
                     texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_0{socks}";
-                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_";
-                    texPattern3 = $"tex_bdy{costumeIdShort}_00_waku";
-                    texPattern4 = $"tex_bdy{costumeIdShort}_num";
+                    texPattern2 = $"tex_bdy{costumeIdShort}_00_0_{bust}";
+                    texPattern3 = $"tex_bdy{costumeIdShort}_zekken";
+                    texPattern4 = $"tex_bdy{costumeIdShort}_00_waku";
+                    texPattern5 = $"tex_bdy{costumeIdShort}_num";
                     break;
                 case "0003":
                     texPattern1 = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}";
@@ -129,7 +138,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 && (a.Name.Contains(texPattern1)
                 || a.Name.Contains(texPattern2)
                 || (string.IsNullOrEmpty(texPattern3) ? false : a.Name.Contains(texPattern3))
-                || (string.IsNullOrEmpty(texPattern4) ? false : a.Name.Contains(texPattern4)))))
+                || (string.IsNullOrEmpty(texPattern4) ? false : a.Name.Contains(texPattern4))
+                || (string.IsNullOrEmpty(texPattern5) ? false : a.Name.Contains(texPattern5)))))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -376,7 +386,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (BGawb != null)
         {
             var BGclip = LoadAudio(BGawb);
-            if (BGclip.Count>0)
+            if (BGclip.Count > 0)
             {
                 AddAudioSource(BGclip[0]);
             }
@@ -416,7 +426,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var sampleProvider = stream.ToSampleProvider();
 
             int channels = stream.WaveFormat.Channels;
-            int bytesPerSample =  stream.WaveFormat.BitsPerSample / 8;
+            int bytesPerSample = stream.WaveFormat.BitsPerSample / 8;
             int sampleRate = stream.WaveFormat.SampleRate;
 
             AudioClip clip = AudioClip.Create(
@@ -578,7 +588,7 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 foreach (Material m in r.sharedMaterials)
                 {
-                    string mainTex = "", toonMap = "", tripleMap = "", optionMap = "";
+                    string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
                     if (CurrentUMAContainer.IsMini)
                     {
 
@@ -604,12 +614,15 @@ public class UmaViewerBuilder : MonoBehaviour
                                         optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_ctrl";
                                         break;
                                     case 2:
-                                        mainTex = $"tex_bdy0001_00_num01";
-                                        toonMap = $"tex_bdy0001_00_num01";
-                                        tripleMap = $"tex_bdy0001_00_num01";
-                                        optionMap = $"tex_bdy0001_00_num01";
+                                        int color = UnityEngine.Random.Range(0, 4);
+                                        mainTex = $"tex_bdy0001_00_zekken{color}_{bust}_diff";
+                                        toonMap = $"tex_bdy0001_00_zekken{color}_{bust}_shad_c";
+                                        tripleMap = $"tex_bdy0001_00_zekken0_{bust}_base";
+                                        optionMap = $"tex_bdy0001_00_zekken0_{bust}_ctrl";
                                         break;
                                 }
+
+                                zekkenNumberTex = $"tex_bdy0001_00_num{UnityEngine.Random.Range(1, 18):d2}";
                                 break;
                             case "0003":
                                 mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_diff";
@@ -642,8 +655,10 @@ public class UmaViewerBuilder : MonoBehaviour
                         m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name == toonMap));
                         m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name == tripleMap));
                         m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name == optionMap));
-                    }
 
+                        if (!string.IsNullOrEmpty(zekkenNumberTex))
+                            m.SetTexture("_ZekkenNumberTex", textures.FirstOrDefault(t => t.name == zekkenNumberTex));
+                    }
                 }
             }
         }
