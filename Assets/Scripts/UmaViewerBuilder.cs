@@ -28,6 +28,12 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public UmaHeadData CurrentHead;
 
+    public Shader hairShader;
+    public Shader faceShader;
+    public Shader eyeShader;
+    public Shader cheekShader;
+    public Shader eyebrowShader;
+
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
@@ -173,8 +179,9 @@ public class UmaViewerBuilder : MonoBehaviour
         int head_id;
         string head_costumeId;
         int tailId = (int)charaData["tailModelId"];
-
-        if (id == 9006) tailId = -1;//The tailId of 9006 is 1, but the character has no tail
+       
+        //The tailId of 9006 is 1, but the character has no tail
+        if (id == 9006) tailId = -1;
 
         if (UI.isHeadFix && CurrentHead != null)
         {
@@ -605,8 +612,19 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (bundle.name == "shader.a")
         {
-            if (Main.ShadersLoaded) return;
-            else Main.ShadersLoaded = true;
+            if (Main.ShadersLoaded)
+            {
+                return;
+            }
+            else
+            {
+                hairShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
+                faceShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
+                eyeShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
+                cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
+                eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+                Main.ShadersLoaded = true;
+            }
         }
 
         foreach (string name in bundle.GetAllAssetNames())
@@ -816,19 +834,25 @@ public class UmaViewerBuilder : MonoBehaviour
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
+                            m.shader = cheekShader;
                             m.CopyPropertiesFromMaterial(TransMaterialCharas);
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
+                            m.shader = faceShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             m.SetColor("_RimColor", new Color(0, 0, 0, 0));
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
+                            m.shader = eyeShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
                         case "Gallop/3D/Chara/ToonHair/TSER":
+                            m.shader = hairShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
-
+                        case "Gallop/3D/Chara/ToonMayu":
+                            m.shader = eyebrowShader;
+                            break;
                         default:
                             Debug.Log(m.shader.name);
                             // m.shader = Shader.Find("Nars/UmaMusume/Body");
@@ -887,11 +911,12 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_e);
                 RecursiveLoadAsset(motion_s);
             }
-
-            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
+         
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
         else if(clip.name.EndsWith("_S"))
@@ -916,9 +941,9 @@ public class UmaViewerBuilder : MonoBehaviour
             else
             {
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+                CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             }
 
-            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
 
     }
