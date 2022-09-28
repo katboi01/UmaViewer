@@ -612,7 +612,7 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
 
-        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.UmaAnimator != null && Builder.CurrentUMAContainer.OverrideController != null)
         {
             var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
