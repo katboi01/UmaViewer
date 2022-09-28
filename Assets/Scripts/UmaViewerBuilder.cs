@@ -906,8 +906,18 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
+
+            // If Cut-in, play immediately without state interpolation
+            if (clip.name.Contains("crd"))
+            {
+                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
+            }
+            else
+            {
+                CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            }
+
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
 
