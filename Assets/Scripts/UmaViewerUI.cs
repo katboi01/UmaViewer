@@ -580,10 +580,12 @@ public class UmaViewerUI : MonoBehaviour
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+
+            // Pause and Seek;
             Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
             animator.Play(0, -1, val);
 
-            AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(val * AnimeClip.length), ToTimeFormat(AnimeClip.length));
+            AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
         }
     }
 
@@ -613,13 +615,16 @@ public class UmaViewerUI : MonoBehaviour
         {
             if(Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
             {
+                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
                 var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
                 var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
                 if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
                 {
+                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
+
                     AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(Mathf.Repeat(AnimeState.normalizedTime, 1) * AnimeClip.length), ToTimeFormat(AnimeClip.length));
-                    AnimationSlider.SetValueWithoutNotify(Mathf.Repeat(AnimeState.normalizedTime, 1));
+                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
+                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
                 }
             }
         }
@@ -641,6 +646,15 @@ public class UmaViewerUI : MonoBehaviour
         int minute = seconds % 3600 / 60;
         seconds = seconds % 3600 % 60;
         return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
+    }
+
+    public static string ToFrameFormat(float time, float frameRate)
+    {
+        int frames = Mathf.FloorToInt(time % 1 * frameRate);
+        int seconds = (int)time;
+        int minute = seconds % 3600 / 60;
+        seconds = seconds % 3600 % 60;
+        return string.Format("{0:D2}m:{1:D2}s:{2:D2}f", minute, seconds, frames);
     }
 
     public string GetCurrentLyrics(float time)
