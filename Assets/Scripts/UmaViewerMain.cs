@@ -47,6 +47,7 @@ public class UmaViewerMain : MonoBehaviour
                     Characters.Add(new CharaEntry()
                     {
                         Name = (string)item["charaNameEnglish"],
+                        Icon = UmaViewerBuilder.Instance.LoadCharaIcon((string)item["charaId"]),
                         Id = (int)item["charaId"]
                     });
                 }
@@ -99,6 +100,7 @@ public class UmaViewerMain : MonoBehaviour
     public class CharaEntry
     {
         public string Name;
+        public Sprite Icon;
         public int Id;
     }
 

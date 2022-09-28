@@ -111,7 +111,6 @@ public class UmaViewerUI : MonoBehaviour
         foreach (var chara in Main.Characters.OrderBy(c => c.Id))
         {
             var charaInstance = chara;
-            var charaIcon = UmaViewerBuilder.Instance.LoadCharaIcon(charaInstance.Id.ToString());
 
             container = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
             container.Name.text = container.name = chara.Id + " " + chara.Name;
@@ -121,9 +120,9 @@ public class UmaViewerUI : MonoBehaviour
                 ListCostumes(charaInstance.Id, false);
             });
 
-            if (charaIcon)
+            if (chara.Icon)
             {
-                container.Image.sprite = charaIcon;
+                container.Image.sprite = chara.Icon;
                 container.Image.enabled = true;
             }
 
@@ -134,6 +133,12 @@ public class UmaViewerUI : MonoBehaviour
                 HighlightChildImage(AnimationSetList.content, imageInstance2);
                 ListAnimations(charaInstance.Id, false);
             });
+
+            if (chara.Icon)
+            {
+                container.Image.sprite = chara.Icon;
+                container.Image.enabled = true;
+            }
         }
     }
 
@@ -202,6 +207,12 @@ public class UmaViewerUI : MonoBehaviour
                 ListCostumes(charaInstance.Id, true);
             });
 
+            if (chara.Icon)
+            {
+                container.Image.sprite = chara.Icon;
+                container.Image.enabled = true;
+            }
+
             container = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
             container.Name.text = container.name = chara.Id + " " + chara.Name;
             var imageInstance2 = container.GetComponent<Image>();
@@ -209,6 +220,12 @@ public class UmaViewerUI : MonoBehaviour
                 HighlightChildImage(MiniAnimationSetList.content, imageInstance2);
                 ListAnimations(charaInstance.Id, true);
             });
+
+            if (chara.Icon)
+            {
+                container.Image.sprite = chara.Icon;
+                container.Image.enabled = true;
+            }
         }
     }
 
