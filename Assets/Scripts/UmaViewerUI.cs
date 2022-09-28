@@ -580,6 +580,8 @@ public class UmaViewerUI : MonoBehaviour
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+
+            // Pause and Seek;
             Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
             animator.Play(0, -1, val);
 
@@ -613,13 +615,16 @@ public class UmaViewerUI : MonoBehaviour
         {
             if(Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
             {
+                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
                 var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
                 var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
                 if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
                 {
+                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
+
                     AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(Mathf.Repeat(AnimeState.normalizedTime, 1) * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-                    AnimationSlider.SetValueWithoutNotify(Mathf.Repeat(AnimeState.normalizedTime, 1));
+                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
+                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
                 }
             }
         }
