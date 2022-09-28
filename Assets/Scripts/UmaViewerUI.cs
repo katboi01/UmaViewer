@@ -310,7 +310,6 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-
     public void SetCriWare(bool value)
     {
         isCriware = value;
@@ -319,7 +318,6 @@ public class UmaViewerUI : MonoBehaviour
     public void SetHeadFix(bool value)
     {
         isHeadFix = value;
-        UnityEngine.Debug.Log(isHeadFix);
     }
 
     void ListLiveSounds(int songid)
@@ -456,7 +454,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadedAnimation()
     {
-        AnimationSlider.value = 0f;
+        if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
+        AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
     }
@@ -501,7 +500,6 @@ public class UmaViewerUI : MonoBehaviour
             {
                 cySpring.EnablePhysics(isOn);
             }
-            
         }
     }
 
@@ -547,12 +545,12 @@ public class UmaViewerUI : MonoBehaviour
                     source.time = source.clip.length * val;
                 }
             }
-            
         }
     }
 
     public void AnimationPause()
     {
+        if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         if (Builder.OverrideController.animationClips.Length > 0)
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
@@ -577,6 +575,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void AnimationProgressChange(float val)
     {
+        if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         if (animator != null)
         {
@@ -590,12 +589,9 @@ public class UmaViewerUI : MonoBehaviour
 
     public void AnimationSpeedChange(float val)
     {
-        var animator = Builder.CurrentUMAContainer.UmaAnimator;
-        if (animator != null)
-        {
-            Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-            AnimationSpeedText.text = $"Animation Speed: {val}";
-        }
+        AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
+        if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
+        Builder.CurrentUMAContainer.UmaAnimator.speed = val;
     }
 
     private void Update()
@@ -612,15 +608,19 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
 
-        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+
+        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
         {
-            var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-            var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-            if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
+            if(Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
             {
-                AnimationTitleText.text = AnimeClip.name;
-                AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(AnimeState.normalizedTime * AnimeClip.length), ToTimeFormat(AnimeClip.length));
-                AnimationSlider.SetValueWithoutNotify(AnimeState.normalizedTime);
+                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
+                {
+                    AnimationTitleText.text = AnimeClip.name;
+                    AnimationProgressText.text = string.Format("{0} / {1}", ToTimeFormat(Mathf.Repeat(AnimeState.normalizedTime, 1) * AnimeClip.length), ToTimeFormat(AnimeClip.length));
+                    AnimationSlider.SetValueWithoutNotify(Mathf.Repeat(AnimeState.normalizedTime, 1));
+                }
             }
         }
     }

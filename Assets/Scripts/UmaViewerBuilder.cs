@@ -173,8 +173,9 @@ public class UmaViewerBuilder : MonoBehaviour
         int head_id;
         string head_costumeId;
         int tailId = (int)charaData["tailModelId"];
-
-        if (id == 9006) tailId = -1;//The tailId of 9006 is 1, but the character has no tail
+       
+        //The tailId of 9006 is 1, but the character has no tail
+        if (id == 9006) tailId = -1;
 
         if (UI.isHeadFix && CurrentHead != null)
         {
@@ -887,11 +888,12 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_e);
                 RecursiveLoadAsset(motion_s);
             }
-
-            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
+            
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
+         
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
         else if(clip.name.EndsWith("_S"))
@@ -916,9 +918,9 @@ public class UmaViewerBuilder : MonoBehaviour
             else
             {
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+                CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             }
 
-            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
 
     }
