@@ -173,6 +173,9 @@ public class UmaViewerBuilder : MonoBehaviour
         int head_id;
         string head_costumeId;
         int tailId = (int)charaData["tailModelId"];
+
+        if (id == 9006) tailId = -1;//The tailId of 9006 is 1, but the character has no tail
+
         if (UI.isHeadFix && CurrentHead != null)
         {
             head_id = CurrentHead.id;
@@ -229,9 +232,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-
         
-
         if (tailId != 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
@@ -617,7 +618,7 @@ public class UmaViewerBuilder : MonoBehaviour
             Type aType = asset.GetType();
             if (aType == typeof(AnimationClip))
             {
-                if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator)
+                if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator && CurrentUMAContainer.UmaAnimator.runtimeAnimatorController)
                 {
                     LoadAnimation(asset as AnimationClip);
                 }
