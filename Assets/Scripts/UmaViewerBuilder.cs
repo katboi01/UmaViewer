@@ -901,7 +901,15 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadAnimation(AnimationClip clip)
     {
         bool needTransit = false;
-        if (clip.name.EndsWith("_loop"))
+        if (clip.name.EndsWith("_S"))
+        {
+            CurrentUMAContainer.OverrideController["clip_s"] = clip;
+        }
+        else if (clip.name.EndsWith("_E"))
+        {
+            CurrentUMAContainer.OverrideController["clip_e"] = clip;
+        }
+        else if (clip.name.EndsWith("_loop"))
         {
             var motion_s = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
             var motion_e = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
@@ -918,14 +926,6 @@ public class UmaViewerBuilder : MonoBehaviour
          
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
-        }
-        else if(clip.name.EndsWith("_S"))
-        {
-            CurrentUMAContainer.OverrideController["clip_s"] = clip;
-        }
-        else if(clip.name.EndsWith("_E"))
-        {
-            CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
         else
         {
