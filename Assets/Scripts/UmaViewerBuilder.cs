@@ -893,7 +893,7 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
          
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
         else if(clip.name.EndsWith("_S"))
