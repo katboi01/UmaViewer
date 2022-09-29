@@ -28,6 +28,12 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public UmaHeadData CurrentHead;
 
+    public Shader hairShader;
+    public Shader faceShader;
+    public Shader eyeShader;
+    public Shader cheekShader;
+    public Shader eyebrowShader;
+
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
@@ -606,8 +612,19 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (bundle.name == "shader.a")
         {
-            if (Main.ShadersLoaded) return;
-            else Main.ShadersLoaded = true;
+            if (Main.ShadersLoaded)
+            {
+                return;
+            }
+            else
+            {
+                hairShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
+                faceShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
+                eyeShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
+                cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
+                eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+                Main.ShadersLoaded = true;
+            }
         }
 
         foreach (string name in bundle.GetAllAssetNames())
@@ -817,19 +834,25 @@ public class UmaViewerBuilder : MonoBehaviour
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
+                            m.shader = cheekShader;
                             m.CopyPropertiesFromMaterial(TransMaterialCharas);
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
+                            m.shader = faceShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             m.SetColor("_RimColor", new Color(0, 0, 0, 0));
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
+                            m.shader = eyeShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
                         case "Gallop/3D/Chara/ToonHair/TSER":
+                            m.shader = hairShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
-
+                        case "Gallop/3D/Chara/ToonMayu":
+                            m.shader = eyebrowShader;
+                            break;
                         default:
                             Debug.Log(m.shader.name);
                             // m.shader = Shader.Find("Nars/UmaMusume/Body");
