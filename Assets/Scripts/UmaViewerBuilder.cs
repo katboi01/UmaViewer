@@ -33,6 +33,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public Shader eyeShader;
     public Shader cheekShader;
     public Shader eyebrowShader;
+    public Shader alphaShader;
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
@@ -627,6 +628,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 eyeShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
                 cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
                 eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+                alphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
                 Main.ShadersLoaded = true;
             }
         }
@@ -839,6 +841,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 else
                 {
+                    //Glasses's shader need to change manually.
+                    if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
+                    {
+                        m.shader = alphaShader;
+                    }
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
@@ -968,6 +975,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void UnloadAllBundle(bool unloadAllObjects = false)
     {
+
         foreach (var bundle in Main.LoadedBundles)
         {
             bundle.Value.Unload(unloadAllObjects);
@@ -1019,6 +1027,8 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (CurrentUMAContainer != null)
         {
+            //It seems that OnDestroy will executed after new model loaded, which cause new FacialPanels empty...
+            UmaViewerUI.Instance.LoadFacialPanels(null);
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
