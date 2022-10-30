@@ -966,6 +966,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void UnloadAllBundle(bool unloadAllObjects = false)
     {
+
         foreach (var bundle in Main.LoadedBundles)
         {
             bundle.Value.Unload(unloadAllObjects);
@@ -1017,6 +1018,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (CurrentUMAContainer != null)
         {
+            //It seems that OnDestroy will executed after new model loaded, which cause new FacialPanels empty...
             UmaViewerUI.Instance.LoadFacialPanels(null);
             Destroy(CurrentUMAContainer.gameObject);
         }
