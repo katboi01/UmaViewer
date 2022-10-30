@@ -58,6 +58,8 @@ public class UmaViewerUI : MonoBehaviour
     public TMP_InputField GifWidth;
     public TMP_InputField GifHeight;
     public Toggle GifTransparent;
+    public Slider GifQuality;
+    public TextMeshProUGUI GifQualityLabel;
 
     public Slider GifSlider;
     public Button GifButton;
@@ -326,6 +328,11 @@ public class UmaViewerUI : MonoBehaviour
     public void SetHeadFix(bool value)
     {
         isHeadFix = value;
+    }
+
+    public void UpdateGifQualityLabel(float value)
+    {
+        GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
     }
 
     void ListLiveSounds(int songid)

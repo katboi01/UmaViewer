@@ -39,11 +39,11 @@ public class Screenshot : MonoBehaviour
         recording = true;
         UmaViewerUI.Instance.GifButton.interactable = false;
         UmaViewerUI.Instance.GifSlider.value = 0;
-        StartCoroutine(RecordGif(int.Parse(UmaViewerUI.Instance.GifWidth.text), int.Parse(UmaViewerUI.Instance.GifHeight.text), UmaViewerUI.Instance.GifTransparent.isOn));
+        StartCoroutine(RecordGif(int.Parse(UmaViewerUI.Instance.GifWidth.text), int.Parse(UmaViewerUI.Instance.GifHeight.text), UmaViewerUI.Instance.GifTransparent.isOn, (int)UmaViewerUI.Instance.GifQuality.value));
     }
 
 
-    private IEnumerator RecordGif(int width, int height, bool transparent)
+    private IEnumerator RecordGif(int width, int height, bool transparent, int quality)
     {
         var ppLayer = Camera.main.GetComponent<PostProcessLayer>();
         bool oldPpState = ppLayer.enabled;
@@ -56,7 +56,7 @@ public class Screenshot : MonoBehaviour
         int frame = 0;
         var animeClip = uma.OverrideController["clip_2"];
         var clipFrameCount = Mathf.RoundToInt(animeClip.length * animeClip.frameRate);
-        StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate));
+        StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate, quality));
 
         animator.speed = 0;
         animator.Play(0, -1, 0);

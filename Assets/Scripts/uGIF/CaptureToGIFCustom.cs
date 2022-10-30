@@ -23,13 +23,13 @@ namespace uGIF
 			Instance = this;
         }
 
-        public IEnumerator Encode (float fps)
+        public IEnumerator Encode (float fps, int quality)
 		{
 			bytes = null;
 			stop = false;
 			UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
 			yield return new WaitForSeconds(0.1f);
-			yield return _Encode(fps);
+			yield return _Encode(fps, quality);
             UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Saving gif...";
 			yield return new WaitForSeconds(0.1f);
 			yield return WaitForBytes();
@@ -47,12 +47,13 @@ namespace uGIF
             UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record GIF";
         }
 
-		public IEnumerator _Encode (float fps)
+		public IEnumerator _Encode (float fps, int quality)
 		{
 			var ge = new GIFEncoder ();
 			ge.useGlobalColorTable = true;
 			ge.repeat = 0;
 			ge.FPS = fps;
+			ge.quality = quality;
 			ge.transparent = new Color32 (0, 0, 0, 0);
 			ge.dispose = 2;
 
