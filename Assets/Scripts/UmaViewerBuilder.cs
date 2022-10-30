@@ -47,10 +47,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public IEnumerator LoadUma(int id, string costumeId, bool mini)
     {
-        if (CurrentUMAContainer != null)
-        {
-            Destroy(CurrentUMAContainer);
-        }
+        UnloadUma();
         CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainer>();
 
         UnloadAllBundle();
@@ -378,10 +375,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadProp(UmaDatabaseEntry entry)
     {
-        if (CurrentOtherContainer != null)
-        {
-            Destroy(CurrentOtherContainer);
-        }
+        UnloadProp();
         UnloadAllBundle();
 
         CurrentOtherContainer = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainer>();
@@ -394,10 +388,7 @@ public class UmaViewerBuilder : MonoBehaviour
         var BGasset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"pfb_env_live{live.BackGroundId}_controller000"));
         if (asset == null|| BGasset == null) return;
 
-        if (CurrentLiveContainer != null)
-        {
-            Destroy(CurrentLiveContainer.gameObject);
-        }
+        UnloadLive();
         UnloadAllBundle();
         CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
@@ -606,6 +597,10 @@ public class UmaViewerBuilder : MonoBehaviour
             UI.LoadedAssetsAdd(entry);
             LoadBundle(bundle, IsSubAsset);
         }
+        else
+        {
+            Debug.LogError($"{entry.Name} - {filePath} does not exist");
+        }
     }
 
     private void LoadBundle(AssetBundle bundle, bool IsSubAsset = false)
@@ -634,65 +629,69 @@ public class UmaViewerBuilder : MonoBehaviour
             if (asset == null) { continue; }
             Debug.Log("Bundle:" + bundle.name + "/" + name + $" ({asset.GetType()})");
             Type aType = asset.GetType();
-            if (aType == typeof(AnimationClip))
+            switch (asset)
             {
-                if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator && CurrentUMAContainer.UmaAnimator.runtimeAnimatorController)
-                {
-                    LoadAnimation(asset as AnimationClip);
-                }
+                case AnimationClip aClip:
+                    {
+                        if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator && CurrentUMAContainer.UmaAnimator.runtimeAnimatorController)
+                        {
+                            LoadAnimation(aClip);
+                        }
 
-                if (!CurrentLiveContainer)
-                    UnloadBundle(bundle, false);
-            }
-            else if (aType == typeof(GameObject))
-            {
-                if (bundle.name.Contains("cloth"))
-                {
-                    if (!CurrentUMAContainer.PhysicsController)
-                    {
-                        CurrentUMAContainer.PhysicsController = new GameObject("PhysicsController");
-                        CurrentUMAContainer.PhysicsController.transform.SetParent(CurrentUMAContainer.transform);
+                        if (!CurrentLiveContainer)
+                            UnloadBundle(bundle, false);
+                        break;
                     }
-                    Instantiate(asset as GameObject, CurrentUMAContainer.PhysicsController.transform);
-                }
-                else if (bundle.name.Contains("/head/"))
-                {
-                    LoadHead(asset as GameObject);
-                }
-                else if (bundle.name.Contains("/body/"))
-                {
-                    LoadBody(asset as GameObject);
-                }
-                else if (bundle.name.Contains("/tail/"))
-                {
-                    LoadTail(asset as GameObject);
-                }
-                else
-                {
-                    if (!IsSubAsset)
+                case GameObject go:
                     {
-                        LoadProp(asset as GameObject);
+                        if (bundle.name.Contains("cloth"))
+                        {
+                            if (!CurrentUMAContainer.PhysicsController)
+                            {
+                                CurrentUMAContainer.PhysicsController = new GameObject("PhysicsController");
+                                CurrentUMAContainer.PhysicsController.transform.SetParent(CurrentUMAContainer.transform);
+                            }
+                            Instantiate(go, CurrentUMAContainer.PhysicsController.transform);
+                        }
+                        else if (bundle.name.Contains("/head/"))
+                        {
+                            LoadHead(go);
+                        }
+                        else if (bundle.name.Contains("/body/"))
+                        {
+                            LoadBody(go);
+                        }
+                        else if (bundle.name.Contains("/tail/"))
+                        {
+                            LoadTail(go);
+                        }
+                        else
+                        {
+                            if (!IsSubAsset)
+                            {
+                                LoadProp(go);
+                            }
+                        }
+                        break;
                     }
-                }
-            }
-            else if (aType == typeof(Shader))
-            {
-                ShaderList.Add(asset as Shader);
-            }
-            else if (aType == typeof(Texture2D))
-            {
-                if (bundle.name.Contains("/mini/head"))
-                {
-                    CurrentUMAContainer.MiniHeadTextures.Add(asset as Texture2D);
-                }
-                else if (bundle.name.Contains("/tail/"))
-                {
-                    CurrentUMAContainer.TailTextures.Add(asset as Texture2D);
-                }
-                else if (bundle.name.Contains("bdy0"))
-                {
-                    CurrentUMAContainer.GenericBodyTextures.Add(asset as Texture2D);
-                }
+                case Shader sha:
+                    ShaderList.Add(sha);
+                    break;
+                case Texture2D tex2D:
+
+                    if (bundle.name.Contains("/mini/head"))
+                    {
+                        CurrentUMAContainer.MiniHeadTextures.Add(tex2D);
+                    }
+                    else if (bundle.name.Contains("/tail/"))
+                    {
+                        CurrentUMAContainer.TailTextures.Add(tex2D);
+                    }
+                    else if (bundle.name.Contains("bdy0"))
+                    {
+                        CurrentUMAContainer.GenericBodyTextures.Add(tex2D);
+                    }
+                    break;
             }
         }
     }
@@ -911,8 +910,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.EndsWith("_loop"))
         {
-            var motion_s = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            var motion_e = Main.AbList.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            var motion_s = Main.Motions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            var motion_e = Main.Motions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
             needTransit = (motion_s != null && motion_e != null);
             if (needTransit)
             {
@@ -990,5 +989,28 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public void UnloadProp()
+    {
+        if(CurrentOtherContainer != null)
+        {
+            Destroy(CurrentOtherContainer.gameObject);
+        }
+    }
+
+    public void UnloadLive()
+    {
+        if (CurrentLiveContainer != null)
+        {
+            Destroy(CurrentLiveContainer.gameObject);
+        }
+    }
+    public void UnloadUma()
+    {
+        if (CurrentUMAContainer != null)
+        {
+            Destroy(CurrentUMAContainer.gameObject);
+        }
     }
 }

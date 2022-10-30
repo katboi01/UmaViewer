@@ -159,6 +159,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             Destroy(ui.gameObject);
         }
+        if (target == null) return;
         List<FacialMorph> tempMorph = new List<FacialMorph>();
         tempMorph.AddRange(target.EyeBrowMorphs);
         tempMorph.AddRange(target.EyeMorphs);
