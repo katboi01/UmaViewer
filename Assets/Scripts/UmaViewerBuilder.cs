@@ -832,6 +832,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 else
                 {
+                    //Glasses's shader need to change manually.
                     if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
                     {
                         m.shader = alphaShader;
