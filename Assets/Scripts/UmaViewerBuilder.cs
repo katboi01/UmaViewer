@@ -1017,6 +1017,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (CurrentUMAContainer != null)
         {
+            UmaViewerUI.Instance.LoadFacialPanels(null);
             Destroy(CurrentUMAContainer.gameObject);
         }
     }

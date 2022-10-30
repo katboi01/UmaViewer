@@ -50,10 +50,6 @@ public class UmaContainer : MonoBehaviour
 
     public void OnDestroy()
     {
-        if (FaceDrivenKeyTargets != null)
-        {
-            UmaViewerUI.Instance.LoadFacialPanels(null);
-        }
         if (TryGetComponent<PuppetMaster>(out PuppetMaster t))
         {
             Destroy(this);
