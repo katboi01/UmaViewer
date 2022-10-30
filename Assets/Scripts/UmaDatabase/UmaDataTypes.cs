@@ -17,6 +17,19 @@ public class UmaCharaData
     public string tail_model_id;
 }
 
+public class UmaHeadData
+{
+    public int id;
+    public string costumeId;
+    public int tailId;
+}
+
+public class UmaLyricsData
+{
+    public float time;
+    public string text;
+}
+
 public enum UmaFileType
 {
     _3d_cutt,
@@ -51,4 +64,7 @@ public enum UmaFileType
     storyevent,
     supportcard,
     uianimation,
+    transferevent,
+    teambuilding,
+    challengematch
 }

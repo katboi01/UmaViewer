@@ -7,16 +7,25 @@ public class UmaViewerDownload : MonoBehaviour
 {
     public static IEnumerator DownloadText(string url, System.Action<string> callback)
     {
-        UnityWebRequest www = UnityWebRequest.Get(url);
-        yield return www.SendWebRequest();
-
-        if (www.result != UnityWebRequest.Result.Success)
+        if (PlayerPrefs.GetString(url, "")=="")
         {
-            Debug.Log(www.error);
+            UnityWebRequest www = UnityWebRequest.Get(url);
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                PlayerPrefs.SetString(url, www.downloadHandler.text);
+                callback(www.downloadHandler.text);
+            }
         }
         else
         {
-            callback(www.downloadHandler.text);
+            callback(PlayerPrefs.GetString(url, ""));
         }
+        
     }
 }

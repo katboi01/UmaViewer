@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 1c86ba130e5a5458a98e3b482192a6dd
+labels:
+- Ragdoll
+- Physics
+- Activeragdolls
+timeCreated: 1444739157
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 10100
+  icon: {fileID: 2800000, guid: 8894e7b9cd0dd9a4b945ffc044647939, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

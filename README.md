@@ -1,4 +1,9 @@
 # UmaViewer
-Asset Viewer for Uma Musume
+Asset Viewer for Uma Musume.
 
-Running the project requires unity 2020.3.28f1 or similar and "JSON .NET For Unity" (free on asset store).
+Add FacialMorph, Physics, LiveSound Support.
+
+Running the project requires unity 2020.3.37f1c1 or similar and "JSON .NET For Unity".
+
+### Special Thank to:
+MarshmallowAndroid: [UmaMusumeExplorer](https://github.com/MarshmallowAndroid/UmaMusumeExplorer) for acb/awb decoder.

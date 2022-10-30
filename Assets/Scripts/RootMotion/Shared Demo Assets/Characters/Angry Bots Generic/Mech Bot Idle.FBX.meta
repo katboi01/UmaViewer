@@ -1,0 +1,184 @@
+fileFormatVersion: 2
+guid: a051f9ee8d34e4038b0539c5ab5f6e43
+timeCreated: 1434698989
+licenseType: Store
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: mech_main_body
+    100004: mech_left_toe
+    100010: mech_left_ankle
+    100012: //RootNode
+    100016: mech_right_toe
+    100018: mech_root
+    100022: mech_head
+    100024: mech_neck
+    100026: mech_left_lower_leg
+    100028: mech_left_upper_leg
+    100030: mech_right_upper_leg
+    100032: mech_right_lower_leg
+    100034: mech_right_ankle
+    400000: mech_main_body
+    400004: mech_left_toe
+    400010: mech_left_ankle
+    400012: //RootNode
+    400016: mech_right_toe
+    400018: mech_root
+    400022: mech_head
+    400024: mech_neck
+    400026: mech_left_lower_leg
+    400028: mech_left_upper_leg
+    400030: mech_right_upper_leg
+    400032: mech_right_lower_leg
+    400034: mech_right_ankle
+    2300000: mech_main_body
+    2300002: mech_left_toe
+    2300004: mech_left_ankle
+    2300006: mech_right_toe
+    2300008: mech_head
+    2300010: mech_neck
+    2300012: mech_left_lower_leg
+    2300014: mech_left_upper_leg
+    2300016: mech_right_upper_leg
+    2300018: mech_right_lower_leg
+    2300020: mech_right_ankle
+    3300000: mech_main_body
+    3300002: mech_left_toe
+    3300004: mech_left_ankle
+    3300006: mech_right_toe
+    3300008: mech_head
+    3300010: mech_neck
+    3300012: mech_left_lower_leg
+    3300014: mech_left_upper_leg
+    3300016: mech_right_upper_leg
+    3300018: mech_right_lower_leg
+    3300020: mech_right_ankle
+    4300000: mech_right_upper_leg
+    4300002: mech_right_lower_leg
+    4300004: mech_right_ankle
+    4300006: mech_right_toe
+    4300008: mech_main_body
+    4300010: mech_neck
+    4300012: mech_head
+    4300014: mech_left_upper_leg
+    4300016: mech_left_lower_leg
+    4300018: mech_left_ankle
+    4300020: mech_left_toe
+    7400000: Mech Bot Idle
+    7400002: __preview__Take 001
+    9500000: //RootNode
+    11100000: //RootNode
+  materials:
+    importMaterials: 0
+    materialName: 3
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 3
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 3
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 2
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Mech Bot Idle
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 90
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: mech_root
+        weight: 1
+      - path: mech_root/mech_left_upper_leg
+        weight: 1
+      - path: mech_root/mech_left_upper_leg/mech_left_lower_leg
+        weight: 1
+      - path: mech_root/mech_left_upper_leg/mech_left_lower_leg/mech_left_ankle
+        weight: 1
+      - path: mech_root/mech_left_upper_leg/mech_left_lower_leg/mech_left_ankle/mech_left_toe
+        weight: 1
+      - path: mech_root/mech_main_body
+        weight: 1
+      - path: mech_root/mech_main_body/mech_neck
+        weight: 1
+      - path: mech_root/mech_main_body/mech_neck/mech_head
+        weight: 1
+      - path: mech_root/mech_right_upper_leg
+        weight: 1
+      - path: mech_root/mech_right_upper_leg/mech_right_lower_leg
+        weight: 1
+      - path: mech_root/mech_right_upper_leg/mech_right_lower_leg/mech_right_ankle
+        weight: 1
+      - path: mech_root/mech_right_upper_leg/mech_right_lower_leg/mech_right_ankle/mech_right_toe
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .0120000001
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
