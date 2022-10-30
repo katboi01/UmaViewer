@@ -1,0 +1,77 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.IO;
+using System.Collections.Generic;
+
+using System.Threading;
+using System.Text;
+using System;
+
+namespace uGIF
+{
+	public class CaptureToGIFCustom : MonoBehaviour
+	{
+		public static CaptureToGIFCustom Instance;
+		public List<Image> Frames = new List<Image>();
+		public bool stop = false;
+
+		[System.NonSerialized]
+		public byte[] bytes = null;
+
+        private void Awake()
+        {
+			Instance = this;
+        }
+
+        public IEnumerator Encode (float fps)
+		{
+			bytes = null;
+			stop = false;
+			UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
+			yield return new WaitForSeconds(0.1f);
+			yield return _Encode(fps);
+            UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Saving gif...";
+			yield return new WaitForSeconds(0.1f);
+			yield return WaitForBytes();
+		}
+
+		IEnumerator WaitForBytes() {
+			while(bytes == null) yield return new WaitForEndOfFrame();
+            string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+            Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
+            File.WriteAllBytes(fileName + ".gif", bytes);
+            bytes = null;
+            Debug.Log("Gif saved!");
+			Frames.Clear();
+			stop = false;
+            UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record GIF";
+        }
+
+		public IEnumerator _Encode (float fps)
+		{
+			var ge = new GIFEncoder ();
+			ge.useGlobalColorTable = true;
+			ge.repeat = 0;
+			ge.FPS = fps;
+			ge.transparent = new Color32 (0, 0, 0, 0);
+			ge.dispose = 2;
+
+			var stream = new MemoryStream ();
+			ge.Start (stream);
+            while (!stop || Frames.Count > 0)
+            {
+				if(Frames.Count>0 && Frames[0] != null)
+				{
+					Frames[0].Flip();
+					ge.AddFrame(Frames[0]);
+					Frames.RemoveAt(0);
+				}
+				yield return 0;
+            }
+			ge.Finish ();
+			bytes = stream.GetBuffer ();
+			stream.Close ();
+			yield break;
+		}
+	}
+}

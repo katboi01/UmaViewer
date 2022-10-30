@@ -17,17 +17,17 @@ public class UmaViewerUI : MonoBehaviour
     
     public CanvasScaler canvasScaler;
 
-    //normal models
+    [Header("normal models")]
     public ScrollRect CharactersList;
     public ScrollRect CostumeList;
     public ScrollRect AnimationSetList;
     public ScrollRect AnimationList;
-    //mini models
+    [Header("mini models")]
     public ScrollRect MiniCharactersList;
     public ScrollRect MiniCostumeList;
     public ScrollRect MiniAnimationSetList;
     public ScrollRect MiniAnimationList;
-    //other
+    [Header("other")]
     public ScrollRect PropList;
     public ScrollRect SceneList;
 
@@ -36,14 +36,14 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
 
-    //audios
+    [Header("audio")]
     public Slider AudioSlider;
     public Button AudioPlayButton;
     public TextMeshProUGUI TitleText;
     public TextMeshProUGUI ProgressText;
     public Text LyricsText;
 
-    //animations
+    [Header("animations")]
     public Slider AnimationSlider;
     public Slider AnimationSpeedSlider;
     public Button AnimationPlayButton;
@@ -51,9 +51,16 @@ public class UmaViewerUI : MonoBehaviour
     public TextMeshProUGUI AnimationSpeedText;
     public TextMeshProUGUI AnimationProgressText;
 
-    //settings
-    public TMP_InputField SSWidth, SSHeight;
+    [Header("settings")]
+    public TMP_InputField SSWidth;
+    public TMP_InputField SSHeight;
+    public Toggle SSTransparent;
+    public TMP_InputField GifWidth;
+    public TMP_InputField GifHeight;
+    public Toggle GifTransparent;
 
+    public Slider GifSlider;
+    public Button GifButton;
     public List<GameObject> TogglablePanels = new List<GameObject>();
 
     public GameObject UmaContainerPrefab;
@@ -293,7 +300,7 @@ public class UmaViewerUI : MonoBehaviour
         //Common costumes
         List<string> costumes = new List<string>();
         nameVar = mini ? "pfb_mbdy0" : $"pfb_bdy0";
-        foreach (var entry in Main.AbList.Where(a => a.Name.StartsWith("3d/chara/") && a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
+        foreach (var entry in Main.AbChara.Where(a => a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
         {
             string id = Path.GetFileName(entry.Name);
             id = id.Split('_')[1].Substring(mini ? 4 : 3) + "_" + id.Split('_')[2] + "_" + id.Split('_')[3];

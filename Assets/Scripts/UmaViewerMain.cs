@@ -18,7 +18,9 @@ public class UmaViewerMain : MonoBehaviour
     public List<CharaEntry> Characters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
     public List<UmaDatabaseEntry> AbList = new List<UmaDatabaseEntry>();
-    public List<UmaDatabaseEntry> Motions = new List<UmaDatabaseEntry>();
+    public List<UmaDatabaseEntry> AbMotions = new List<UmaDatabaseEntry>();
+    public List<UmaDatabaseEntry> AbSounds = new List<UmaDatabaseEntry>();
+    public List<UmaDatabaseEntry> AbChara = new List<UmaDatabaseEntry>();
 
     [Header("Asset Memory")]
     public bool ShadersLoaded = false;
@@ -29,7 +31,9 @@ public class UmaViewerMain : MonoBehaviour
         Instance = this;
         Application.targetFrameRate = -1;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
-        Motions = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath)).ToList();
+        AbChara = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath)).ToList();
+        AbMotions = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath)).ToList();
+        AbSounds = AbList.Where(ab => ab.Name.EndsWith(".awb") || ab.Name.EndsWith(".acb")).ToList();
     }
 
     IEnumerator Start()

@@ -29,22 +29,16 @@ public class UmaDatabaseController
     /// https://prd-storage-umamusume.akamaized.net/dl/resources/
     /// </summary>
     public static string ServerUrl = "https://prd-storage-umamusume.akamaized.net/dl/resources/";
-    /// <summary>
-    /// Android/assetbundles/
-    /// </summary>
+    /// <summary> Android/assetbundles/ </summary>
     public static string AssetUrl = "Windows/assetbundles/";
-    /// <summary>
-    /// 3d/chara/body/
-    /// </summary>
+    /// <summary> 3d/chara/body/ </summary>
     public static string BodyPath = "3d/chara/body/";
-    /// <summary>
-    /// 3d/chara/head/
-    /// </summary>
+    /// <summary> 3d/chara/head/ </summary>
     public static string HeadPath = "3d/chara/head/";
-    /// <summary>
-    /// 3d/motion/
-    /// </summary>
+    /// <summary> 3d/motion/ </summary>
     public static string MotionPath = "3d/motion/";
+    /// <summary> 3d/chara/ </summary>
+    public static string CharaPath = "3d/chara/";
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<UmaCharaData> CharaData;
 

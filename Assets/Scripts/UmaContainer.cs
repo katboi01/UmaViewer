@@ -31,23 +31,6 @@ public class UmaContainer : MonoBehaviour
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
 
-    public static Transform FindBoneInChildren(Transform trans, string name)
-    {
-        foreach (Transform t in trans)
-        {
-            if (t.name == name)
-            {
-                return t;
-            }
-            else
-            {
-                Transform candidate = FindBoneInChildren(t, name);
-                if (candidate != null) return candidate;
-            }
-        }
-        return null;
-    }
-
     public void OnDestroy()
     {
         if (FaceDrivenKeyTargets != null)

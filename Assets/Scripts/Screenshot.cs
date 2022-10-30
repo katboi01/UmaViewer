@@ -1,10 +1,16 @@
 using System;
+using System.Collections;
 using System.IO;
+using uGIF;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.UIElements;
+using Image = uGIF.Image;
 
 public class Screenshot : MonoBehaviour
 {
     public static Screenshot Instance;
+    bool recording = false;
 
     private void Awake()
     {
@@ -13,7 +19,11 @@ public class Screenshot : MonoBehaviour
 
     public static void TakeScreenshot()
     {
-        var image = GrabFrame(Screen.width, Screen.height);
+        int width = int.Parse(UmaViewerUI.Instance.SSWidth.text);
+        int height = int.Parse(UmaViewerUI.Instance.SSHeight.text);
+        width = width == -1 ? Screen.width : width;
+        height = height == -1 ? Screen.height : height;
+        var image = GrabFrame(width, height, UmaViewerUI.Instance.SSTransparent.isOn);
 
         string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
         byte[] pngShot = ImageConversion.EncodeToPNG(image);
@@ -23,7 +33,55 @@ public class Screenshot : MonoBehaviour
         Destroy(image);
     }
 
-    public static Texture2D GrabFrame(int width, int height)
+    public void BeginRecordGif()
+    {
+        if (recording || UmaViewerBuilder.Instance.CurrentUMAContainer == null) return;
+        recording = true;
+        UmaViewerUI.Instance.GifButton.interactable = false;
+        UmaViewerUI.Instance.GifSlider.value = 0;
+        StartCoroutine(RecordGif(int.Parse(UmaViewerUI.Instance.GifWidth.text), int.Parse(UmaViewerUI.Instance.GifHeight.text), UmaViewerUI.Instance.GifTransparent.isOn));
+    }
+
+
+    private IEnumerator RecordGif(int width, int height, bool transparent)
+    {
+        var ppLayer = Camera.main.GetComponent<PostProcessLayer>();
+        bool oldPpState = ppLayer.enabled;
+        ppLayer.enabled = false;
+
+        var uma = UmaViewerBuilder.Instance.CurrentUMAContainer;
+        var animator = uma.UmaAnimator;
+        if (animator == null) yield break;
+
+        int frame = 0;
+        var animeClip = uma.OverrideController["clip_2"];
+        var clipFrameCount = Mathf.RoundToInt(animeClip.length * animeClip.frameRate);
+        StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate));
+
+        animator.speed = 0;
+        animator.Play(0, -1, 0);
+        yield return new WaitForSeconds(1); //wait for dynamicBone to settle;
+
+        while (frame < clipFrameCount)
+        {
+            UmaViewerUI.Instance.GifSlider.value = (float)frame / clipFrameCount;
+            animator.Play(0, -1, (float)frame/clipFrameCount);
+            yield return new WaitForEndOfFrame();
+            var tex = GrabFrame(width, height, transparent, transparent);
+            CaptureToGIFCustom.Instance.Frames.Add(new Image(tex));
+            Destroy(tex);
+            frame++;
+        }
+
+        recording = false;
+        animator.speed = 1;
+        ppLayer.enabled = oldPpState;
+        CaptureToGIFCustom.Instance.stop = true;
+        UmaViewerUI.Instance.GifButton.interactable = true;
+        UmaViewerUI.Instance.GifSlider.value = 1;
+    }
+
+    public static Texture2D GrabFrame(int width, int height, bool transparent = true, bool gifBackground = false)
     {
         var dimensions = GetResolution(width, height);
         width = dimensions.x;
@@ -31,9 +89,19 @@ public class Screenshot : MonoBehaviour
 
         Camera cam = Camera.main;
         int oldMask = cam.cullingMask;
-        var bak_cam_clearFlags = cam.clearFlags;
+        var oldClearFlags = cam.clearFlags;
+        Color oldBG = cam.backgroundColor;
+
         cam.cullingMask = ~LayerMask.GetMask("UI");
-        cam.clearFlags = CameraClearFlags.Depth;
+        if (gifBackground)
+        {
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color32(0, 0, 0, 0);
+        }
+        else if (transparent)
+        {
+            cam.clearFlags = CameraClearFlags.Depth;
+        }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
         var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
@@ -46,8 +114,9 @@ public class Screenshot : MonoBehaviour
         tex_color.ReadPixels(grab_area, 0, 0);
         tex_color.Apply();
 
-        cam.clearFlags = bak_cam_clearFlags;
+        cam.clearFlags = oldClearFlags;
         cam.cullingMask = oldMask;
+        cam.backgroundColor = oldBG;
         cam.targetTexture = null;
         RenderTexture.active = null;
         RenderTexture.ReleaseTemporary(render_texture);

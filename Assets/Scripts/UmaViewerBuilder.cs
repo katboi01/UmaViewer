@@ -276,7 +276,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.LoadPhysics();
-        LoadAsset(UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
+        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
     private void LoadMiniUma(int id, string costumeId)
@@ -299,7 +299,7 @@ public class UmaViewerBuilder : MonoBehaviour
             string body = $"3d/chara/mini/body/mbdy{costumeIdShort}/pfb_mbdy{costumeId}_0";
             asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
         }
-        else asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == $"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}");
+        else asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == $"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}");
         if (asset == null)
         {
             Debug.LogError("No body, can't load!");
@@ -318,7 +318,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     break;
             }
             //Load Body Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith("3d/chara/mini/body/") && a.Name.Contains(texPattern1)))
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith("3d/chara/mini/body/") && a.Name.Contains(texPattern1)))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -333,21 +333,21 @@ public class UmaViewerBuilder : MonoBehaviour
         if (costumeId != "00" && asset == null)
         {
             customHead = false;
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == $"3d/chara/mini/head/mchr{id}_00/pfb_mchr{id}_00_hair");
+            asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == $"3d/chara/mini/head/mchr{id}_00/pfb_mchr{id}_00_hair");
         }
         if (asset != null)
         {
             //Load Hair Textures
             if (customHead)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_{costumeId}/textures")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_{costumeId}/textures")))
                 {
                     RecursiveLoadAsset(asset1);
                 }
             }
             else
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_00/textures")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_00/textures")))
                 {
                     RecursiveLoadAsset(asset1);
                 }
@@ -362,7 +362,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (asset != null)
         {
             //Load Head Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr0001_00/textures/tex_mchr0001_00_face0_{skin}")))
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr0001_00/textures/tex_mchr0001_00_face0_{skin}")))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -573,7 +573,16 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             foreach (string prerequisite in entry.Prerequisites.Split(';'))
             {
-                RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                if (prerequisite.StartsWith(UmaDatabaseController.CharaPath))
+                {
+                    RecursiveLoadAsset(Main.AbChara.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                }
+                else if (prerequisite.StartsWith(UmaDatabaseController.MotionPath))
+                {
+                    RecursiveLoadAsset(Main.AbMotions.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                }
+                else
+                    RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true);
             }
         }
         LoadAsset(entry, IsSubAsset);
@@ -910,8 +919,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.EndsWith("_loop"))
         {
-            var motion_s = Main.Motions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            var motion_e = Main.Motions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            var motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            var motion_e = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
             needTransit = (motion_s != null && motion_e != null);
             if (needTransit)
             {
