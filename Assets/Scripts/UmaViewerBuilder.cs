@@ -298,7 +298,7 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
             string body = $"3d/chara/mini/body/mbdy{costumeIdShort}/pfb_mbdy{costumeId}_0";
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
+            asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == body);
         }
         else asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == $"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}");
         if (asset == null)
@@ -330,7 +330,7 @@ public class UmaViewerBuilder : MonoBehaviour
             RecursiveLoadAsset(asset);
 
         string hair = $"3d/chara/mini/head/mchr{id}_{costumeId}/pfb_mchr{id}_{costumeId}_hair";
-        asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == hair);
+        asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == hair);
         if (costumeId != "00" && asset == null)
         {
             customHead = false;
@@ -359,7 +359,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         string head = $"3d/chara/mini/head/mchr0001_00/pfb_mchr0001_00_face0";
-        asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == head);
+        asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == head);
         if (asset != null)
         {
             //Load Head Textures
@@ -639,7 +639,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
             if (asset == null) { continue; }
             Debug.Log("Bundle:" + bundle.name + "/" + name + $" ({asset.GetType()})");
-            Type aType = asset.GetType();
             switch (asset)
             {
                 case AnimationClip aClip:

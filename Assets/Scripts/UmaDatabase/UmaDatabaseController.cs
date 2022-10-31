@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using System.IO;
+using UnityEngine.XR;
 
 public class UmaDatabaseController
 {
@@ -39,20 +40,16 @@ public class UmaDatabaseController
     public static string MotionPath = "3d/motion/";
     /// <summary> 3d/chara/ </summary>
     public static string CharaPath = "3d/chara/";
+
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<UmaCharaData> CharaData;
+    public IEnumerable<FaceTypeData> FaceTypeData;
 
-    /// <summary>
-    /// Meta Database Connection
-    /// </summary>
+    /// <summary> Meta Database Connection </summary>
     private SqliteConnection metaDb;
-    /// <summary>
-    /// Master Database Connection
-    /// </summary>
+    /// <summary> Master Database Connection </summary>
     private SqliteConnection masterDb;
-    /// <summary>
-    /// Loads the file database
-    /// </summary>
+    /// <summary> Loads the file database </summary>
     public UmaDatabaseController()
     {
         try
@@ -71,6 +68,7 @@ public class UmaDatabaseController
             MetaEntries = ReadMeta(metaDb);
             masterDb.Open();
             CharaData = ReadMaster(masterDb);
+            FaceTypeData = ReadFaceTypeData(masterDb);
         }
         catch
         {
@@ -102,7 +100,6 @@ public class UmaDatabaseController
             catch(Exception e) { Debug.LogError("Error caught: " + e); }
         }
         return entries;
-        //conn.Close();
     }
 
     static IEnumerable<UmaCharaData> ReadMaster(SqliteConnection conn)
@@ -119,7 +116,29 @@ public class UmaDatabaseController
             };
             yield return entry;
         }
-        //conn.Close();
+    }
+
+    static IEnumerable<FaceTypeData> ReadFaceTypeData(SqliteConnection conn)
+    {
+        SqliteCommand sqlite_cmd = conn.CreateCommand();
+        sqlite_cmd.CommandText = "SELECT * FROM face_type_data";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        while (sqlite_datareader.Read())
+        {
+            FaceTypeData entry = new FaceTypeData()
+            {
+                label = sqlite_datareader.GetString(0),
+                eyebrow_l = sqlite_datareader.GetString(1),
+                eyebrow_r = sqlite_datareader.GetString(2),
+                eye_l = sqlite_datareader.GetString(3),
+                eye_r = sqlite_datareader.GetString(4),
+                mouth = sqlite_datareader.GetString(5),
+                mouth_shape_type = sqlite_datareader.GetInt32(6),
+                inverce_face_type = sqlite_datareader.GetString(7),
+                set_face_group = sqlite_datareader.GetInt32(8),
+            };
+            yield return entry;
+        }
     }
 
     public static string GetABPath(UmaDatabaseEntry entry)
