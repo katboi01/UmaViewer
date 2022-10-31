@@ -200,7 +200,7 @@ public class UmaViewerUI : MonoBehaviour
             Destroy(ui.gameObject);
         }
 
-
+        if (target == null) return;
 
         foreach(var emotion in target.Container.FaceEmotionKey)
         {
