@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
+    UmaViewerUI UI => UmaViewerUI.Instance;
+
     public JObject CharaData;
     public GameObject Body;
     public GameObject Tail;
@@ -20,7 +22,7 @@ public class UmaContainer : MonoBehaviour
     [Header("Face")]
     public List<AnimationClip> FacialClips = new List<AnimationClip>();
     public FaceDrivenKeyTarget FaceDrivenKeyTargets;
-
+    public List<FaceTypeData> FaceEmotionKey;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -130,6 +132,62 @@ public class UmaContainer : MonoBehaviour
         foreach (CySpringDataContainer spring in springs)
         {
             spring.InitializePhysics();
+        }
+    }
+
+    private void Update()
+    {
+        if(FaceDrivenKeyTargets != null)
+        {
+            if (FaceDrivenKeyTargets.needUpdate)
+            {
+                FaceDrivenKeyTargets.ChangeMorph();
+                FaceDrivenKeyTargets.needUpdate = false;
+            }
+            if (FaceDrivenKeyTargets.needAllUpdate)
+            {
+                FaceDrivenKeyTargets.ClearMorph();
+                foreach(var emotion in FaceEmotionKey)
+                {
+                    if(emotion.mouthTarget != null)
+                    {
+                        foreach (var key in emotion.mouthTarget)
+                        {
+                            key.morph.Weight += key.weight / 100 * emotion.Weight;
+                        }
+                    }
+                    if (emotion.eyeLTarget != null)
+                    {
+                        foreach (var key in emotion.eyeLTarget)
+                        {
+                            key.morph.Weight += key.weight / 100 * emotion.Weight;
+                        }
+                    }
+                    if (emotion.eyeRTarget != null)
+                    {
+                        foreach (var key in emotion.eyeRTarget)
+                        {
+                            key.morph.Weight += key.weight / 100 * emotion.Weight;
+                        }
+                    }
+                    if (emotion.eyebrowLTarget != null)
+                    {
+                        foreach (var key in emotion.eyeRTarget)
+                        {
+                            key.morph.Weight += key.weight / 100 * emotion.Weight;
+                        }
+                    }
+                    if (emotion.eyebrowRTarget != null)
+                    {
+                        foreach (var key in emotion.eyeRTarget)
+                        {
+                            key.morph.Weight += key.weight / 100 * emotion.Weight;
+                        }
+                    }
+                }
+                FaceDrivenKeyTargets.ChangeMorph();
+                FaceDrivenKeyTargets.needAllUpdate = false;
+            }
         }
     }
 }

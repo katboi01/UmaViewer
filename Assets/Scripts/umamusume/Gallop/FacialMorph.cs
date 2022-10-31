@@ -14,7 +14,7 @@ namespace Gallop
         public string tag = "";
         public bool direction;
         public FaceDrivenKeyTarget target;
-        private float _weight;
+        public float _weight;
         public float Weight
         {
             get
@@ -24,7 +24,7 @@ namespace Gallop
             set
             {
                 _weight = value;
-                target.ChangeMorph();
+                target.needUpdate = true;
             }
         }
         public List<TrsArray> trsArray;

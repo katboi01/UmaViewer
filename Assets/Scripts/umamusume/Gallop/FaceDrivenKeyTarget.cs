@@ -22,6 +22,10 @@ namespace Gallop
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
+        public bool needUpdate = false;
+        public bool needAllUpdate = false;
+        public UmaContainer Container;
+
         Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
         public void Initialize(List<Transform> objs)
         {
@@ -106,6 +110,8 @@ namespace Gallop
             FacialReset();
             MouthMorphs[3].Weight = 1;
             if (UmaViewerUI.Instance) { UmaViewerUI.Instance.LoadFacialPanels(this); }
+            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.LoadEmotionPanels(this); }
+            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.currentMorph = this; }
         }
         
         public void ChangeMorph()
@@ -129,6 +135,25 @@ namespace Gallop
 
             ApplyRotation();
         }
+
+        public void ClearMorph()
+        {
+            foreach (FacialMorph morph in EyeBrowMorphs)
+            {
+                morph._weight = 0;
+            }
+
+            foreach (FacialMorph morph in EyeMorphs)
+            {
+                morph._weight = 0;
+            }
+
+            foreach (FacialMorph morph in MouthMorphs)
+            {
+                morph._weight = 0;
+            }
+        }
+
         private void ProcessMorph(FacialMorph morph)
         {
             foreach (TrsArray trs in morph.trsArray)
