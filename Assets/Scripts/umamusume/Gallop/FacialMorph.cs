@@ -11,6 +11,7 @@ namespace Gallop
     public class FacialMorph
     {
         public string name;
+        public string tag = "";
         public bool direction;
         public FaceDrivenKeyTarget target;
         private float _weight;

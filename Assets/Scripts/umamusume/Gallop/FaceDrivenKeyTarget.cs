@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using Gallop.Live.Cutt;
+using System;
 
 namespace Gallop
 {
@@ -33,6 +35,7 @@ namespace Gallop
                     morph.target = this;
                     morph.direction = j > 0;
                     morph.name = "EyeBrow_" + i + "_" + (morph.direction ? "L" : "R");
+                    morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialEyebrowId), i);
                     morph.trsArray = _eyebrowTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
@@ -58,6 +61,7 @@ namespace Gallop
                     morph.target = this;
                     morph.direction = j > 0;
                     morph.name = "Eye_" + i + "_" + (morph.direction ? "L" : "R");
+                    morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialEyeId), i);
                     morph.trsArray = _eyeTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
@@ -83,6 +87,7 @@ namespace Gallop
                     morph.target = this;
                     morph.direction = j > 0;
                     morph.name = "Mouth_" + i + "_" + j;
+                    morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialMouthId), i);
                     morph.trsArray = _mouthTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {

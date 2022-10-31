@@ -176,7 +176,7 @@ public class UmaViewerUI : MonoBehaviour
         foreach (FacialMorph morph in tempMorph)
         {
            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = morph.name;
+            container.Name.text = morph.name + " (" + morph.tag + ")";
             container.Slider.value = morph.Weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
