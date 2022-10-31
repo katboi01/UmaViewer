@@ -52,7 +52,7 @@ public class UmaContainer : MonoBehaviour
             var child = Body.transform.GetChild(0);
             child.SetParent(transform);
         }
-        Destroy(Body);
+        Body.SetActive(false); //for debugging
 
 
         //MergeHead
@@ -70,8 +70,7 @@ public class UmaContainer : MonoBehaviour
                 var child = Head.transform.GetChild(0);
                 child.SetParent(child.name.Contains("info") ? eyes.transform : transform);
             }
-            Destroy(Head);
-
+            Head.SetActive(false); //for debugging
         }
 
 
@@ -85,7 +84,7 @@ public class UmaContainer : MonoBehaviour
                 var child = Tail.transform.GetChild(0);
                 child.SetParent(transform);
             }
-            Destroy(Tail);
+            Tail.SetActive(false); //for debugging
             emptyBones.ForEach(a => { if (a) Destroy(a.gameObject); });
         }
 
