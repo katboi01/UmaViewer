@@ -108,7 +108,8 @@ namespace Gallop
                 }
             }
             FacialResetAll();
-            MouthMorphs[3].Weight = 1;
+            ChangeMorphWeight(MouthMorphs[3], 1);
+
             if (UmaViewerUI.Instance)
             {
                 UmaViewerUI.Instance.LoadFacialPanels(this);
@@ -153,6 +154,7 @@ namespace Gallop
             {
                 morph._weight = 0;
             }
+            ChangeMorph();
         }
 
         private void ProcessMorph(FacialMorph morph)
@@ -197,6 +199,21 @@ namespace Gallop
             {
                 trs.Key.localRotation = RotationConvert.fromMaya(trs.Value);
             }
+        }
+
+        public void ChangeMorphWeight(FacialMorph morph,float val)
+        {
+            morph.Weight = val;
+            ChangeMorph();
+        }
+
+        public void ChangeMorphWeights(Dictionary<FacialMorph, float> morphs)
+        {
+            foreach(var item in morphs)
+            {
+                item.Key.Weight = item.Value;
+            }
+            ChangeMorph();
         }
     }
 }

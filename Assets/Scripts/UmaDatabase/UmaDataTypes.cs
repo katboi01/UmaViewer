@@ -32,6 +32,7 @@ public class UmaLyricsData
     public string text;
 }
 
+[System.Serializable]
 public class EmotionKey
 {
     public FacialMorph morph;
@@ -46,11 +47,7 @@ public class FaceTypeData
 
     public FaceEmotionKeyTarget target;
 
-    public List<EmotionKey> mouthTarget;
-    public List<EmotionKey> eyeLTarget;
-    public List<EmotionKey> eyeRTarget;
-    public List<EmotionKey> eyebrowLTarget;
-    public List<EmotionKey> eyebrowRTarget;
+    public List<EmotionKey> emotionKeys;
 
     private float _weight;
     public float Weight

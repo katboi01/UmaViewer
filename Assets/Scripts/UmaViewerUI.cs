@@ -187,7 +187,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.value = morph.Weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a;});
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
         }
     }
 

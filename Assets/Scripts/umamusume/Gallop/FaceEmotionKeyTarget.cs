@@ -16,12 +16,12 @@ public class FaceEmotionKeyTarget : ScriptableObject
         {
             if (emotion.label == "Base") continue;
             emotion.target = this;
-
-            InitializeEmotionTarget(ref emotion.mouthTarget,ref emotion.mouthTarget, FaceDrivenKeyTarget.MouthMorphs, emotion.mouth, false);
-            InitializeEmotionTarget(ref emotion.eyeLTarget, ref emotion.eyeLTarget, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_l, true);
-            InitializeEmotionTarget(ref emotion.eyeRTarget, ref emotion.eyeRTarget, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_r, false);
-            InitializeEmotionTarget(ref emotion.eyebrowLTarget, ref emotion.eyebrowLTarget, FaceDrivenKeyTarget.EyeBrowMorphs, emotion.eyebrow_l, true);
-            InitializeEmotionTarget(ref emotion.eyebrowRTarget, ref emotion.eyebrowRTarget, FaceDrivenKeyTarget.EyeBrowMorphs, emotion.eyebrow_r, false);
+            emotion.emotionKeys = new List<EmotionKey>();
+            InitializeEmotionTarget(emotion,FaceDrivenKeyTarget.MouthMorphs, emotion.mouth, false);
+            InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_l, true);
+            InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_r, false);
+            InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeBrowMorphs, emotion.eyebrow_l, true);
+            InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeBrowMorphs, emotion.eyebrow_r, false);
         }
 
         if (UmaViewerUI.Instance)
@@ -30,9 +30,8 @@ public class FaceEmotionKeyTarget : ScriptableObject
         }
     }
 
-    private void InitializeEmotionTarget(ref List<EmotionKey> targets, ref List<EmotionKey> emotionKeys,List<FacialMorph> morphs,string tags,bool direction)
+    private void InitializeEmotionTarget(FaceTypeData faceTypeData, List<FacialMorph> morphs,string tags,bool direction)
     {
-        targets = new List<EmotionKey>();
         foreach (var morphName in tags.Split('|'))
         {
             EmotionKey newValue = new EmotionKey();
@@ -48,7 +47,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                     newValue.morph = morphs.Where(a => a.tag == splitArray[0] && a.direction == direction).First();
                 }
                 newValue.weight = Convert.ToInt32(splitArray[1]);
-                emotionKeys.Add(newValue);
+                faceTypeData.emotionKeys.Add(newValue);
                 Debug.Log(newValue.weight);
             }
             else
@@ -62,7 +61,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                     newValue.morph = morphs.Where(a => a.tag == morphName && a.direction == direction).First();
                 }
                 newValue.weight = 100;
-                emotionKeys.Add(newValue);
+                faceTypeData.emotionKeys.Add(newValue);
                 Debug.Log(morphName);
             }
         }
@@ -72,43 +71,24 @@ public class FaceEmotionKeyTarget : ScriptableObject
     {
         if (FaceDrivenKeyTarget == null) return;
         FaceDrivenKeyTarget.ClearMorph();
+        Dictionary<FacialMorph, float> morphs = new Dictionary<FacialMorph, float>();
         foreach (var emotion in FaceEmotionKey)
         {
-            if (emotion.mouthTarget != null)
+            if (emotion.emotionKeys != null)
             {
-                foreach (var key in emotion.mouthTarget)
+                foreach (var key in emotion.emotionKeys)
                 {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
+                    if (morphs.ContainsKey(key.morph))
+                    {
+                        morphs[key.morph] = key.morph.Weight + key.weight / 100 * emotion.Weight;
+                    }
+                    else
+                    {
+                        morphs.Add(key.morph, key.morph.Weight + key.weight / 100 * emotion.Weight);
+                    }
                 }
             }
-            if (emotion.eyeLTarget != null)
-            {
-                foreach (var key in emotion.eyeLTarget)
-                {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
-                }
-            }
-            if (emotion.eyeRTarget != null)
-            {
-                foreach (var key in emotion.eyeRTarget)
-                {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
-                }
-            }
-            if (emotion.eyebrowLTarget != null)
-            {
-                foreach (var key in emotion.eyeRTarget)
-                {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
-                }
-            }
-            if (emotion.eyebrowRTarget != null)
-            {
-                foreach (var key in emotion.eyeRTarget)
-                {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
-                }
-            }
+            FaceDrivenKeyTarget.ChangeMorphWeights(morphs);
         }
     }
 }
