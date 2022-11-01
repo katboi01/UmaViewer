@@ -154,7 +154,6 @@ namespace Gallop
             {
                 morph._weight = 0;
             }
-            ChangeMorph();
         }
 
         private void ProcessMorph(FacialMorph morph)
@@ -206,15 +205,7 @@ namespace Gallop
             morph.Weight = val;
             ChangeMorph();
         }
-
-        public void ChangeMorphWeights(Dictionary<FacialMorph, float> morphs)
-        {
-            foreach(var item in morphs)
-            {
-                item.Key.Weight = item.Value;
-            }
-            ChangeMorph();
-        }
+        
     }
 }
 

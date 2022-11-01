@@ -71,25 +71,20 @@ public class FaceEmotionKeyTarget : ScriptableObject
     {
         if (FaceDrivenKeyTarget == null) return;
         FaceDrivenKeyTarget.ClearMorph();
-        Dictionary<FacialMorph, float> morphs = new Dictionary<FacialMorph, float>();
+        
         foreach (var emotion in FaceEmotionKey)
         {
             if (emotion.emotionKeys != null)
             {
                 foreach (var key in emotion.emotionKeys)
                 {
-                    if (morphs.ContainsKey(key.morph))
-                    {
-                        morphs[key.morph] = key.morph.Weight + key.weight / 100 * emotion.Weight;
-                    }
-                    else
-                    {
-                        morphs.Add(key.morph, key.morph.Weight + key.weight / 100 * emotion.Weight);
-                    }
+                    key.morph.Weight += key.weight / 100 * emotion.Weight;
                 }
             }
-            FaceDrivenKeyTarget.ChangeMorphWeights(morphs);
+
         }
+
+        FaceDrivenKeyTarget.ChangeMorph();
     }
 }
 
