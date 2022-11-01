@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using RootMotion.Dynamics;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Gallop;
 
 public class UmaDatabaseEntry
 {
@@ -31,10 +33,35 @@ public class UmaLyricsData
 }
 
 [System.Serializable]
+public class EmotionKey
+{
+    public FacialMorph morph;
+    public float weight;
+}
+
+[System.Serializable]
 public class FaceTypeData
 {
     public string label, eyebrow_l, eyebrow_r, eye_l, eye_r, mouth, inverce_face_type;
     public int mouth_shape_type, set_face_group;
+
+    public FaceEmotionKeyTarget target;
+
+    public List<EmotionKey> emotionKeys;
+
+    private float _weight;
+    public float Weight
+    {
+        get
+        {
+            return _weight;
+        }
+        set
+        {
+            _weight = value;
+            target.UpdateAllFacialKeyTargets();
+        }
+    }
 }
 
 public enum UmaFileType

@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
+    UmaViewerUI UI => UmaViewerUI.Instance;
+
     public JObject CharaData;
     public GameObject Body;
     public GameObject Tail;
@@ -18,9 +20,8 @@ public class UmaContainer : MonoBehaviour
     public AnimatorOverrideController OverrideController;
 
     [Header("Face")]
-    public List<AnimationClip> FacialClips = new List<AnimationClip>();
-    public FaceDrivenKeyTarget FaceDrivenKeyTargets;
-
+    public FaceDrivenKeyTarget FaceDrivenKeyTarget;
+    public FaceEmotionKeyTarget FaceEmotionKeyTarget;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -30,16 +31,6 @@ public class UmaContainer : MonoBehaviour
     [Header("Mini")]
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
-
-    public void OnDestroy()
-    {
-        if (TryGetComponent<PuppetMaster>(out PuppetMaster t))
-        {
-            Destroy(this);
-        }
-        else { Destroy(gameObject); }
-        
-    }
 
     public void MergeModel()
     {
@@ -92,7 +83,7 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator = gameObject.AddComponent<Animator>();
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
         UmaAnimator.runtimeAnimatorController = OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
-        
+
     }
 
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
@@ -121,15 +112,16 @@ public class UmaContainer : MonoBehaviour
             }
         }
         from.bones = tmpBone;
-        return emptyBones.ToArray() ;
+        return emptyBones.ToArray();
     }
 
     public void LoadPhysics()
     {
-        var springs =  PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
+        var springs = PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
         foreach (CySpringDataContainer spring in springs)
         {
             spring.InitializePhysics();
         }
     }
+
 }

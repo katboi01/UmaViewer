@@ -177,7 +177,7 @@ public class UmaViewerBuilder : MonoBehaviour
         int head_id;
         string head_costumeId;
         int tailId = (int)charaData["tailModelId"];
-       
+
         //The tailId of 9006 is 1, but the character has no tail
         if (id == 9006) tailId = -1;
 
@@ -192,10 +192,12 @@ public class UmaViewerBuilder : MonoBehaviour
             head_id = id;
             head_costumeId = costumeId;
 
-            CurrentHead = new UmaHeadData();
-            CurrentHead.id = id;
-            CurrentHead.costumeId = costumeId;
-            CurrentHead.tailId = tailId;
+            CurrentHead = new UmaHeadData
+            {
+                id = id,
+                costumeId = costumeId,
+                tailId = tailId
+            };
         }
 
         string head = UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/pfb_chr{head_id}_{head_costumeId}";
@@ -237,7 +239,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        
+
         if (tailId != 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
@@ -271,8 +273,16 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             var firsehead = CurrentUMAContainer.Head;
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
-            CurrentUMAContainer.FaceDrivenKeyTargets = FaceDriven;
+            CurrentUMAContainer.FaceDrivenKeyTarget = FaceDriven;
+            CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
+
+            CurrentUMAContainer.FaceEmotionKeyTarget = new FaceEmotionKeyTarget()
+            {
+                FaceDrivenKeyTarget = FaceDriven,
+                FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList()
+            };
+            CurrentUMAContainer.FaceEmotionKeyTarget.Initialize();
         }
 
         CurrentUMAContainer.MergeModel();
@@ -387,7 +397,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + live.MusicId));
         var BGasset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"pfb_env_live{live.BackGroundId}_controller000"));
-        if (asset == null|| BGasset == null) return;
+        if (asset == null || BGasset == null) return;
 
         UnloadLive();
         UnloadAllBundle();
@@ -507,7 +517,7 @@ public class UmaViewerBuilder : MonoBehaviour
             int sampleRate = stream.WaveFormat.SampleRate;
 
             AudioClip clip = AudioClip.Create(
-                Path.GetFileNameWithoutExtension(awb.Name)+"_"+wave.WaveId.ToString(),
+                Path.GetFileNameWithoutExtension(awb.Name) + "_" + wave.WaveId.ToString(),
                 (int)(stream.Length / channels / bytesPerSample),
                 channels,
                 sampleRate,
@@ -543,11 +553,11 @@ public class UmaViewerBuilder : MonoBehaviour
                     bundle = AssetBundle.LoadFromFile(filePath);
                     Main.LoadedBundles.Add(lyricsAsset.Name, bundle);
                 }
-               
+
                 TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
                 string[] lines = asset.text.Split("\n"[0]);
 
-                for (int i = 1; i < lines.Length; i++) 
+                for (int i = 1; i < lines.Length; i++)
                 {
                     string[] words = lines[i].Split(',');
                     if (words.Length > 0)
@@ -561,13 +571,13 @@ public class UmaViewerBuilder : MonoBehaviour
                             };
                             CurrentLyrics.Add(lyricsData);
                         }
-                        catch{}
+                        catch { }
                     }
                 }
             }
         }
     }
-   
+
     private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -804,7 +814,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadHead(GameObject go)
     {
         GameObject head = Instantiate(go, CurrentUMAContainer.transform);
-        CurrentUMAContainer.Head=head;
+        CurrentUMAContainer.Head = head;
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
@@ -933,11 +943,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_e);
                 RecursiveLoadAsset(motion_s);
             }
-            
+
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
-         
+
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
@@ -1009,7 +1019,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void UnloadProp()
     {
-        if(CurrentOtherContainer != null)
+        if (CurrentOtherContainer != null)
         {
             Destroy(CurrentOtherContainer.gameObject);
         }
@@ -1027,8 +1037,29 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentUMAContainer != null)
         {
             //It seems that OnDestroy will executed after new model loaded, which cause new FacialPanels empty...
+            UmaViewerUI.Instance.currentFaceDrivenKeyTarget = null;
+            UmaViewerUI.Instance.LoadEmotionPanels(null);
             UmaViewerUI.Instance.LoadFacialPanels(null);
             Destroy(CurrentUMAContainer.gameObject);
+        }
+    }
+
+    public void ClearMorphs()
+    {
+        if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
+        {
+            foreach (var container in UI.EmotionList.GetComponentsInChildren<UmaUIContainer>())
+            {
+                if (container.Slider != null)
+                    container.Slider.value = 0;
+            }
+            foreach (var container in UI.FacialList.GetComponentsInChildren<UmaUIContainer>())
+            {
+                if (container.Slider != null)
+                    container.Slider.SetValueWithoutNotify(0);
+            }
+            CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
+            CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
         }
     }
 }

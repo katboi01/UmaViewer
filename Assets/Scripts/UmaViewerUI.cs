@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,6 +32,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public ScrollRect SceneList;
 
+    public ScrollRect EmotionList;
     public ScrollRect FacialList;
     public ScrollRect LiveList;
     public ScrollRect LiveSoundList;
@@ -77,6 +79,8 @@ public class UmaViewerUI : MonoBehaviour
     public bool isCriware = false;
     public bool isHeadFix = false;
 
+    public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
+
     private void Awake()
     {
         Instance = this;
@@ -87,6 +91,40 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
         if (Application.platform == RuntimePlatform.Android)
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
+    }
+
+    private void Update()
+    {
+        if (Builder.CurrentAudioSources.Count > 0)
+        {
+            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            if (MianSource.clip)
+            {
+                TitleText.text = MianSource.clip.name;
+                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
+                AudioSlider.SetValueWithoutNotify(MianSource.time / MianSource.clip.length);
+                LyricsText.text = GetCurrentLyrics(MianSource.time);
+            }
+        }
+
+
+        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
+        {
+            if (Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+            {
+                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
+                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
+                {
+                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
+
+                    AnimationTitleText.text = AnimeClip.name;
+                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
+                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
+                }
+            }
+        }
     }
 
     public void HighlightChildImage(Transform mainObject, Image child)
@@ -164,10 +202,13 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadFacialPanels(FaceDrivenKeyTarget target)
     {
+        currentFaceDrivenKeyTarget = target;
+
         foreach (UmaUIContainer ui in FacialList.content.GetComponentsInChildren<UmaUIContainer>())
         {
             Destroy(ui.gameObject);
         }
+
         if (target == null) return;
         List<FacialMorph> tempMorph = new List<FacialMorph>();
         tempMorph.AddRange(target.EyeBrowMorphs);
@@ -176,11 +217,40 @@ public class UmaViewerUI : MonoBehaviour
         foreach (FacialMorph morph in tempMorph)
         {
            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = morph.name;
-            container.Slider.value = morph.Weight;
+            container.Name.text = morph.name + " (" + morph.tag + ")";
+            container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { morph.Weight = a;});
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+        }
+    }
+
+    public void UpdateFacialPanels()
+    {
+        LoadFacialPanels(currentFaceDrivenKeyTarget);
+    }
+
+    public void LoadEmotionPanels(FaceEmotionKeyTarget target)
+    {
+        foreach (UmaUIContainer ui in EmotionList.content.GetComponentsInChildren<UmaUIContainer>())
+        {
+            Destroy(ui.gameObject);
+        }
+
+        if (target == null) return;
+
+        foreach(var emotion in target.FaceEmotionKey)
+        {
+            if (emotion.label == "Base")
+            {
+                continue;
+            }
+            var container = Instantiate(UmaContainerSliderPrefab, EmotionList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = emotion.label;
+            container.Slider.value = emotion.Weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { emotion.Weight = a; });
         }
     }
 
@@ -609,40 +679,6 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-    }
-
-    private void Update()
-    {
-        if (Builder.CurrentAudioSources.Count > 0)
-        {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
-            if (MianSource.clip)
-            {
-                TitleText.text = MianSource.clip.name;
-                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
-                AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
-                LyricsText.text =  GetCurrentLyrics(MianSource.time);
-            }
-        }
-
-
-        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
-        {
-            if(Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
-            {
-                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
-                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
-                {
-                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
-
-                    AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
-                }
-            }
-        }
     }
 
     public void ResetAudioPlayer()
