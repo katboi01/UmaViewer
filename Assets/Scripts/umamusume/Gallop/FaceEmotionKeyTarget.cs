@@ -48,7 +48,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                 }
                 newValue.weight = Convert.ToInt32(splitArray[1]);
                 faceTypeData.emotionKeys.Add(newValue);
-                Debug.Log(newValue.weight);
+                //Debug.Log(newValue.weight);
             }
             else
             {
@@ -62,7 +62,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                 }
                 newValue.weight = 100;
                 faceTypeData.emotionKeys.Add(newValue);
-                Debug.Log(morphName);
+                //Debug.Log(morphName);
             }
         }
     }
@@ -78,7 +78,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
             {
                 foreach (var key in emotion.emotionKeys)
                 {
-                    key.morph.Weight += key.weight / 100 * emotion.Weight;
+                    key.morph.weight += key.weight / 100 * emotion.Weight;
                 }
             }
 

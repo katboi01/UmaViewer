@@ -1043,4 +1043,23 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
+
+    public void ClearMorphs()
+    {
+        if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
+        {
+            foreach (var container in UI.EmotionList.GetComponentsInChildren<UmaUIContainer>())
+            {
+                if (container.Slider != null)
+                    container.Slider.value = 0;
+            }
+            foreach (var container in UI.FacialList.GetComponentsInChildren<UmaUIContainer>())
+            {
+                if (container.Slider != null)
+                    container.Slider.SetValueWithoutNotify(0);
+            }
+            CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
+            CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+        }
+    }
 }

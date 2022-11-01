@@ -142,17 +142,17 @@ namespace Gallop
         {
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
-                morph._weight = 0;
+                morph.weight = 0;
             }
 
             foreach (FacialMorph morph in EyeMorphs)
             {
-                morph._weight = 0;
+                morph.weight = 0;
             }
 
             foreach (FacialMorph morph in MouthMorphs)
             {
-                morph._weight = 0;
+                morph.weight = 0;
             }
         }
 
@@ -162,9 +162,9 @@ namespace Gallop
             {
                 if (trs.transform)
                 {
-                    trs.transform.localScale += trs._scale * morph.Weight;
-                    trs.transform.localPosition += trs._position * morph.Weight;
-                    RotationRecorder[trs.transform] += trs._rotation * morph.Weight;
+                    trs.transform.localScale += trs._scale * morph.weight;
+                    trs.transform.localPosition += trs._position * morph.weight;
+                    RotationRecorder[trs.transform] += trs._rotation * morph.weight;
                 };
             }
         }
@@ -202,7 +202,7 @@ namespace Gallop
 
         public void ChangeMorphWeight(FacialMorph morph,float val)
         {
-            morph.Weight = val;
+            morph.weight = val;
             ChangeMorph();
         }
         

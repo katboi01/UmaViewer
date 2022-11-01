@@ -14,18 +14,7 @@ namespace Gallop
         public string tag = "";
         public bool direction;
         public FaceDrivenKeyTarget target;
-        public float _weight;
-        public float Weight
-        {
-            get
-            {
-                return _weight;
-            }
-            set
-            {
-                _weight = value;
-            }
-        }
+        public float weight;
         public List<TrsArray> trsArray;
     }
 }

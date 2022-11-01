@@ -20,7 +20,6 @@ public class UmaContainer : MonoBehaviour
     public AnimatorOverrideController OverrideController;
 
     [Header("Face")]
-    public List<AnimationClip> FacialClips = new List<AnimationClip>();
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
 

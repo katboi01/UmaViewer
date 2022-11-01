@@ -93,6 +93,40 @@ public class UmaViewerUI : MonoBehaviour
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
 
+    private void Update()
+    {
+        if (Builder.CurrentAudioSources.Count > 0)
+        {
+            AudioSource MianSource = Builder.CurrentAudioSources[0];
+            if (MianSource.clip)
+            {
+                TitleText.text = MianSource.clip.name;
+                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
+                AudioSlider.SetValueWithoutNotify(MianSource.time / MianSource.clip.length);
+                LyricsText.text = GetCurrentLyrics(MianSource.time);
+            }
+        }
+
+
+        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
+        {
+            if (Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+            {
+                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
+                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
+                {
+                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
+
+                    AnimationTitleText.text = AnimeClip.name;
+                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
+                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
+                }
+            }
+        }
+    }
+
     public void HighlightChildImage(Transform mainObject, Image child)
     {
         foreach(var t in mainObject.GetComponentsInChildren<Image>())
@@ -184,7 +218,7 @@ public class UmaViewerUI : MonoBehaviour
         {
            var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
             container.Name.text = morph.name + " (" + morph.tag + ")";
-            container.Slider.value = morph.Weight;
+            container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
@@ -645,40 +679,6 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-    }
-
-    private void Update()
-    {
-        if (Builder.CurrentAudioSources.Count > 0)
-        {
-            AudioSource MianSource = Builder.CurrentAudioSources[0];
-            if (MianSource.clip)
-            {
-                TitleText.text = MianSource.clip.name;
-                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
-                AudioSlider.SetValueWithoutNotify(MianSource.time/ MianSource.clip.length);
-                LyricsText.text =  GetCurrentLyrics(MianSource.time);
-            }
-        }
-
-
-        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
-        {
-            if(Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
-            {
-                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
-                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
-                {
-                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
-
-                    AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
-                }
-            }
-        }
     }
 
     public void ResetAudioPlayer()
