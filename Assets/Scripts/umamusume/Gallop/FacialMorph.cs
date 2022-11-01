@@ -24,7 +24,7 @@ namespace Gallop
             set
             {
                 _weight = value;
-                target.needUpdate = true;
+                target.ChangeMorph();
             }
         }
         public List<TrsArray> trsArray;

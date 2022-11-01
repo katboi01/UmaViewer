@@ -107,25 +107,26 @@ namespace Gallop
                     }
                 }
             }
-            FacialReset();
+            FacialResetAll();
             MouthMorphs[3].Weight = 1;
-            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.LoadFacialPanels(this); }
-            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.LoadEmotionPanels(this); }
-            if (UmaViewerUI.Instance) { UmaViewerUI.Instance.currentMorph = this; }
+            if (UmaViewerUI.Instance)
+            {
+                UmaViewerUI.Instance.LoadFacialPanels(this);
+            }
         }
-        
+
         public void ChangeMorph()
         {
-            FacialReset();
+            FacialResetAll();
 
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
-               ProcessMorph(morph);
+                ProcessMorph(morph);
             }
 
             foreach (FacialMorph morph in EyeMorphs)
             {
-               ProcessMorph(morph);
+                ProcessMorph(morph);
             }
 
             foreach (FacialMorph morph in MouthMorphs)
@@ -167,76 +168,37 @@ namespace Gallop
             }
         }
 
-        public void FacialReset()
+        public void FacialResetAll()
         {
-            foreach (TrsArray trs in BaseLEyeBrowMorph.trsArray)
-            {
-                if (trs.transform)
-                {
-
-                    trs.transform.localPosition = trs._position;
-                    trs.transform.localScale = trs._scale;
-                    RotationRecorder[trs.transform] = trs._rotation;
-                };
-            }
-
-            foreach (TrsArray trs in BaseREyeBrowMorph.trsArray)
-            {
-                if (trs.transform)
-                {
-                    trs.transform.localPosition = trs._position;
-                    trs.transform.localScale = trs._scale;
-                    RotationRecorder[trs.transform] = trs._rotation;
-                };
-            }
-
-            foreach (TrsArray trs in BaseLEyeMorph.trsArray)
-            {
-                if (trs.transform)
-                {
-                    trs.transform.localPosition = trs._position;
-                    trs.transform.localScale = trs._scale;
-                    RotationRecorder[trs.transform] = trs._rotation;
-                };
-            }
-
-            foreach (TrsArray trs in BaseREyeMorph.trsArray)
-            {
-                if (trs.transform)
-                {
-                    trs.transform.localPosition = trs._position;
-                    trs.transform.localScale = trs._scale;
-                    RotationRecorder[trs.transform] = trs._rotation;
-                };
-            }
-
-            foreach (TrsArray trs in BaseMouthMorph.trsArray)
-            {
-                if (trs.transform)
-                {
-
-                    trs.transform.localPosition = trs._position;
-                    trs.transform.localScale = trs._scale;
-                    RotationRecorder[trs.transform] = trs._rotation;
-                };
-            }
-
+            FacialReset(BaseLEyeBrowMorph.trsArray);
+            FacialReset(BaseREyeBrowMorph.trsArray);
+            FacialReset(BaseLEyeMorph.trsArray);
+            FacialReset(BaseREyeMorph.trsArray);
+            FacialReset(BaseMouthMorph.trsArray);
             ApplyRotation();
         }
 
-        public void ApplyRotation(){
+        public void FacialReset(List<TrsArray> trsArrays)
+        {
+            foreach (TrsArray trs in trsArrays)
+            {
+                if (trs.transform)
+                {
+                    trs.transform.localPosition = trs._position;
+                    trs.transform.localScale = trs._scale;
+                    RotationRecorder[trs.transform] = trs._rotation;
+                };
+            }
+        }
+
+        public void ApplyRotation()
+        {
             foreach (var trs in RotationRecorder)
             {
                 trs.Key.localRotation = RotationConvert.fromMaya(trs.Value);
             }
         }
-
-
-
-}
-
-
-
+    }
 }
 
 

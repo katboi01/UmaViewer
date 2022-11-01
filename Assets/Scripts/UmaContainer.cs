@@ -21,8 +21,8 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Face")]
     public List<AnimationClip> FacialClips = new List<AnimationClip>();
-    public FaceDrivenKeyTarget FaceDrivenKeyTargets;
-    public List<FaceTypeData> FaceEmotionKey;
+    public FaceDrivenKeyTarget FaceDrivenKeyTarget;
+    public FaceEmotionKeyTarget FaceEmotionKeyTarget;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -32,16 +32,6 @@ public class UmaContainer : MonoBehaviour
     [Header("Mini")]
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
-
-    public void OnDestroy()
-    {
-        if (TryGetComponent<PuppetMaster>(out PuppetMaster t))
-        {
-            Destroy(this);
-        }
-        else { Destroy(gameObject); }
-        
-    }
 
     public void MergeModel()
     {
@@ -94,7 +84,7 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator = gameObject.AddComponent<Animator>();
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
         UmaAnimator.runtimeAnimatorController = OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
-        
+
     }
 
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
@@ -123,71 +113,16 @@ public class UmaContainer : MonoBehaviour
             }
         }
         from.bones = tmpBone;
-        return emptyBones.ToArray() ;
+        return emptyBones.ToArray();
     }
 
     public void LoadPhysics()
     {
-        var springs =  PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
+        var springs = PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
         foreach (CySpringDataContainer spring in springs)
         {
             spring.InitializePhysics();
         }
     }
 
-    private void Update()
-    {
-        if(FaceDrivenKeyTargets != null)
-        {
-            if (FaceDrivenKeyTargets.needUpdate)
-            {
-                FaceDrivenKeyTargets.ChangeMorph();
-                FaceDrivenKeyTargets.needUpdate = false;
-            }
-            if (FaceDrivenKeyTargets.needAllUpdate)
-            {
-                FaceDrivenKeyTargets.ClearMorph();
-                foreach(var emotion in FaceEmotionKey)
-                {
-                    if(emotion.mouthTarget != null)
-                    {
-                        foreach (var key in emotion.mouthTarget)
-                        {
-                            key.morph.Weight += key.weight / 100 * emotion.Weight;
-                        }
-                    }
-                    if (emotion.eyeLTarget != null)
-                    {
-                        foreach (var key in emotion.eyeLTarget)
-                        {
-                            key.morph.Weight += key.weight / 100 * emotion.Weight;
-                        }
-                    }
-                    if (emotion.eyeRTarget != null)
-                    {
-                        foreach (var key in emotion.eyeRTarget)
-                        {
-                            key.morph.Weight += key.weight / 100 * emotion.Weight;
-                        }
-                    }
-                    if (emotion.eyebrowLTarget != null)
-                    {
-                        foreach (var key in emotion.eyeRTarget)
-                        {
-                            key.morph.Weight += key.weight / 100 * emotion.Weight;
-                        }
-                    }
-                    if (emotion.eyebrowRTarget != null)
-                    {
-                        foreach (var key in emotion.eyeRTarget)
-                        {
-                            key.morph.Weight += key.weight / 100 * emotion.Weight;
-                        }
-                    }
-                }
-                FaceDrivenKeyTargets.ChangeMorph();
-                FaceDrivenKeyTargets.needAllUpdate = false;
-            }
-        }
-    }
 }

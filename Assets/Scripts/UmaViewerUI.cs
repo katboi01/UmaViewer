@@ -79,7 +79,7 @@ public class UmaViewerUI : MonoBehaviour
     public bool isCriware = false;
     public bool isHeadFix = false;
 
-    public FaceDrivenKeyTarget currentMorph;
+    public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
     private void Awake()
     {
@@ -168,10 +168,13 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadFacialPanels(FaceDrivenKeyTarget target)
     {
+        currentFaceDrivenKeyTarget = target;
+
         foreach (UmaUIContainer ui in FacialList.content.GetComponentsInChildren<UmaUIContainer>())
         {
             Destroy(ui.gameObject);
         }
+
         if (target == null) return;
         List<FacialMorph> tempMorph = new List<FacialMorph>();
         tempMorph.AddRange(target.EyeBrowMorphs);
@@ -190,10 +193,10 @@ public class UmaViewerUI : MonoBehaviour
 
     public void UpdateFacialPanels()
     {
-        LoadFacialPanels(currentMorph);
+        LoadFacialPanels(currentFaceDrivenKeyTarget);
     }
 
-    public void LoadEmotionPanels(FaceDrivenKeyTarget target)
+    public void LoadEmotionPanels(FaceEmotionKeyTarget target)
     {
         foreach (UmaUIContainer ui in EmotionList.content.GetComponentsInChildren<UmaUIContainer>())
         {
@@ -202,191 +205,12 @@ public class UmaViewerUI : MonoBehaviour
 
         if (target == null) return;
 
-        foreach(var emotion in target.Container.FaceEmotionKey)
+        foreach(var emotion in target.FaceEmotionKey)
         {
-            if(emotion.label == "Base")
+            if (emotion.label == "Base")
             {
                 continue;
             }
-
-            emotion.target = target;
-
-            emotion.mouthTarget = new List<EmotionKey>();
-            foreach(var morphName in emotion.mouth.Split('|'))
-            {
-                EmotionKey newValue = new EmotionKey();
-                if (morphName.Contains("__"))
-                {
-                    var splitArray = Regex.Split(morphName, "__", RegexOptions.IgnoreCase);
-                    if(splitArray[0] == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.MouthMorphs.Where(a => a.tag == splitArray[0]).First();
-                    }
-                    newValue.weight = Convert.ToInt32(splitArray[1]);
-                    UnityEngine.Debug.Log(newValue.weight);
-                    emotion.mouthTarget.Add(newValue);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(morphName);
-                    if (morphName == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.MouthMorphs.Where(a => a.tag == morphName).First();
-                    }
-                    newValue.weight = 100;
-                    emotion.mouthTarget.Add(newValue);
-                }
-            }
-
-            emotion.eyeLTarget = new List<EmotionKey>();
-            foreach (var morphName in emotion.eye_l.Split('|'))
-            {
-                EmotionKey newValue = new EmotionKey();
-                if (morphName.Contains("__"))
-                {
-                    var splitArray = Regex.Split(morphName, "__", RegexOptions.IgnoreCase);
-                    if (splitArray[0] == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeMorphs.Where(a => a.tag == splitArray[0] && a.direction == true).First();
-                    }
-                    newValue.weight = Convert.ToInt32(splitArray[1]);
-                    UnityEngine.Debug.Log(newValue.weight);
-                    emotion.mouthTarget.Add(newValue);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(morphName);
-                    if (morphName == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeMorphs.Where(a => a.tag == morphName && a.direction == true).First();
-                    }
-                    newValue.weight = 100;
-                    emotion.mouthTarget.Add(newValue);
-                }
-            }
-
-            emotion.eyeRTarget = new List<EmotionKey>();
-            foreach (var morphName in emotion.eye_r.Split('|'))
-            {
-                EmotionKey newValue = new EmotionKey();
-                if (morphName.Contains("__"))
-                {
-                    var splitArray = Regex.Split(morphName, "__", RegexOptions.IgnoreCase);
-                    if (splitArray[0] == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeMorphs.Where(a => a.tag == splitArray[0] && a.direction == false).First();
-                    }
-                    newValue.weight = Convert.ToInt32(splitArray[1]);
-                    UnityEngine.Debug.Log(newValue.weight);
-                    emotion.mouthTarget.Add(newValue);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(morphName);
-                    if (morphName == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeMorphs.Where(a => a.tag == morphName && a.direction == false).First();
-                    }
-                    newValue.weight = 100;
-                    emotion.mouthTarget.Add(newValue);
-                }
-            }
-
-            emotion.eyebrowLTarget = new List<EmotionKey>();
-            foreach (var morphName in emotion.eyebrow_l.Split('|'))
-            {
-                EmotionKey newValue = new EmotionKey();
-                if (morphName.Contains("__"))
-                {
-                    var splitArray = Regex.Split(morphName, "__", RegexOptions.IgnoreCase);
-                    if (splitArray[0] == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeBrowMorphs.Where(a => a.tag == splitArray[0] && a.direction == true).First();
-                    }
-                    newValue.weight = Convert.ToInt32(splitArray[1]);
-                    UnityEngine.Debug.Log(newValue.weight);
-                    emotion.mouthTarget.Add(newValue);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(morphName);
-                    if (morphName == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeBrowMorphs.Where(a => a.tag == morphName && a.direction == true).First();
-                    }
-                    newValue.weight = 100;
-                    emotion.mouthTarget.Add(newValue);
-                }
-            }
-
-            emotion.eyebrowRTarget = new List<EmotionKey>();
-            foreach (var morphName in emotion.eyebrow_r.Split('|'))
-            {
-                EmotionKey newValue = new EmotionKey();
-                if (morphName.Contains("__"))
-                {
-                    var splitArray = Regex.Split(morphName, "__", RegexOptions.IgnoreCase);
-                    if (splitArray[0] == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeBrowMorphs.Where(a => a.tag == splitArray[0] && a.direction == false).First();
-                    }
-                    newValue.weight = Convert.ToInt32(splitArray[1]);
-                    UnityEngine.Debug.Log(newValue.weight);
-                    emotion.mouthTarget.Add(newValue);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(morphName);
-                    if (morphName == "Base")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        newValue.morph = target.EyeBrowMorphs.Where(a => a.tag == morphName && a.direction == false).First();
-                    }
-                    newValue.weight = 100;
-                    emotion.mouthTarget.Add(newValue);
-                }
-            }
-
-
             var container = Instantiate(UmaContainerSliderPrefab, EmotionList.content).GetComponent<UmaUIContainer>();
             container.Name.text = emotion.label;
             container.Slider.value = emotion.Weight;

@@ -44,7 +44,7 @@ public class FaceTypeData
     public string label, eyebrow_l, eyebrow_r, eye_l, eye_r, mouth, inverce_face_type;
     public int mouth_shape_type, set_face_group;
 
-    public FaceDrivenKeyTarget target;
+    public FaceEmotionKeyTarget target;
 
     public List<EmotionKey> mouthTarget;
     public List<EmotionKey> eyeLTarget;
@@ -62,7 +62,7 @@ public class FaceTypeData
         set
         {
             _weight = value;
-            target.needAllUpdate = true;
+            target.UpdateAllFacialKeyTargets();
         }
     }
 }
