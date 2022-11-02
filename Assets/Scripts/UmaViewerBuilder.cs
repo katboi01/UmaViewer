@@ -277,12 +277,11 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
 
-            CurrentUMAContainer.FaceEmotionKeyTarget = new FaceEmotionKeyTarget()
-            {
-                FaceDrivenKeyTarget = FaceDriven,
-                FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList()
-            };
-            CurrentUMAContainer.FaceEmotionKeyTarget.Initialize();
+            var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
+            CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
+            emotionDriven.FaceDrivenKeyTarget = FaceDriven;
+            emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
+            emotionDriven.Initialize();
         }
 
         CurrentUMAContainer.MergeModel();

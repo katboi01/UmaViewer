@@ -81,9 +81,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                     key.morph.weight += key.weight / 100 * emotion.Weight;
                 }
             }
-
         }
-
         FaceDrivenKeyTarget.ChangeMorph();
     }
 }
