@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
 using Gallop.Live.Cutt;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Gallop
 {
@@ -17,6 +15,7 @@ namespace Gallop
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
         private FacialMorph BaseMouthMorph;
+        public FacialMorph LeftEyeXrange, LeftEyeYrange, RightEyeXrange, RightEyeYrange;
 
         public List<FacialMorph> EyeBrowMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
@@ -47,8 +46,8 @@ namespace Gallop
                     }
                     if (i == 0)
                     {
-                        if (morph.direction) BaseREyeBrowMorph = morph;
-                        else BaseLEyeBrowMorph = morph;
+                        if (morph.direction) BaseLEyeBrowMorph = morph;
+                        else BaseREyeBrowMorph = morph;
                     }
                     else
                     {
@@ -73,11 +72,22 @@ namespace Gallop
                     }
                     if (i == 0)
                     {
-                        if (morph.direction) BaseREyeMorph = morph;
-                        else BaseLEyeMorph = morph;
+                        if (morph.direction) BaseLEyeMorph = morph;
+                        else BaseREyeMorph = morph;
                     }
                     else
                     {
+                        if (i == 20)
+                        {
+                            if (morph.direction) LeftEyeXrange = morph;
+                            else RightEyeXrange = morph;
+                        }
+                        else if (i == 21)
+                        {
+                            if (morph.direction) LeftEyeYrange = morph;
+                            else RightEyeYrange = morph;
+                        }
+
                         EyeMorphs.Add(morph);
                     }
                 }
@@ -206,6 +216,14 @@ namespace Gallop
             ChangeMorph();
         }
         
+        public void SetEyeRange(float lx, float ly,float rx, float ry)
+        {
+            LeftEyeXrange.weight = lx;
+            LeftEyeYrange.weight = ly;
+            RightEyeXrange.weight = rx;
+            RightEyeYrange.weight = ry;
+            ChangeMorph();
+        }
     }
 }
 

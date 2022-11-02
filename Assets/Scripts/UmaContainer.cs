@@ -22,6 +22,9 @@ public class UmaContainer : MonoBehaviour
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
+    public GameObject HeadBone;
+    public GameObject TrackTarget;
+    public float EyeHeight;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -31,6 +34,13 @@ public class UmaContainer : MonoBehaviour
     [Header("Mini")]
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
+
+    private void Start()
+    {
+        HeadBone = (GameObject)Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
+        EyeHeight = 0.1f;
+        TrackTarget = Camera.main.gameObject;
+    }
 
     public void MergeModel()
     {
@@ -124,4 +134,15 @@ public class UmaContainer : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (TrackTarget)
+        {
+            var targetPosotion = TrackTarget.transform.position - new Vector3(0, EyeHeight, 0);
+            var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
+            var deltaRotation = HeadBone.transform.InverseTransformDirection(deltaPos.normalized);
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.x / 0.86f,-1,1), Mathf.Clamp(deltaRotation.y / 0.86f, -1, 1));//Limited to the angle of view 
+            FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+        }
+    }
 }
