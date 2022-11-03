@@ -495,6 +495,7 @@ public class UmaViewerUI : MonoBehaviour
         var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
         && !a.Name.Contains($"mirror")
         && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
+        && !a.Name.Contains($"facial") 
         && !a.Name.Contains($"_cam")
         && !a.Name.EndsWith($"_s")
         && !a.Name.EndsWith($"_e")
@@ -531,7 +532,7 @@ public class UmaViewerUI : MonoBehaviour
         else
         {
             //Common animations
-            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}")))
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains("pose")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
@@ -564,6 +565,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
+        Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -643,7 +645,6 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MiaiSource = Builder.CurrentAudioSources[0];
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
                 if (source.clip)
@@ -660,20 +661,25 @@ public class UmaViewerUI : MonoBehaviour
         if (Builder.OverrideController.animationClips.Length > 0)
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
+            var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
             {
                 animator.speed = 0;
+                animator_face.speed = 0;
             }
             else if (AnimeState.normalizedTime < 1f)
             {
                 animator.speed = AnimationSpeedSlider.value;
+                animator_face.speed = AnimationSpeedSlider.value;
             }
             else
             {
                 animator.speed = AnimationSpeedSlider.value;
                 animator.Play(0, -1, 0);
+                animator_face.speed = AnimationSpeedSlider.value;
+                animator_face.Play(0, -1, 0);
             }
             
         }
@@ -683,13 +689,16 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
+        var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-
+            
             // Pause and Seek;
-            Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
+            animator.speed = 0;
             animator.Play(0, -1, val);
+            animator_face.speed = 0;
+            animator_face.Play(0, -1, val);
 
             AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
         }
@@ -700,6 +709,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
+        Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
     }
 
     public void ResetAudioPlayer()

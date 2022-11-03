@@ -135,7 +135,7 @@ namespace Gallop
             SetupLocator("Eye_R_Base_Ctrl", "Eye_R__", EyeMorphs.FindAll(a => a.direction == false));
             SetupLocator("Eyebrow_L_Base_Ctrl", "Eyebrow_L__", EyeBrowMorphs.FindAll(a => a.direction == true));
             SetupLocator("Eyebrow_R_Base_Ctrl", "Eyebrow_R__", EyeBrowMorphs.FindAll(a => a.direction == false));
-            SetupLocator("Mouth_Base_Ctrl", "Mouth__", EyeBrowMorphs.FindAll(a => a.direction == false));
+            SetupLocator("Mouth_Base_Ctrl", "Mouth__", MouthMorphs.FindAll(a => a.direction == false));
 
             Container.UmaFaceAnimator = DrivenKeyLocator.AddComponent<Animator>();
             Container.UmaFaceAnimator.avatar = AvatarBuilder.BuildGenericAvatar(DrivenKeyLocator, "DrivenKeyLocator");
@@ -259,20 +259,38 @@ namespace Gallop
         {
             EyeBrowMorphs.ForEach(morph =>
             {
-                morph.weight = morph.locator.transform.localPosition.x;
+                morph.weight = morph.locator.transform.localPosition.x * -100;
             });
             EyeMorphs.ForEach(morph =>
             {
-                morph.weight = morph.locator.transform.localPosition.x;
+                morph.weight = morph.locator.transform.localPosition.x * -100;
             });
             MouthMorphs.ForEach(morph =>
             {
-                if(morph.locator)
-                morph.weight = morph.locator.transform.localPosition.x;
+                morph.weight = morph.locator.transform.localPosition.x * -100;
             });
             ChangeMorph();
         }
         
+        public void ResetLocator()
+        {
+            EyeBrowMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            EyeMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            MouthMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            ChangeMorph();
+        }
     }
 }
 

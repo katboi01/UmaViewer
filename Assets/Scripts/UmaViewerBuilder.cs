@@ -951,15 +951,28 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
         }
+        else if (clip.name.Contains("face"))
+        {
+            clip.wrapMode = WrapMode.Loop;
+            CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
+            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            CurrentUMAContainer.isAnimatorControl = true;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
+        }
         else
         {
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
-
             // If Cut-in, play immediately without state interpolation
             if (clip.name.Contains("crd"))
             {
+                clip.wrapMode = WrapMode.Loop;
+                var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
+                if (facialMotion != null)
+                {
+                    RecursiveLoadAsset(facialMotion);
+                }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
             }
             else

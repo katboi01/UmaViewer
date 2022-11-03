@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
-    UmaViewerUI UI => UmaViewerUI.Instance;
-
     public JObject CharaData;
     public GameObject Body;
     public GameObject Tail;
