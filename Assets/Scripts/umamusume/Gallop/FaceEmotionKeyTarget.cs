@@ -67,6 +67,12 @@ public class FaceEmotionKeyTarget : ScriptableObject
         }
     }
 
+    public void ChangeEmotionWeight(FaceTypeData emotion, float val)
+    {
+        FaceDrivenKeyTarget.Container.isAnimatorControl = false;
+        emotion.Weight = val;
+    }
+
     public void UpdateAllFacialKeyTargets()
     {
         if (FaceDrivenKeyTarget == null) return;

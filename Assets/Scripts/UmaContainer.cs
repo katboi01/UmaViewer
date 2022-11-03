@@ -39,16 +39,14 @@ public class UmaContainer : MonoBehaviour
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
 
-    private void Start()
-    {
-        HeadBone = (GameObject)Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
-        EyeHeight = 0.1f;
-        TrackTarget = Camera.main.gameObject;
-    }
-
     public void MergeModel()
     {
         if (!Body) return;
+
+        HeadBone = (GameObject)Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
+        EyeHeight = 0.1f;
+        TrackTarget = Camera.main.gameObject;
+
         List<Transform> bodybones = new List<Transform>(Body.GetComponentInChildren<SkinnedMeshRenderer>().bones);
         List<Transform> emptyBones = new List<Transform>();
         emptyBones.Add(Body.GetComponentInChildren<SkinnedMeshRenderer>().rootBone.Find("Tail_Ctrl"));
@@ -141,12 +139,12 @@ public class UmaContainer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (TrackTarget)
+        if (TrackTarget&&!isAnimatorControl)
         {
-            var targetPosotion = TrackTarget.transform.position - new Vector3(0, EyeHeight, 0);
+            var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
             var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
             var deltaRotation = HeadBone.transform.InverseTransformDirection(deltaPos.normalized);
-            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.x / 0.86f,-1,1), Mathf.Clamp(deltaRotation.y / 0.86f, -1, 1));//Limited to the angle of view 
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.x / 0.86f,-1,1), Mathf.Clamp(deltaRotation.y / 0.66f, -1, 1));//Limited to the angle of view 
             FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
         }
 

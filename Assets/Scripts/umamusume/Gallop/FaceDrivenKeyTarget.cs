@@ -241,6 +241,7 @@ namespace Gallop
 
         public void ChangeMorphWeight(FacialMorph morph,float val)
         {
+            Container.isAnimatorControl = false;
             morph.weight = val;
             ChangeMorph();
         }

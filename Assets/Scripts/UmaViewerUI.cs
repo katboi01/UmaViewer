@@ -229,7 +229,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+            container.Slider.onValueChanged.AddListener((a) => {target.ChangeMorphWeight(morph, a);});
         }
     }
 
@@ -258,7 +258,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.value = emotion.Weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { emotion.Weight = a; });
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeEmotionWeight(emotion, a); });
         }
     }
 
