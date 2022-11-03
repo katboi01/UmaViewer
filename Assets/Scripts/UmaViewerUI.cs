@@ -159,7 +159,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadModelPanels()
     {
         var container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name.text = container.name = "General";
+        container.Name.text = container.name = "Generic";
         var imageInstance = container.GetComponent<Image>();
         container.Button.onClick.AddListener(() => {
             HighlightChildImage(AnimationSetList.content, imageInstance);
@@ -495,7 +495,6 @@ public class UmaViewerUI : MonoBehaviour
         var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
         && !a.Name.Contains($"mirror")
         && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
-        && !a.Name.Contains($"facial")
         && !a.Name.Contains($"_cam")
         && !a.Name.EndsWith($"_s")
         && !a.Name.EndsWith($"_e")
