@@ -19980,8 +19980,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1882365343}
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
-  m_Value: 0.999995
-  m_Size: 0.9765434
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -25230,6 +25230,8 @@ MonoBehaviour:
   CurrentAudioSources: []
   OverrideController: {fileID: 22100000, guid: 130057757529b0f40a4fdc08bf0861ef, type: 2}
   FaceOverrideController: {fileID: 22100000, guid: 21f82840716293147bcb9f4bfb58cc99,
+    type: 2}
+  CameraOverrideController: {fileID: 22100000, guid: 2074a3b49810aed419168eda443b9e1a,
     type: 2}
 --- !u!1 &1566898429
 GameObject:
@@ -41789,6 +41791,7 @@ GameObject:
   - component: {fileID: 8918259399633999299}
   - component: {fileID: 6878219667401439304}
   - component: {fileID: 8918259399633999297}
+  - component: {fileID: 8918259399633999300}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -41907,6 +41910,25 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8918259399633999296}
   m_Enabled: 1
+--- !u!95 &8918259399633999300
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8918259399633999296}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!4 &8918259399633999301
 Transform:
   m_ObjectHideFlags: 0

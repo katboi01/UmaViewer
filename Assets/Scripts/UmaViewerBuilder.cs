@@ -40,6 +40,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
+    public AnimatorOverrideController CameraOverrideController;
 
     private void Awake()
     {
@@ -953,11 +954,19 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.Contains("face"))
         {
-            clip.wrapMode = WrapMode.Loop;
             CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
             CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
             CurrentUMAContainer.isAnimatorControl = true;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
+        }
+        else if (clip.name.Contains("cam"))
+        {
+            Camera.main.transform.position = Vector3.zero;
+            var overrideController = Instantiate(CameraOverrideController);
+            overrideController["clip_1"] = clip;
+            var animator = Camera.main.gameObject.GetComponent<Animator>();
+            animator.runtimeAnimatorController = overrideController;
+            animator.Play("motion_1", 0, 0);
         }
         else
         {
@@ -967,16 +976,27 @@ public class UmaViewerBuilder : MonoBehaviour
             // If Cut-in, play immediately without state interpolation
             if (clip.name.Contains("crd"))
             {
-                clip.wrapMode = WrapMode.Loop;
                 var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
+                var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
+
                 if (facialMotion != null)
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
+                if(cameraMotion != null)
+                {
+                    RecursiveLoadAsset(cameraMotion);
+                }
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
+                CurrentUMAContainer.OverrideController["clip_2"].wrapMode = WrapMode.Loop;
             }
             else
             {
+                CurrentUMAContainer.isAnimatorControl = false;
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                Camera.main.gameObject.GetComponent<Animator>().runtimeAnimatorController = null;
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             }
