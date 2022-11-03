@@ -286,7 +286,10 @@ public class UmaViewerBuilder : MonoBehaviour
             emotionDriven.FaceDrivenKeyTarget = FaceDriven;
             emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
             emotionDriven.Initialize();
+
+            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
         }
+
 
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.LoadPhysics();
@@ -956,8 +959,12 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.Contains("face"))
         {
-            CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
-            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            if (CurrentUMAContainer.FaceDrivenKeyTarget)
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
+            }
+                
             CurrentUMAContainer.isAnimatorControl = true;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
         }
@@ -996,7 +1003,8 @@ public class UmaViewerBuilder : MonoBehaviour
             else
             {
                 CurrentUMAContainer.isAnimatorControl = false;
-                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                if (CurrentUMAContainer.FaceDrivenKeyTarget)
+                    CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 PreviewCamera.enabled = false;
 
                 if (CurrentCameraAnimator)
@@ -1095,8 +1103,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (container.Slider != null)
                     container.Slider.SetValueWithoutNotify(0);
             }
-            CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
-            CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+            if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
+                CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+            }
         }
     }
 

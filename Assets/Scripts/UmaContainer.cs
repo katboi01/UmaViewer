@@ -40,8 +40,6 @@ public class UmaContainer : MonoBehaviour
     public void MergeModel()
     {
         if (!Body) return;
-
-        HeadBone = (GameObject)Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
         EyeHeight = 0.1f;
         TrackTarget = Camera.main.gameObject;
 
@@ -137,7 +135,7 @@ public class UmaContainer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (TrackTarget&&!isAnimatorControl)
+        if (TrackTarget&&!isAnimatorControl&&!IsMini)
         {
             var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
             var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
@@ -146,7 +144,7 @@ public class UmaContainer : MonoBehaviour
             FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
         }
 
-        if (isAnimatorControl)
+        if (isAnimatorControl && !IsMini)
         {
             FaceDrivenKeyTarget.ProcessLocator();
         }

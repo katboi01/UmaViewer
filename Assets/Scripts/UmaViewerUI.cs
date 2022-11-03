@@ -565,6 +565,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
+        if(Builder.CurrentUMAContainer.UmaFaceAnimator)
         Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
 
@@ -668,23 +669,28 @@ public class UmaViewerUI : MonoBehaviour
             if (state)
             {
                 animator.speed = 0;
-                animator_face.speed = 0;
+                if (animator_face)
+                    animator_face.speed = 0;
                 animator_cam.speed = 0;
             }
             else if (AnimeState.normalizedTime < 1f)
             {
                 animator.speed = AnimationSpeedSlider.value;
-                animator_face.speed = AnimationSpeedSlider.value;
                 animator_cam.speed = AnimationSpeedSlider.value;
+                if (animator_face)
+                    animator_face.speed = AnimationSpeedSlider.value;
             }
             else
             {
                 animator.speed = AnimationSpeedSlider.value;
                 animator.Play(0, -1, 0);
-                animator_face.speed = AnimationSpeedSlider.value;
-                animator_face.Play(0, -1, 0);
                 animator_cam.speed = AnimationSpeedSlider.value;
                 animator_cam.Play(0, -1, 0);
+                if (animator_face)
+                {
+                    animator_face.speed = AnimationSpeedSlider.value;
+                    animator_face.Play(0, -1, 0);
+                }
             }
             
         }
@@ -703,10 +709,13 @@ public class UmaViewerUI : MonoBehaviour
             // Pause and Seek;
             animator.speed = 0;
             animator.Play(0, -1, val);
-            animator_face.speed = 0;
-            animator_face.Play(0, -1, val);
             animator_cam.speed = 0;
             animator_cam.Play(0, -1, val);
+            if (animator_face)
+            {
+                animator_face.speed = 0;
+                animator_face.Play(0, -1, val);
+            }
 
             AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
         }
@@ -717,8 +726,11 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-        Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
         Builder.CurrentCameraAnimator.speed = val;
+        if (Builder.CurrentUMAContainer.UmaFaceAnimator)
+        {
+            Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
+        }
     }
 
     public void ResetAudioPlayer()
