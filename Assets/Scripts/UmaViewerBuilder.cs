@@ -42,6 +42,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
     public Animator CurrentCameraAnimator;
+    public Camera PreviewCamera;
 
     private void Awake()
     {
@@ -966,6 +967,7 @@ public class UmaViewerBuilder : MonoBehaviour
             overrideController["clip_1"] = clip;
             CurrentCameraAnimator = Camera.main.gameObject.GetComponent<Animator>();
             CurrentCameraAnimator.runtimeAnimatorController = overrideController;
+            PreviewCamera.enabled = true;
             CurrentCameraAnimator.Play("motion_1", 0, 0);
         }
         else
@@ -983,7 +985,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
-                if(cameraMotion != null)
+                if (cameraMotion != null)
                 {
                     RecursiveLoadAsset(cameraMotion);
                 }
@@ -995,9 +997,10 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 CurrentUMAContainer.isAnimatorControl = false;
                 CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                PreviewCamera.enabled = false;
 
-                if(CurrentCameraAnimator)
-                CurrentCameraAnimator.GetComponent<Animator>().runtimeAnimatorController = null;
+                if (CurrentCameraAnimator)
+                    CurrentCameraAnimator.GetComponent<Animator>().runtimeAnimatorController = null;
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
@@ -1078,7 +1081,6 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
-
     public void ClearMorphs()
     {
         if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
@@ -1095,6 +1097,14 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
             CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (PreviewCamera&&PreviewCamera.enabled == true)
+        {
+            PreviewCamera.fieldOfView = PreviewCamera.gameObject.transform.parent.transform.localScale.x;
         }
     }
 }
