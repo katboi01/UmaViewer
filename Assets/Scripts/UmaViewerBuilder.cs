@@ -41,6 +41,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
+    public Animator CurrentCameraAnimator;
 
     private void Awake()
     {
@@ -961,12 +962,11 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.Contains("cam"))
         {
-            Camera.main.transform.position = Vector3.zero;
             var overrideController = Instantiate(CameraOverrideController);
             overrideController["clip_1"] = clip;
-            var animator = Camera.main.gameObject.GetComponent<Animator>();
-            animator.runtimeAnimatorController = overrideController;
-            animator.Play("motion_1", 0, 0);
+            CurrentCameraAnimator = Camera.main.gameObject.GetComponent<Animator>();
+            CurrentCameraAnimator.runtimeAnimatorController = overrideController;
+            CurrentCameraAnimator.Play("motion_1", 0, 0);
         }
         else
         {
@@ -995,7 +995,9 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 CurrentUMAContainer.isAnimatorControl = false;
                 CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-                Camera.main.gameObject.GetComponent<Animator>().runtimeAnimatorController = null;
+
+                if(CurrentCameraAnimator)
+                CurrentCameraAnimator.GetComponent<Animator>().runtimeAnimatorController = null;
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");

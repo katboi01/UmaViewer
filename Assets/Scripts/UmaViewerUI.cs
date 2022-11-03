@@ -662,17 +662,20 @@ public class UmaViewerUI : MonoBehaviour
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
             var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
+            var animator_cam = Builder.CurrentCameraAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
             {
                 animator.speed = 0;
                 animator_face.speed = 0;
+                animator_cam.speed = 0;
             }
             else if (AnimeState.normalizedTime < 1f)
             {
                 animator.speed = AnimationSpeedSlider.value;
                 animator_face.speed = AnimationSpeedSlider.value;
+                animator_cam.speed = AnimationSpeedSlider.value;
             }
             else
             {
@@ -680,6 +683,8 @@ public class UmaViewerUI : MonoBehaviour
                 animator.Play(0, -1, 0);
                 animator_face.speed = AnimationSpeedSlider.value;
                 animator_face.Play(0, -1, 0);
+                animator_cam.speed = AnimationSpeedSlider.value;
+                animator_cam.Play(0, -1, 0);
             }
             
         }
@@ -690,6 +695,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
+        var animator_cam = Builder.CurrentCameraAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
@@ -699,6 +705,8 @@ public class UmaViewerUI : MonoBehaviour
             animator.Play(0, -1, val);
             animator_face.speed = 0;
             animator_face.Play(0, -1, val);
+            animator_cam.speed = 0;
+            animator_cam.Play(0, -1, val);
 
             AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
         }
@@ -710,6 +718,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
         Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
+        Builder.CurrentCameraAnimator.speed = val;
     }
 
     public void ResetAudioPlayer()
