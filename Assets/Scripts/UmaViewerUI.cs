@@ -159,11 +159,19 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadModelPanels()
     {
         var container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name.text = container.name = "type00";
+        container.Name.text = container.name = "General";
         var imageInstance = container.GetComponent<Image>();
         container.Button.onClick.AddListener(() => {
             HighlightChildImage(AnimationSetList.content, imageInstance);
             ListAnimations(-1, false);
+        });
+
+        container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        container.Name.text = container.name = "Tail";
+        imageInstance = container.GetComponent<Image>();
+        container.Button.onClick.AddListener(() => {
+            HighlightChildImage(AnimationSetList.content, imageInstance);
+            ListAnimations(-2, false);
         });
 
         foreach (var chara in Main.Characters.OrderBy(c => c.Id))
@@ -280,7 +288,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadMiniModelPanels()
     {
         var container = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name.text = container.name = "type00";
+        container.Name.text = container.name = "General";
         var imageInstance = container.GetComponent<Image>();
         container.Button.onClick.AddListener(() => {
             HighlightChildImage(MiniAnimationSetList.content, imageInstance);
@@ -495,7 +503,21 @@ public class UmaViewerUI : MonoBehaviour
         
         if (umaId == -1)
         {
-            foreach (var entry in filteredList.Where(a=> a.Name.Contains($"/type00")))
+            foreach (var entry in filteredList.Where(a=> a.Name.Contains($"/type00") && !a.Name.Contains($"/tail")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name.text = container.name = Path.GetFileName(entry.Name);
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+        }
+        else if(umaId == -2)
+        {
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
