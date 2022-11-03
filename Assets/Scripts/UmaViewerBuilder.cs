@@ -974,7 +974,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
             // If Cut-in, play immediately without state interpolation
-            if (clip.name.Contains("crd"))
+            if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
             {
                 var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
                 var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
