@@ -21,11 +21,12 @@ namespace Gallop
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
-        public bool needUpdate = false;
-        public bool needAllUpdate = false;
+        public GameObject DrivenKeyLocator;
+
         public UmaContainer Container;
 
         Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
+        
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
@@ -119,11 +120,39 @@ namespace Gallop
             }
             FacialResetAll();
             ChangeMorphWeight(MouthMorphs[3], 1);
-
+            SetupAnimator();
             if (UmaViewerUI.Instance)
             {
                 UmaViewerUI.Instance.LoadFacialPanels(this);
             }
+        }
+
+        public void SetupAnimator()
+        {
+            DrivenKeyLocator = new GameObject("DrivenKeyLocator");
+            DrivenKeyLocator.transform.SetParent(Container.transform);
+            SetupLocator("Eye_L_Base_Ctrl", "Eye_L__", EyeMorphs.FindAll(a => a.direction == true));
+            SetupLocator("Eye_R_Base_Ctrl", "Eye_R__", EyeMorphs.FindAll(a => a.direction == false));
+            SetupLocator("Eyebrow_L_Base_Ctrl", "Eyebrow_L__", EyeBrowMorphs.FindAll(a => a.direction == true));
+            SetupLocator("Eyebrow_R_Base_Ctrl", "Eyebrow_R__", EyeBrowMorphs.FindAll(a => a.direction == false));
+            SetupLocator("Mouth_Base_Ctrl", "Mouth__", EyeBrowMorphs.FindAll(a => a.direction == false));
+
+            Container.UmaFaceAnimator = DrivenKeyLocator.AddComponent<Animator>();
+            Container.UmaFaceAnimator.avatar = AvatarBuilder.BuildGenericAvatar(DrivenKeyLocator, "DrivenKeyLocator");
+            Container.FaceOverrideController = Instantiate(UmaViewerBuilder.Instance.FaceOverrideController);
+            Container.UmaFaceAnimator.runtimeAnimatorController = Container.FaceOverrideController;
+        }
+
+        public void SetupLocator(string rootName, string prefix, List<FacialMorph> morphs)
+        {
+            var root = new GameObject(rootName);
+            root.transform.SetParent(DrivenKeyLocator.transform);
+
+            morphs.ForEach(morph=>{
+                var locator = new GameObject(prefix+morph.tag);
+                locator.transform.SetParent(root.transform);
+                morph.locator = locator.transform;
+            });
         }
 
         public void ChangeMorph()
@@ -224,6 +253,25 @@ namespace Gallop
             RightEyeYrange.weight = ry;
             ChangeMorph();
         }
+
+        public void ProcessLocator()
+        {
+            EyeBrowMorphs.ForEach(morph =>
+            {
+                morph.weight = morph.locator.transform.localPosition.x;
+            });
+            EyeMorphs.ForEach(morph =>
+            {
+                morph.weight = morph.locator.transform.localPosition.x;
+            });
+            MouthMorphs.ForEach(morph =>
+            {
+                if(morph.locator)
+                morph.weight = morph.locator.transform.localPosition.x;
+            });
+            ChangeMorph();
+        }
+        
     }
 }
 

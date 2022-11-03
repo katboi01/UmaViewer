@@ -25229,6 +25229,8 @@ MonoBehaviour:
   alphaShader: {fileID: 0}
   CurrentAudioSources: []
   OverrideController: {fileID: 22100000, guid: 130057757529b0f40a4fdc08bf0861ef, type: 2}
+  FaceOverrideController: {fileID: 22100000, guid: 21f82840716293147bcb9f4bfb58cc99,
+    type: 2}
 --- !u!1 &1566898429
 GameObject:
   m_ObjectHideFlags: 0

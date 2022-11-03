@@ -16,5 +16,6 @@ namespace Gallop
         public FaceDrivenKeyTarget target;
         public float weight;
         public List<TrsArray> trsArray;
+        public Transform locator;
     }
 }

@@ -19,6 +19,10 @@ public class UmaContainer : MonoBehaviour
     public Animator UmaAnimator;
     public AnimatorOverrideController OverrideController;
 
+    public bool isAnimatorControl;
+    public Animator UmaFaceAnimator;
+    public AnimatorOverrideController FaceOverrideController;
+
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
@@ -92,7 +96,8 @@ public class UmaContainer : MonoBehaviour
         //MergeAvatar
         UmaAnimator = gameObject.AddComponent<Animator>();
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
-        UmaAnimator.runtimeAnimatorController = OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
+        OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
+        UmaAnimator.runtimeAnimatorController = OverrideController;
 
     }
 
@@ -143,6 +148,11 @@ public class UmaContainer : MonoBehaviour
             var deltaRotation = HeadBone.transform.InverseTransformDirection(deltaPos.normalized);
             var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.x / 0.86f,-1,1), Mathf.Clamp(deltaRotation.y / 0.86f, -1, 1));//Limited to the angle of view 
             FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+        }
+
+        if (isAnimatorControl)
+        {
+            FaceDrivenKeyTarget.ProcessLocator();
         }
     }
 }

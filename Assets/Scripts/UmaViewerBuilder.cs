@@ -39,7 +39,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
     public AnimatorOverrideController OverrideController;
-
+    public AnimatorOverrideController FaceOverrideController;
 
     private void Awake()
     {
