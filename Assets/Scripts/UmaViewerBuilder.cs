@@ -960,6 +960,7 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
 
             CurrentUMAContainer.isAnimatorControl = false;
+            CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
         }
         else if (clip.name.Contains("face"))
         {
@@ -1004,6 +1005,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
                 CurrentUMAContainer.OverrideController["clip_2"].wrapMode = WrapMode.Loop;
+                CurrentUMAContainer.TrackTarget = PreviewCamera.gameObject;
             }
             else
             {
@@ -1012,6 +1014,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 }
                 CurrentUMAContainer.isAnimatorControl = false;
+                CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
                 SetPreviewCamera(null);
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);

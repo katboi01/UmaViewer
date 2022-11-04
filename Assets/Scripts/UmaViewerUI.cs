@@ -624,6 +624,14 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void SetEyeTrackingEnable(bool isOn)
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
+        }
+    }
+
     public void ClearCache()
     {
         PlayerPrefs.DeleteAll();

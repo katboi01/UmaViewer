@@ -305,7 +305,17 @@ namespace Gallop
             });
             EyeMorphs.ForEach(morph =>
             {
-                morph.weight = morph.locator.transform.localPosition.x * -100;
+                if (morph == LeftEyeXrange || morph == LeftEyeYrange || morph == RightEyeXrange || morph == RightEyeYrange)
+                {
+                    if (!Container.EnableEyeTracking)
+                    {
+                        morph.weight = morph.locator.transform.localPosition.x * -100;
+                    }
+                }
+                else
+                {
+                    morph.weight = morph.locator.transform.localPosition.x * -100;
+                }
             });
             MouthMorphs.ForEach(morph =>
             {

@@ -27,6 +27,7 @@ public class UmaContainer : MonoBehaviour
     public GameObject HeadBone;
     public GameObject TrackTarget;
     public float EyeHeight;
+    public bool EnableEyeTracking = true;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -135,12 +136,15 @@ public class UmaContainer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (TrackTarget&&!isAnimatorControl&&!IsMini)
+        if (TrackTarget&& EnableEyeTracking && !IsMini)
         {
             var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
             var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
-            var deltaRotation = HeadBone.transform.InverseTransformDirection(deltaPos.normalized);
-            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.x / 0.86f,-1,1), Mathf.Clamp(deltaRotation.y / 0.66f, -1, 1));//Limited to the angle of view 
+            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
+            if (deltaRotation.x > 180) deltaRotation.x -= 360;
+            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35,-1,1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
             FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
         }
 
