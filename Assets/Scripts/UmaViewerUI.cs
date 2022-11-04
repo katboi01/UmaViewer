@@ -219,6 +219,7 @@ public class UmaViewerUI : MonoBehaviour
 
         if (target == null) return;
         List<FacialMorph> tempMorph = new List<FacialMorph>();
+        tempMorph.AddRange(target.EarMorphs);
         tempMorph.AddRange(target.EyeBrowMorphs);
         tempMorph.AddRange(target.EyeMorphs);
         tempMorph.AddRange(target.MouthMorphs);
@@ -608,6 +609,17 @@ public class UmaViewerUI : MonoBehaviour
             foreach(CySpringDataContainer cySpring in Builder.CurrentUMAContainer.GetComponentsInChildren<CySpringDataContainer>())
             {
                 cySpring.EnablePhysics(isOn);
+            }
+        }
+    }
+
+    public void SetEarMorphEnable(bool isOn)
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            foreach (CySpringDataContainer cySpring in Builder.CurrentUMAContainer.GetComponentsInChildren<CySpringDataContainer>())
+            {
+                cySpring.EnableEarPhysics(!isOn);
             }
         }
     }

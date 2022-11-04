@@ -158,7 +158,21 @@ namespace Gallop
         {
             foreach(DynamicBone dynamic in DynamicBones)
             {
-                dynamic.enabled = isOn;
+                if (!dynamic.m_Root.name.Contains("Ear"))
+                {
+                    dynamic.enabled = isOn;
+                }
+            }
+        }
+
+        public void EnableEarPhysics(bool isOn)
+        {
+            foreach (DynamicBone dynamic in DynamicBones)
+            {
+                if (dynamic.m_Root.name.Contains("Ear"))
+                {
+                    dynamic.enabled = isOn;
+                }
             }
         }
     }

@@ -10,13 +10,16 @@ namespace Gallop
         public List<EyeTarget> _eyeTarget;
         public List<EyebrowTarget> _eyebrowTarget;
         public List<MouthTarget> _mouthTarget;
+        public List<TargetInfomation> _earTarget;
 
         public List<Transform> Objs;
+        private FacialMorph BaseLEarMorph, BaseREarMorph;
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
         private FacialMorph BaseMouthMorph;
         public FacialMorph LeftEyeXrange, LeftEyeYrange, RightEyeXrange, RightEyeYrange;
 
+        public List<FacialMorph> EarMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeBrowMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
@@ -30,6 +33,32 @@ namespace Gallop
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
+
+            for (int i = 0; i < _earTarget.Count; i++)
+            {
+                for (int j = 0; j < _earTarget[i]._faceGroupInfo.Count; j++)
+                {
+                    FacialMorph morph = new FacialMorph();
+                    morph.target = this;
+                    morph.direction = j > 0;
+                    morph.name = "Ear_" + i + "_" + (morph.direction ? "L" : "R");
+                    morph.tag = Enum.GetName(typeof(EarType), i);
+                    morph.trsArray = _earTarget[i]._faceGroupInfo[j]._trsArray;
+                    foreach (TrsArray trs in morph.trsArray)
+                    {
+                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                    }
+                    if (i == 0)
+                    {
+                        if (morph.direction) BaseLEarMorph = morph;
+                        else BaseREarMorph = morph;
+                    }
+                    else
+                    {
+                        EarMorphs.Add(morph);
+                    }
+                }
+            }
 
             for (int i = 0; i < _eyebrowTarget.Count; i++)
             {
@@ -159,6 +188,11 @@ namespace Gallop
         {
             FacialResetAll();
 
+            foreach (FacialMorph morph in EarMorphs)
+            {
+                ProcessMorph(morph);
+            }
+
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
                 ProcessMorph(morph);
@@ -179,6 +213,12 @@ namespace Gallop
 
         public void ClearMorph()
         {
+
+            foreach (FacialMorph morph in EarMorphs)
+            {
+                morph.weight = 0;
+            }
+
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
                 morph.weight = 0;
@@ -210,6 +250,8 @@ namespace Gallop
 
         public void FacialResetAll()
         {
+            FacialReset(BaseLEarMorph.trsArray);
+            FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
             FacialReset(BaseREyeBrowMorph.trsArray);
             FacialReset(BaseLEyeMorph.trsArray);
