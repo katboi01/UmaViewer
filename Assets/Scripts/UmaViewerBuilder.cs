@@ -41,7 +41,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
-    public Animator CurrentCameraAnimator;
+    public Animator PreviewCameraAnimator;
     public Camera PreviewCamera;
 
     private void Awake()
@@ -956,6 +956,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+
+            CurrentUMAContainer.isAnimatorControl = false;
         }
         else if (clip.name.Contains("face"))
         {
@@ -972,10 +974,7 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             var overrideController = Instantiate(CameraOverrideController);
             overrideController["clip_1"] = clip;
-            CurrentCameraAnimator = Camera.main.gameObject.GetComponent<Animator>();
-            CurrentCameraAnimator.runtimeAnimatorController = overrideController;
-            PreviewCamera.enabled = true;
-            CurrentCameraAnimator.Play("motion_1", 0, 0);
+            SetPreviewCamera(overrideController);
         }
         else
         {
@@ -992,23 +991,27 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
+
                 if (cameraMotion != null)
                 {
                     RecursiveLoadAsset(cameraMotion);
                 }
 
+                if (CurrentUMAContainer.IsMini) 
+                {
+                    SetPreviewCamera(null);
+                }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
                 CurrentUMAContainer.OverrideController["clip_2"].wrapMode = WrapMode.Loop;
             }
             else
             {
-                CurrentUMAContainer.isAnimatorControl = false;
-                if (CurrentUMAContainer.FaceDrivenKeyTarget)
+                if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+                {
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-                PreviewCamera.enabled = false;
-
-                if (CurrentCameraAnimator)
-                    CurrentCameraAnimator.GetComponent<Animator>().runtimeAnimatorController = null;
+                }
+                CurrentUMAContainer.isAnimatorControl = false;
+                SetPreviewCamera(null);
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
@@ -1016,6 +1019,20 @@ public class UmaViewerBuilder : MonoBehaviour
 
         }
 
+    }
+    public void SetPreviewCamera(RuntimeAnimatorController controller)
+    {
+        if (controller)
+        {
+            PreviewCameraAnimator.runtimeAnimatorController = controller;
+            PreviewCamera.enabled = true;
+            PreviewCameraAnimator.Play("motion_1", 0, 0);
+        }
+        else
+        {
+            PreviewCameraAnimator.runtimeAnimatorController = null;
+            PreviewCamera.enabled = false;
+        }
     }
 
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)

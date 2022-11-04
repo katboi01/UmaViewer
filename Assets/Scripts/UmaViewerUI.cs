@@ -663,7 +663,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
             var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-            var animator_cam = Builder.CurrentCameraAnimator;
+            var animator_cam = Builder.PreviewCameraAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
@@ -701,7 +701,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-        var animator_cam = Builder.CurrentCameraAnimator;
+        var animator_cam = Builder.PreviewCameraAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
@@ -726,7 +726,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-        Builder.CurrentCameraAnimator.speed = val;
+        Builder.PreviewCameraAnimator.speed = val;
         if (Builder.CurrentUMAContainer.UmaFaceAnimator)
         {
             Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
