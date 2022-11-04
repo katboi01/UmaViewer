@@ -170,7 +170,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
-                if (asset1.Name.Contains("cloth00"))
+                if (asset1.Name.Contains("cloth04"))
                     RecursiveLoadAsset(asset1);
             }
         }
@@ -961,12 +961,10 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.Contains("face"))
         {
-            if (CurrentUMAContainer.FaceDrivenKeyTarget)
-            {
-                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-                CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
-            }
-                
+            if (CurrentUMAContainer.IsMini) return;
+            
+            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
             CurrentUMAContainer.isAnimatorControl = true;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
         }
