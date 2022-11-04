@@ -33,7 +33,11 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect SceneList;
 
     public ScrollRect EmotionList;
-    public ScrollRect FacialList;
+    public Transform FacialList;
+    public ScrollRect EarList;
+    public ScrollRect EyeBrowList;
+    public ScrollRect EyeList;
+    public ScrollRect MouthList;
     public ScrollRect LiveList;
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
@@ -66,6 +70,7 @@ public class UmaViewerUI : MonoBehaviour
     public Slider GifSlider;
     public Button GifButton;
     public List<GameObject> TogglablePanels = new List<GameObject>();
+    public List<GameObject> TogglableFacials = new List<GameObject>();
 
     public GameObject UmaContainerPrefab;
     public GameObject UmaContainerSliderPrefab;
@@ -208,16 +213,36 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void InstantiateFacialPart(GameObject UmaContainerSliderPrefab, FaceDrivenKeyTarget target, List<FacialMorph> targetMorph, ScrollRect TargetList)
+    {
+        foreach (FacialMorph morph in targetMorph)
+        {
+            var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = morph.name + " (" + morph.tag + ")";
+            container.Slider.value = morph.weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+        }
+    }
+
     public void LoadFacialPanels(FaceDrivenKeyTarget target)
     {
         currentFaceDrivenKeyTarget = target;
 
-        foreach (UmaUIContainer ui in FacialList.content.GetComponentsInChildren<UmaUIContainer>())
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>())
         {
             Destroy(ui.gameObject);
         }
 
         if (target == null) return;
+
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EarMorphs, EarList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeBrowMorphs, EyeBrowList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeMorphs, EyeList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.MouthMorphs, MouthList);
+
+        /*
         List<FacialMorph> tempMorph = new List<FacialMorph>();
         tempMorph.AddRange(target.EarMorphs);
         tempMorph.AddRange(target.EyeBrowMorphs);
@@ -232,6 +257,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) => {target.ChangeMorphWeight(morph, a);});
         }
+        */
     }
 
     public void UpdateFacialPanels()
@@ -580,6 +606,20 @@ public class UmaViewerUI : MonoBehaviour
         }
 
         foreach (var panel in TogglablePanels)
+        {
+            panel.SetActive(panel == go);
+        }
+    }
+
+    public void ToggleUIFacial(GameObject go)
+    {
+        if (go.activeSelf || !TogglableFacials.Contains(go))
+        {
+            go.SetActive(!go.activeSelf);
+            return;
+        }
+
+        foreach (var panel in TogglableFacials)
         {
             panel.SetActive(panel == go);
         }
