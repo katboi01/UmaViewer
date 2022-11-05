@@ -646,21 +646,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (Builder.CurrentUMAContainer)
         {
-            foreach(CySpringDataContainer cySpring in Builder.CurrentUMAContainer.GetComponentsInChildren<CySpringDataContainer>())
-            {
-                cySpring.EnablePhysics(isOn);
-            }
-        }
-    }
-
-    public void SetEarMorphEnable(bool isOn)
-    {
-        if (Builder.CurrentUMAContainer)
-        {
-            foreach (CySpringDataContainer cySpring in Builder.CurrentUMAContainer.GetComponentsInChildren<CySpringDataContainer>())
-            {
-                cySpring.EnableEarPhysics(!isOn);
-            }
+            Builder.CurrentUMAContainer.SetDynamicBoneEnable(isOn);
         }
     }
 
@@ -749,7 +735,8 @@ public class UmaViewerUI : MonoBehaviour
                 if (animator_face)
                 {
                     animator_face.speed = AnimationSpeedSlider.value;
-                    animator_face.Play(0, -1, 0);
+                    animator_face.Play(0, 0, 0);
+                    animator_face.Play(0, 1, 0);
                 }
             }
             
@@ -774,7 +761,8 @@ public class UmaViewerUI : MonoBehaviour
             if (animator_face)
             {
                 animator_face.speed = 0;
-                animator_face.Play(0, -1, val);
+                animator_face.Play(0, 0, val);
+                animator_face.Play(0, 1, val);
             }
 
             AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));

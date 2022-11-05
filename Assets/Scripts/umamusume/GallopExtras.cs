@@ -1,6 +1,7 @@
 using Unity;
 using System.Collections.Generic;
 using UnityEngine;
+using static DynamicBone;
 
 [System.Serializable]
 public class AssetTable
@@ -40,6 +41,14 @@ public class TrsArray
     public Vector3 _scale;
     public Vector3 _rotation;
     public bool IsOverrideTarget;
+
+    public bool isPhysics;
+    public Particle physicsParticle;
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 }
 
 [System.Serializable]

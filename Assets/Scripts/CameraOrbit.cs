@@ -248,11 +248,11 @@ public class CameraOrbit : MonoBehaviour
     private void MobileOrbitLight()
     {
         return;
-        if (Input.touchCount == 2 && !eventSystem.IsPointerOverGameObject(Input.touches[0].fingerId) && !eventSystem.IsPointerOverGameObject(Input.touches[1].fingerId))
-        {
-            Light.transform.Rotate(Input.GetAxis("Mouse X") * Vector3.up, Space.Self);
-            Light.transform.Rotate(Input.GetAxis("Mouse Y") * Vector3.right, Space.Self);
-        }
+        //if (Input.touchCount == 2 && !eventSystem.IsPointerOverGameObject(Input.touches[0].fingerId) && !eventSystem.IsPointerOverGameObject(Input.touches[1].fingerId))
+        //{
+        //    Light.transform.Rotate(Input.GetAxis("Mouse X") * Vector3.up, Space.Self);
+        //    Light.transform.Rotate(Input.GetAxis("Mouse Y") * Vector3.right, Space.Self);
+        //}
     }
 
     /// <summary>

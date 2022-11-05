@@ -14,12 +14,13 @@ public class UmaContainer : MonoBehaviour
     public GameObject PhysicsController;
 
     public List<Texture2D> TailTextures = new List<Texture2D>();
+
+    [Header("Animator")]
     public Animator UmaAnimator;
     public AnimatorOverrideController OverrideController;
-
-    public bool isAnimatorControl;
     public Animator UmaFaceAnimator;
     public AnimatorOverrideController FaceOverrideController;
+    public bool isAnimatorControl;
 
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
@@ -37,6 +38,10 @@ public class UmaContainer : MonoBehaviour
     [Header("Mini")]
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
+
+    [Header("Physics")]
+    public bool EnablePhysics = true;
+    public List<CySpringDataContainer> cySpringDataContainers;
 
     public void MergeModel()
     {
@@ -127,16 +132,28 @@ public class UmaContainer : MonoBehaviour
 
     public void LoadPhysics()
     {
+        cySpringDataContainers = new List<CySpringDataContainer>();
         var springs = PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
         foreach (CySpringDataContainer spring in springs)
         {
+            cySpringDataContainers.Add(spring);
             spring.InitializePhysics();
+        }
+    }
+
+    public void SetDynamicBoneEnable(bool isOn)
+    {
+        if (IsMini) return;
+        EnablePhysics = isOn;
+        foreach (CySpringDataContainer cySpring in cySpringDataContainers)
+        {
+            cySpring.EnablePhysics(isOn);
         }
     }
 
     private void FixedUpdate()
     {
-        if (TrackTarget&& EnableEyeTracking && !IsMini)
+        if (TrackTarget && EnableEyeTracking && !isAnimatorControl && !IsMini) 
         {
             var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
             var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);

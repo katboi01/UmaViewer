@@ -271,6 +271,9 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
+
+        CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
+
         //Load FacialMorph
         if (CurrentUMAContainer.Head)
         {
@@ -294,7 +297,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
 
         CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.LoadPhysics();
         LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
@@ -971,6 +973,11 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.isAnimatorControl = true;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
         }
+        else if (clip.name.Contains("ear"))
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
+        }
         else if (clip.name.Contains("cam"))
         {
             var overrideController = Instantiate(CameraOverrideController);
@@ -988,10 +995,15 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
                 var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
-
+                var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
                 if (facialMotion != null)
                 {
                     RecursiveLoadAsset(facialMotion);
+                }
+
+                if (earMotion != null)
+                {
+                    RecursiveLoadAsset(earMotion);
                 }
 
                 if (cameraMotion != null)
