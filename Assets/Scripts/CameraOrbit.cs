@@ -82,25 +82,10 @@ public class CameraOrbit : MonoBehaviour
 
         if (AAMode != AAModeDropdown.value)
         {
-            var postprocessLayer = Camera.main.GetComponent<PostProcessLayer>();
-            switch (AAModeDropdown.value) //new
-            {
-                case 0:
-                    postprocessLayer.antialiasingMode = PostProcessLayer.Antialiasing.None;
-                    break;
-                case 1:
-                    postprocessLayer.antialiasingMode = PostProcessLayer.Antialiasing.FastApproximateAntialiasing;
-                    break;
-                case 2:
-                    postprocessLayer.antialiasingMode = PostProcessLayer.Antialiasing.SubpixelMorphologicalAntialiasing;
-                    break;
-                case 3:
-                    postprocessLayer.antialiasingMode = PostProcessLayer.Antialiasing.TemporalAntialiasing;
-                    break;
-                default:
-                    postprocessLayer.antialiasingMode = PostProcessLayer.Antialiasing.None;
-                    break;
-            }
+            var postprocessLayerMain = Camera.main.GetComponent<PostProcessLayer>();
+            var postprocessLayerPreview = UmaViewerBuilder.Instance.PreviewCamera.GetComponent<PostProcessLayer>();
+            postprocessLayerMain.antialiasingMode = postprocessLayerPreview.antialiasingMode = (PostProcessLayer.Antialiasing)AAModeDropdown.value;
+            Debug.Log($"Switched AntiAliasing to {(PostProcessLayer.Antialiasing)AAModeDropdown.value}");
             AAMode = AAModeDropdown.value;
         }
 #if UNITY_ANDROID
