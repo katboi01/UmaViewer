@@ -964,6 +964,12 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.isAnimatorControl = false;
             CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
         }
+        else if (clip.name.Contains("tail"))
+        {
+            if (CurrentUMAContainer.IsMini) return;
+            CurrentUMAContainer.OverrideController["clip_t"] = clip;
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 1);
+        }
         else if (clip.name.Contains("face"))
         {
             if (CurrentUMAContainer.IsMini) return;
