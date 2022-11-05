@@ -5,10 +5,10 @@ using UnityEngine;
 namespace Gallop
 {
     
-    public class DrivenKeyTarget : MonoBehaviour
+    public class DrivenKeyTarget : ScriptableObject
     {
 
-        public List<TargetInfomation> _targetFaces { get; set; }
+        public List<TargetInfomation> _targetFaces;
     }
 }
 

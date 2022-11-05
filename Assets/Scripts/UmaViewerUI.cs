@@ -33,7 +33,11 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect SceneList;
 
     public ScrollRect EmotionList;
-    public ScrollRect FacialList;
+    public Transform FacialList;
+    public ScrollRect EarList;
+    public ScrollRect EyeBrowList;
+    public ScrollRect EyeList;
+    public ScrollRect MouthList;
     public ScrollRect LiveList;
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
@@ -66,6 +70,7 @@ public class UmaViewerUI : MonoBehaviour
     public Slider GifSlider;
     public Button GifButton;
     public List<GameObject> TogglablePanels = new List<GameObject>();
+    public List<GameObject> TogglableFacials = new List<GameObject>();
 
     public GameObject UmaContainerPrefab;
     public GameObject UmaContainerSliderPrefab;
@@ -159,11 +164,19 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadModelPanels()
     {
         var container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name.text = container.name = "type00";
+        container.Name.text = container.name = "Generic";
         var imageInstance = container.GetComponent<Image>();
         container.Button.onClick.AddListener(() => {
             HighlightChildImage(AnimationSetList.content, imageInstance);
             ListAnimations(-1, false);
+        });
+
+        container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        container.Name.text = container.name = "Tail";
+        imageInstance = container.GetComponent<Image>();
+        container.Button.onClick.AddListener(() => {
+            HighlightChildImage(AnimationSetList.content, imageInstance);
+            ListAnimations(-2, false);
         });
 
         foreach (var chara in Main.Characters.OrderBy(c => c.Id))
@@ -200,17 +213,38 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void InstantiateFacialPart(GameObject UmaContainerSliderPrefab, FaceDrivenKeyTarget target, List<FacialMorph> targetMorph, ScrollRect TargetList)
+    {
+        foreach (FacialMorph morph in targetMorph)
+        {
+            var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
+            container.Name.text = morph.name + " (" + morph.tag + ")";
+            container.Slider.value = morph.weight;
+            container.Slider.maxValue = 1;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+        }
+    }
+
     public void LoadFacialPanels(FaceDrivenKeyTarget target)
     {
         currentFaceDrivenKeyTarget = target;
 
-        foreach (UmaUIContainer ui in FacialList.content.GetComponentsInChildren<UmaUIContainer>())
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>())
         {
             Destroy(ui.gameObject);
         }
 
         if (target == null) return;
+
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EarMorphs, EarList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeBrowMorphs, EyeBrowList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeMorphs, EyeList);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, target.MouthMorphs, MouthList);
+
+        /*
         List<FacialMorph> tempMorph = new List<FacialMorph>();
+        tempMorph.AddRange(target.EarMorphs);
         tempMorph.AddRange(target.EyeBrowMorphs);
         tempMorph.AddRange(target.EyeMorphs);
         tempMorph.AddRange(target.MouthMorphs);
@@ -221,8 +255,9 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+            container.Slider.onValueChanged.AddListener((a) => {target.ChangeMorphWeight(morph, a);});
         }
+        */
     }
 
     public void UpdateFacialPanels()
@@ -250,7 +285,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Slider.value = emotion.Weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => { emotion.Weight = a; });
+            container.Slider.onValueChanged.AddListener((a) => { target.ChangeEmotionWeight(emotion, a); });
         }
     }
 
@@ -280,7 +315,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadMiniModelPanels()
     {
         var container = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name.text = container.name = "type00";
+        container.Name.text = container.name = "General";
         var imageInstance = container.GetComponent<Image>();
         container.Button.onClick.AddListener(() => {
             HighlightChildImage(MiniAnimationSetList.content, imageInstance);
@@ -487,7 +522,7 @@ public class UmaViewerUI : MonoBehaviour
         var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
         && !a.Name.Contains($"mirror")
         && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
-        && !a.Name.Contains($"facial")
+        && !a.Name.Contains($"facial") 
         && !a.Name.Contains($"_cam")
         && !a.Name.EndsWith($"_s")
         && !a.Name.EndsWith($"_e")
@@ -495,7 +530,21 @@ public class UmaViewerUI : MonoBehaviour
         
         if (umaId == -1)
         {
-            foreach (var entry in filteredList.Where(a=> a.Name.Contains($"/type00")))
+            foreach (var entry in filteredList.Where(a=> a.Name.Contains($"/type00") && !a.Name.Contains($"/tail")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name.text = container.name = Path.GetFileName(entry.Name);
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+        }
+        else if(umaId == -2)
+        {
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
@@ -510,7 +559,7 @@ public class UmaViewerUI : MonoBehaviour
         else
         {
             //Common animations
-            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}")))
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains("pose")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
@@ -543,6 +592,8 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
+        if(Builder.CurrentUMAContainer.UmaFaceAnimator)
+        Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -555,6 +606,20 @@ public class UmaViewerUI : MonoBehaviour
         }
 
         foreach (var panel in TogglablePanels)
+        {
+            panel.SetActive(panel == go);
+        }
+    }
+
+    public void ToggleUIFacial(GameObject go)
+    {
+        if (go.activeSelf || !TogglableFacials.Contains(go))
+        {
+            go.SetActive(!go.activeSelf);
+            return;
+        }
+
+        foreach (var panel in TogglableFacials)
         {
             panel.SetActive(panel == go);
         }
@@ -585,6 +650,25 @@ public class UmaViewerUI : MonoBehaviour
             {
                 cySpring.EnablePhysics(isOn);
             }
+        }
+    }
+
+    public void SetEarMorphEnable(bool isOn)
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            foreach (CySpringDataContainer cySpring in Builder.CurrentUMAContainer.GetComponentsInChildren<CySpringDataContainer>())
+            {
+                cySpring.EnableEarPhysics(!isOn);
+            }
+        }
+    }
+
+    public void SetEyeTrackingEnable(bool isOn)
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
         }
     }
 
@@ -622,7 +706,6 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (Builder.CurrentAudioSources.Count>0)
         {
-            AudioSource MiaiSource = Builder.CurrentAudioSources[0];
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
                 if (source.clip)
@@ -639,20 +722,35 @@ public class UmaViewerUI : MonoBehaviour
         if (Builder.OverrideController.animationClips.Length > 0)
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
+            var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
+            var animator_cam = Builder.PreviewCameraAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
             {
                 animator.speed = 0;
+                if (animator_face)
+                    animator_face.speed = 0;
+                animator_cam.speed = 0;
             }
             else if (AnimeState.normalizedTime < 1f)
             {
                 animator.speed = AnimationSpeedSlider.value;
+                animator_cam.speed = AnimationSpeedSlider.value;
+                if (animator_face)
+                    animator_face.speed = AnimationSpeedSlider.value;
             }
             else
             {
                 animator.speed = AnimationSpeedSlider.value;
                 animator.Play(0, -1, 0);
+                animator_cam.speed = AnimationSpeedSlider.value;
+                animator_cam.Play(0, -1, 0);
+                if (animator_face)
+                {
+                    animator_face.speed = AnimationSpeedSlider.value;
+                    animator_face.Play(0, -1, 0);
+                }
             }
             
         }
@@ -662,13 +760,22 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
+        var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
+        var animator_cam = Builder.PreviewCameraAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-
+            
             // Pause and Seek;
-            Builder.CurrentUMAContainer.UmaAnimator.speed = 0;
+            animator.speed = 0;
             animator.Play(0, -1, val);
+            animator_cam.speed = 0;
+            animator_cam.Play(0, -1, val);
+            if (animator_face)
+            {
+                animator_face.speed = 0;
+                animator_face.Play(0, -1, val);
+            }
 
             AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
         }
@@ -679,6 +786,11 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
+        Builder.PreviewCameraAnimator.speed = val;
+        if (Builder.CurrentUMAContainer.UmaFaceAnimator)
+        {
+            Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
+        }
     }
 
     public void ResetAudioPlayer()

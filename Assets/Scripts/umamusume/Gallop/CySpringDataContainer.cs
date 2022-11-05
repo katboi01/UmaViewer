@@ -89,14 +89,26 @@ namespace Gallop
                 var bone = gameObjects.Find(a => { return a.name == spring._boneName; });
                 if (bone)
                 {
+                    bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
                     var dynamic = gameObject.AddComponent<DynamicBone>();
                     dynamic.m_Root = bone;
                     dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
-                    dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-spring._gravity / 80000), 0);
-                    dynamic.m_Damping = 0.2f;
-                    dynamic.m_Stiffness = Mathf.Clamp01(spring._stiffnessForce / 900);
-                    dynamic.m_Elasticity = Mathf.Clamp01(spring._dragForce / 4000);
+                    dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30 / spring._gravity), 0);
+                    if (isTail)
+                    {
+                        dynamic.m_Damping = 0.1f;
+                        dynamic.m_Stiffness = Mathf.Clamp01(10 / spring._stiffnessForce);
+                        dynamic.m_Elasticity = Mathf.Clamp01(10 / spring._dragForce);
+                    }
+                    else
+                    {
+                        dynamic.m_Damping = 0.2f;
+                        dynamic.m_Stiffness = Mathf.Clamp01(40 / spring._stiffnessForce);
+                        dynamic.m_Elasticity = Mathf.Clamp01(40 / spring._dragForce);
+                        
+                    }
                     dynamic.m_Radius = spring._collisionRadius;
+
                     dynamic.SetupParticles();
                     DynamicBones.Add(dynamic);
                     
@@ -114,8 +126,18 @@ namespace Gallop
                         if (tempParticle != null)
                         {
                             tempParticle.m_Damping = 0.2f;
-                            tempParticle.m_Stiffness = Mathf.Clamp01(Childcollision._stiffnessForce / 900);
-                            tempParticle.m_Elasticity = Mathf.Clamp01(Childcollision._dragForce / 4000);
+                            if (isTail)
+                            {
+                                tempParticle.m_Damping = 0.1f;
+                                tempParticle.m_Stiffness = Mathf.Clamp01(10 / spring._stiffnessForce);
+                                tempParticle.m_Elasticity = Mathf.Clamp01(10 / spring._dragForce);
+                            }
+                            else
+                            {
+                                tempParticle.m_Damping = 0.2f;
+                                tempParticle.m_Stiffness = Mathf.Clamp01(40 / spring._stiffnessForce);
+                                tempParticle.m_Elasticity = Mathf.Clamp01(40 / spring._dragForce);
+                            }
                             tempParticle.m_Radius = Childcollision._collisionRadius;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
@@ -136,7 +158,21 @@ namespace Gallop
         {
             foreach(DynamicBone dynamic in DynamicBones)
             {
-                dynamic.enabled = isOn;
+                if (!dynamic.m_Root.name.Contains("Ear"))
+                {
+                    dynamic.enabled = isOn;
+                }
+            }
+        }
+
+        public void EnableEarPhysics(bool isOn)
+        {
+            foreach (DynamicBone dynamic in DynamicBones)
+            {
+                if (dynamic.m_Root.name.Contains("Ear"))
+                {
+                    dynamic.enabled = isOn;
+                }
             }
         }
     }

@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
-    UmaViewerUI UI => UmaViewerUI.Instance;
-
     public JObject CharaData;
     public GameObject Body;
     public GameObject Tail;
@@ -19,9 +17,17 @@ public class UmaContainer : MonoBehaviour
     public Animator UmaAnimator;
     public AnimatorOverrideController OverrideController;
 
+    public bool isAnimatorControl;
+    public Animator UmaFaceAnimator;
+    public AnimatorOverrideController FaceOverrideController;
+
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
+    public GameObject HeadBone;
+    public GameObject TrackTarget;
+    public float EyeHeight;
+    public bool EnableEyeTracking = true;
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -35,6 +41,9 @@ public class UmaContainer : MonoBehaviour
     public void MergeModel()
     {
         if (!Body) return;
+        EyeHeight = 0.1f;
+        TrackTarget = Camera.main.gameObject;
+
         List<Transform> bodybones = new List<Transform>(Body.GetComponentInChildren<SkinnedMeshRenderer>().bones);
         List<Transform> emptyBones = new List<Transform>();
         emptyBones.Add(Body.GetComponentInChildren<SkinnedMeshRenderer>().rootBone.Find("Tail_Ctrl"));
@@ -82,7 +91,8 @@ public class UmaContainer : MonoBehaviour
         //MergeAvatar
         UmaAnimator = gameObject.AddComponent<Animator>();
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
-        UmaAnimator.runtimeAnimatorController = OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
+        OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
+        UmaAnimator.runtimeAnimatorController = OverrideController;
 
     }
 
@@ -124,4 +134,23 @@ public class UmaContainer : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (TrackTarget&& EnableEyeTracking && !IsMini)
+        {
+            var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
+            var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
+            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
+            if (deltaRotation.x > 180) deltaRotation.x -= 360;
+            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35,-1,1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
+            FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+        }
+
+        if (isAnimatorControl && !IsMini)
+        {
+            FaceDrivenKeyTarget.ProcessLocator();
+        }
+    }
 }

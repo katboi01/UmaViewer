@@ -39,7 +39,10 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
     public AnimatorOverrideController OverrideController;
-
+    public AnimatorOverrideController FaceOverrideController;
+    public AnimatorOverrideController CameraOverrideController;
+    public Animator PreviewCameraAnimator;
+    public Camera PreviewCamera;
 
     private void Awake()
     {
@@ -167,7 +170,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
-                if (asset1.Name.Contains("cloth00"))
+                if (asset1.Name.Contains("cloth04"))
                     RecursiveLoadAsset(asset1);
             }
         }
@@ -273,17 +276,22 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             var firsehead = CurrentUMAContainer.Head;
             var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
+            var EarDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "ear_target"; }).Value as DrivenKeyTarget;
+            FaceDriven._earTarget = EarDriven._targetFaces;
             CurrentUMAContainer.FaceDrivenKeyTarget = FaceDriven;
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
             FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
 
-            CurrentUMAContainer.FaceEmotionKeyTarget = new FaceEmotionKeyTarget()
-            {
-                FaceDrivenKeyTarget = FaceDriven,
-                FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList()
-            };
-            CurrentUMAContainer.FaceEmotionKeyTarget.Initialize();
+            var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
+            emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
+            CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
+            emotionDriven.FaceDrivenKeyTarget = FaceDriven;
+            emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
+            emotionDriven.Initialize();
+
+            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
         }
+
 
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.LoadPhysics();
@@ -950,26 +958,85 @@ public class UmaViewerBuilder : MonoBehaviour
 
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+
+            CurrentUMAContainer.isAnimatorControl = false;
+            CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
+        }
+        else if (clip.name.Contains("face"))
+        {
+            if (CurrentUMAContainer.IsMini) return;
+            
+            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
+            CurrentUMAContainer.isAnimatorControl = true;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
+        }
+        else if (clip.name.Contains("cam"))
+        {
+            var overrideController = Instantiate(CameraOverrideController);
+            overrideController["clip_1"] = clip;
+            SetPreviewCamera(overrideController);
         }
         else
         {
+            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
-
             // If Cut-in, play immediately without state interpolation
-            if (clip.name.Contains("crd"))
+            if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
             {
+                var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
+                var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
+
+                if (facialMotion != null)
+                {
+                    RecursiveLoadAsset(facialMotion);
+                }
+
+                if (cameraMotion != null)
+                {
+                    RecursiveLoadAsset(cameraMotion);
+                }
+
+                if (CurrentUMAContainer.IsMini) 
+                {
+                    SetPreviewCamera(null);
+                }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
+                CurrentUMAContainer.OverrideController["clip_2"].wrapMode = WrapMode.Loop;
+                CurrentUMAContainer.TrackTarget = PreviewCamera.gameObject;
             }
             else
             {
+                if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+                {
+                    CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                }
+                CurrentUMAContainer.isAnimatorControl = false;
+                CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
+                SetPreviewCamera(null);
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             }
 
         }
 
+    }
+    public void SetPreviewCamera(RuntimeAnimatorController controller)
+    {
+        if (controller)
+        {
+            PreviewCameraAnimator.runtimeAnimatorController = controller;
+            PreviewCamera.enabled = true;
+            PreviewCameraAnimator.Play("motion_1", 0, 0);
+        }
+        else
+        {
+            PreviewCameraAnimator.runtimeAnimatorController = null;
+            PreviewCamera.enabled = false;
+        }
     }
 
     private void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
@@ -1043,7 +1110,6 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
-
     public void ClearMorphs()
     {
         if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
@@ -1058,8 +1124,19 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (container.Slider != null)
                     container.Slider.SetValueWithoutNotify(0);
             }
-            CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
-            CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+            if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
+                CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+            }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (PreviewCamera&&PreviewCamera.enabled == true)
+        {
+            PreviewCamera.fieldOfView = PreviewCamera.gameObject.transform.parent.transform.localScale.x;
         }
     }
 }

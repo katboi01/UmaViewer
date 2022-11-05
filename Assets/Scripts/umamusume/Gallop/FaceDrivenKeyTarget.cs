@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
 using Gallop.Live.Cutt;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Gallop
 {
@@ -12,24 +10,55 @@ namespace Gallop
         public List<EyeTarget> _eyeTarget;
         public List<EyebrowTarget> _eyebrowTarget;
         public List<MouthTarget> _mouthTarget;
+        public List<TargetInfomation> _earTarget;
 
         public List<Transform> Objs;
+        private FacialMorph BaseLEarMorph, BaseREarMorph;
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
         private FacialMorph BaseMouthMorph;
+        public FacialMorph LeftEyeXrange, LeftEyeYrange, RightEyeXrange, RightEyeYrange;
 
+        public List<FacialMorph> EarMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeBrowMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
 
-        public bool needUpdate = false;
-        public bool needAllUpdate = false;
+        public GameObject DrivenKeyLocator;
+
         public UmaContainer Container;
 
         Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
+        
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
+
+            for (int i = 0; i < _earTarget.Count; i++)
+            {
+                for (int j = 0; j < _earTarget[i]._faceGroupInfo.Count; j++)
+                {
+                    FacialMorph morph = new FacialMorph();
+                    morph.target = this;
+                    morph.direction = j > 0;
+                    morph.name = "Ear_" + i + "_" + (morph.direction ? "L" : "R");
+                    morph.tag = Enum.GetName(typeof(EarType), i);
+                    morph.trsArray = _earTarget[i]._faceGroupInfo[j]._trsArray;
+                    foreach (TrsArray trs in morph.trsArray)
+                    {
+                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                    }
+                    if (i == 0)
+                    {
+                        if (morph.direction) BaseLEarMorph = morph;
+                        else BaseREarMorph = morph;
+                    }
+                    else
+                    {
+                        EarMorphs.Add(morph);
+                    }
+                }
+            }
 
             for (int i = 0; i < _eyebrowTarget.Count; i++)
             {
@@ -47,8 +76,8 @@ namespace Gallop
                     }
                     if (i == 0)
                     {
-                        if (morph.direction) BaseREyeBrowMorph = morph;
-                        else BaseLEyeBrowMorph = morph;
+                        if (morph.direction) BaseLEyeBrowMorph = morph;
+                        else BaseREyeBrowMorph = morph;
                     }
                     else
                     {
@@ -73,11 +102,22 @@ namespace Gallop
                     }
                     if (i == 0)
                     {
-                        if (morph.direction) BaseREyeMorph = morph;
-                        else BaseLEyeMorph = morph;
+                        if (morph.direction) BaseLEyeMorph = morph;
+                        else BaseREyeMorph = morph;
                     }
                     else
                     {
+                        if (i == 20)
+                        {
+                            if (morph.direction) LeftEyeXrange = morph;
+                            else RightEyeXrange = morph;
+                        }
+                        else if (i == 21)
+                        {
+                            if (morph.direction) LeftEyeYrange = morph;
+                            else RightEyeYrange = morph;
+                        }
+
                         EyeMorphs.Add(morph);
                     }
                 }
@@ -109,16 +149,49 @@ namespace Gallop
             }
             FacialResetAll();
             ChangeMorphWeight(MouthMorphs[3], 1);
-
+            SetupAnimator();
             if (UmaViewerUI.Instance)
             {
                 UmaViewerUI.Instance.LoadFacialPanels(this);
             }
         }
 
+        public void SetupAnimator()
+        {
+            DrivenKeyLocator = new GameObject("DrivenKeyLocator");
+            DrivenKeyLocator.transform.SetParent(Container.transform);
+            SetupLocator("Eye_L_Base_Ctrl", "Eye_L__", EyeMorphs.FindAll(a => a.direction == true));
+            SetupLocator("Eye_R_Base_Ctrl", "Eye_R__", EyeMorphs.FindAll(a => a.direction == false));
+            SetupLocator("Eyebrow_L_Base_Ctrl", "Eyebrow_L__", EyeBrowMorphs.FindAll(a => a.direction == true));
+            SetupLocator("Eyebrow_R_Base_Ctrl", "Eyebrow_R__", EyeBrowMorphs.FindAll(a => a.direction == false));
+            SetupLocator("Mouth_Base_Ctrl", "Mouth__", MouthMorphs.FindAll(a => a.direction == false));
+
+            Container.UmaFaceAnimator = DrivenKeyLocator.AddComponent<Animator>();
+            Container.UmaFaceAnimator.avatar = AvatarBuilder.BuildGenericAvatar(DrivenKeyLocator, "DrivenKeyLocator");
+            Container.FaceOverrideController = Instantiate(UmaViewerBuilder.Instance.FaceOverrideController);
+            Container.UmaFaceAnimator.runtimeAnimatorController = Container.FaceOverrideController;
+        }
+
+        public void SetupLocator(string rootName, string prefix, List<FacialMorph> morphs)
+        {
+            var root = new GameObject(rootName);
+            root.transform.SetParent(DrivenKeyLocator.transform);
+
+            morphs.ForEach(morph=>{
+                var locator = new GameObject(prefix+morph.tag);
+                locator.transform.SetParent(root.transform);
+                morph.locator = locator.transform;
+            });
+        }
+
         public void ChangeMorph()
         {
             FacialResetAll();
+
+            foreach (FacialMorph morph in EarMorphs)
+            {
+                ProcessMorph(morph);
+            }
 
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
@@ -140,6 +213,12 @@ namespace Gallop
 
         public void ClearMorph()
         {
+
+            foreach (FacialMorph morph in EarMorphs)
+            {
+                morph.weight = 0;
+            }
+
             foreach (FacialMorph morph in EyeBrowMorphs)
             {
                 morph.weight = 0;
@@ -171,6 +250,8 @@ namespace Gallop
 
         public void FacialResetAll()
         {
+            FacialReset(BaseLEarMorph.trsArray);
+            FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
             FacialReset(BaseREyeBrowMorph.trsArray);
             FacialReset(BaseLEyeMorph.trsArray);
@@ -202,10 +283,66 @@ namespace Gallop
 
         public void ChangeMorphWeight(FacialMorph morph,float val)
         {
+            Container.isAnimatorControl = false;
             morph.weight = val;
             ChangeMorph();
         }
         
+        public void SetEyeRange(float lx, float ly,float rx, float ry)
+        {
+            LeftEyeXrange.weight = lx;
+            LeftEyeYrange.weight = ly;
+            RightEyeXrange.weight = rx;
+            RightEyeYrange.weight = ry;
+            ChangeMorph();
+        }
+
+        public void ProcessLocator()
+        {
+            EyeBrowMorphs.ForEach(morph =>
+            {
+                morph.weight = morph.locator.transform.localPosition.x * -100;
+            });
+            EyeMorphs.ForEach(morph =>
+            {
+                if (morph == LeftEyeXrange || morph == LeftEyeYrange || morph == RightEyeXrange || morph == RightEyeYrange)
+                {
+                    if (!Container.EnableEyeTracking)
+                    {
+                        morph.weight = morph.locator.transform.localPosition.x * -100;
+                    }
+                }
+                else
+                {
+                    morph.weight = morph.locator.transform.localPosition.x * -100;
+                }
+            });
+            MouthMorphs.ForEach(morph =>
+            {
+                morph.weight = morph.locator.transform.localPosition.x * -100;
+            });
+            ChangeMorph();
+        }
+        
+        public void ResetLocator()
+        {
+            EyeBrowMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            EyeMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            MouthMorphs.ForEach(morph =>
+            {
+                morph.weight = 0;
+                morph.locator.transform.localPosition = Vector3.zero;
+            });
+            ChangeMorph();
+        }
     }
 }
 
