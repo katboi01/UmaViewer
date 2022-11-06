@@ -242,22 +242,6 @@ public class UmaViewerUI : MonoBehaviour
         InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeMorphs, EyeList);
         InstantiateFacialPart(UmaContainerSliderPrefab, target, target.MouthMorphs, MouthList);
 
-        /*
-        List<FacialMorph> tempMorph = new List<FacialMorph>();
-        tempMorph.AddRange(target.EarMorphs);
-        tempMorph.AddRange(target.EyeBrowMorphs);
-        tempMorph.AddRange(target.EyeMorphs);
-        tempMorph.AddRange(target.MouthMorphs);
-        foreach (FacialMorph morph in tempMorph)
-        {
-           var container = Instantiate(UmaContainerSliderPrefab, FacialList.content).GetComponent<UmaUIContainer>();
-            container.Name.text = morph.name + " (" + morph.tag + ")";
-            container.Slider.value = morph.weight;
-            container.Slider.maxValue = 1;
-            container.Slider.minValue = 0;
-            container.Slider.onValueChanged.AddListener((a) => {target.ChangeMorphWeight(morph, a);});
-        }
-        */
     }
 
     public void UpdateFacialPanels()

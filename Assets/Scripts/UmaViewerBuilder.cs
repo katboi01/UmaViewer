@@ -988,6 +988,11 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
         }
+        else if (clip.name.Contains("pos"))
+        {
+            CurrentUMAContainer.OverrideController["clip_p"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
+        }
         else if (clip.name.Contains("cam"))
         {
             var overrideController = Instantiate(CameraOverrideController);
@@ -1006,6 +1011,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
                 var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
                 var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
+                var posMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_pos"));
 
                 if (facialMotion != null)
                 {
@@ -1020,6 +1026,12 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (cameraMotion != null)
                 {
                     RecursiveLoadAsset(cameraMotion);
+                }
+
+                if (posMotion != null)
+                {
+                    Debug.Log("Has Pos!");
+                    RecursiveLoadAsset(posMotion);
                 }
 
                 if (CurrentUMAContainer.IsMini) 
