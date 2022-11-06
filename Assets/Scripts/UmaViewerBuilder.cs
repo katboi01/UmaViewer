@@ -954,6 +954,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 RecursiveLoadAsset(motion_s);
             }
 
+            SetPreviewCamera(null);
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
@@ -967,8 +968,11 @@ public class UmaViewerBuilder : MonoBehaviour
         else if (clip.name.Contains("tail"))
         {
             if (CurrentUMAContainer.IsMini) return;
+            var currentStateInfo = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_t"] = clip;
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", 1);
+            CurrentUMAContainer.UmaAnimator.Play("motion_t", 1 ,0);
+            CurrentUMAContainer.UmaAnimator.Play(currentStateInfo.shortNameHash, 0, currentStateInfo.normalizedTime);
         }
         else if (clip.name.Contains("face"))
         {
@@ -1002,6 +1006,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
                 var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
                 var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
+
                 if (facialMotion != null)
                 {
                     RecursiveLoadAsset(facialMotion);
@@ -1022,7 +1027,6 @@ public class UmaViewerBuilder : MonoBehaviour
                     SetPreviewCamera(null);
                 }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-                CurrentUMAContainer.OverrideController["clip_2"].wrapMode = WrapMode.Loop;
                 CurrentUMAContainer.TrackTarget = PreviewCamera.gameObject;
             }
             else
