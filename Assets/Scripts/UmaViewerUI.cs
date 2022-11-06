@@ -576,8 +576,9 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
-        if(Builder.CurrentUMAContainer.UmaFaceAnimator)
-        Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
+        Builder.PreviewCameraAnimator.speed = AnimationSpeedSlider.value;
+        if (Builder.CurrentUMAContainer.UmaFaceAnimator)
+            Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -713,7 +714,8 @@ public class UmaViewerUI : MonoBehaviour
             else
             {
                 animator.speed = AnimationSpeedSlider.value;
-                animator.Play(0, -1, 0);
+                animator.Play(0, 0, 0);
+                animator.Play(0, 2, 0);
                 animator_cam.speed = AnimationSpeedSlider.value;
                 animator_cam.Play(0, -1, 0);
                 if (animator_face)
@@ -729,7 +731,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void AnimationProgressChange(float val)
     {
-        if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
+        if (!Builder.CurrentUMAContainer) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
         var animator_cam = Builder.PreviewCameraAnimator;
@@ -739,7 +741,8 @@ public class UmaViewerUI : MonoBehaviour
             
             // Pause and Seek;
             animator.speed = 0;
-            animator.Play(0, -1, val);
+            animator.Play(0, 0, val);
+            animator.Play(0, 2, val);
             animator_cam.speed = 0;
             animator_cam.Play(0, -1, val);
             if (animator_face)

@@ -977,7 +977,6 @@ public class UmaViewerBuilder : MonoBehaviour
         else if (clip.name.Contains("face"))
         {
             if (CurrentUMAContainer.IsMini) return;
-            
             CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
             CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
             CurrentUMAContainer.isAnimatorControl = true;
@@ -985,13 +984,15 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.Contains("ear"))
         {
+            if (CurrentUMAContainer.IsMini) return;
             CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
         }
         else if (clip.name.Contains("pos"))
         {
+            if (CurrentUMAContainer.IsMini) return;
             CurrentUMAContainer.OverrideController["clip_p"] = clip;
-            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 2, 0);
         }
         else if (clip.name.Contains("cam"))
         {
@@ -1030,8 +1031,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
                 if (posMotion != null)
                 {
-                    Debug.Log("Has Pos!");
-                    RecursiveLoadAsset(posMotion);
+                   RecursiveLoadAsset(posMotion);
                 }
 
                 if (CurrentUMAContainer.IsMini) 
