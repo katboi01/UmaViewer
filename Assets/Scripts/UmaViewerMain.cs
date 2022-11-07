@@ -1,5 +1,3 @@
-using Newtonsoft.Json.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,9 +9,6 @@ public class UmaViewerMain : MonoBehaviour
     public static UmaViewerMain Instance;
     private UmaViewerUI UI => UmaViewerUI.Instance;
     private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
-
-    public JArray UmaCharaData;
-    public JArray UmaLiveData;
 
     public List<CharaEntry> Characters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
@@ -36,31 +31,27 @@ public class UmaViewerMain : MonoBehaviour
         AbSounds = AbList.Where(ab => ab.Name.EndsWith(".awb") || ab.Name.EndsWith(".acb")).ToList();
     }
 
-    IEnumerator Start()
+    private void Start()
     {
-        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
+        var UmaCharaData = UmaDatabaseController.Instance.CharaData;
+        foreach (var item in UmaCharaData)
         {
-            UmaCharaData = JArray.Parse(txt);
-            foreach (var item in UmaCharaData)
+            var id = Convert.ToInt32(item["id"]);
+            if (!Characters.Where(c => c.Id == id).Any())
             {
-                //Debug.Log(item);
-                if (!Characters.Where(c => c.Id == (int)item["charaId"]).Any())
+                Characters.Add(new CharaEntry()
                 {
-                    Characters.Add(new CharaEntry()
-                    {
-                        Name = (string)item["charaNameEnglish"],
-                        Icon = UmaViewerBuilder.Instance.LoadCharaIcon((string)item["charaId"]),
-                        Id = (int)item["charaId"]
-                    });
-                }
+                    Name = item["charaname"].ToString(),
+                    Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
+                    Id = id
+                });
             }
+        }
 
-            UI.LoadModelPanels();
-            UI.LoadMiniModelPanels();
-            UI.LoadPropPanel();
-            UI.LoadMapPanel();
-        });
-
+        UI.LoadModelPanels();
+        UI.LoadMiniModelPanels();
+        UI.LoadPropPanel();
+        UI.LoadMapPanel();
 
 
         var asset = AbList.FirstOrDefault(a => a.Name.Equals("livesettings"));

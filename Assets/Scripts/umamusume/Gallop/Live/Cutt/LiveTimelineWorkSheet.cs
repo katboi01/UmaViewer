@@ -1,15 +1,9 @@
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-	public enum LiveTimelineKeyAttribute
+    public enum LiveTimelineKeyAttribute
 	{
 		Disable = 1,
 		CameraDelayEnable = 2,

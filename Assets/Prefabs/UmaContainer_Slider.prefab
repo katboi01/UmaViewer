@@ -180,9 +180,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 908bc558174093149b89e5c25c1be244, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: {fileID: 857826377799910844}
+  TextComponentType: 1
+  TextMesh: {fileID: 857826377799910844}
+  Text: {fileID: 0}
   Button: {fileID: 0}
   Slider: {fileID: 9166705304021389345}
+  Image: {fileID: 0}
 --- !u!1 &694429400078501214
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,7 +2,6 @@
 using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +10,6 @@ using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
-using static UmaViewerMain;
 
 public class UmaViewerBuilder : MonoBehaviour
 {

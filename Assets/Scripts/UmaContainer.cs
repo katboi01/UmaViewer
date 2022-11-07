@@ -1,7 +1,4 @@
 using Gallop;
-using Newtonsoft.Json.Linq;
-using RootMotion.Dynamics;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using UnityEngine;

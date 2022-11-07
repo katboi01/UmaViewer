@@ -38,7 +38,7 @@ public class UmaDatabaseController
     public static string CharaPath = "3d/chara/";
 
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
-    public IEnumerable<UmaCharaData> CharaData;
+    public IEnumerable<DataRow> CharaData;
     public IEnumerable<FaceTypeData> FaceTypeData;
     public IEnumerable<DataRow> LiveData;
 
@@ -101,19 +101,33 @@ public class UmaDatabaseController
         return entries;
     }
 
-    static IEnumerable<UmaCharaData> ReadMaster(SqliteConnection conn)
+    //static IEnumerable<UmaharaData> ReadMaster(SqliteConnection conn)
+    //{
+    //    SqliteCommand sqlite_cmd = conn.CreateCommand();
+    //    sqlite_cmd.CommandText = "SELECT id,tail_model_id FROM chara_data";
+    //    SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+    //    while (sqlite_datareader.Read())
+    //    {
+    //        UmaCharaData entry = new UmaCharaData()
+    //        {
+    //            id = sqlite_datareader.GetInt32(0),
+    //            tail_model_id = sqlite_datareader.GetInt32(1).ToString(),
+    //        };
+    //        yield return entry;
+    //    }
+    //}
+
+    static IEnumerable<DataRow> ReadMaster(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT id,tail_model_id FROM chara_data";
+        sqlite_cmd.CommandText = "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        while (sqlite_datareader.Read())
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        var temp = result.Rows.GetEnumerator();
+        while (temp.MoveNext())
         {
-            UmaCharaData entry = new UmaCharaData()
-            {
-                id = sqlite_datareader.GetInt32(0),
-                tail_model_id = sqlite_datareader.GetInt32(1).ToString(),
-            };
-            yield return entry;
+            yield return (DataRow)temp.Current;
         }
     }
 
