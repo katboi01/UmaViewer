@@ -1,12 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Data.Sqlite;
-using System.IO;
-using UnityEngine.XR;
 using System.Data;
 
 public class UmaDatabaseController
@@ -45,6 +40,7 @@ public class UmaDatabaseController
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<UmaCharaData> CharaData;
     public IEnumerable<FaceTypeData> FaceTypeData;
+    public IEnumerable<DataRow> LiveData;
 
     /// <summary> Meta Database Connection </summary>
     private SqliteConnection metaDb;
@@ -67,9 +63,11 @@ public class UmaDatabaseController
             }
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
+
             masterDb.Open();
             CharaData = ReadMaster(masterDb);
             FaceTypeData = ReadFaceTypeData(masterDb);
+            LiveData = ReadAllLiveData(masterDb);
         }
         catch
         {
@@ -139,6 +137,21 @@ public class UmaDatabaseController
                 set_face_group = sqlite_datareader.GetInt32(8),
             };
             yield return entry;
+        }
+    }
+
+    static IEnumerable<DataRow> ReadAllLiveData(SqliteConnection conn)
+    {
+        SqliteCommand sqlite_cmd = conn.CreateCommand();
+        sqlite_cmd.CommandText = 
+        $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        var temp = result.Rows.GetEnumerator();
+        while (temp.MoveNext()) 
+        {
+            yield return (DataRow)temp.Current;
         }
     }
 

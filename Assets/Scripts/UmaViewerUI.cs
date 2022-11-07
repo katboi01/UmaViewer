@@ -279,7 +279,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var liveInstance = live;
             var container = Instantiate(UmaContainerNoTMPPrefab, LiveList.content).GetComponent<UmaUIContainer>();
-            container.GetComponentInChildren<Text>().text = " "+ live.MusicId + " " + live.songName;
+            container.GetComponentInChildren<Text>().text = " "+ live.MusicId + " " + live.SongName;
             var imageInstance1 = container.GetComponent<Image>();
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveList.content, imageInstance1);
@@ -287,7 +287,7 @@ public class UmaViewerUI : MonoBehaviour
             });
 
             var CharaContainer = Instantiate(UmaContainerNoTMPPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
-            CharaContainer.GetComponentInChildren<Text>().text = " " + live.MusicId + " " + live.songName;
+            CharaContainer.GetComponentInChildren<Text>().text = " " + live.MusicId + " " + live.SongName;
             var CharaimageInstance1 = CharaContainer.GetComponent<Image>();
             CharaContainer.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveSoundList.content, CharaimageInstance1);
