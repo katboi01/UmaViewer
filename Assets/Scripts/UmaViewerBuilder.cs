@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
@@ -56,31 +57,29 @@ public class UmaViewerBuilder : MonoBehaviour
 
         UnloadAllBundle();
 
-        yield return UmaViewerDownload.DownloadText($"https://www.tracenacademy.com/api/CharaData/{id}", txt =>
+        CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(id);
+        if (mini)
         {
-            Debug.Log(txt);
-            CurrentUMAContainer.CharaData = JObject.Parse(txt);
-            if (mini)
-            {
-                LoadMiniUma(id, costumeId);
-            }
-            else
-            {
-                LoadNormalUma(id, costumeId);
-            }
-        });
+            LoadMiniUma(id, costumeId);
+        }
+        else
+        {
+            LoadNormalUma(id, costumeId);
+        }
+
+        yield break;
     }
 
     private void LoadNormalUma(int id, string costumeId)
     {
-        JObject charaData = CurrentUMAContainer.CharaData;
+        DataRow charaData = CurrentUMAContainer.CharaData;
         bool genericCostume = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
-        string skin = (string)charaData["skin"],
-               height = (string)charaData["height"],
-               socks = (string)charaData["socks"],
-               bust = (string)charaData["bust"],
-               sex = (string)charaData["sex"],
-               shape = (string)charaData["shape"],
+        string skin = charaData["skin"].ToString(),
+               height = charaData["height"].ToString(),
+               socks = charaData["socks"].ToString(),
+               bust = charaData["bust"].ToString(),
+               sex = charaData["sex"].ToString(),
+               shape = charaData["shape"].ToString(),
                costumeIdShort = "";
 
         UmaDatabaseEntry asset = null;
@@ -179,7 +178,7 @@ public class UmaViewerBuilder : MonoBehaviour
         // Record Head Data
         int head_id;
         string head_costumeId;
-        int tailId = (int)charaData["tailModelId"];
+        int tailId =  Convert.ToInt32(charaData["tail_model_id"]);
 
         //The tailId of 9006 is 1, but the character has no tail
         if (id == 9006) tailId = -1;
@@ -302,14 +301,14 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadMiniUma(int id, string costumeId)
     {
-        JObject charaData = CurrentUMAContainer.CharaData;
+        DataRow charaData = CurrentUMAContainer.CharaData;
         CurrentUMAContainer.IsMini = true;
         bool isGeneric = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
-        string skin = (string)charaData["skin"],
-               height = (string)charaData["height"],
-               socks = (string)charaData["socks"],
-               bust = (string)charaData["bust"],
-               sex = (string)charaData["sex"],
+        string skin = charaData["skin"].ToString(),
+               height = charaData["height"].ToString(),
+               socks = charaData["socks"].ToString(),
+               bust = charaData["bust"].ToString(),
+               sex = charaData["sex"].ToString(),
                costumeIdShort = "";
         bool customHead = true;
 
@@ -971,7 +970,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var currentStateInfo = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
             CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_t"] = clip;
-            CurrentUMAContainer.UmaAnimator.Play("motion_t", 1 ,0);
+            CurrentUMAContainer.UmaAnimator.Play("motion_t", 1, 0);
             CurrentUMAContainer.UmaAnimator.Play(currentStateInfo.shortNameHash, 0, currentStateInfo.normalizedTime);
         }
         else if (clip.name.Contains("face"))
@@ -1031,10 +1030,10 @@ public class UmaViewerBuilder : MonoBehaviour
 
                 if (posMotion != null)
                 {
-                   RecursiveLoadAsset(posMotion);
+                    RecursiveLoadAsset(posMotion);
                 }
 
-                if (CurrentUMAContainer.IsMini) 
+                if (CurrentUMAContainer.IsMini)
                 {
                     SetPreviewCamera(null);
                 }
@@ -1043,7 +1042,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             else
             {
-                if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+                if (CurrentUMAContainer.FaceDrivenKeyTarget)
                 {
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 }
@@ -1158,7 +1157,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (container.Slider != null)
                     container.Slider.SetValueWithoutNotify(0);
             }
-            if (CurrentUMAContainer.FaceDrivenKeyTarget) 
+            if (CurrentUMAContainer.FaceDrivenKeyTarget)
             {
                 CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
                 CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
@@ -1168,7 +1167,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (PreviewCamera&&PreviewCamera.enabled == true)
+        if (PreviewCamera && PreviewCamera.enabled == true)
         {
             PreviewCamera.fieldOfView = PreviewCamera.gameObject.transform.parent.transform.localScale.x;
         }

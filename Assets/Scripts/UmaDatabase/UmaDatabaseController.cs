@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Mono.Data.Sqlite;
 using System.IO;
 using UnityEngine.XR;
+using System.Data;
 
 public class UmaDatabaseController
 {
@@ -139,6 +140,17 @@ public class UmaDatabaseController
             };
             yield return entry;
         }
+    }
+
+    public static DataRow ReadCharaData(int id)
+    {
+        SqliteCommand sqlite_cmd = instance.masterDb.CreateCommand();
+        sqlite_cmd.CommandText = $"SELECT * FROM chara_data WHERE id LIKE {id}";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        DataRow row = result.Rows[0];
+        return row;
     }
 
     public static string GetABPath(UmaDatabaseEntry entry)

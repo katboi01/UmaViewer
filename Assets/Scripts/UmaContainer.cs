@@ -3,11 +3,12 @@ using Newtonsoft.Json.Linq;
 using RootMotion.Dynamics;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
-    public JObject CharaData;
+    public DataRow CharaData;
     public GameObject Body;
     public GameObject Tail;
     public GameObject Head;
