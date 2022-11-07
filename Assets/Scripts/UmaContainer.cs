@@ -99,6 +99,11 @@ public class UmaContainer : MonoBehaviour
 
     }
 
+    public void SetHeight(int scale)
+    {
+        transform.Find("Position").localScale *= (scale / 160f);//WIP
+    }
+
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
     {
         var rootbone = targetBones.FindLast(a => a.name.Equals(from.rootBone.name));

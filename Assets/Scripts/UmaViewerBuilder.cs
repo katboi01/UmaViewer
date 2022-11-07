@@ -294,6 +294,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
 
         CurrentUMAContainer.MergeModel();
+        CurrentUMAContainer.SetHeight(Convert.ToInt32(CurrentUMAContainer.CharaData["scale"]));
         LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
