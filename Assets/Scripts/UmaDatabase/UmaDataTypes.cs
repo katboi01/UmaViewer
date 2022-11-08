@@ -64,6 +64,33 @@ public class FaceTypeData
     }
 }
 
+[System.Serializable]
+public class CharaEntry
+{
+    public string Name;
+    public Sprite Icon;
+    public int Id;
+}
+
+[System.Serializable]
+public class LiveEntry
+{
+    public int MusicId;
+    public string SongName;
+    public string BackGroundId;
+    public List<string[]> LiveSettings = new List<string[]>();
+
+    public LiveEntry(string data)
+    {
+        string[] lines = data.Split("\n"[0]);
+        for (int i = 1; i < lines.Length; i++)
+        {
+            LiveSettings.Add(lines[i].Split(','));
+        }
+        BackGroundId = LiveSettings[1][2];
+    }
+}
+
 public enum UmaFileType
 {
     _3d_cutt,

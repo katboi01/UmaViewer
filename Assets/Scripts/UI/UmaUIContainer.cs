@@ -1,12 +1,71 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+
+
 public class UmaUIContainer : MonoBehaviour
 {
-    public TMPro.TextMeshProUGUI Name;
+    enum TextType
+    {
+        Text,
+        TextMesh,
+    }
+
+    [SerializeField]TextType TextComponentType = TextType.Text;
+    public string Name
+    {
+        get 
+        {
+            switch (TextComponentType)
+            {
+                case TextType.Text: return Text.text;
+                case TextType.TextMesh: return TextMesh.text;
+                default: return TextMesh.text;
+            }
+        }
+        set 
+        {
+            switch (TextComponentType)
+            {
+                case TextType.Text: 
+                    Text.text = value;
+                    break;
+                case TextType.TextMesh:
+                    TextMesh.text = value; 
+                    break;
+            }
+        }
+    }
+
+    public float FontSize
+    {
+        get
+        {
+            switch (TextComponentType)
+            {
+                case TextType.Text: return Text.fontSize;
+                case TextType.TextMesh: return TextMesh.fontSize;
+                default: return TextMesh.fontSize;
+            }
+        }
+        set
+        {
+            switch (TextComponentType)
+            {
+                case TextType.Text:
+                    Text.fontSize = (int)value;
+                    break;
+                case TextType.TextMesh:
+                    TextMesh.fontSize = value;
+                    break;
+            }
+        }
+    }
+    public TMPro.TextMeshProUGUI TextMesh;
+    public Text Text;
     public Button Button;
     public Slider Slider;
     public Image Image;
 }
+

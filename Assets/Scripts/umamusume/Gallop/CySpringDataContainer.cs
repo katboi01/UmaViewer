@@ -103,8 +103,8 @@ namespace Gallop
                     else
                     {
                         dynamic.m_Damping = 0.2f;
-                        dynamic.m_Stiffness = Mathf.Clamp01(40 / spring._stiffnessForce);
-                        dynamic.m_Elasticity = Mathf.Clamp01(40 / spring._dragForce);
+                        dynamic.m_Stiffness = Mathf.Clamp01(45 / spring._stiffnessForce);
+                        dynamic.m_Elasticity = Mathf.Clamp01(45 / spring._dragForce);
                         
                     }
                     dynamic.m_Radius = spring._collisionRadius;
@@ -125,7 +125,6 @@ namespace Gallop
                         var tempParticle = dynamic.Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
                         if (tempParticle != null)
                         {
-                            tempParticle.m_Damping = 0.2f;
                             if (isTail)
                             {
                                 tempParticle.m_Damping = 0.1f;
@@ -135,8 +134,8 @@ namespace Gallop
                             else
                             {
                                 tempParticle.m_Damping = 0.2f;
-                                tempParticle.m_Stiffness = Mathf.Clamp01(40 / spring._stiffnessForce);
-                                tempParticle.m_Elasticity = Mathf.Clamp01(40 / spring._dragForce);
+                                tempParticle.m_Stiffness = Mathf.Clamp01(45 / spring._stiffnessForce);
+                                tempParticle.m_Elasticity = Mathf.Clamp01(45 / spring._dragForce);
                             }
                             tempParticle.m_Radius = Childcollision._collisionRadius;
                             foreach (string collisionName in Childcollision._collisionNameList)
@@ -158,21 +157,7 @@ namespace Gallop
         {
             foreach(DynamicBone dynamic in DynamicBones)
             {
-                if (!dynamic.m_Root.name.Contains("Ear"))
-                {
-                    dynamic.enabled = isOn;
-                }
-            }
-        }
-
-        public void EnableEarPhysics(bool isOn)
-        {
-            foreach (DynamicBone dynamic in DynamicBones)
-            {
-                if (dynamic.m_Root.name.Contains("Ear"))
-                {
-                    dynamic.enabled = isOn;
-                }
+                dynamic.enabled = isOn;
             }
         }
     }

@@ -90,9 +90,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 908bc558174093149b89e5c25c1be244, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: {fileID: 857826377799910844}
+  TextComponentType: 1
+  TextMesh: {fileID: 857826377799910844}
+  Text: {fileID: 0}
   Button: {fileID: 4701344421301256321}
   Slider: {fileID: 0}
+  Image: {fileID: 0}
 --- !u!1 &4970516181956112805
 GameObject:
   m_ObjectHideFlags: 0

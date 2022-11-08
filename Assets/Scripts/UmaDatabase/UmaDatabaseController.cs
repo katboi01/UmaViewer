@@ -1,12 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Data.Sqlite;
-using System.IO;
-using UnityEngine.XR;
+using System.Data;
 
 public class UmaDatabaseController
 {
@@ -42,8 +38,9 @@ public class UmaDatabaseController
     public static string CharaPath = "3d/chara/";
 
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
-    public IEnumerable<UmaCharaData> CharaData;
+    public IEnumerable<DataRow> CharaData;
     public IEnumerable<FaceTypeData> FaceTypeData;
+    public IEnumerable<DataRow> LiveData;
 
     /// <summary> Meta Database Connection </summary>
     private SqliteConnection metaDb;
@@ -66,9 +63,11 @@ public class UmaDatabaseController
             }
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
+
             masterDb.Open();
             CharaData = ReadMaster(masterDb);
             FaceTypeData = ReadFaceTypeData(masterDb);
+            LiveData = ReadAllLiveData(masterDb);
         }
         catch
         {
@@ -102,19 +101,17 @@ public class UmaDatabaseController
         return entries;
     }
 
-    static IEnumerable<UmaCharaData> ReadMaster(SqliteConnection conn)
+    static IEnumerable<DataRow> ReadMaster(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT id,tail_model_id FROM chara_data";
+        sqlite_cmd.CommandText = "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        while (sqlite_datareader.Read())
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        var temp = result.Rows.GetEnumerator();
+        while (temp.MoveNext())
         {
-            UmaCharaData entry = new UmaCharaData()
-            {
-                id = sqlite_datareader.GetInt32(0),
-                tail_model_id = sqlite_datareader.GetInt32(1).ToString(),
-            };
-            yield return entry;
+            yield return (DataRow)temp.Current;
         }
     }
 
@@ -139,6 +136,32 @@ public class UmaDatabaseController
             };
             yield return entry;
         }
+    }
+
+    static IEnumerable<DataRow> ReadAllLiveData(SqliteConnection conn)
+    {
+        SqliteCommand sqlite_cmd = conn.CreateCommand();
+        sqlite_cmd.CommandText = 
+        $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        var temp = result.Rows.GetEnumerator();
+        while (temp.MoveNext()) 
+        {
+            yield return (DataRow)temp.Current;
+        }
+    }
+
+    public static DataRow ReadCharaData(int id)
+    {
+        SqliteCommand sqlite_cmd = instance.masterDb.CreateCommand();
+        sqlite_cmd.CommandText = $"SELECT * FROM chara_data WHERE id LIKE {id}";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        DataRow row = result.Rows[0];
+        return row;
     }
 
     public static string GetABPath(UmaDatabaseEntry entry)

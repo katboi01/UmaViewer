@@ -88,20 +88,6 @@ public class CameraOrbit : MonoBehaviour
             Debug.Log($"Switched AntiAliasing to {(PostProcessLayer.Antialiasing)AAModeDropdown.value}");
             AAMode = AAModeDropdown.value;
         }
-#if UNITY_ANDROID
-        switch (CameraModeDropdown.value)
-        {
-            case 0:
-                MobileOrbitAround();
-                MobileOrbitLight();
-                break;
-            case 1:
-                MobileOrbitAround(true);
-                MobileOrbitLight();
-                break;
-            case 2: FreeCamera(); break;
-        }
-#else
         switch (CameraModeDropdown.value)
         {
             case 0:
@@ -110,7 +96,6 @@ public class CameraOrbit : MonoBehaviour
                 break;
             case 1: FreeCamera(); break;
         }
-#endif
     }
 
 
@@ -221,77 +206,6 @@ public class CameraOrbit : MonoBehaviour
         {
             FreeCamRight = false;
         }
-    }
-    #endregion
-
-    #region Mobile Controls
-    Vector3 mouseBasePos = Vector3.zero;
-
-    /// <summary>
-    /// Rotate Light Source
-    /// </summary>
-    private void MobileOrbitLight()
-    {
-        return;
-        if (Input.touchCount == 2 && !eventSystem.IsPointerOverGameObject(Input.touches[0].fingerId) && !eventSystem.IsPointerOverGameObject(Input.touches[1].fingerId))
-        {
-            Light.transform.Rotate(Input.GetAxis("Mouse X") * Vector3.up, Space.Self);
-            Light.transform.Rotate(Input.GetAxis("Mouse Y") * Vector3.right, Space.Self);
-        }
-    }
-
-    /// <summary>
-    /// Orbit camera around world center
-    /// </summary>
-    void MobileOrbitAround(bool aroundCharacter = false)
-    {
-        TargetCenter = Vector3.zero;
-
-        Camera.main.fieldOfView = OrbitCamFovSlider.value;
-        Vector3 position = transform.position;
-
-        if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject(0))
-        {
-            mouseBasePos = Input.mousePosition;
-            controlOn = true;
-        }
-        if (Input.touchCount==1 && controlOn)
-        {
-            position -= (Input.mousePosition - mouseBasePos).x * 0.001f * transform.right * OrbitCamSpeedSlider.value;
-            OrbitCamHeightSlider.value -= (Input.mousePosition - mouseBasePos).y * 0.001f * OrbitCamSpeedSlider.value;
-        }
-        else
-        {
-            mouseBasePos = Vector3.zero;
-            controlOn = false;
-        }
-
-        if (Input.touchCount == 2)
-        {
-            Touch touchZero = Input.GetTouch(0);
-            Touch touchOne = Input.GetTouch(1);
-
-            Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
-            Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
-
-            float prevMagnitude = (touchZeroPrevPos - touchOnePrevPos).magnitude;
-            float currentMagnitude = (touchZero.position - touchOne.position).magnitude;
-
-            float difference = currentMagnitude - prevMagnitude;
-
-            OrbitCamZoomSlider.value -= difference * 0.01f * OrbitCamZoomSpeedSlider.value;
-        }
-
-        float camDist = OrbitCamZoomSlider.value;
-        OrbitCamHeightSlider.maxValue = camDist + 1 - camDist * 0.2f;
-        OrbitCamHeightSlider.minValue = -camDist + 1 + camDist * 0.2f;
-
-        Vector3 target = TargetCenter + OrbitCamTargetHeightSlider.value * Vector3.up; //set target offsets
-
-        position.y = TargetCenter.y + OrbitCamHeightSlider.value; //set camera height
-        transform.position = position;  //set final position of camera at target
-        transform.LookAt(target); //look at target position
-        transform.position = target - transform.forward * camDist; //move away from target
     }
     #endregion
 }
