@@ -104,9 +104,9 @@ public class UmaViewerBuilder : MonoBehaviour
             body = UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/pfb_bdy{costumeId}_{height}_{shape}_{bust}";
 
             Debug.Log("Looking for " + body);
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == body);
+            asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == body);
         }
-        else asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/pfb_bdy{id}_{costumeId}");
+        else asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/pfb_bdy{id}_{costumeId}");
 
         if (asset == null)
         {
@@ -141,7 +141,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             Debug.Log(texPattern1 + " " + texPattern2);
             //Load Body Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath)
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath)
                 && (a.Name.Contains(texPattern1)
                 || a.Name.Contains(texPattern2)
                 || (string.IsNullOrEmpty(texPattern3) ? false : a.Name.Contains(texPattern3))
@@ -154,7 +154,7 @@ public class UmaViewerBuilder : MonoBehaviour
             RecursiveLoadAsset(asset);
 
             //Load Physics
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes")))
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes")))
             {
                 if (asset1.Name.Contains("cloth00") && asset1.Name.Contains("bust" + bust))
                     RecursiveLoadAsset(asset1);
@@ -165,7 +165,7 @@ public class UmaViewerBuilder : MonoBehaviour
             RecursiveLoadAsset(asset);
 
             //Load Physics
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
                 if (asset1.Name.Contains("cloth04"))
                     RecursiveLoadAsset(asset1);
@@ -201,19 +201,19 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         string head = UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/pfb_chr{head_id}_{head_costumeId}";
-        asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == head);
+        asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == head);
         bool isDefaultHead = false;
         //Some costumes don't have custom heads
         if (head_costumeId != "00" && asset == null)
         {
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == UmaDatabaseController.HeadPath + $"chr{head_id}_00/pfb_chr{head_id}_00");
+            asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == UmaDatabaseController.HeadPath + $"chr{head_id}_00/pfb_chr{head_id}_00");
             isDefaultHead = true;
         }
 
         if (asset != null)
         {
             //Load Hair Textures
-            foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/textures")))
+            foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/textures")))
             {
                 RecursiveLoadAsset(asset1);
             }
@@ -223,7 +223,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             if (isDefaultHead)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_00/clothes")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_00/clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
                         RecursiveLoadAsset(asset1);
@@ -231,7 +231,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             else
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/clothes")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
                         RecursiveLoadAsset(asset1);
@@ -245,10 +245,10 @@ public class UmaViewerBuilder : MonoBehaviour
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
             string tailPath = $"3d/chara/tail/{tailName}/";
             string tailPfb = tailPath + $"pfb_{tailName}";
-            asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name == tailPfb);
+            asset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == tailPfb);
             if (asset != null)
             {
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
                 {
                     RecursiveLoadAsset(asset1);
                 }
@@ -256,7 +256,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
 
                 //Load Physics
-                foreach (var asset1 in UmaViewerMain.Instance.AbList.Where(a => a.Name.StartsWith($"{tailPath}clothes")))
+                foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}clothes")))
                 {
                     if (asset1.Name.Contains("cloth00"))
                         RecursiveLoadAsset(asset1);

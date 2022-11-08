@@ -101,22 +101,6 @@ public class UmaDatabaseController
         return entries;
     }
 
-    //static IEnumerable<UmaharaData> ReadMaster(SqliteConnection conn)
-    //{
-    //    SqliteCommand sqlite_cmd = conn.CreateCommand();
-    //    sqlite_cmd.CommandText = "SELECT id,tail_model_id FROM chara_data";
-    //    SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-    //    while (sqlite_datareader.Read())
-    //    {
-    //        UmaCharaData entry = new UmaCharaData()
-    //        {
-    //            id = sqlite_datareader.GetInt32(0),
-    //            tail_model_id = sqlite_datareader.GetInt32(1).ToString(),
-    //        };
-    //        yield return entry;
-    //    }
-    //}
-
     static IEnumerable<DataRow> ReadMaster(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();

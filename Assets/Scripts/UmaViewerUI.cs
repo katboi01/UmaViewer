@@ -503,8 +503,7 @@ public class UmaViewerUI : MonoBehaviour
             Destroy(animationList.content.GetChild(i).gameObject);
         }
 
-        var filteredList = Main.AbList.Where(a => a.Name.StartsWith(UmaDatabaseController.MotionPath)
-        && !a.Name.Contains($"mirror")
+        var filteredList = Main.AbMotions.Where(a => !a.Name.Contains($"mirror")
         && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
         && !a.Name.Contains($"facial") 
         && !a.Name.Contains($"_cam")
