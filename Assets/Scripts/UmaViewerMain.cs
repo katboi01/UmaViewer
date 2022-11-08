@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using System;
+using Newtonsoft.Json.Linq;
+using System.Collections;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -31,8 +33,22 @@ public class UmaViewerMain : MonoBehaviour
         AbSounds = AbList.Where(ab => ab.Name.EndsWith(".awb") || ab.Name.EndsWith(".acb")).ToList();
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
+        Dictionary<int, string> enNames = new Dictionary<int, string>();
+        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
+        {
+            if (string.IsNullOrEmpty(txt)) return;
+            var umaData = JArray.Parse(txt);
+            foreach (var item in umaData)
+            {
+                if (!enNames.ContainsKey((int)item["charaId"]))
+                {
+                    enNames.Add((int)item["charaId"], item["charaNameEnglish"].ToString());
+                }
+            }
+        });
+
         var UmaCharaData = UmaDatabaseController.Instance.CharaData;
         foreach (var item in UmaCharaData)
         {
@@ -41,7 +57,7 @@ public class UmaViewerMain : MonoBehaviour
             {
                 Characters.Add(new CharaEntry()
                 {
-                    Name = item["charaname"].ToString(),
+                    Name = enNames.ContainsKey(id)? enNames[id] : item["charaname"].ToString(),
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id
                 });
