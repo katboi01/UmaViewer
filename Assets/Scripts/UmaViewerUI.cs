@@ -229,7 +229,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         currentFaceDrivenKeyTarget = target;
 
-        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>())
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>(true))
         {
             Destroy(ui.gameObject);
         }
