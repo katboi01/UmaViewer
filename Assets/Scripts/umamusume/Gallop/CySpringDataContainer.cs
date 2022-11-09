@@ -36,6 +36,9 @@ namespace Gallop
             DynamicBones.Clear();
             List<Transform> gameObjects = new List<Transform>();
             gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
+
+            List<DynamicBoneColliderBase> colliders = new List<DynamicBoneColliderBase>();
+
             foreach (CySpringCollisionData collider in collisionParam)
             {
                 if (collider._isInner) continue;
@@ -61,6 +64,7 @@ namespace Gallop
                             dynamic.m_Height = (collider._offset - collider._offset2).magnitude + collider._radius;
                             dynamic.m_Radius = collider._radius;
                             dynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+                            colliders.Add(dynamic);
                             break;
                         case CySpringCollisionData.CollisionType.Sphere:
                             var Spheredynamic = child.AddComponent<DynamicBoneCollider>();
@@ -69,12 +73,14 @@ namespace Gallop
                             Spheredynamic.m_Radius = collider._radius;
                             Spheredynamic.m_Height = collider._distance;
                             Spheredynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+                            colliders.Add(Spheredynamic);
                             break;
                         case CySpringCollisionData.CollisionType.Plane:
                             var planedynamic = child.AddComponent<DynamicBonePlaneCollider>();
                             planedynamic.ColliderName = collider._collisionName;
                             child.transform.localPosition = collider._offset;
                             planedynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+                            colliders.Add(planedynamic);
                             break;
                         case CySpringCollisionData.CollisionType.None:
                             break;
@@ -82,8 +88,7 @@ namespace Gallop
                 }
             }
 
-            gameObjects.Clear();
-            gameObjects.AddRange(transform.parent.transform.parent.GetComponentsInChildren<Transform>());
+            
             foreach(CySpringParamDataElement spring in springParam)
             {
                 var bone = gameObjects.Find(a => { return a.name == spring._boneName; });
@@ -94,6 +99,8 @@ namespace Gallop
                     dynamic.m_Root = bone;
                     dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
                     dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30 / spring._gravity), 0);
+                    dynamic.m_LimitAngel_Min = spring._limitAngleMin;
+                    dynamic.m_LimitAngel_Max = spring._limitAngleMax;
                     if (isTail)
                     {
                         dynamic.m_Damping = 0.1f;
@@ -108,13 +115,13 @@ namespace Gallop
                         
                     }
                     dynamic.m_Radius = spring._collisionRadius;
-
+                    dynamic.m_Friction = 0.5f; 
                     dynamic.SetupParticles();
                     DynamicBones.Add(dynamic);
                     
                     foreach (string collisionName in spring._collisionNameList)
                     {
-                        var tmp = gameObjects.Find(a => { return a.name == collisionName; });
+                        var tmp = colliders.Find(a => { return a.gameObject.name == collisionName; });
                         if (tmp)
                         {
                             dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
@@ -137,10 +144,13 @@ namespace Gallop
                                 tempParticle.m_Stiffness = Mathf.Clamp01(45 / spring._stiffnessForce);
                                 tempParticle.m_Elasticity = Mathf.Clamp01(45 / spring._dragForce);
                             }
+                            tempParticle.m_Friction = 0.5f;
                             tempParticle.m_Radius = Childcollision._collisionRadius;
+                            tempParticle.m_LimitAngel_Min = Childcollision._limitAngleMin;
+                            tempParticle.m_LimitAngel_Max = Childcollision._limitAngleMax;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
-                                var tmp = gameObjects.Find(a => { return a.name == collisionName; });
+                                var tmp = colliders.Find(a => { return a.gameObject.name == collisionName; });
                                 if (tmp)
                                 {
                                     tempParticle.m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
@@ -148,7 +158,6 @@ namespace Gallop
                             }
                         }
                     }
-                    
                 }
             }
         }

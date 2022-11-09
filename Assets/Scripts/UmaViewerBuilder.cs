@@ -167,7 +167,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
-                if (asset1.Name.Contains("cloth04"))
+                if (asset1.Name.Contains("cloth00"))
                     RecursiveLoadAsset(asset1);
             }
         }
