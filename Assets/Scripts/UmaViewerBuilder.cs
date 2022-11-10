@@ -863,11 +863,14 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         m.shader = alphaShader;
                     }
+                    //Disable cheek
+                    if (r.name.Contains("Cheek")){
+                        r.gameObject.SetActive(false);
+                    }
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = cheekShader;
-                            m.CopyPropertiesFromMaterial(TransMaterialCharas);
+                            m.shader = cheekShader;;
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
                             m.shader = faceShader;
