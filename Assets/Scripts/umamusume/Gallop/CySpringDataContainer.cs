@@ -95,7 +95,7 @@ namespace Gallop
                 if (bone)
                 {
                     bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
-                    var dynamic = gameObject.AddComponent<DynamicBone>();
+                    var dynamic = bone.gameObject.AddComponent<DynamicBone>();
                     dynamic.m_Root = bone;
                     dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
                     dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30 / spring._gravity), 0);
@@ -115,7 +115,8 @@ namespace Gallop
                         
                     }
                     dynamic.m_Radius = spring._collisionRadius;
-                    dynamic.m_Friction = 0.5f; 
+                    dynamic.m_Friction = 0.5f;
+                    dynamic.m_Inert = spring.MoveSpringApplyRate / 3;
                     dynamic.SetupParticles();
                     DynamicBones.Add(dynamic);
                     
@@ -129,22 +130,24 @@ namespace Gallop
                     }
                     foreach (CySpringParamDataChildElement Childcollision in spring._childElements)
                     {
+                        
                         var tempParticle = dynamic.Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
                         if (tempParticle != null)
                         {
                             if (isTail)
                             {
                                 tempParticle.m_Damping = 0.1f;
-                                tempParticle.m_Stiffness = Mathf.Clamp01(10 / spring._stiffnessForce);
-                                tempParticle.m_Elasticity = Mathf.Clamp01(10 / spring._dragForce);
+                                tempParticle.m_Stiffness = Mathf.Clamp01(10 / Childcollision._stiffnessForce);
+                                tempParticle.m_Elasticity = Mathf.Clamp01(10 / Childcollision._dragForce);
                             }
                             else
                             {
                                 tempParticle.m_Damping = 0.2f;
-                                tempParticle.m_Stiffness = Mathf.Clamp01(45 / spring._stiffnessForce);
-                                tempParticle.m_Elasticity = Mathf.Clamp01(45 / spring._dragForce);
+                                tempParticle.m_Stiffness = Mathf.Clamp01(45 / Childcollision._stiffnessForce);
+                                tempParticle.m_Elasticity = Mathf.Clamp01(45 / Childcollision._dragForce);
                             }
                             tempParticle.m_Friction = 0.5f;
+                            tempParticle.m_Inert = Childcollision.MoveSpringApplyRate / 3;
                             tempParticle.m_Radius = Childcollision._collisionRadius;
                             tempParticle.m_LimitAngel_Min = Childcollision._limitAngleMin;
                             tempParticle.m_LimitAngel_Max = Childcollision._limitAngleMax;

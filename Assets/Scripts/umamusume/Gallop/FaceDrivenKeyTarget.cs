@@ -319,7 +319,6 @@ namespace Gallop
             foreach (var trs in RotationRecorder)
             {
                 trs.Key.transform.localRotation = RotationConvert.fromMaya(trs.Value);
-                var tmp = trs.Key.transform.localEulerAngles;
             }
             if (Container.EnablePhysics)
             {
