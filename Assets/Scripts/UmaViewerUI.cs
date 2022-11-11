@@ -82,6 +82,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public bool isCriware = false;
     public bool isHeadFix = false;
+    public bool EnableEyeTracking = true;
+    public bool IsCheekBlushing = false;
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
@@ -640,9 +642,29 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetEyeTrackingEnable(bool isOn)
     {
+        EnableEyeTracking = isOn;
         if (Builder.CurrentUMAContainer)
         {
             Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
+        }
+    }
+
+    public void SetBlushing(bool isOn)
+    {
+        IsCheekBlushing = isOn;
+        if (Builder.CurrentUMAContainer)
+        {
+            if (Builder.CurrentUMAContainer.CheekMaterial)
+            {
+                if (isOn)
+                {
+                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", Builder.CurrentUMAContainer.CheekTex);
+                }
+                else
+                {
+                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", null);
+                } 
+            }
         }
     }
 

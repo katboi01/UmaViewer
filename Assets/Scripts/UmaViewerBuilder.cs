@@ -2,6 +2,7 @@
 using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
+using PlasticGui.Help.Conditions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -824,6 +825,9 @@ public class UmaViewerBuilder : MonoBehaviour
         GameObject head = Instantiate(go, CurrentUMAContainer.transform);
         CurrentUMAContainer.Head = head;
 
+        //Some setting for Head
+        CurrentUMAContainer.EnableEyeTracking = UI.EnableEyeTracking;
+
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -863,9 +867,18 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         m.shader = alphaShader;
                     }
-                    //Disable cheek
+                    //Blush Setting
                     if (r.name.Contains("Cheek")){
-                        r.gameObject.SetActive(false);
+                        CurrentUMAContainer.CheekMaterial = m;
+                        CurrentUMAContainer.CheekTex = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "cheek1"; }).Value as Texture;
+                        if (UI.IsCheekBlushing)
+                        {
+                            m.SetTexture("_MainTex", CurrentUMAContainer.CheekTex);
+                        }
+                        else
+                        {
+                            m.SetTexture("_MainTex", null);
+                        }
                     }
                     switch (m.shader.name)
                     {

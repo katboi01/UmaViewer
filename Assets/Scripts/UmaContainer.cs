@@ -28,6 +28,11 @@ public class UmaContainer : MonoBehaviour
     public float EyeHeight;
     public bool EnableEyeTracking = true;
 
+    [Header("Cheek")]
+    public Texture CheekTex;
+    public Material CheekMaterial;
+
+
     [Header("Generic")]
     public bool IsGeneric = false;
     public string VarCostumeIdShort, VarCostumeIdLong, VarSkin, VarHeight, VarSocks, VarBust;
