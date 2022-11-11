@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.43975654, g: 0.48818094, b: 0.5683994, a: 1}
+  m_IndirectSpecularColor: {r: 0.4397552, g: 0.48818004, b: 0.56839955, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -17775,13 +17775,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 926505643}
-  m_LocalRotation: {x: 0.6275069, y: 0.3686878, z: -0.52654076, w: 0.4393851}
+  m_LocalRotation: {x: 0.81915206, y: 0, z: 0, w: 0.57357645}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 110, y: 80, z: 0}
+  m_LocalEulerAnglesHint: {x: 110, y: 0, z: 0}
 --- !u!1 &931406425
 GameObject:
   m_ObjectHideFlags: 0
@@ -21764,7 +21764,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.9250021
+  m_Size: 0.925002
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -36197,9 +36197,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _Global_MaxDensity: 1
   _Global_MaxHeight: 10
-  _GlobalOutlineOffest: 0
-  _GlobalOutlineWidth: 1
-  _GlobalCameraFov: 0
+  _GlobalOutlineOffset: 1
+  _GlobalOutlineWidth: 0.14
+  _GlobalCameraFov: 0.1
   _CylinderBlend: 0
   _GlobalToonColor: {r: 1, g: 1, b: 1, a: 0}
   _Global_FogColor: {r: 0, g: 0, b: 0, a: 0}

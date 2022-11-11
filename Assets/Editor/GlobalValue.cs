@@ -7,7 +7,7 @@ public class GlobalValue : EditorWindow
 {
     float _Global_MaxDensity = 1.0f;
     float _Global_MaxHeight = 10.0f;
-    float _GlobalOutlineOffest = 0.0f;
+    float _GlobalOutlineOffset = 0.0f;
     float _GlobalOutlineWidth = 1.0f;
     float _GlobalCameraFov = 0.0f;
     float _CylinderBlend = 0.0f;
@@ -72,7 +72,7 @@ public class GlobalValue : EditorWindow
         //Float
         _Global_MaxDensity = EditorGUILayout.Slider("最低能见度", _Global_MaxDensity, 0, 1);
         _Global_MaxHeight = EditorGUILayout.Slider("最高可见高度", _Global_MaxHeight, 0, 10);
-        _GlobalOutlineOffest = EditorGUILayout.Slider("_GlobalOutlineOffest", _GlobalOutlineOffest, 0, 100);
+        _GlobalOutlineOffset = EditorGUILayout.Slider("_GlobalOutlineOffset", _GlobalOutlineOffset, -100, 100);
         _GlobalOutlineWidth = EditorGUILayout.Slider("全局轮廓线宽度", _GlobalOutlineWidth, 0, 100);
         _GlobalCameraFov = EditorGUILayout.Slider("_GlobalCameraFov", _GlobalCameraFov, 0, 100);
         _CylinderBlend = EditorGUILayout.Slider("_CylinderBlend", _CylinderBlend, 0, 100);
@@ -131,7 +131,7 @@ public class GlobalValue : EditorWindow
         //Float
         Shader.SetGlobalFloat("_Global_MaxDensity", _Global_MaxDensity);
         Shader.SetGlobalFloat("_Global_MaxHeight", _Global_MaxHeight);
-        Shader.SetGlobalFloat("_GlobalOutlineOffest", _GlobalOutlineOffest);
+        Shader.SetGlobalFloat("_GlobalOutlineOffset", _GlobalOutlineOffset);
         Shader.SetGlobalFloat("_GlobalOutlineWidth", _GlobalOutlineWidth);
         Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov);
         Shader.SetGlobalFloat("_CylinderBlend", _CylinderBlend);

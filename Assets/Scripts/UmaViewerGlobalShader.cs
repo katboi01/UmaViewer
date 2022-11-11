@@ -7,9 +7,9 @@ public class UmaViewerGlobalShader : MonoBehaviour
     //仅用于设置游戏开局shader全局变量的初始值，若想即时调整请使用Editor内部工具
     public float _Global_MaxDensity = 1.0f;
     public float _Global_MaxHeight = 10.0f;
-    public float _GlobalOutlineOffest = 0.0f;
+    public float _GlobalOutlineOffset = 1f;
     public float _GlobalOutlineWidth = 1.0f;
-    public float _GlobalCameraFov = 0.0f;
+    public float _GlobalCameraFov = 0.1f;
     public float _CylinderBlend = 0.0f;
     public Color _GlobalToonColor = new Color(1, 1, 1, 0);
     public Color _Global_FogColor;
@@ -69,7 +69,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
         //Float
         Shader.SetGlobalFloat("_Global_MaxDensity", _Global_MaxDensity);
         Shader.SetGlobalFloat("_Global_MaxHeight", _Global_MaxHeight);
-        Shader.SetGlobalFloat("_GlobalOutlineOffest", _GlobalOutlineOffest);
+        Shader.SetGlobalFloat("_GlobalOutlineOffset", _GlobalOutlineOffset);
         Shader.SetGlobalFloat("_GlobalOutlineWidth", _GlobalOutlineWidth);
         Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov);
         Shader.SetGlobalFloat("_CylinderBlend", _CylinderBlend);
@@ -123,4 +123,12 @@ public class UmaViewerGlobalShader : MonoBehaviour
         setGlobal();
     }
 
+    private void FixedUpdate()
+    {
+        //Used to calculate the correct outline
+        _GlobalCameraFov = Camera.main.fieldOfView;
+        Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov); 
+    }
+
+   
 }
