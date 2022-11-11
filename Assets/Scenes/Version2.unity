@@ -21764,7 +21764,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.925002
+  m_Size: 0.9250021
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -36197,8 +36197,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _Global_MaxDensity: 1
   _Global_MaxHeight: 10
-  _GlobalOutlineOffset: 1
-  _GlobalOutlineWidth: 0.14
+  _GlobalOutlineOffset: 0.1
+  _GlobalOutlineWidth: 0.1
   _GlobalCameraFov: 0.1
   _CylinderBlend: 0
   _GlobalToonColor: {r: 1, g: 1, b: 1, a: 0}
