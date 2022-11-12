@@ -2,7 +2,6 @@
 using CriWareFormats;
 using Gallop;
 using NAudio.Wave;
-using PlasticGui.Help.Conditions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
