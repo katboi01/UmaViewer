@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Gallop;
 
 //初期ポーズ(T,Aポーズ)の時点でアタッチ、有効化されている必要がある
@@ -169,7 +167,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         animator.Play(state.shortNameHash, 0, state.normalizedTime);
     }
 
-   
+
 
     private void FixedUpdate()
     {
@@ -197,7 +195,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 Vector3 targetVector = Vector3.zero;
                 if (UseCenterAsParentOfAll)
                 {
-                    if ((!UseAbsoluteCoordinateSystem && transform.parent != null) && IgnoreInitialPosition )
+                    if ((!UseAbsoluteCoordinateSystem && transform.parent != null) && IgnoreInitialPosition)
                     {
                         targetVector
                             = Quaternion.Inverse(transform.parent.rotation)
@@ -365,7 +363,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     /// </summary>
     /// <param name="modelName">VMDファイルに記載される専用モデル名</param>
     /// <param name="filePath">保存先の絶対ファイルパス</param>
-    public async void SaveVMD(string modelName, string filePath)
+    public void SaveVMD(string modelName, string filePath)
     {
         if (IsRecording)
         {
@@ -376,195 +374,191 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         if (KeyReductionLevel <= 0) { KeyReductionLevel = 1; }
 
         Debug.Log(transform.name + "VMDファイル作成開始");
-        await Task.Run(() =>
+        //ファイルの書き込み
+        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+        using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
         {
-            //ファイルの書き込み
-            using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
-            using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
+            try
             {
-                try
+                const string ShiftJIS = "shift_jis";
+                const int intByteLength = 4;
+
+                //ファイルタイプの書き込み
+                const int fileTypeLength = 30;
+                const string RightFileType = "Vocaloid Motion Data 0002";
+                byte[] fileTypeBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(RightFileType);
+                binaryWriter.Write(fileTypeBytes, 0, fileTypeBytes.Length);
+                binaryWriter.Write(new byte[fileTypeLength - fileTypeBytes.Length], 0, fileTypeLength - fileTypeBytes.Length);
+
+                //モデル名の書き込み、Shift_JISで保存
+                const int modelNameLength = 20;
+                byte[] modelNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(modelName);
+                //モデル名が長すぎたとき
+                modelNameBytes = modelNameBytes.Take(Mathf.Min(modelNameLength, modelNameBytes.Length)).ToArray();
+                binaryWriter.Write(modelNameBytes, 0, modelNameBytes.Length);
+                binaryWriter.Write(new byte[modelNameLength - modelNameBytes.Length], 0, modelNameLength - modelNameBytes.Length);
+
+                //全ボーンフレーム数の書き込み
+                void LoopWithBoneCondition(Action<BoneNames, int> action)
                 {
-                    const string ShiftJIS = "shift_jis";
-                    const int intByteLength = 4;
-
-                    //ファイルタイプの書き込み
-                    const int fileTypeLength = 30;
-                    const string RightFileType = "Vocaloid Motion Data 0002";
-                    byte[] fileTypeBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(RightFileType);
-                    binaryWriter.Write(fileTypeBytes, 0, fileTypeBytes.Length);
-                    binaryWriter.Write(new byte[fileTypeLength - fileTypeBytes.Length], 0, fileTypeLength - fileTypeBytes.Length);
-
-                    //モデル名の書き込み、Shift_JISで保存
-                    const int modelNameLength = 20;
-                    byte[] modelNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(modelName);
-                    //モデル名が長すぎたとき
-                    modelNameBytes = modelNameBytes.Take(Mathf.Min(modelNameLength, modelNameBytes.Length)).ToArray();
-                    binaryWriter.Write(modelNameBytes, 0, modelNameBytes.Length);
-                    binaryWriter.Write(new byte[modelNameLength - modelNameBytes.Length], 0, modelNameLength - modelNameBytes.Length);
-
-                    //全ボーンフレーム数の書き込み
-                    void LoopWithBoneCondition(Action<BoneNames, int> action)
+                    for (int i = 0; i < frameNumberSaved; i++)
                     {
-                        for (int i = 0; i < frameNumberSaved; i++)
+                        if ((i % KeyReductionLevel) != 0) { continue; }
+
+                        foreach (BoneNames boneName in Enum.GetValues(typeof(BoneNames)))
                         {
-                            if ((i % KeyReductionLevel) != 0) { continue; }
+                            if (!BoneDictionary.Keys.Contains(boneName)) { continue; }
+                            if (BoneDictionary[boneName] == null) { continue; }
+                            if (!UseParentOfAll && boneName == BoneNames.全ての親) { continue; }
 
-                            foreach (BoneNames boneName in Enum.GetValues(typeof(BoneNames)))
-                            {
-                                if (!BoneDictionary.Keys.Contains(boneName)) { continue; }
-                                if (BoneDictionary[boneName] == null) { continue; }
-                                if (!UseParentOfAll && boneName == BoneNames.全ての親) { continue; }
-
-                                action(boneName, i);
-                            }
+                            action(boneName, i);
                         }
                     }
-                    uint allKeyFrameNumber = 0;
-                    LoopWithBoneCondition((a, b) => { allKeyFrameNumber++; });
-                    byte[] allKeyFrameNumberByte = BitConverter.GetBytes(allKeyFrameNumber);
-                    binaryWriter.Write(allKeyFrameNumberByte, 0, intByteLength);
+                }
+                uint allKeyFrameNumber = 0;
+                LoopWithBoneCondition((a, b) => { allKeyFrameNumber++; });
+                byte[] allKeyFrameNumberByte = BitConverter.GetBytes(allKeyFrameNumber);
+                binaryWriter.Write(allKeyFrameNumberByte, 0, intByteLength);
 
-                    //人ボーンの書き込み
-                    LoopWithBoneCondition((boneName, i) =>
+                //人ボーンの書き込み
+                LoopWithBoneCondition((boneName, i) =>
+                {
+                    const int boneNameLength = 15;
+                    string boneNameString = boneName.ToString();
+                    if (boneName == BoneNames.全ての親 && UseCenterAsParentOfAll)
                     {
-                        const int boneNameLength = 15;
-                        string boneNameString = boneName.ToString();
-                        if (boneName == BoneNames.全ての親 && UseCenterAsParentOfAll)
-                        {
-                            boneNameString = CenterNameString;
-                        }
-                        if (boneName == BoneNames.センター && UseCenterAsParentOfAll)
-                        {
-                            boneNameString = GrooveNameString;
-                        }
-
-                        byte[] boneNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(boneNameString);
-                        binaryWriter.Write(boneNameBytes, 0, boneNameBytes.Length);
-                        binaryWriter.Write(new byte[boneNameLength - boneNameBytes.Length], 0, boneNameLength - boneNameBytes.Length);
-
-                        byte[] frameNumberByte = BitConverter.GetBytes((ulong)i);
-                        binaryWriter.Write(frameNumberByte, 0, intByteLength);
-
-                        Vector3 position = positionDictionarySaved[boneName][i];
-                        byte[] positionX = BitConverter.GetBytes(position.x);
-                        binaryWriter.Write(positionX, 0, intByteLength);
-                        byte[] positionY = BitConverter.GetBytes(position.y);
-                        binaryWriter.Write(positionY, 0, intByteLength);
-                        byte[] positionZ = BitConverter.GetBytes(position.z);
-                        binaryWriter.Write(positionZ, 0, intByteLength);
-                        Quaternion rotation = rotationDictionarySaved[boneName][i];
-                        byte[] rotationX = BitConverter.GetBytes(rotation.x);
-                        binaryWriter.Write(rotationX, 0, intByteLength);
-                        byte[] rotationY = BitConverter.GetBytes(rotation.y);
-                        binaryWriter.Write(rotationY, 0, intByteLength);
-                        byte[] rotationZ = BitConverter.GetBytes(rotation.z);
-                        binaryWriter.Write(rotationZ, 0, intByteLength);
-                        byte[] rotationW = BitConverter.GetBytes(rotation.w);
-                        binaryWriter.Write(rotationW, 0, intByteLength);
-
-                        byte[] interpolateBytes = new byte[64];
-                        binaryWriter.Write(interpolateBytes, 0, 64);
-                    });
-
-                    //全モーフフレーム数の書き込み
-                    morphRecorderSaved.DisableIntron();
-                    if (TrimMorphNumber) { morphRecorderSaved.TrimMorphNumber(); }
-                    void LoopWithMorphCondition(Action<string, int> action)
+                        boneNameString = CenterNameString;
+                    }
+                    if (boneName == BoneNames.センター && UseCenterAsParentOfAll)
                     {
-                        for (int i = 0; i < frameNumberSaved; i++)
-                        {
-                            foreach (string morphName in morphRecorderSaved.MorphDrivers.Keys)
-                            {
-                                if (morphRecorderSaved.MorphDrivers[morphName].ValueList.Count == 0) { continue; }
-                                if (i > morphRecorderSaved.MorphDrivers[morphName].ValueList.Count) { continue; }
-                                //変化のない部分は省く
-                                if (!morphRecorderSaved.MorphDrivers[morphName].ValueList[i].enabled) { continue; }
-                                const int boneNameLength = 15;
-                                string morphNameString = morphName.ToString();
-                                byte[] morphNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(morphNameString);
-                                //名前が長過ぎた場合書き込まない
-                                if (boneNameLength - morphNameBytes.Length < 0) { continue; }
+                        boneNameString = GrooveNameString;
+                    }
 
-                                action(morphName, i);
-                            }
+                    byte[] boneNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(boneNameString);
+                    binaryWriter.Write(boneNameBytes, 0, boneNameBytes.Length);
+                    binaryWriter.Write(new byte[boneNameLength - boneNameBytes.Length], 0, boneNameLength - boneNameBytes.Length);
+
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)i);
+                    binaryWriter.Write(frameNumberByte, 0, intByteLength);
+
+                    Vector3 position = positionDictionarySaved[boneName][i];
+                    byte[] positionX = BitConverter.GetBytes(position.x);
+                    binaryWriter.Write(positionX, 0, intByteLength);
+                    byte[] positionY = BitConverter.GetBytes(position.y);
+                    binaryWriter.Write(positionY, 0, intByteLength);
+                    byte[] positionZ = BitConverter.GetBytes(position.z);
+                    binaryWriter.Write(positionZ, 0, intByteLength);
+                    Quaternion rotation = rotationDictionarySaved[boneName][i];
+                    byte[] rotationX = BitConverter.GetBytes(rotation.x);
+                    binaryWriter.Write(rotationX, 0, intByteLength);
+                    byte[] rotationY = BitConverter.GetBytes(rotation.y);
+                    binaryWriter.Write(rotationY, 0, intByteLength);
+                    byte[] rotationZ = BitConverter.GetBytes(rotation.z);
+                    binaryWriter.Write(rotationZ, 0, intByteLength);
+                    byte[] rotationW = BitConverter.GetBytes(rotation.w);
+                    binaryWriter.Write(rotationW, 0, intByteLength);
+
+                    byte[] interpolateBytes = new byte[64];
+                    binaryWriter.Write(interpolateBytes, 0, 64);
+                });
+
+                //全モーフフレーム数の書き込み
+                morphRecorderSaved.DisableIntron();
+                if (TrimMorphNumber) { morphRecorderSaved.TrimMorphNumber(); }
+                void LoopWithMorphCondition(Action<string, int> action)
+                {
+                    for (int i = 0; i < frameNumberSaved; i++)
+                    {
+                        foreach (string morphName in morphRecorderSaved.MorphDrivers.Keys)
+                        {
+                            if (morphRecorderSaved.MorphDrivers[morphName].ValueList.Count == 0) { continue; }
+                            if (i > morphRecorderSaved.MorphDrivers[morphName].ValueList.Count) { continue; }
+                            //変化のない部分は省く
+                            if (!morphRecorderSaved.MorphDrivers[morphName].ValueList[i].enabled) { continue; }
+                            const int boneNameLength = 15;
+                            string morphNameString = morphName.ToString();
+                            byte[] morphNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(morphNameString);
+                            //名前が長過ぎた場合書き込まない
+                            if (boneNameLength - morphNameBytes.Length < 0) { continue; }
+
+                            action(morphName, i);
                         }
                     }
-                    uint allMorphNumber = 0;
-                    LoopWithMorphCondition((a, b) => { allMorphNumber++; });
-                    byte[] faceFrameCount = BitConverter.GetBytes(allMorphNumber);
-                    binaryWriter.Write(faceFrameCount, 0, intByteLength);
-
-                    //モーフの書き込み
-                    LoopWithMorphCondition((morphName, i) =>
-                    {
-                        const int boneNameLength = 15;
-                        string morphNameString = morphName.ToString();
-                        byte[] morphNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(morphNameString);
-
-                        binaryWriter.Write(morphNameBytes, 0, morphNameBytes.Length);
-                        binaryWriter.Write(new byte[boneNameLength - morphNameBytes.Length], 0, boneNameLength - morphNameBytes.Length);
-
-                        byte[] frameNumberByte = BitConverter.GetBytes((ulong)i);
-                        binaryWriter.Write(frameNumberByte, 0, intByteLength);
-
-                        byte[] valueByte = BitConverter.GetBytes(morphRecorderSaved.MorphDrivers[morphName].ValueList[i].value);
-                        binaryWriter.Write(valueByte, 0, intByteLength);
-                    });
-
-                    //カメラの書き込み
-                    byte[] cameraFrameCount = BitConverter.GetBytes(0);
-                    binaryWriter.Write(cameraFrameCount, 0, intByteLength);
-
-                    //照明の書き込み
-                    byte[] lightFrameCount = BitConverter.GetBytes(0);
-                    binaryWriter.Write(lightFrameCount, 0, intByteLength);
-
-                    //セルフシャドウの書き込み
-                    byte[] selfShadowCount = BitConverter.GetBytes(0);
-                    binaryWriter.Write(selfShadowCount, 0, intByteLength);
-
-                    //IKの書き込み
-                    //0フレームにキーフレーム一つだけ置く
-                    byte[] ikCount = BitConverter.GetBytes(1);
-                    byte[] ikFrameNumber = BitConverter.GetBytes(0);
-                    byte modelDisplay = Convert.ToByte(1);
-                    //右足IKと左足IKと右足つま先IKと左足つま先IKの4つ
-                    byte[] ikNumber = BitConverter.GetBytes(4);
-                    const int IKNameLength = 20;
-                    byte[] leftIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左足ＩＫ");
-                    byte[] rightIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右足ＩＫ");
-                    byte[] leftToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左つま先ＩＫ");
-                    byte[] rightToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右つま先ＩＫ");
-                    byte ikOn = Convert.ToByte(1);
-                    byte ikOff = Convert.ToByte(0);
-                    binaryWriter.Write(ikCount, 0, intByteLength);
-                    binaryWriter.Write(ikFrameNumber, 0, intByteLength);
-                    binaryWriter.Write(modelDisplay);
-                    binaryWriter.Write(ikNumber, 0, intByteLength);
-                    binaryWriter.Write(leftIKName, 0, leftIKName.Length);
-                    binaryWriter.Write(new byte[IKNameLength - leftIKName.Length], 0, IKNameLength - leftIKName.Length);
-                    binaryWriter.Write(ikOff);
-                    binaryWriter.Write(leftToeIKName, 0, leftToeIKName.Length);
-                    binaryWriter.Write(new byte[IKNameLength - leftToeIKName.Length], 0, IKNameLength - leftToeIKName.Length);
-                    binaryWriter.Write(ikOff);
-                    binaryWriter.Write(rightIKName, 0, rightIKName.Length);
-                    binaryWriter.Write(new byte[IKNameLength - rightIKName.Length], 0, IKNameLength - rightIKName.Length);
-                    binaryWriter.Write(ikOff);
-                    binaryWriter.Write(rightToeIKName, 0, rightToeIKName.Length);
-                    binaryWriter.Write(new byte[IKNameLength - rightToeIKName.Length], 0, IKNameLength - rightToeIKName.Length);
-                    binaryWriter.Write(ikOff);
                 }
-                catch (Exception ex)
+                uint allMorphNumber = 0;
+                LoopWithMorphCondition((a, b) => { allMorphNumber++; });
+                byte[] faceFrameCount = BitConverter.GetBytes(allMorphNumber);
+                binaryWriter.Write(faceFrameCount, 0, intByteLength);
+
+                //モーフの書き込み
+                LoopWithMorphCondition((morphName, i) =>
                 {
-                    Debug.Log("VMD書き込みエラー" + ex.Message);
-                }
-                finally
-                {
-                    binaryWriter.Close();
-                }
+                    const int boneNameLength = 15;
+                    string morphNameString = morphName.ToString();
+                    byte[] morphNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(morphNameString);
+
+                    binaryWriter.Write(morphNameBytes, 0, morphNameBytes.Length);
+                    binaryWriter.Write(new byte[boneNameLength - morphNameBytes.Length], 0, boneNameLength - morphNameBytes.Length);
+
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)i);
+                    binaryWriter.Write(frameNumberByte, 0, intByteLength);
+
+                    byte[] valueByte = BitConverter.GetBytes(morphRecorderSaved.MorphDrivers[morphName].ValueList[i].value);
+                    binaryWriter.Write(valueByte, 0, intByteLength);
+                });
+
+                //カメラの書き込み
+                byte[] cameraFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(cameraFrameCount, 0, intByteLength);
+
+                //照明の書き込み
+                byte[] lightFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(lightFrameCount, 0, intByteLength);
+
+                //セルフシャドウの書き込み
+                byte[] selfShadowCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(selfShadowCount, 0, intByteLength);
+
+                //IKの書き込み
+                //0フレームにキーフレーム一つだけ置く
+                byte[] ikCount = BitConverter.GetBytes(1);
+                byte[] ikFrameNumber = BitConverter.GetBytes(0);
+                byte modelDisplay = Convert.ToByte(1);
+                //右足IKと左足IKと右足つま先IKと左足つま先IKの4つ
+                byte[] ikNumber = BitConverter.GetBytes(4);
+                const int IKNameLength = 20;
+                byte[] leftIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左足ＩＫ");
+                byte[] rightIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右足ＩＫ");
+                byte[] leftToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左つま先ＩＫ");
+                byte[] rightToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右つま先ＩＫ");
+                byte ikOn = Convert.ToByte(1);
+                byte ikOff = Convert.ToByte(0);
+                binaryWriter.Write(ikCount, 0, intByteLength);
+                binaryWriter.Write(ikFrameNumber, 0, intByteLength);
+                binaryWriter.Write(modelDisplay);
+                binaryWriter.Write(ikNumber, 0, intByteLength);
+                binaryWriter.Write(leftIKName, 0, leftIKName.Length);
+                binaryWriter.Write(new byte[IKNameLength - leftIKName.Length], 0, IKNameLength - leftIKName.Length);
+                binaryWriter.Write(ikOff);
+                binaryWriter.Write(leftToeIKName, 0, leftToeIKName.Length);
+                binaryWriter.Write(new byte[IKNameLength - leftToeIKName.Length], 0, IKNameLength - leftToeIKName.Length);
+                binaryWriter.Write(ikOff);
+                binaryWriter.Write(rightIKName, 0, rightIKName.Length);
+                binaryWriter.Write(new byte[IKNameLength - rightIKName.Length], 0, IKNameLength - rightIKName.Length);
+                binaryWriter.Write(ikOff);
+                binaryWriter.Write(rightToeIKName, 0, rightToeIKName.Length);
+                binaryWriter.Write(new byte[IKNameLength - rightToeIKName.Length], 0, IKNameLength - rightToeIKName.Length);
+                binaryWriter.Write(ikOff);
             }
-        });
-
+            catch (Exception ex)
+            {
+                Debug.Log("VMD書き込みエラー" + ex.Message);
+            }
+            finally
+            {
+                binaryWriter.Close();
+            }
+        }
         Destroy(this);
     }
 
@@ -575,7 +569,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     /// <param name="modelName">VMDファイルに記載される専用モデル名</param>
     /// <param name="filePath">保存先の絶対ファイルパス</param>
     /// <param name="keyReductionLevel">キーの書き込み頻度を減らして容量を減らす</param>
-    public void SaveVMD(string modelName,  int keyReductionLevel = 3)
+    public void SaveVMD(string modelName, int keyReductionLevel = 3)
     {
         string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
         Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
@@ -774,7 +768,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             FacialMorphList.AddRange(facialTarget.EyeBrowMorphs);
             FacialMorphList.AddRange(facialTarget.EyeMorphs);
             FacialMorphList.AddRange(facialTarget.MouthMorphs);
-            for (int i = 0; i < FacialMorphList.Count; i++) 
+            for (int i = 0; i < FacialMorphList.Count; i++)
             {
                 string morphName = ConvertMorphName(FacialMorphList[i].name);
 
@@ -818,9 +812,9 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 case "Eye_5_L": return "ウィンク";
                 case "Eye_8_R": return "ウィンク右";
                 case "Eye_8_L": return "ウィンク";
-                case "Eye_9_L": 
-                case "Eye_10_L": 
-                case "Eye_11_L": 
+                case "Eye_9_L":
+                case "Eye_10_L":
+                case "Eye_11_L":
                 case "Eye_18_L": return "ｷﾘｯ";
                 case "Eye_16_L": return "なごみ";
                 case "Eye_12_L": return "びっくり";
@@ -835,11 +829,11 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 case "Mouth_6_0":
                 case "Mouth_7_0":
                 case "Mouth_23_0": return "あ";
-                case "Mouth_25_0": 
+                case "Mouth_25_0":
                 case "Mouth_8_0": return "い";
-                case "Mouth_28_0": 
+                case "Mouth_28_0":
                 case "Mouth_16_0": return "う";
-                case "Mouth_31_0": 
+                case "Mouth_31_0":
                 case "Mouth_10_0":
                 case "Mouth_14_0": return "お";
                 case "Mouth_33_0": return "え";
@@ -847,7 +841,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 case "Mouth_45_0": return "ぺろっ";
                 case "Mouth_54_0": return "口横広げ";
                 case "Mouth_55_0": return "口横狭い";
-                default:return name;
+                default: return name;
             }
         }
 
@@ -921,7 +915,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             public void RecordMorph()
             {
                 float val = 0;
-                foreach(var morph in Morphs)
+                foreach (var morph in Morphs)
                 {
                     val += morph.weight;
                 }
