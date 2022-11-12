@@ -69,6 +69,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public Slider GifSlider;
     public Button GifButton;
+    public Button VMDButton;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -824,5 +825,52 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
         return "";
+    }
+
+    public void RecordVMD()
+    {
+        var buttonText = VMDButton.GetComponentInChildren<TextMeshProUGUI>();
+        if (!UmaViewerBuilder.Instance.CurrentUMAContainer|| UmaViewerBuilder.Instance.CurrentUMAContainer.IsMini)
+        {
+            buttonText.text = string.Format("<color=#FF0000>{0}</color>", "Need Normal UMA");
+            return;
+        }
+
+        var container = UmaViewerBuilder.Instance.CurrentUMAContainer;
+        var camera = UmaViewerBuilder.Instance.PreviewCamera;
+
+        var rootbone = container.transform.Find("Position");
+        if(rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))
+        {
+            if (recorder.IsRecording)
+            {
+                if (camera.enabled)
+                {
+                    var cameraRecorder = camera.GetComponent<UnityCameraVMDRecorder>();
+                    cameraRecorder.StopRecording();
+                    cameraRecorder.SaveVMD();
+                }
+                recorder.StopRecording();
+                buttonText.text = "Saving";
+                recorder.SaveVMD(container.name);
+                buttonText.text = "Record VMD";
+            }
+        }
+        else
+        {
+            var newRecorder = rootbone.gameObject.AddComponent<UnityHumanoidVMDRecorder>();
+            newRecorder.Initialize();
+            if (!newRecorder.IsRecording)
+            {
+                if (camera.enabled)
+                {
+                    var cameraRecorder = camera.gameObject.AddComponent<UnityCameraVMDRecorder>();
+                    cameraRecorder.Initialize();
+                    cameraRecorder.StartRecording();
+                }
+                newRecorder.StartRecording();
+                buttonText.text = "Recording...";
+            }
+        }
     }
 }

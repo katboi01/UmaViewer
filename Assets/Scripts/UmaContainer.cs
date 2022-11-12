@@ -32,7 +32,6 @@ public class UmaContainer : MonoBehaviour
     public Texture CheekTex;
     public Material CheekMaterial;
 
-
     [Header("Generic")]
     public bool IsGeneric = false;
     public string VarCostumeIdShort, VarCostumeIdLong, VarSkin, VarHeight, VarSocks, VarBust;
@@ -48,6 +47,7 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Shader")]
     public Material FaceMaterial;
+
     public void MergeModel()
     {
         if (!Body) return;
