@@ -30,6 +30,10 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     List<Vector3> positionsSaved = new List<Vector3>();
     List<Vector3> rotationsSaved = new List<Vector3>();
 
+    Vector3 LastRotation;
+    bool firstKey;
+    Vector3 finalRotation;
+
     // Start is called before the first frame update
     public void Initialize()
     {
@@ -116,8 +120,46 @@ public class UnityCameraVMDRecorder : MonoBehaviour
         Quaternion fixedRotation = new Quaternion(-rotation.x, rotation.y, -rotation.z, rotation.w);
         Vector3 vmdRotation = new Vector3(fixedRotation.eulerAngles.x, 180 - fixedRotation.eulerAngles.y, fixedRotation.eulerAngles.z);
 
+        if (!firstKey)
+        {
+            finalRotation = vmdRotation;
+            firstKey = true;
+        }
+        else
+        {
+            finalRotation += DeltaVector(vmdRotation, LastRotation);
+            Debug.Log(DeltaVector(vmdRotation, LastRotation)+" "+ vmdRotation + " "+ LastRotation);
+        }
+
         LocalPositions.Add(vmdPosition);
-        LocalRotations.Add(vmdRotation);
+        LocalRotations.Add(finalRotation);
+
+        LastRotation = vmdRotation;
+    }
+
+    Vector3 DeltaVector(Vector3 val ,Vector3 lastVal)
+    {
+        return new Vector3(DeltaDegree(val.x, lastVal.x), DeltaDegree(val.y, lastVal.y), DeltaDegree(val.z, lastVal.z));
+    }
+
+    float DeltaDegree(float val,float lastVal)
+    {
+        var deltaVal = val - lastVal;
+        if (Mathf.Abs(deltaVal) < 180)
+        {
+            return deltaVal;
+        }
+        else
+        {
+            if (deltaVal >= 0)
+            {
+                return deltaVal - 360;
+            }
+            else
+            {
+                return 360 + deltaVal;
+            }
+        }
     }
 
     public static void SetFPS(int fps)
