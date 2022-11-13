@@ -40,8 +40,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
-    public Animator PreviewCameraAnimator;
-    public Camera PreviewCamera;
+    public Animator AnimationCameraAnimator;
+    public Camera AnimationCamera;
 
     private void Awake()
     {
@@ -954,6 +954,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.EndsWith("_E"))
         {
+            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
         else if (clip.name.EndsWith("_loop"))
@@ -1052,7 +1053,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     SetPreviewCamera(null);
                 }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-                CurrentUMAContainer.TrackTarget = PreviewCamera.gameObject;
+                CurrentUMAContainer.TrackTarget = AnimationCamera.gameObject;
             }
             else
             {
@@ -1075,14 +1076,14 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (controller)
         {
-            PreviewCameraAnimator.runtimeAnimatorController = controller;
-            PreviewCamera.enabled = true;
-            PreviewCameraAnimator.Play("motion_1", 0, 0);
+            AnimationCameraAnimator.runtimeAnimatorController = controller;
+            AnimationCamera.enabled = true;
+            AnimationCameraAnimator.Play("motion_1", 0, 0);
         }
         else
         {
-            PreviewCameraAnimator.runtimeAnimatorController = null;
-            PreviewCamera.enabled = false;
+            AnimationCameraAnimator.runtimeAnimatorController = null;
+            AnimationCamera.enabled = false;
         }
     }
 
@@ -1181,9 +1182,9 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (PreviewCamera && PreviewCamera.enabled == true)
+        if (AnimationCamera && AnimationCamera.enabled == true)
         {
-            PreviewCamera.fieldOfView = PreviewCamera.gameObject.transform.parent.transform.localScale.x;
+            AnimationCamera.fieldOfView = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
         }
     }
 }

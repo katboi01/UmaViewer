@@ -582,7 +582,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
-        Builder.PreviewCameraAnimator.speed = AnimationSpeedSlider.value;
+        Builder.AnimationCameraAnimator.speed = AnimationSpeedSlider.value;
         if (Builder.CurrentUMAContainer.UmaFaceAnimator)
             Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
@@ -714,7 +714,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
             var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-            var animator_cam = Builder.PreviewCameraAnimator;
+            var animator_cam = Builder.AnimationCameraAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
@@ -754,7 +754,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!Builder.CurrentUMAContainer) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-        var animator_cam = Builder.PreviewCameraAnimator;
+        var animator_cam = Builder.AnimationCameraAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
@@ -781,7 +781,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-        Builder.PreviewCameraAnimator.speed = val;
+        Builder.AnimationCameraAnimator.speed = val;
         if (Builder.CurrentUMAContainer.UmaFaceAnimator)
         {
             Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
@@ -837,7 +837,7 @@ public class UmaViewerUI : MonoBehaviour
         }
 
         var container = UmaViewerBuilder.Instance.CurrentUMAContainer;
-        var camera = UmaViewerBuilder.Instance.PreviewCamera;
+        var camera = UmaViewerBuilder.Instance.AnimationCamera;
 
         var rootbone = container.transform.Find("Position");
         if(rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))

@@ -15158,7 +15158,7 @@ GameObject:
   - component: {fileID: 790387849}
   - component: {fileID: 790387850}
   m_Layer: 0
-  m_Name: PreviewCamera
+  m_Name: AnimationCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27050,7 +27050,7 @@ GameObject:
   - component: {fileID: 1468470378}
   - component: {fileID: 1468470379}
   m_Layer: 0
-  m_Name: PreviewCameraRoot
+  m_Name: AnimationCameraRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28235,8 +28235,8 @@ MonoBehaviour:
     type: 2}
   CameraOverrideController: {fileID: 22100000, guid: 2074a3b49810aed419168eda443b9e1a,
     type: 2}
-  PreviewCameraAnimator: {fileID: 1468470379}
-  PreviewCamera: {fileID: 790387849}
+  AnimationCameraAnimator: {fileID: 1468470379}
+  AnimationCamera: {fileID: 790387849}
 --- !u!1 &1566898429
 GameObject:
   m_ObjectHideFlags: 0
