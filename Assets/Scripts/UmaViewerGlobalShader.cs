@@ -126,8 +126,13 @@ public class UmaViewerGlobalShader : MonoBehaviour
     private void FixedUpdate()
     {
         //Used to calculate the correct outline
-        _GlobalCameraFov = Camera.main.fieldOfView;
-        Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov); 
+        if (UmaViewerBuilder.Instance.CurrentUMAContainer)
+        {
+            var camera = Camera.main;
+            var distance = Vector3.Distance(camera.transform.position, UmaViewerBuilder.Instance.CurrentUMAContainer.transform.position);
+            var outlineWidth = 40.0f * distance * Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            Shader.SetGlobalFloat("_GlobalCameraFov", outlineWidth);
+        }
     }
 
    

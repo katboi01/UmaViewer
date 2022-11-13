@@ -8,6 +8,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 public class CameraOrbit : MonoBehaviour
 {
+    public static CameraOrbit instance;
     public int CameraMode = 0;
     public int AAMode = 0;
 
@@ -52,6 +53,7 @@ public class CameraOrbit : MonoBehaviour
         eventSystem = EventSystem.current;
 
         lookRotation = transform.localRotation;
+        instance = this;
     }
 
     void Update()
