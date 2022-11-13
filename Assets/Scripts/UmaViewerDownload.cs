@@ -8,8 +8,9 @@ public class UmaViewerDownload : MonoBehaviour
     public static IEnumerator DownloadText(string url, System.Action<string> callback)
     {
         UnityWebRequest www = UnityWebRequest.Get(url);
+        www.timeout = 3;
         yield return www.SendWebRequest();
-
+        
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);

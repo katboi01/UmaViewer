@@ -82,11 +82,13 @@ public class DynamicBone : MonoBehaviour
 	[Tooltip("The force apply to bones.")]
 #endif
     public Vector3 m_Force = Vector3.zero;
-	
-
-	
 #if UNITY_5_3_OR_NEWER
-	[Tooltip("Bones exclude from physics simulation.")]
+    [Tooltip("The limit angle to bones.")]
+#endif
+    public Vector3 m_LimitAngel_Min = Vector3.zero;
+    public Vector3 m_LimitAngel_Max = Vector3.zero;
+#if UNITY_5_3_OR_NEWER
+    [Tooltip("Bones exclude from physics simulation.")]
 #endif
     public List<Transform> m_Exclusions = null;
 	
@@ -131,6 +133,9 @@ public class DynamicBone : MonoBehaviour
         public float m_BoneLength = 0;
         public bool m_isCollide = false;
 
+
+        public Vector3 m_LimitAngel_Min = Vector3.zero;
+        public Vector3 m_LimitAngel_Max = Vector3.zero;
         public Vector3 m_Position = Vector3.zero;
         public Vector3 m_PrevPosition = Vector3.zero;
         public Vector3 m_EndOffset = Vector3.zero;
@@ -417,6 +422,8 @@ public class DynamicBone : MonoBehaviour
             p.m_Inert = m_Inert;
             p.m_Friction = m_Friction;
             p.m_Radius = m_Radius;
+            p.m_LimitAngel_Min = m_LimitAngel_Min;
+            p.m_LimitAngel_Max = m_LimitAngel_Max;
 
             if (m_BoneTotalLength > 0)
             {
@@ -529,7 +536,8 @@ public class DynamicBone : MonoBehaviour
 
             // keep shape
             float stiffness = Mathf.Lerp(1.0f, p.m_Stiffness, m_Weight);
-            if (stiffness > 0 || p.m_Elasticity > 0)
+            float elasticity = p.m_Elasticity;
+            if (stiffness > 0 || elasticity > 0)
             {
                 Matrix4x4 m0 = p0.m_Transform.localToWorldMatrix;
                 m0.SetColumn(3, p0.m_Position);
@@ -540,7 +548,7 @@ public class DynamicBone : MonoBehaviour
                     restPos = m0.MultiplyPoint3x4(p.m_EndOffset);
 
                 Vector3 d = restPos - p.m_Position;
-                p.m_Position += d * (p.m_Elasticity * timeVar);
+                p.m_Position += d * (elasticity * timeVar);
 
                 if (stiffness > 0)
                 {

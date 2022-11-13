@@ -40,8 +40,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
-    public Animator PreviewCameraAnimator;
-    public Camera PreviewCamera;
+    public Animator AnimationCameraAnimator;
+    public Camera AnimationCamera;
 
     private void Awake()
     {
@@ -167,7 +167,7 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Physics
             foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes")))
             {
-                if (asset1.Name.Contains("cloth04"))
+                if (asset1.Name.Contains("cloth00"))
                     RecursiveLoadAsset(asset1);
             }
         }
@@ -824,6 +824,9 @@ public class UmaViewerBuilder : MonoBehaviour
         GameObject head = Instantiate(go, CurrentUMAContainer.transform);
         CurrentUMAContainer.Head = head;
 
+        //Some setting for Head
+        CurrentUMAContainer.EnableEyeTracking = UI.EnableEyeTracking;
+
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -863,11 +866,23 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         m.shader = alphaShader;
                     }
+                    //Blush Setting
+                    if (r.name.Contains("Cheek")){
+                        CurrentUMAContainer.CheekMaterial = m;
+                        CurrentUMAContainer.CheekTex = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "cheek1"; }).Value as Texture;
+                        if (UI.IsCheekBlushing)
+                        {
+                            m.SetTexture("_MainTex", CurrentUMAContainer.CheekTex);
+                        }
+                        else
+                        {
+                            m.SetTexture("_MainTex", null);
+                        }
+                    }
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = cheekShader;
-                            m.CopyPropertiesFromMaterial(TransMaterialCharas);
+                            m.shader = cheekShader;;
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
                             m.shader = faceShader;
@@ -939,6 +954,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.EndsWith("_E"))
         {
+            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
         else if (clip.name.EndsWith("_loop"))
@@ -1037,7 +1053,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     SetPreviewCamera(null);
                 }
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-                CurrentUMAContainer.TrackTarget = PreviewCamera.gameObject;
+                CurrentUMAContainer.TrackTarget = AnimationCamera.gameObject;
             }
             else
             {
@@ -1060,14 +1076,14 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (controller)
         {
-            PreviewCameraAnimator.runtimeAnimatorController = controller;
-            PreviewCamera.enabled = true;
-            PreviewCameraAnimator.Play("motion_1", 0, 0);
+            AnimationCameraAnimator.runtimeAnimatorController = controller;
+            AnimationCamera.enabled = true;
+            AnimationCameraAnimator.Play("motion_1", 0, 0);
         }
         else
         {
-            PreviewCameraAnimator.runtimeAnimatorController = null;
-            PreviewCamera.enabled = false;
+            AnimationCameraAnimator.runtimeAnimatorController = null;
+            AnimationCamera.enabled = false;
         }
     }
 
@@ -1166,9 +1182,9 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (PreviewCamera && PreviewCamera.enabled == true)
+        if (AnimationCamera && AnimationCamera.enabled == true)
         {
-            PreviewCamera.fieldOfView = PreviewCamera.gameObject.transform.parent.transform.localScale.x;
+            AnimationCamera.fieldOfView = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
         }
     }
 }

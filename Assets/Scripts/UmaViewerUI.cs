@@ -69,6 +69,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public Slider GifSlider;
     public Button GifButton;
+    public Button VMDButton;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -82,6 +83,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public bool isCriware = false;
     public bool isHeadFix = false;
+    public bool EnableEyeTracking = true;
+    public bool IsCheekBlushing = false;
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
@@ -220,7 +223,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Name = morph.name + " (" + morph.tag + ")";
             container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
-            container.Slider.minValue = 0;
+            container.Slider.minValue = morph.tag.Contains("Range") ? -1 : 0;
             container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
         }
     }
@@ -229,7 +232,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         currentFaceDrivenKeyTarget = target;
 
-        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>())
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>(true))
         {
             Destroy(ui.gameObject);
         }
@@ -579,7 +582,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
         Builder.CurrentUMAContainer.UmaAnimator.speed = AnimationSpeedSlider.value;
-        Builder.PreviewCameraAnimator.speed = AnimationSpeedSlider.value;
+        Builder.AnimationCameraAnimator.speed = AnimationSpeedSlider.value;
         if (Builder.CurrentUMAContainer.UmaFaceAnimator)
             Builder.CurrentUMAContainer.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
     }
@@ -640,9 +643,29 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetEyeTrackingEnable(bool isOn)
     {
+        EnableEyeTracking = isOn;
         if (Builder.CurrentUMAContainer)
         {
             Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
+        }
+    }
+
+    public void SetBlushing(bool isOn)
+    {
+        IsCheekBlushing = isOn;
+        if (Builder.CurrentUMAContainer)
+        {
+            if (Builder.CurrentUMAContainer.CheekMaterial)
+            {
+                if (isOn)
+                {
+                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", Builder.CurrentUMAContainer.CheekTex);
+                }
+                else
+                {
+                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", null);
+                } 
+            }
         }
     }
 
@@ -691,7 +714,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var animator = Builder.CurrentUMAContainer.UmaAnimator;
             var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-            var animator_cam = Builder.PreviewCameraAnimator;
+            var animator_cam = Builder.AnimationCameraAnimator;
             var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
             var state = animator.speed > 0f;
             if (state)
@@ -731,7 +754,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!Builder.CurrentUMAContainer) return;
         var animator = Builder.CurrentUMAContainer.UmaAnimator;
         var animator_face = Builder.CurrentUMAContainer.UmaFaceAnimator;
-        var animator_cam = Builder.PreviewCameraAnimator;
+        var animator_cam = Builder.AnimationCameraAnimator;
         if (animator != null)
         {
             var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
@@ -758,7 +781,7 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
-        Builder.PreviewCameraAnimator.speed = val;
+        Builder.AnimationCameraAnimator.speed = val;
         if (Builder.CurrentUMAContainer.UmaFaceAnimator)
         {
             Builder.CurrentUMAContainer.UmaFaceAnimator.speed = val;
@@ -802,5 +825,52 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
         return "";
+    }
+
+    public void RecordVMD()
+    {
+        var buttonText = VMDButton.GetComponentInChildren<TextMeshProUGUI>();
+        if (!UmaViewerBuilder.Instance.CurrentUMAContainer|| UmaViewerBuilder.Instance.CurrentUMAContainer.IsMini)
+        {
+            buttonText.text = string.Format("<color=#FF0000>{0}</color>", "Need Normal UMA");
+            return;
+        }
+
+        var container = UmaViewerBuilder.Instance.CurrentUMAContainer;
+        var camera = UmaViewerBuilder.Instance.AnimationCamera;
+
+        var rootbone = container.transform.Find("Position");
+        if(rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))
+        {
+            if (recorder.IsRecording)
+            {
+                if (camera.enabled)
+                {
+                    var cameraRecorder = camera.GetComponent<UnityCameraVMDRecorder>();
+                    cameraRecorder.StopRecording();
+                    cameraRecorder.SaveVMD();
+                }
+                recorder.StopRecording();
+                buttonText.text = "Saving";
+                recorder.SaveVMD(container.name);
+                buttonText.text = "Record VMD";
+            }
+        }
+        else
+        {
+            var newRecorder = rootbone.gameObject.AddComponent<UnityHumanoidVMDRecorder>();
+            newRecorder.Initialize();
+            if (!newRecorder.IsRecording)
+            {
+                if (camera.enabled)
+                {
+                    var cameraRecorder = camera.gameObject.AddComponent<UnityCameraVMDRecorder>();
+                    cameraRecorder.Initialize();
+                    cameraRecorder.StartRecording();
+                }
+                newRecorder.StartRecording();
+                buttonText.text = "Recording...";
+            }
+        }
     }
 }

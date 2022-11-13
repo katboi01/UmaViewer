@@ -8,6 +8,7 @@ using UnityEngine.Rendering.PostProcessing;
 
 public class CameraOrbit : MonoBehaviour
 {
+    public static CameraOrbit instance;
     public int CameraMode = 0;
     public int AAMode = 0;
 
@@ -52,6 +53,7 @@ public class CameraOrbit : MonoBehaviour
         eventSystem = EventSystem.current;
 
         lookRotation = transform.localRotation;
+        instance = this;
     }
 
     void Update()
@@ -83,7 +85,7 @@ public class CameraOrbit : MonoBehaviour
         if (AAMode != AAModeDropdown.value)
         {
             var postprocessLayerMain = Camera.main.GetComponent<PostProcessLayer>();
-            var postprocessLayerPreview = UmaViewerBuilder.Instance.PreviewCamera.GetComponent<PostProcessLayer>();
+            var postprocessLayerPreview = UmaViewerBuilder.Instance.AnimationCamera.GetComponent<PostProcessLayer>();
             postprocessLayerMain.antialiasingMode = postprocessLayerPreview.antialiasingMode = (PostProcessLayer.Antialiasing)AAModeDropdown.value;
             Debug.Log($"Switched AntiAliasing to {(PostProcessLayer.Antialiasing)AAModeDropdown.value}");
             AAMode = AAModeDropdown.value;

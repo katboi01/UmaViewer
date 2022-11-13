@@ -28,6 +28,10 @@ public class UmaContainer : MonoBehaviour
     public float EyeHeight;
     public bool EnableEyeTracking = true;
 
+    [Header("Cheek")]
+    public Texture CheekTex;
+    public Material CheekMaterial;
+
     [Header("Generic")]
     public bool IsGeneric = false;
     public string VarCostumeIdShort, VarCostumeIdLong, VarSkin, VarHeight, VarSocks, VarBust;
@@ -40,6 +44,9 @@ public class UmaContainer : MonoBehaviour
     [Header("Physics")]
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
+
+    [Header("Shader")]
+    public Material FaceMaterial;
 
     public void MergeModel()
     {
@@ -97,6 +104,7 @@ public class UmaContainer : MonoBehaviour
         OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
         UmaAnimator.runtimeAnimatorController = OverrideController;
 
+        FaceMaterial = transform.Find("M_Face").GetComponent<SkinnedMeshRenderer>().material;
     }
 
     public void SetHeight(int scale)
@@ -171,6 +179,24 @@ public class UmaContainer : MonoBehaviour
         if (isAnimatorControl && !IsMini)
         {
             FaceDrivenKeyTarget.ProcessLocator();
+        }
+
+        if (!IsMini && FaceMaterial)
+        {
+            if (isAnimatorControl)
+            {
+                FaceMaterial.SetVector("_FaceForward", Vector3.zero);
+                FaceMaterial.SetVector("_FaceUp", Vector3.zero);
+                FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
+                
+            }
+            else
+            {
+                //Used to calculate facial shadows
+                FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
+                FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
+                FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
+            }
         }
     }
 }
