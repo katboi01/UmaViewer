@@ -223,7 +223,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Name = morph.name + " (" + morph.tag + ")";
             container.Slider.value = morph.weight;
             container.Slider.maxValue = 1;
-            container.Slider.minValue = 0;
+            container.Slider.minValue = morph.tag.Contains("Range") ? -1 : 0;
             container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
         }
     }

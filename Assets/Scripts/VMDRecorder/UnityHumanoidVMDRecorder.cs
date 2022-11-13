@@ -919,7 +919,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 {
                     val += morph.weight;
                 }
-                ValueList.Add((Mathf.Clamp01(val), true));
+                ValueList.Add((Mathf.Clamp(val, -1, 1), true));
             }
         }
     }
