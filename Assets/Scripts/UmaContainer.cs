@@ -1,6 +1,7 @@
 using Gallop;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
@@ -18,6 +19,7 @@ public class UmaContainer : MonoBehaviour
     public AnimatorOverrideController OverrideController;
     public Animator UmaFaceAnimator;
     public AnimatorOverrideController FaceOverrideController;
+
     public bool isAnimatorControl;
 
     [Header("Face")]
@@ -27,6 +29,11 @@ public class UmaContainer : MonoBehaviour
     public GameObject TrackTarget;
     public float EyeHeight;
     public bool EnableEyeTracking = true;
+
+    [Header("Body")]
+    public GameObject UpBodyBone;
+    public Vector3 UpBodyPosition;
+    public Quaternion UpBodyRotation;
 
     [Header("Cheek")]
     public Texture CheekTex;
@@ -48,11 +55,17 @@ public class UmaContainer : MonoBehaviour
     [Header("Shader")]
     public Material FaceMaterial;
 
+    public void Initialize()
+    {
+        EyeHeight = 0.1f;
+        TrackTarget = Camera.main.gameObject;
+        UpBodyPosition = UpBodyBone.transform.localPosition;
+        UpBodyRotation = UpBodyBone.transform.localRotation;
+    }
+
     public void MergeModel()
     {
         if (!Body) return;
-        EyeHeight = 0.1f;
-        TrackTarget = Camera.main.gameObject;
 
         List<Transform> bodybones = new List<Transform>(Body.GetComponentInChildren<SkinnedMeshRenderer>().bones);
         List<Transform> emptyBones = new List<Transform>();
@@ -197,6 +210,26 @@ public class UmaContainer : MonoBehaviour
                 FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
                 FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
             }
+        }
+    }
+
+    public void SetNextAnimationCut(string cutName)
+    {
+        var asset = UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.Equals(cutName));
+        UmaViewerBuilder.Instance.RecursiveLoadAsset(asset);
+    }
+
+    public void SetEndAnimationCut()
+    {
+        UmaViewerUI.Instance.AnimationPause();
+    }
+
+    public void UpBodyReset()
+    {
+        if (UpBodyBone)
+        {
+            UpBodyBone.transform.localPosition = UpBodyPosition;
+            UpBodyBone.transform.localRotation = UpBodyRotation;
         }
     }
 }

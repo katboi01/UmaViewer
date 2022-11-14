@@ -176,7 +176,7 @@ public class UmaViewerBuilder : MonoBehaviour
         // Record Head Data
         int head_id;
         string head_costumeId;
-        int tailId =  Convert.ToInt32(charaData["tail_model_id"]);
+        int tailId = Convert.ToInt32(charaData["tail_model_id"]);
 
         //The tailId of 9006 is 1, but the character has no tail
         if (id == 9006) tailId = -1;
@@ -275,8 +275,8 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentUMAContainer.Head)
         {
             var firsehead = CurrentUMAContainer.Head;
-            var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
-            var EarDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "ear_target"; }).Value as DrivenKeyTarget;
+            var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => a.Key.Equals("facial_target")).Value as FaceDrivenKeyTarget;
+            var EarDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => a.Key.Equals("ear_target")).Value as DrivenKeyTarget;
             FaceDriven._earTarget = EarDriven._targetFaces;
             CurrentUMAContainer.FaceDrivenKeyTarget = FaceDriven;
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
@@ -288,12 +288,13 @@ public class UmaViewerBuilder : MonoBehaviour
             emotionDriven.FaceDrivenKeyTarget = FaceDriven;
             emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
             emotionDriven.Initialize();
-
-            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
+            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key.Equals("head")).Value;
         }
 
 
         CurrentUMAContainer.MergeModel();
+        CurrentUMAContainer.Initialize();
+
         CurrentUMAContainer.SetHeight(Convert.ToInt32(CurrentUMAContainer.CharaData["scale"]));
         LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
@@ -586,7 +587,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
+    public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
         {
@@ -729,6 +730,15 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.Body = Instantiate(go, CurrentUMAContainer.transform);
         CurrentUMAContainer.UmaAnimator = CurrentUMAContainer.Body.GetComponent<Animator>();
 
+        if (CurrentUMAContainer.IsMini)
+        {
+            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.transform.Find("Position/Hip").gameObject;
+        }
+        else
+        {
+            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.Find(a => a.Key.Equals("upbody_ctrl")).Value as GameObject;
+        }
+
         if (CurrentUMAContainer.IsGeneric)
         {
             List<Texture2D> textures = CurrentUMAContainer.GenericBodyTextures;
@@ -867,9 +877,10 @@ public class UmaViewerBuilder : MonoBehaviour
                         m.shader = alphaShader;
                     }
                     //Blush Setting
-                    if (r.name.Contains("Cheek")){
+                    if (r.name.Contains("Cheek"))
+                    {
                         CurrentUMAContainer.CheekMaterial = m;
-                        CurrentUMAContainer.CheekTex = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "cheek1"; }).Value as Texture;
+                        CurrentUMAContainer.CheekTex = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list.Find(a => a.Key.Equals("cheek1")).Value as Texture;
                         if (UI.IsCheekBlushing)
                         {
                             m.SetTexture("_MainTex", CurrentUMAContainer.CheekTex);
@@ -882,7 +893,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = cheekShader;;
+                            m.shader = cheekShader; ;
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
                             m.shader = faceShader;
@@ -954,7 +965,6 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else if (clip.name.EndsWith("_E"))
         {
-            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
         else if (clip.name.EndsWith("_loop"))
@@ -975,18 +985,13 @@ public class UmaViewerBuilder : MonoBehaviour
 
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
-
             CurrentUMAContainer.isAnimatorControl = false;
-            CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
         }
         else if (clip.name.Contains("tail"))
         {
             if (CurrentUMAContainer.IsMini) return;
-            var currentStateInfo = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_t"] = clip;
             CurrentUMAContainer.UmaAnimator.Play("motion_t", 1, 0);
-            CurrentUMAContainer.UmaAnimator.Play(currentStateInfo.shortNameHash, 0, currentStateInfo.normalizedTime);
         }
         else if (clip.name.Contains("face"))
         {
@@ -1006,17 +1011,15 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             if (CurrentUMAContainer.IsMini) return;
             CurrentUMAContainer.OverrideController["clip_p"] = clip;
-            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 2, 0);
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 2, 0);
         }
         else if (clip.name.Contains("cam"))
         {
-            var overrideController = Instantiate(CameraOverrideController);
-            overrideController["clip_1"] = clip;
-            SetPreviewCamera(overrideController);
+            SetPreviewCamera(clip);
         }
         else
         {
-            CurrentUMAContainer.UmaAnimator.Rebind();
+            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
@@ -1052,8 +1055,25 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     SetPreviewCamera(null);
                 }
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-                CurrentUMAContainer.TrackTarget = AnimationCamera.gameObject;
+
+                if (clip.name.Contains("cti_crd"))
+                {
+                    string[] param = clip.name.Split('_');
+                    if (param.Length > 4)
+                    {
+                        int index = int.Parse(param[4]) + 1;
+                        var nextMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_0{index}"));
+                        var aevent = new AnimationEvent
+                        {
+                            time = clip.length*0.99f,
+                            stringParameter = (nextMotion != null ? nextMotion.Name : null),
+                            functionName = (nextMotion != null ? "SetNextAnimationCut" : "SetEndAnimationCut")
+                        };
+                        clip.AddEvent(aevent);
+                    }
+                }
             }
             else
             {
@@ -1062,27 +1082,28 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 }
                 CurrentUMAContainer.isAnimatorControl = false;
-                CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
                 SetPreviewCamera(null);
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             }
-
         }
-
     }
-    public void SetPreviewCamera(RuntimeAnimatorController controller)
+
+    public void SetPreviewCamera(AnimationClip clip)
     {
-        if (controller)
+        if (clip)
         {
-            AnimationCameraAnimator.runtimeAnimatorController = controller;
+            if (!AnimationCameraAnimator.runtimeAnimatorController)
+            {
+                AnimationCameraAnimator.runtimeAnimatorController = Instantiate(CameraOverrideController);
+            }
+            (AnimationCameraAnimator.runtimeAnimatorController as AnimatorOverrideController)["clip_1"] = clip;
             AnimationCamera.enabled = true;
             AnimationCameraAnimator.Play("motion_1", 0, 0);
         }
         else
         {
-            AnimationCameraAnimator.runtimeAnimatorController = null;
             AnimationCamera.enabled = false;
         }
     }
@@ -1158,6 +1179,7 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
+
     public void ClearMorphs()
     {
         if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
@@ -1184,7 +1206,8 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (AnimationCamera && AnimationCamera.enabled == true)
         {
-            AnimationCamera.fieldOfView = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
+            var fov = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
+            AnimationCamera.fieldOfView = fov;
         }
     }
 }
