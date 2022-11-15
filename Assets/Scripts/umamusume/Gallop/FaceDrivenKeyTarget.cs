@@ -360,6 +360,8 @@ namespace Gallop
             MouthMorphs.ForEach(morph =>
             {
                 morph.weight = morph.locator.transform.localPosition.x * -100;
+                if (morph.weight < 0)
+                    morph.weight = -morph.weight;  
             });
 
             EyeMorphs.ForEach(morph =>

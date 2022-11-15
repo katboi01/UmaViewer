@@ -438,8 +438,16 @@ public class UmaViewerUI : MonoBehaviour
         {
             var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
             string[] split = Path.GetFileNameWithoutExtension(entry.Name).Split('_');
-            string name = split[split.Length - 2] + getCharaName(split[split.Length - 2]) + " " + split[split.Length - 1];
+            string name = $"{ split[split.Length - 2]} {getCharaName(split[split.Length - 2])}";
             container.Name = name;
+
+            var icon = Main.Characters.Find(a => a.Id.ToString().Equals(split[split.Length - 2]));
+            if (icon != null)
+            {
+                container.Image.sprite = icon.Icon;
+                container.Image.enabled = true;
+            }
+
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
                 if (isCriware)
