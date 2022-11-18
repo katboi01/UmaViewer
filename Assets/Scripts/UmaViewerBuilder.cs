@@ -1027,41 +1027,40 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadTear(GameObject go)
     {
-        if (CurrentUMAContainer)
-        {
-            var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
-            var attachBone_2_L = headBone.transform.Find("Eye_tear_attach_02_L");
-            var attachBone_2_R = headBone.transform.Find("Eye_tear_attach_02_R");
-            var attachBone_3_L = headBone.transform.Find("Eye_tear_attach_03_L");
-            var attachBone_3_R = headBone.transform.Find("Eye_tear_attach_03_R");
-            var ani = go.GetComponent<Animator>();
-            var controller = new AnimatorOverrideController(ani.runtimeAnimatorController);
-            controller["anm_tear000_00"] = go.GetComponent<AssetHolder>()._assetTable["default_animation"] as AnimationClip;
-            ani.runtimeAnimatorController = controller;
+        //WIP
+        //if (CurrentUMAContainer)
+        //{
+        //    var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
+        //    var attachBone_2_L = headBone.transform.Find("Eye_tear_attach_02_L");
+        //    var attachBone_2_R = headBone.transform.Find("Eye_tear_attach_02_R");
+        //    var attachBone_3_L = headBone.transform.Find("Eye_tear_attach_03_L");
+        //    var attachBone_3_R = headBone.transform.Find("Eye_tear_attach_03_R");
+        //    var ani = go.GetComponent<Animator>();
+        //    var controller = new AnimatorOverrideController(ani.runtimeAnimatorController);
+        //    controller["anm_tear000_00"] = go.GetComponent<AssetHolder>()._assetTable["default_animation"] as AnimationClip;
+        //    ani.runtimeAnimatorController = controller;
 
-            if (go.name.EndsWith("000"))
-            {
-                for(int i = 0; i < 4; i++)
-                {
-                    var obj = Instantiate(go, headBone.transform);
-                    var attachBone = (i % 2 == 0 ? attachBone_3_L : attachBone_3_R);
-                    obj.transform.SetPositionAndRotation(attachBone.TransformPoint(Vector3.zero), attachBone.transform.rotation);
-                    CurrentUMAContainer.TearObjects_0.Add(obj);
-                }
-            }
-            else if(go.name.EndsWith("001"))
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    var obj = Instantiate(go, headBone.transform);
-                    var animator = obj.GetComponent<Animator>();
-                    Debug.LogError(animator.GetCurrentAnimatorClipInfo(0)[0].clip.name);
-                    var attachBone = (i % 2 == 0 ? attachBone_2_L : attachBone_2_R);
-                    obj.transform.SetPositionAndRotation(attachBone.TransformPoint(Vector3.zero), attachBone.transform.rotation);
-                    CurrentUMAContainer.TearObjects_1.Add(obj);
-                }
-            }
-        }
+        //    if (go.name.EndsWith("000"))
+        //    {
+        //        for(int i = 0; i < 4; i++)
+        //        {
+        //            var obj = Instantiate(go, headBone.transform);
+        //            var attachBone = (i % 2 == 0 ? attachBone_3_L : attachBone_3_R);
+        //            obj.transform.SetPositionAndRotation(attachBone.TransformPoint(Vector3.zero), attachBone.transform.rotation);
+        //            CurrentUMAContainer.TearObjects_0.Add(obj);
+        //        }
+        //    }
+        //    else if(go.name.EndsWith("001"))
+        //    {
+        //        for (int i = 0; i < 4; i++)
+        //        {
+        //            var obj = Instantiate(go, headBone.transform);
+        //            var attachBone = (i % 2 == 0 ? attachBone_2_L : attachBone_2_R);
+        //            obj.transform.SetPositionAndRotation(attachBone.TransformPoint(Vector3.zero), attachBone.transform.rotation);
+        //            CurrentUMAContainer.TearObjects_1.Add(obj);
+        //        }
+        //    }
+        //}
     }
 
     private void LoadAnimation(AnimationClip clip)
