@@ -38,6 +38,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect EyeBrowList;
     public ScrollRect EyeList;
     public ScrollRect MouthList;
+    public ScrollRect OtherList;
     public ScrollRect LiveList;
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
@@ -84,7 +85,6 @@ public class UmaViewerUI : MonoBehaviour
     public bool isCriware = false;
     public bool isHeadFix = false;
     public bool EnableEyeTracking = true;
-    public bool IsCheekBlushing = false;
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
@@ -219,12 +219,55 @@ public class UmaViewerUI : MonoBehaviour
     {
         foreach (FacialMorph morph in targetMorph)
         {
-            var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
-            container.Name = morph.name + " (" + morph.tag + ")";
-            container.Slider.value = morph.weight;
-            container.Slider.maxValue = 1;
-            container.Slider.minValue = morph.tag.Contains("Range") ? -1 : 0;
-            container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+            if(morph is FacialExtraMorph extraMorph)
+            {
+                foreach(var prop in extraMorph.BindProperties)
+                {
+                    var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
+                    container.Name = $"{morph.name}_{extraMorph.BindProperties.IndexOf(prop)}_{prop.Type}";
+                    container.Slider.value = prop.Value;
+                    switch (prop.Type)
+                    {
+                        case BindProperty.BindType.Shader:
+                        case BindProperty.BindType.Texture:
+                            container.Slider.maxValue = 1;
+                            container.Slider.minValue = 0;
+                            break;
+                        case BindProperty.BindType.Select:
+                            container.Slider.wholeNumbers = true;
+                            container.Slider.maxValue = prop.BindPrefab.Count - 1;
+                            container.Slider.minValue = 0;
+                            break;
+                        case BindProperty.BindType.EyeSelect:
+                            container.Slider.wholeNumbers = true;
+                            container.Slider.maxValue = prop.BindPrefab.Count/2 - 1;
+                            container.Slider.minValue = 0;
+                            break;
+                        case BindProperty.BindType.Bool:
+                            container.Slider.wholeNumbers = true;
+                            container.Slider.maxValue = 1;
+                            container.Slider.minValue = 0;
+                            break;
+                    }
+                    container.Slider.onValueChanged.AddListener((a) => { 
+                        target.ChangeMorphWeight(prop, a);
+                        if(prop.Type == BindProperty.BindType.Bool&& morph.name.Contains("Manga"))
+                        {
+                            target.ChangeMorphWeight(target.EyeMorphs[42], container.Slider.value > 0 ? 1 : 0);
+                            target.ChangeMorphWeight(target.EyeMorphs[43], container.Slider.value > 0 ? 1 : 0);
+                        }
+                    });
+                }
+            }
+            else
+            {
+                var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
+                container.Name = $"{morph.name}({morph.tag})";
+                container.Slider.value = morph.weight;
+                container.Slider.maxValue = 1;
+                container.Slider.minValue = morph.tag.Contains("Range") ? -1 : 0;
+                container.Slider.onValueChanged.AddListener((a) => { target.ChangeMorphWeight(morph, a); });
+            }
         }
     }
 
@@ -244,6 +287,8 @@ public class UmaViewerUI : MonoBehaviour
         InstantiateFacialPart(UmaContainerSliderPrefab, target, target.EyeMorphs, EyeList);
         InstantiateFacialPart(UmaContainerSliderPrefab, target, target.MouthMorphs, MouthList);
 
+        List<FacialMorph> targetMorph = new List<FacialMorph>(target.OtherMorphs);
+        InstantiateFacialPart(UmaContainerSliderPrefab, target, targetMorph, OtherList);
     }
 
     public void UpdateFacialPanels()
@@ -658,24 +703,7 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    public void SetBlushing(bool isOn)
-    {
-        IsCheekBlushing = isOn;
-        if (Builder.CurrentUMAContainer)
-        {
-            if (Builder.CurrentUMAContainer.CheekMaterial)
-            {
-                if (isOn)
-                {
-                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", Builder.CurrentUMAContainer.CheekTex);
-                }
-                else
-                {
-                    Builder.CurrentUMAContainer.CheekMaterial.SetTexture("_MainTex", null);
-                } 
-            }
-        }
-    }
+
 
     public void AudioPause()
     {

@@ -6,6 +6,22 @@ using static DynamicBone;
 [System.Serializable]
 public class AssetTable
 {
+    public Object this[string key]
+    {
+        get 
+        {
+            var item = list.Find(a => a.Key.Equals(key));
+            if(item != null)
+            {
+                return item.Value;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
     public List<StringObjectPair> list;
 }
 
@@ -13,6 +29,21 @@ public class AssetTable
 [System.Serializable]
 public class AssetTableValue
 {
+    public float this[string key]
+    {
+        get
+        {
+            var item = list.Find(a => a.Key.Equals(key));
+            if (item != null)
+            {
+                return item.Value;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
     public List<StringValuePair> list;
 }
 
