@@ -224,7 +224,7 @@ public class UmaViewerUI : MonoBehaviour
                 foreach(var prop in extraMorph.BindProperties)
                 {
                     var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
-                    container.Name = $"{morph.name}_{extraMorph.BindProperties.IndexOf(prop)}_{prop.Type}";
+                    container.Name = $"{morph.locator.name}({prop.Type})";
                     container.Slider.value = prop.Value;
                     switch (prop.Type)
                     {
@@ -243,15 +243,25 @@ public class UmaViewerUI : MonoBehaviour
                             container.Slider.maxValue = prop.BindPrefab.Count/2 - 1;
                             container.Slider.minValue = 0;
                             break;
-                        case BindProperty.BindType.Bool:
+                        case BindProperty.BindType.Enable:
+                        case BindProperty.BindType.TearSelect:
+                        case BindProperty.BindType.TearSide:
                             container.Slider.wholeNumbers = true;
                             container.Slider.maxValue = 1;
+                            container.Slider.minValue = 0;
+                            break;
+                        case BindProperty.BindType.TearWeight:
+                            container.Slider.maxValue = 1;
+                            container.Slider.minValue = 0;
+                            break;
+                        case BindProperty.BindType.TearSpeed:
+                            container.Slider.maxValue = 2;
                             container.Slider.minValue = 0;
                             break;
                     }
                     container.Slider.onValueChanged.AddListener((a) => { 
                         target.ChangeMorphWeight(prop, a);
-                        if(prop.Type == BindProperty.BindType.Bool&& morph.name.Contains("Manga"))
+                        if(prop.Type == BindProperty.BindType.Enable&& morph.name.Contains("Manga"))
                         {
                             target.ChangeMorphWeight(target.EyeMorphs[42], container.Slider.value > 0 ? 1 : 0);
                             target.ChangeMorphWeight(target.EyeMorphs[43], container.Slider.value > 0 ? 1 : 0);

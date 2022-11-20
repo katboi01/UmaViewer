@@ -258,10 +258,49 @@ namespace Gallop
             FaceMangaMorph.BindProperties.Add(new BindProperty()
             {
                 Part = BindProperty.LocatorPart.ScaX,
-                Type = BindProperty.BindType.Bool,
+                Type = BindProperty.BindType.Enable,
                 BindPrefab = mangaObjects
             });
             OtherMorphs.Add(FaceMangaMorph);
+
+            foreach(var tear in Container.TearControllers)
+            {
+                var index = Container.TearControllers.IndexOf(tear);
+                FacialExtraMorph FaceTearMorph = new FacialExtraMorph()
+                {
+                    name = $"Tear{index}_Ctrl",
+                    locator = DrivenKeyLocator.Find($"Tear{index}_Ctrl")
+                };
+                FaceTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.ScaX,
+                    Type = BindProperty.BindType.TearWeight,
+                    BindTearController = tear,
+                    Value = tear.Weight
+                });
+                FaceTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.PosY,
+                    Type = BindProperty.BindType.TearSide,
+                    BindTearController = tear,
+                    Value = tear.CurrentDir
+                });
+                FaceTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.ScaY,
+                    Type = BindProperty.BindType.TearSelect,
+                    BindTearController = tear,
+                    Value = tear.CurrenObject
+                });
+                FaceTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.ScaZ,
+                    Type = BindProperty.BindType.TearSpeed,
+                    BindTearController = tear,
+                    Value = tear.Speed
+                });
+                OtherMorphs.Add(FaceTearMorph);
+            }
         }
 
         public void SetupAnimator()
@@ -380,11 +419,23 @@ namespace Gallop
                         property.BindPrefab.ForEach(a =>
                         a.SetActive(val + count < property.BindPrefab.Count && (val == property.BindPrefab.IndexOf(a) || val + count == property.BindPrefab.IndexOf(a))));
                         break;
-                    case BindProperty.BindType.Bool:
+                    case BindProperty.BindType.Enable:
                         if (property.Value <= 0)
                         {
                             property.BindPrefab.ForEach(a =>a.SetActive(false));
                         }
+                        break;
+                    case BindProperty.BindType.TearSide:
+                        property.BindTearController.SetDir((int)property.Value);
+                        break;
+                    case BindProperty.BindType.TearWeight:
+                        property.BindTearController.SetWegiht(property.Value);
+                        break;
+                    case BindProperty.BindType.TearSelect:
+                        property.BindTearController.SetObject((int)property.Value);
+                        break;
+                    case BindProperty.BindType.TearSpeed:
+                        property.BindTearController.SetSpeed(property.Value);
                         break;
                 }
             }
@@ -491,12 +542,6 @@ namespace Gallop
                 }
             });
 
-            LeftEyeXrange.weight = -(EyeballCtrl_L_Locator.transform.localPosition.x * -100 + EyeballCtrl_All_Locator.transform.localPosition.x * -100);
-            RightEyeXrange.weight = -(EyeballCtrl_R_Locator.transform.localPosition.x * -100 + EyeballCtrl_All_Locator.transform.localPosition.x * -100);
-
-            LeftEyeYrange.weight = -(EyeballCtrl_L_Locator.transform.localPosition.y * -100 + EyeballCtrl_All_Locator.transform.localPosition.y * -100);
-            RightEyeYrange.weight = (EyeballCtrl_R_Locator.transform.localPosition.y * -100 + EyeballCtrl_All_Locator.transform.localPosition.y * -100);
-
             OtherMorphs.ForEach(morph =>
             {
                 morph.BindProperties.ForEach(property =>
@@ -505,12 +550,19 @@ namespace Gallop
                 });
             });
 
+            LeftEyeXrange.weight = -(EyeballCtrl_L_Locator.transform.localPosition.x * -100 + EyeballCtrl_All_Locator.transform.localPosition.x * -100);
+            RightEyeXrange.weight = -(EyeballCtrl_R_Locator.transform.localPosition.x * -100 + EyeballCtrl_All_Locator.transform.localPosition.x * -100);
+
+            LeftEyeYrange.weight = -(EyeballCtrl_L_Locator.transform.localPosition.y * -100 + EyeballCtrl_All_Locator.transform.localPosition.y * -100);
+            RightEyeYrange.weight = (EyeballCtrl_R_Locator.transform.localPosition.y * -100 + EyeballCtrl_All_Locator.transform.localPosition.y * -100);
+
             ChangeMorph();
         }
 
         public void ResetLocator()
         {
             Container.UmaFaceAnimator.Rebind();
+            ProcessLocator();
             ChangeMorph();
         }
     }

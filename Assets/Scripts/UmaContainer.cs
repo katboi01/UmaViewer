@@ -45,8 +45,9 @@ public class UmaContainer : MonoBehaviour
     public List<GameObject> RightMangaObject = new List<GameObject>();
 
     [Header("Tear")]
-    public List<GameObject> TearObjects_0 = new List<GameObject>();
-    public List<GameObject> TearObjects_1 = new List<GameObject>();
+    public GameObject TearPrefab_0;
+    public GameObject TearPrefab_1;
+    public List<TearController> TearControllers = new List<TearController>();
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -192,39 +193,45 @@ public class UmaContainer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (TrackTarget && EnableEyeTracking && !isAnimatorControl && !IsMini) 
+        if (!IsMini)
         {
-            var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
-            var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
-            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
-            if (deltaRotation.x > 180) deltaRotation.x -= 360;
-            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+            if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
+            {
+                var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up * EyeHeight;
+                var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
+                var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
+                if (deltaRotation.x > 180) deltaRotation.x -= 360;
+                if (deltaRotation.y > 180) deltaRotation.y -= 360;
 
-            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35,-1,1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
-            FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
-        }
+                var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
+                FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+            }
 
-        if (isAnimatorControl && !IsMini)
-        {
-            FaceDrivenKeyTarget.ProcessLocator();
-        }
-
-        if (!IsMini && FaceMaterial)
-        {
             if (isAnimatorControl)
             {
-                FaceMaterial.SetVector("_FaceForward", Vector3.zero);
-                FaceMaterial.SetVector("_FaceUp", Vector3.zero);
-                FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
-                
+                FaceDrivenKeyTarget.ProcessLocator();
             }
-            else
+
+            if (FaceMaterial)
             {
-                //Used to calculate facial shadows
-                FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
-                FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
-                FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
+                if (isAnimatorControl)
+                {
+                    FaceMaterial.SetVector("_FaceForward", Vector3.zero);
+                    FaceMaterial.SetVector("_FaceUp", Vector3.zero);
+                    FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
+
+                }
+                else
+                {
+                    //Used to calculate facial shadows
+                    FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
+                    FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
+                    FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
+                }
+                FaceMaterial.SetFloat("_faceShadowEndY", HeadBone.transform.position.y);
             }
+
+            TearControllers.ForEach(a => a.UpdateOffset());
         }
     }
 

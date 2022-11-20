@@ -57,10 +57,15 @@ namespace Gallop
             Select,
             EyeSelect,
             Texture,
-            Bool
+            Enable,
+            TearSide,
+            TearWeight,
+            TearSelect,
+            TearSpeed
         }
         public Material BindMaterial;
         public Texture BindTexture;
+        public TearController BindTearController;
         public List<GameObject> BindPrefab = new List<GameObject>();
         public string PropertyName;
         public LocatorPart Part;
