@@ -39,7 +39,7 @@ public class TearController
         TearObject_0 = tearPrefab_0;
         AssetHolder0 = TearObject_0.GetComponent<AssetHolder>();
         TearMaterial_0 = TearObject_0.GetComponentInChildren<SkinnedMeshRenderer>().material;
-        TearMaterial_0.SetFloat("_OffsetFactor", -100);
+        TearMaterial_0.SetFloat("_OffsetFactor", -1000);
         Animator_0 = TearObject_0.GetComponent<Animator>();
         var clip = AssetHolder0._assetTable["default_animation"] as AnimationClip;
         var controller = new AnimatorOverrideController(Animator_0.runtimeAnimatorController);
@@ -49,7 +49,7 @@ public class TearController
         TearObject_1 = tearPrefab_1;
         AssetHolder1 = TearObject_1.GetComponent<AssetHolder>();
         TearMaterial_1 = TearObject_1.GetComponentInChildren<SkinnedMeshRenderer>().material;
-        TearMaterial_1.SetFloat("_OffsetFactor", -100);
+        TearMaterial_1.SetFloat("_OffsetFactor", -1000);
         Animator_1 = TearObject_1.GetComponent<Animator>();
         clip = AssetHolder1._assetTable["default_animation"] as AnimationClip;
         controller = new AnimatorOverrideController(Animator_1.runtimeAnimatorController);
