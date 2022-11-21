@@ -318,8 +318,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 var p1 = CurrentUMAContainer.TearPrefab_1;
                 var t = headBone.transform;
                 CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
                 CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
+                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
                 CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
             }
 
@@ -338,9 +338,10 @@ public class UmaViewerBuilder : MonoBehaviour
             emotionDriven.FaceDrivenKeyTarget = faceDriven;
             emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
             emotionDriven.Initialize();
-            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         }
 
+        CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
+        CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.Initialize();
