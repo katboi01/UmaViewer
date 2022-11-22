@@ -219,7 +219,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         foreach (FacialMorph morph in targetMorph)
         {
-            if(morph is FacialExtraMorph extraMorph)
+            if(morph is FacialOtherMorph extraMorph)
             {
                 foreach(var prop in extraMorph.BindProperties)
                 {

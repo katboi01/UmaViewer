@@ -19,7 +19,7 @@ namespace Gallop
     }
 
     [System.Serializable]
-    public class FacialExtraMorph : FacialMorph
+    public class FacialOtherMorph : FacialMorph
     {
         public GameObject BindGameObject;
         public List<BindProperty> BindProperties = new List<BindProperty>();

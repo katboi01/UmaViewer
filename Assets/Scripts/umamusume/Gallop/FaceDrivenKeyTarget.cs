@@ -27,7 +27,7 @@ namespace Gallop
         public List<FacialMorph> EyeBrowMorphs = new List<FacialMorph>();
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
-        public List<FacialExtraMorph> OtherMorphs = new List<FacialExtraMorph>();
+        public List<FacialOtherMorph> OtherMorphs = new List<FacialOtherMorph>();
 
         public Transform DrivenKeyLocator;
         public Transform EyeballCtrl_L_Locator, EyeballCtrl_R_Locator, EyeballCtrl_All_Locator;
@@ -175,7 +175,7 @@ namespace Gallop
         {
             if (Container.CheekTex_0)
             {
-                var CheekMorph = new FacialExtraMorph
+                var CheekMorph = new FacialOtherMorph
                 {
                     name = "Cheek_Ctrl",
                     locator = DrivenKeyLocator.Find("Cheek_Ctrl"),
@@ -224,7 +224,7 @@ namespace Gallop
             Container.FaceMaterial = Container.Head.transform.Find("M_Face").GetComponent<SkinnedMeshRenderer>().material;
             if (Container.FaceMaterial)
             {
-                FacialExtraMorph FaceShadowMorph = new FacialExtraMorph()
+                FacialOtherMorph FaceShadowMorph = new FacialOtherMorph()
                 {
                     name = "Shade_Ctrl",
                     locator = DrivenKeyLocator.Find("Shade_Ctrl")
@@ -240,7 +240,7 @@ namespace Gallop
                 OtherMorphs.Add(FaceShadowMorph);
             }
 
-            FacialExtraMorph FaceMangaMorph = new FacialExtraMorph()
+            FacialOtherMorph FaceMangaMorph = new FacialOtherMorph()
             {
                 name = "Manga_Ctrl",
                 locator = DrivenKeyLocator.Find("Manga_Ctrl")
@@ -266,7 +266,7 @@ namespace Gallop
             foreach(var tear in Container.TearControllers)
             {
                 var index = Container.TearControllers.IndexOf(tear);
-                FacialExtraMorph FaceTearMorph = new FacialExtraMorph()
+                FacialOtherMorph FaceTearMorph = new FacialOtherMorph()
                 {
                     name = $"Tear{index}_Ctrl",
                     locator = DrivenKeyLocator.Find($"Tear{index}_Ctrl")
@@ -385,7 +385,7 @@ namespace Gallop
             }
         }
 
-        private void ProcessExtraMorph(FacialExtraMorph morph)
+        private void ProcessExtraMorph(FacialOtherMorph morph)
         {
             foreach (var property in morph.BindProperties)
             {
