@@ -579,7 +579,7 @@ public class UmaViewerUI : MonoBehaviour
         
         if (umaId == -1)
         {
-            foreach (var entry in filteredList.Where(a=> a.Name.Contains($"/type00") && !a.Name.Contains($"/tail")))
+            foreach (var entry in filteredList.Where(a=> (a.Name.Contains($"/type0") || a.Name.Contains($"/type99") || a.Name.Contains($"anm_sty_")) && !a.Name.Contains($"/tail") && !a.Name.EndsWith($"_pos") && !a.Name.EndsWith($"_prop") && !a.Name.Contains($"_defaultmotion")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
