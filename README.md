@@ -31,9 +31,9 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
      * master\
        * **master.mdb**
      * dat\
-       - 2A\...
-       - 2B\...
-       - ...
+       - 2A\\...
+       - 2B\\...
+       - ...\\...
 1. Download the most recent UmaViewer.zip file from [Releases](https://github.com/katboi01/UmaViewer/releases/) tab.
 1. Extract the archive anywhere, can be extracted over previous version.
 1. Run the UmaViewer.exe
@@ -45,7 +45,7 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 1. Clone or download and extract this repository.
 1. Import and Open the project in Unity Hub, missing files should be automatically repaired.
 1. Open the Assets/Scenes/Version2 scene.
-	note: [JSON .NET For Unity](https://assetstore.unity.com/packages/tools/input-management/json-net-for-unity-11347) may be required
+   - note: If there are errors in the console, [JSON .NET For Unity](https://assetstore.unity.com/packages/tools/input-management/json-net-for-unity-11347) may be required
 
 ### Special Thank to:
 MarshmallowAndroid: [UmaMusumeExplorer](https://github.com/MarshmallowAndroid/UmaMusumeExplorer) for acb/awb decoder.
