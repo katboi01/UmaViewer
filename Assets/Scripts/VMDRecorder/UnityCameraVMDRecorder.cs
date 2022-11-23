@@ -128,7 +128,6 @@ public class UnityCameraVMDRecorder : MonoBehaviour
         else
         {
             finalRotation += DeltaVector(vmdRotation, LastRotation);
-            Debug.Log(DeltaVector(vmdRotation, LastRotation)+" "+ vmdRotation + " "+ LastRotation);
         }
 
         LocalPositions.Add(vmdPosition);
@@ -210,6 +209,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     public void SaveVMD()
     {
         string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("Camera_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
         if (IsRecording)
         {
             Debug.Log(targetCameraTransform.name + "VMD保存前にレコーディングをストップしてください。");

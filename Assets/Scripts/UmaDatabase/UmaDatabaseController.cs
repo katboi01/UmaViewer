@@ -36,6 +36,8 @@ public class UmaDatabaseController
     public static string MotionPath = "3d/motion/";
     /// <summary> 3d/chara/ </summary>
     public static string CharaPath = "3d/chara/";
+    /// <summary> 3d/effect/ </summary>
+    public static string EffectPath = "3d/effect/";
 
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<DataRow> CharaData;

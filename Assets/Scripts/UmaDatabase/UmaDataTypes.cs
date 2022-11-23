@@ -70,6 +70,7 @@ public class CharaEntry
     public string Name;
     public Sprite Icon;
     public int Id;
+    public string ThemeColor;
 }
 
 [System.Serializable]

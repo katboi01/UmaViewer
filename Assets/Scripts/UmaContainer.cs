@@ -1,6 +1,7 @@
 using Gallop;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
@@ -20,6 +21,11 @@ public class UmaContainer : MonoBehaviour
     public AnimatorOverrideController FaceOverrideController;
     public bool isAnimatorControl;
 
+    [Header("Body")]
+    public GameObject UpBodyBone;
+    public Vector3 UpBodyPosition;
+    public Quaternion UpBodyRotation;
+
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
@@ -27,10 +33,21 @@ public class UmaContainer : MonoBehaviour
     public GameObject TrackTarget;
     public float EyeHeight;
     public bool EnableEyeTracking = true;
+    public Material FaceMaterial;
 
     [Header("Cheek")]
-    public Texture CheekTex;
-    public Material CheekMaterial;
+    public Texture CheekTex_0;
+    public Texture CheekTex_1;
+    public Texture CheekTex_2;
+
+    [Header("Manga")]
+    public List<GameObject> LeftMangaObject = new List<GameObject>();
+    public List<GameObject> RightMangaObject = new List<GameObject>();
+
+    [Header("Tear")]
+    public GameObject TearPrefab_0;
+    public GameObject TearPrefab_1;
+    public List<TearController> TearControllers = new List<TearController>();
 
     [Header("Generic")]
     public bool IsGeneric = false;
@@ -45,14 +62,21 @@ public class UmaContainer : MonoBehaviour
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
 
-    [Header("Shader")]
-    public Material FaceMaterial;
+
+    public void Initialize()
+    {
+        TrackTarget = Camera.main.gameObject;
+        UpBodyPosition = UpBodyBone.transform.localPosition;
+        UpBodyRotation = UpBodyBone.transform.localRotation;
+
+        //Models must be merged before handling extra morphs
+        if (FaceDrivenKeyTarget)
+            FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
+    }
 
     public void MergeModel()
     {
         if (!Body) return;
-        EyeHeight = 0.1f;
-        TrackTarget = Camera.main.gameObject;
 
         List<Transform> bodybones = new List<Transform>(Body.GetComponentInChildren<SkinnedMeshRenderer>().bones);
         List<Transform> emptyBones = new List<Transform>();
@@ -95,16 +119,16 @@ public class UmaContainer : MonoBehaviour
                 child.SetParent(transform);
             }
             Tail.SetActive(false); //for debugging
-            emptyBones.ForEach(a => { if (a) Destroy(a.gameObject); });
         }
+
+
+        emptyBones.ForEach(a => { if (a) Destroy(a.gameObject); });
 
         //MergeAvatar
         UmaAnimator = gameObject.AddComponent<Animator>();
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
         OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
         UmaAnimator.runtimeAnimatorController = OverrideController;
-
-        FaceMaterial = transform.Find("M_Face").GetComponent<SkinnedMeshRenderer>().material;
     }
 
     public void SetHeight(int scale)
@@ -143,12 +167,17 @@ public class UmaContainer : MonoBehaviour
 
     public void LoadPhysics()
     {
-        cySpringDataContainers = new List<CySpringDataContainer>();
-        var springs = PhysicsController.GetComponentsInChildren<CySpringDataContainer>();
-        foreach (CySpringDataContainer spring in springs)
+        cySpringDataContainers = new List<CySpringDataContainer>(PhysicsController.GetComponentsInChildren<CySpringDataContainer>());
+        var bones = new List<Transform>(GetComponentsInChildren<Transform>());
+        var colliders = new List<GameObject>();
+
+        foreach (CySpringDataContainer spring in cySpringDataContainers)
         {
-            cySpringDataContainers.Add(spring);
-            spring.InitializePhysics();
+            colliders.AddRange(spring.InitiallizeCollider(bones));
+        }
+        foreach (CySpringDataContainer spring in cySpringDataContainers)
+        {
+            spring.InitializePhysics(bones, colliders);
         }
     }
 
@@ -164,39 +193,65 @@ public class UmaContainer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (TrackTarget && EnableEyeTracking && !isAnimatorControl && !IsMini) 
+        if (!IsMini)
         {
-            var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up*EyeHeight;
-            var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
-            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
-            if (deltaRotation.x > 180) deltaRotation.x -= 360;
-            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+            if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
+            {
+                var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up * EyeHeight;
+                var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
+                var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
+                if (deltaRotation.x > 180) deltaRotation.x -= 360;
+                if (deltaRotation.y > 180) deltaRotation.y -= 360;
 
-            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35,-1,1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
-            FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
-        }
+                var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
+                FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+            }
 
-        if (isAnimatorControl && !IsMini)
-        {
-            FaceDrivenKeyTarget.ProcessLocator();
-        }
-
-        if (!IsMini && FaceMaterial)
-        {
             if (isAnimatorControl)
             {
-                FaceMaterial.SetVector("_FaceForward", Vector3.zero);
-                FaceMaterial.SetVector("_FaceUp", Vector3.zero);
-                FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
-                
+                FaceDrivenKeyTarget.ProcessLocator();
             }
-            else
+
+            if (FaceMaterial)
             {
-                //Used to calculate facial shadows
-                FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
-                FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
-                FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
+                if (isAnimatorControl)
+                {
+                    FaceMaterial.SetVector("_FaceForward", Vector3.zero);
+                    FaceMaterial.SetVector("_FaceUp", Vector3.zero);
+                    FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
+
+                }
+                else
+                {
+                    //Used to calculate facial shadows
+                    FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
+                    FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
+                    FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
+                }
+                FaceMaterial.SetFloat("_faceShadowEndY", HeadBone.transform.position.y);
             }
+
+            TearControllers.ForEach(a => a.UpdateOffset());
+        }
+    }
+
+    public void SetNextAnimationCut(string cutName)
+    {
+        var asset = UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.Equals(cutName));
+        UmaViewerBuilder.Instance.RecursiveLoadAsset(asset);
+    }
+
+    public void SetEndAnimationCut()
+    {
+        UmaViewerUI.Instance.AnimationPause();
+    }
+
+    public void UpBodyReset()
+    {
+        if (UpBodyBone)
+        {
+            UpBodyBone.transform.localPosition = UpBodyPosition;
+            UpBodyBone.transform.localRotation = UpBodyRotation;
         }
     }
 }

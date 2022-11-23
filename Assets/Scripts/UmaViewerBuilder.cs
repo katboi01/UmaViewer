@@ -33,6 +33,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public Shader cheekShader;
     public Shader eyebrowShader;
     public Shader alphaShader;
+    public Shader bodyAlphaShader;
+    public Shader bodyBehindAlphaShader;
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
@@ -176,7 +178,7 @@ public class UmaViewerBuilder : MonoBehaviour
         // Record Head Data
         int head_id;
         string head_costumeId;
-        int tailId =  Convert.ToInt32(charaData["tail_model_id"]);
+        int tailId = Convert.ToInt32(charaData["tail_model_id"]);
 
         //The tailId of 9006 is 1, but the character has no tail
         if (id == 9006) tailId = -1;
@@ -239,7 +241,6 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-
         if (tailId != 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
@@ -268,32 +269,83 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-
         CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
 
         //Load FacialMorph
         if (CurrentUMAContainer.Head)
         {
+            var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
+            var bundle = AssetBundle.LoadFromFile(UmaDatabaseController.GetABPath(locatorEntry));
+            Main.LoadedBundles.Add(locatorEntry.Name, bundle);
+            var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
+            locator.name = "DrivenKeyLocator";
+
+            var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
+            var eyeLocator_L = headBone.transform.Find("Eye_target_locator_L");
+            var eyeLocator_R = headBone.transform.Find("Eye_target_locator_R");
+
+            var mangaEntry = Main.AbEffect.FindAll(a => a.Name.StartsWith("3d/effect/charaemotion/pfb_eff_chr_emo_eye"));
+            var mangaObjects = new List<GameObject>();
+            mangaEntry.ForEach(entry =>
+            {
+                AssetBundle ab = AssetBundle.LoadFromFile(UmaDatabaseController.GetABPath(entry));
+                Main.LoadedBundles.Add(entry.Name, ab);
+                var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
+                obj.SetActive(false);
+
+                var leftObj = Instantiate(obj, eyeLocator_L.transform);
+                new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
+                CurrentUMAContainer.LeftMangaObject.Add(leftObj);
+
+                var RightObj = Instantiate(obj, eyeLocator_R.transform);
+                if (RightObj.TryGetComponent<AssetHolder>(out var holder))
+                {
+                    if (holder._assetTableValue["invert"] > 0)
+                        RightObj.transform.localScale = new Vector3(-1, 1, 1);
+                }
+                new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
+                CurrentUMAContainer.RightMangaObject.Add(RightObj);
+            });
+
+            var tearEntry = Main.AbChara.FindAll(a => a.Name.StartsWith("3d/chara/common/tear/") && a.Name.Contains("pfb_chr_tear"));
+            if (tearEntry.Count > 0)
+            {
+                tearEntry.ForEach(a => RecursiveLoadAsset(a));
+            }
+            if (CurrentUMAContainer.TearPrefab_0 && CurrentUMAContainer.TearPrefab_1)
+            {
+                var p0 = CurrentUMAContainer.TearPrefab_0;
+                var p1 = CurrentUMAContainer.TearPrefab_1;
+                var t = headBone.transform;
+                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
+                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
+                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
+                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
+            }
+
             var firsehead = CurrentUMAContainer.Head;
-            var FaceDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "facial_target"; }).Value as FaceDrivenKeyTarget;
-            var EarDriven = firsehead.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "ear_target"; }).Value as DrivenKeyTarget;
-            FaceDriven._earTarget = EarDriven._targetFaces;
-            CurrentUMAContainer.FaceDrivenKeyTarget = FaceDriven;
+            var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
+            var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
+            faceDriven._earTarget = earDriven._targetFaces;
+            CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
-            FaceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
+            faceDriven.DrivenKeyLocator = locator.transform;
+            faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
 
             var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
             emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
             CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
-            emotionDriven.FaceDrivenKeyTarget = FaceDriven;
+            emotionDriven.FaceDrivenKeyTarget = faceDriven;
             emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
             emotionDriven.Initialize();
-
-            CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable.list.FindLast(a => a.Key == "head").Value;
         }
 
-
+        CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
+        CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
+        CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
+        CurrentUMAContainer.Initialize();
+
         CurrentUMAContainer.SetHeight(Convert.ToInt32(CurrentUMAContainer.CharaData["scale"]));
         LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
@@ -586,7 +638,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
+    public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
         {
@@ -647,6 +699,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
                 eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
                 alphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
+                bodyAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
+                bodyBehindAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
                 Main.ShadersLoaded = true;
             }
         }
@@ -666,8 +720,11 @@ public class UmaViewerBuilder : MonoBehaviour
                             LoadAnimation(aClip);
                         }
 
-                        if (!CurrentLiveContainer)
-                            UnloadBundle(bundle, false);
+                        if (CurrentLiveContainer || aClip.name.Contains("tear"))
+                        {
+                            break;
+                        }
+                        UnloadBundle(bundle, false);
                         break;
                     }
                 case GameObject go:
@@ -692,6 +749,10 @@ public class UmaViewerBuilder : MonoBehaviour
                         else if (bundle.name.Contains("/tail/"))
                         {
                             LoadTail(go);
+                        }
+                        else if (bundle.name.Contains("pfb_chr_tear"))
+                        {
+                            LoadTear(go);
                         }
                         else
                         {
@@ -729,6 +790,15 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.Body = Instantiate(go, CurrentUMAContainer.transform);
         CurrentUMAContainer.UmaAnimator = CurrentUMAContainer.Body.GetComponent<Animator>();
 
+        if (CurrentUMAContainer.IsMini)
+        {
+            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.transform.Find("Position/Hip").gameObject;
+        }
+        else
+        {
+            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["upbody_ctrl"] as GameObject;
+        }
+
         if (CurrentUMAContainer.IsGeneric)
         {
             List<Texture2D> textures = CurrentUMAContainer.GenericBodyTextures;
@@ -744,6 +814,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 foreach (Material m in r.sharedMaterials)
                 {
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
+
                     if (CurrentUMAContainer.IsMini)
                     {
 
@@ -751,6 +822,12 @@ public class UmaViewerBuilder : MonoBehaviour
                     }
                     else
                     {
+                        //BodyAlapha's shader need to change manually.
+                        if (m.name.Contains("bdy") && m.name.Contains("Alpha"))
+                        {
+                            m.shader = bodyAlphaShader;
+                        }
+
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
@@ -817,6 +894,20 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
+            {
+                foreach (Material m in r.sharedMaterials)
+                {
+                    //BodyAlapha's shader need to change manually.
+                    if (m.name.Contains("bdy") && m.name.Contains("Alpha"))
+                    {
+                        m.shader = bodyAlphaShader;
+                    }
+                }
+            }
+        }
     }
 
     private void LoadHead(GameObject go)
@@ -866,23 +957,19 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         m.shader = alphaShader;
                     }
+
                     //Blush Setting
-                    if (r.name.Contains("Cheek")){
-                        CurrentUMAContainer.CheekMaterial = m;
-                        CurrentUMAContainer.CheekTex = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list.Find(a => { return a.Key == "cheek1"; }).Value as Texture;
-                        if (UI.IsCheekBlushing)
-                        {
-                            m.SetTexture("_MainTex", CurrentUMAContainer.CheekTex);
-                        }
-                        else
-                        {
-                            m.SetTexture("_MainTex", null);
-                        }
+                    if (r.name.Contains("Cheek"))
+                    {
+                        var table = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable.list;
+                        CurrentUMAContainer.CheekTex_0 = table.FindLast(a => a.Key.Equals("cheek0")).Value as Texture;
+                        CurrentUMAContainer.CheekTex_1 = table.FindLast(a => a.Key.Equals("cheek1")).Value as Texture;
+                        CurrentUMAContainer.CheekTex_2 = table.FindLast(a => a.Key.Equals("cheek2")).Value as Texture;
                     }
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = cheekShader;;
+                            m.shader = cheekShader; ;
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
                             m.shader = faceShader;
@@ -915,9 +1002,9 @@ public class UmaViewerBuilder : MonoBehaviour
         //}
     }
 
-    private void LoadTail(GameObject gameObject)
+    private void LoadTail(GameObject go)
     {
-        CurrentUMAContainer.Tail = Instantiate(gameObject, CurrentUMAContainer.transform);
+        CurrentUMAContainer.Tail = Instantiate(go, CurrentUMAContainer.transform);
         var textures = CurrentUMAContainer.TailTextures;
         foreach (Renderer r in CurrentUMAContainer.Tail.GetComponentsInChildren<Renderer>())
         {
@@ -945,22 +1032,54 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
+    private void LoadTear(GameObject go)
+    {
+
+        if (CurrentUMAContainer)
+        {
+            if (go.name.EndsWith("000"))
+            {
+                CurrentUMAContainer.TearPrefab_0 = go;
+            }
+            else if (go.name.EndsWith("001"))
+            {
+                CurrentUMAContainer.TearPrefab_1 = go;
+            }
+        }
+    }
+
     private void LoadAnimation(AnimationClip clip)
     {
-        bool needTransit = false;
         if (clip.name.EndsWith("_S"))
         {
+            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_s"] = clip;
         }
         else if (clip.name.EndsWith("_E"))
         {
-            CurrentUMAContainer.UmaAnimator.Rebind();
+            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
         else if (clip.name.EndsWith("_loop"))
         {
-            var motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            var motion_e = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            CurrentUMAContainer.UpBodyReset();
+            UmaDatabaseEntry motion_e = null, motion_s = null;
+            if (clip.name.EndsWith("_loop"))
+            {
+                motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            }
+
+            if (CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop"))
+            {
+                motion_e = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
+            }
+
+            if (CurrentUMAContainer.isAnimatorControl && CurrentUMAContainer.FaceDrivenKeyTarget)
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            }
+
+            bool needTransit = false;
             needTransit = (motion_s != null && motion_e != null);
             if (needTransit)
             {
@@ -975,18 +1094,14 @@ public class UmaViewerBuilder : MonoBehaviour
 
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
-
             CurrentUMAContainer.isAnimatorControl = false;
-            CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
         }
         else if (clip.name.Contains("tail"))
         {
             if (CurrentUMAContainer.IsMini) return;
-            var currentStateInfo = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-            CurrentUMAContainer.UmaAnimator.Rebind();
+            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_t"] = clip;
             CurrentUMAContainer.UmaAnimator.Play("motion_t", 1, 0);
-            CurrentUMAContainer.UmaAnimator.Play(currentStateInfo.shortNameHash, 0, currentStateInfo.normalizedTime);
         }
         else if (clip.name.Contains("face"))
         {
@@ -1006,16 +1121,15 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             if (CurrentUMAContainer.IsMini) return;
             CurrentUMAContainer.OverrideController["clip_p"] = clip;
-            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 2, 0);
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", 2, 0);
         }
         else if (clip.name.Contains("cam"))
         {
-            var overrideController = Instantiate(CameraOverrideController);
-            overrideController["clip_1"] = clip;
-            SetPreviewCamera(overrideController);
+            SetPreviewCamera(clip);
         }
         else
         {
+            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
@@ -1052,8 +1166,25 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     SetPreviewCamera(null);
                 }
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-                CurrentUMAContainer.TrackTarget = AnimationCamera.gameObject;
+
+                if (clip.name.Contains("cti_crd"))
+                {
+                    string[] param = clip.name.Split('_');
+                    if (param.Length > 4)
+                    {
+                        int index = int.Parse(param[4]) + 1;
+                        var nextMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_0{index}"));
+                        var aevent = new AnimationEvent
+                        {
+                            time = clip.length * 0.99f,
+                            stringParameter = (nextMotion != null ? nextMotion.Name : null),
+                            functionName = (nextMotion != null ? "SetNextAnimationCut" : "SetEndAnimationCut")
+                        };
+                        clip.AddEvent(aevent);
+                    }
+                }
             }
             else
             {
@@ -1062,27 +1193,28 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 }
                 CurrentUMAContainer.isAnimatorControl = false;
-                CurrentUMAContainer.TrackTarget = Camera.main.gameObject;
                 SetPreviewCamera(null);
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
-                CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
+                CurrentUMAContainer.UmaAnimator.SetTrigger("next");
             }
-
         }
-
     }
-    public void SetPreviewCamera(RuntimeAnimatorController controller)
+
+    public void SetPreviewCamera(AnimationClip clip)
     {
-        if (controller)
+        if (clip)
         {
-            AnimationCameraAnimator.runtimeAnimatorController = controller;
+            if (!AnimationCameraAnimator.runtimeAnimatorController)
+            {
+                AnimationCameraAnimator.runtimeAnimatorController = Instantiate(CameraOverrideController);
+            }
+            (AnimationCameraAnimator.runtimeAnimatorController as AnimatorOverrideController)["clip_1"] = clip;
             AnimationCamera.enabled = true;
             AnimationCameraAnimator.Play("motion_1", 0, 0);
         }
         else
         {
-            AnimationCameraAnimator.runtimeAnimatorController = null;
             AnimationCamera.enabled = false;
         }
     }
@@ -1147,6 +1279,7 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentLiveContainer.gameObject);
         }
     }
+
     public void UnloadUma()
     {
         if (CurrentUMAContainer != null)
@@ -1158,6 +1291,7 @@ public class UmaViewerBuilder : MonoBehaviour
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
+
     public void ClearMorphs()
     {
         if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
@@ -1184,7 +1318,8 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (AnimationCamera && AnimationCamera.enabled == true)
         {
-            AnimationCamera.fieldOfView = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
+            var fov = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
+            AnimationCamera.fieldOfView = fov;
         }
     }
 }
