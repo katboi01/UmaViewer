@@ -30122,6 +30122,7 @@ GameObject:
   - component: {fileID: 1564959565}
   - component: {fileID: 1564959567}
   - component: {fileID: 1564959568}
+  - component: {fileID: 1564959569}
   m_Layer: 0
   m_Name: ViewerMain
   m_TagString: Untagged
@@ -30275,6 +30276,18 @@ MonoBehaviour:
     type: 2}
   AnimationCameraAnimator: {fileID: 1468470379}
   AnimationCamera: {fileID: 790387849}
+--- !u!114 &1564959569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564959564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 822adc4dd85200142901586dd5c697c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1566898429
 GameObject:
   m_ObjectHideFlags: 0
