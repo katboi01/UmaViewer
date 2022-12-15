@@ -19,6 +19,7 @@ public class ManifestDB
         if (File.Exists(DBPath))
         {
             MetaDB = new SqliteConnection($@"Data Source={DBPath}");
+            MetaDB.Open();
         }
         else
         {
@@ -64,7 +65,7 @@ public class ManifestDB
         command.ExecuteNonQuery();
 
         int index = 1;
-        InsertManifestEntry(index, "manifest3", rootEntry, ref command);
+        UpdateManifestEntry(index, "manifest3", rootEntry, ref command);
 
         //Insert platform
         ManifestEntry[] platformEntrys = null;
@@ -77,7 +78,7 @@ public class ManifestDB
         }
         ManifestEntry platformEntry = GetLocalPlatformEntry(platformEntrys);
         index++;
-        InsertManifestEntry(index, "manifest2", platformEntry, ref command);
+        UpdateManifestEntry(index, "manifest2", platformEntry, ref command);
 
         //Insert AssetManifest
         ManifestEntry[] assetEntrys = null;
@@ -93,7 +94,7 @@ public class ManifestDB
             foreach (var entry in assetEntrys)
             {
                 index++;
-                InsertManifestEntry(index, "manifest", entry, ref command);
+                UpdateManifestEntry(index, "manifest", entry, ref command);
             }
             tran.Commit();
         }
@@ -113,7 +114,7 @@ public class ManifestDB
                 foreach (var entry in assets)
                 {
                     index++;
-                    InsertManifestEntry(index, assetEntry.tname, entry, ref command);
+                    UpdateManifestEntry(index, assetEntry.tname, entry, ref command);
                 }
                 tran.Commit();
             }
@@ -121,9 +122,9 @@ public class ManifestDB
         MetaDB.Close();
     }
 
-    private void InsertManifestEntry(int index, string type, ManifestEntry entry, ref SqliteCommand command)
+    private void UpdateManifestEntry(int index, string type, ManifestEntry entry, ref SqliteCommand command)
     {
-        command.CommandText = "INSERT INTO a (i,n,d,g,l,c,h,m,k,s,p) VALUES (@id,@name,@deps,@group,@length,@check,@hash,@m,@k,@s,@p)";
+        command.CommandText = "INSERT OR REPLACE INTO a (i,n,d,g,l,c,h,m,k,s,p) VALUES (@id,@name,@deps,@group,@length,@check,@hash,@m,@k,@s,@p)";
         command.Parameters.Clear();
         command.Parameters.Add(new SqliteParameter("@id", index));
         command.Parameters.Add(new SqliteParameter("@name", (type.Contains("manifest") ? "//" : "") + entry.tname));
@@ -190,6 +191,7 @@ public class ManifestDB
     public IEnumerator DownloadManifest(string hash)
     {
         UnityWebRequest www = UnityWebRequest.Get(GetManifestRequestUrl(hash));
+        www.timeout = 15;
         yield return www.SendWebRequest();
         if (www.result == UnityWebRequest.Result.Success)
         {
