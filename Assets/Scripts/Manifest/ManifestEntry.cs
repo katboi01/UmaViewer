@@ -9,6 +9,8 @@ public struct ManifestEntry
 {
     public byte[] name;
     public byte[] deps;
+    public string tname;
+    public string tdeps;
     public uint group;
     public uint priority;
     public ulong size;
@@ -16,11 +18,26 @@ public struct ManifestEntry
     public string hname;
     public int kind;
 
+    public ManifestEntry(byte[] name, byte[] deps, uint group, uint priority, ulong size, ulong checksum, string hname, int kind)
+    {
+        this.name = name;
+        this.deps = deps;
+        this.group = group;
+        this.priority = priority;
+        this.size = size;
+        this.checksum = checksum;
+        this.hname = hname;
+        this.kind = kind;
+        this.tname = Encoding.UTF8.GetString(this.name);
+        this.tdeps = (this.deps == null ? null : Encoding.UTF8.GetString(this.deps));
+    }
+
     public enum Format
     {
         Simplified = 0,
         Full = 1
     }
+
 
     public static byte[] CalHame(ulong checksum, ulong size, byte[] name)
     {
@@ -37,6 +54,7 @@ public struct ManifestEntry
         return sha1.ComputeHash(allbyte);
     }
 
+
     public static string CalHameString(ulong checksum, ulong size, byte[] name)
     {
         var bytes = CalHame(checksum, size, name);
@@ -47,6 +65,11 @@ public struct ManifestEntry
     public static string CalHameString(ulong checksum, ulong size, string name)
     {
         return CalHameString(checksum, size, Encoding.UTF8.GetBytes(name));
+    }
+
+    public string CalHameString()
+    {
+        return CalHameString(checksum, size, name);
     }
 
     public override string ToString()
@@ -90,6 +113,8 @@ public struct ManifestEntry
             dat.name = GetArray(ReadText(buf, ref offset));
             dat.size = ReadVLQ(buf, ref offset);
             dat.checksum = ReadUNum(buf, ref offset, 8);
+            dat.hname = CalHameString(dat.checksum, dat.size, dat.name);
+            dat.tname = Encoding.UTF8.GetString(dat.name);
         }
 
     }
@@ -105,6 +130,9 @@ public struct ManifestEntry
             dat.priority = (uint)ReadVLQ(buf, ref offset, 4);
             dat.size = (uint)ReadVLQ(buf, ref offset, 8);
             dat.checksum = ReadUNum(buf, ref offset, 8);
+            dat.hname = CalHameString(dat.checksum, dat.size, dat.name);
+            dat.tname = Encoding.UTF8.GetString(dat.name);
+            dat.tdeps = (dat.deps == null ? null : Encoding.UTF8.GetString(dat.deps));
         }
 
     }
@@ -118,6 +146,9 @@ public struct ManifestEntry
             dat.group = (uint)ReadVLQ(buf, ref offset, 4);
             dat.size = (uint)ReadVLQ(buf, ref offset, 8);
             dat.checksum = ReadUNum(buf, ref offset, 8);
+            dat.hname = CalHameString(dat.checksum, dat.size, dat.name);
+            dat.tname = Encoding.UTF8.GetString(dat.name);
+            dat.tdeps = (dat.deps == null ? null : Encoding.UTF8.GetString(dat.deps));
             dat.priority = 0;
         }
     }

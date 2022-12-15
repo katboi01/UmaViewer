@@ -1,6 +1,7 @@
 ﻿using K4os.Compression.LZ4.Streams;
 using System;
 using System.IO;
+using UnityEngine;
 
 public class BSVReader
 {
@@ -67,7 +68,7 @@ public class BSVReader
     public static ArraySegment<byte> ReadText(byte[] buf, ref int offset)
     {
         int start = offset;
-        while (buf[offset] != 0 && offset < buf.Length)
+        while (offset < buf.Length &&buf[offset] != 0)
         {
             offset++;
         }
@@ -102,7 +103,7 @@ public class BSVReader
         return subArray;
     }
 
-    internal static IBSVReader Init(string path, ReadMode mode, bool isCompressed)
+    internal static IBSVReader Init(string path, bool isCompressed,ReadMode mode = ReadMode.Memory)
     {
         try
         {
@@ -131,7 +132,8 @@ public class BSVReader
         }
         catch (Exception e)
         {
-            throw e;
+            Debug.LogError("Read Manifest File Error :" + e);
+            return null;
         }
     }
 
