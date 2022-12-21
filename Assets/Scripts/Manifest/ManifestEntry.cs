@@ -58,8 +58,7 @@ public struct ManifestEntry
     public static string CalHNameString(ulong checksum, ulong size, byte[] name)
     {
         var bytes = CalHName(checksum, size, name);
-        Base32 base32 = new Base32();
-        return base32.Encode(bytes);
+        return new Base32().Encode(bytes);
     }
 
     public static string CalHameString(ulong checksum, ulong size, string name)

@@ -1,5 +1,4 @@
-﻿using K4os.Compression.LZ4.Streams;
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 
@@ -107,19 +106,7 @@ public class BSVReader
     {
         try
         {
-            byte[] input;
-            if (isCompressed)
-            {
-                var source = new MemoryStream(File.ReadAllBytes(path));
-                var decoder = LZ4Stream.Decode(source);
-                var target = new MemoryStream();
-                decoder.CopyTo(target);
-                input = target.ToArray();
-            }
-            else
-            {
-                input = File.ReadAllBytes(path);
-            }
+            byte[] input = isCompressed? LZ4Util.DecompressFromFile(path): File.ReadAllBytes(path);
 
             if (mode == ReadMode.Stream)
             {

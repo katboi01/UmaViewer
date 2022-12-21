@@ -1,4 +1,5 @@
 ﻿using Mono.Data.Sqlite;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.IO;
@@ -11,11 +12,12 @@ using static ManifestCategory;
 public class ManifestDB
 {
     public SqliteConnection MetaDB;
-    public string DBPath;
-    public static string MANIFEST_ROOT_URL = "https://prd-storage-app-umamusume.akamaized.net/dl/resources/Manifest";
-    public ManifestDB(string DBPath)
+    public static string DBPath;
+    public const string DefaultDBPath = "umamusume/meta";
+    public Action<string> callback;
+    public ManifestDB(string DBPath = DefaultDBPath)
     {
-        this.DBPath = DBPath;
+        ManifestDB.DBPath = DBPath;
         if (File.Exists(DBPath))
         {
             MetaDB = new SqliteConnection($@"Data Source={DBPath}");
@@ -43,31 +45,68 @@ public class ManifestDB
         }
     }
 
+    public IEnumerator UpdateResourceVersion(Action<string> callback)
+    {
+        this.callback = callback;
+        callback?.Invoke("Checking Resource Version");
+        yield return UpdateMetaDB();
+        yield return UpdateMasterDB();
+        callback?.Invoke($"Done");
+    }
 
     //umamusume uses the manifest file to generate meta database.
     //it needs to get the root manifest file first
     //then read the root manifest to get other manifest file information
     //recursively read the manifest file to obtain all resource files information
     //finally, insert all data into the meta database
-    public IEnumerator GenerateMetaDB(ulong rootSize, ulong rootCheckSum)
+    public IEnumerator UpdateMetaDB()
     {
-        if (MetaDB == null || MetaDB.State == System.Data.ConnectionState.Closed) {
+        string rootHash = null;
+        callback?.Invoke("Getting resource version");
+        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/MetaC/root", txt =>
+        {
+            if (string.IsNullOrEmpty(txt)) return;
+            var item = JObject.Parse(txt);
+            if ((string)item["n"] == "//root")
+            {
+                rootHash = (string)item["h"];
+            }
+        });
+
+        if (rootHash == null)
+        {
+            Debug.LogError("Get RootHash Error");
+            yield break;
+        }
+
+        ManifestEntry rootEntry = new ManifestEntry(Encoding.UTF8.GetBytes("root"), null, 0, 0, 0, 0, "", 3);
+        rootEntry.hname = rootHash;
+        yield return UpdateMetaDB(rootEntry);
+    }
+
+    public IEnumerator UpdateMetaDB(ulong size, ulong checksum)
+    {
+        ManifestEntry rootEntry = new ManifestEntry(Encoding.UTF8.GetBytes("root"), null, 0, 0, size, checksum, "", 3);
+        rootEntry.hname = rootEntry.CalHameString();
+        yield return UpdateMetaDB(rootEntry);
+    }
+
+    public IEnumerator UpdateMetaDB(ManifestEntry rootEntry)
+    {
+        if (MetaDB == null || MetaDB.State == System.Data.ConnectionState.Closed)
+        {
             Debug.LogError("Open Meta Database Error");
             yield break;
         }
 
-        //Insert root
-        ManifestEntry rootEntry = new ManifestEntry(Encoding.UTF8.GetBytes("root"), null, 0, 0, rootSize, rootCheckSum, "", 3);
-        rootEntry.hname = rootEntry.CalHameString();
-
         SqliteCommand command = new SqliteCommand(MetaDB);
-        command.CommandText = "DELETE FROM a";
-        command.ExecuteNonQuery();
 
+        //Insert root
         int index = 1;
         UpdateManifestEntry(index, "manifest3", rootEntry, ref command);
 
         //Insert platform
+        callback?.Invoke("Reading Platform Manifest");
         ManifestEntry[] platformEntrys = null;
         yield return GetManifest(rootEntry.hname, Kind.PlatformManifest, entrys => { platformEntrys = entrys; });
         if (platformEntrys == null)
@@ -91,14 +130,15 @@ public class ManifestDB
         }
         using (SqliteTransaction tran = MetaDB.BeginTransaction())
         {
-            foreach (var entry in assetEntrys)
+            for (int i = 0; i < assetEntrys.Length; i++)
             {
                 index++;
-                UpdateManifestEntry(index, "manifest", entry, ref command);
+                callback?.Invoke($"Reading Assets Manifest : {assetEntrys[i].tname} ({i + 1}/{assetEntrys.Length})");
+                UpdateManifestEntry(index, "manifest", assetEntrys[i], ref command);
             }
             tran.Commit();
         }
-        
+
         //Insert Asset
         foreach (var assetEntry in assetEntrys)
         {
@@ -109,17 +149,54 @@ public class ManifestDB
                 Debug.LogError("Read AssetManifest Error");
                 continue;
             }
-            using (SqliteTransaction tran = MetaDB.BeginTransaction())
+            using SqliteTransaction tran = MetaDB.BeginTransaction();
+            for (int i = 0; i < assets.Length; i++)
             {
-                foreach (var entry in assets)
-                {
-                    index++;
-                    UpdateManifestEntry(index, assetEntry.tname, entry, ref command);
-                }
-                tran.Commit();
+                index++;
+                callback?.Invoke($"Reading AssetBundles Manifest : {assetEntry.tname} ({i + 1}/{assets.Length})");
+                UpdateManifestEntry(index, assetEntry.tname, assets[i], ref command);
             }
+            tran.Commit();
         }
-        MetaDB.Close();
+    }
+
+    public IEnumerator UpdateMasterDB()
+    {
+        if (MetaDB == null || MetaDB.State == System.Data.ConnectionState.Closed)
+        {
+            Debug.LogError("Open Meta Database Error");
+            yield break;
+        }
+
+        callback?.Invoke($"Checking master.mdb");
+        SqliteCommand command = new SqliteCommand("SELECT h FROM a WHERE n LIKE 'master.mdb.lz4'", MetaDB);
+        var reader = command.ExecuteReader();
+        
+        if (reader.Read())
+        {
+            var hash = reader.GetString(0);
+            var path = GetManifestPath(hash);
+            if (!File.Exists(path))
+            {
+                callback?.Invoke($"Downloading master.mdb");
+                UnityWebRequest www = UnityWebRequest.Get(UmaViewerDownload.GetGenericRequestUrl(hash));
+                yield return www.SendWebRequest();
+                if (www.result == UnityWebRequest.Result.Success)
+                {
+                    File.WriteAllBytes(path, www.downloadHandler.data);
+                }
+                else
+                {
+                    Debug.LogError("Download Master.mdb Failed :" + www.error);
+                    yield break;
+                }
+            }
+
+            callback?.Invoke($"Decompress master.mdb");
+            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master.mdb";
+            Directory.CreateDirectory(Path.GetDirectoryName(masterPath));
+            File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+        }
     }
 
     private void UpdateManifestEntry(int index, string type, ManifestEntry entry, ref SqliteCommand command)
@@ -180,6 +257,7 @@ public class ManifestDB
         var path = GetManifestPath(hash);
         if (!File.Exists(path))
         {
+            this.callback?.Invoke($"Downloading Manifest :{hash}");
             yield return DownloadManifest(hash);
         }
         if (File.Exists(path))
@@ -190,7 +268,7 @@ public class ManifestDB
 
     public IEnumerator DownloadManifest(string hash)
     {
-        UnityWebRequest www = UnityWebRequest.Get(GetManifestRequestUrl(hash));
+        UnityWebRequest www = UnityWebRequest.Get(UmaViewerDownload.GetManifestRequestUrl(hash));
         www.timeout = 15;
         yield return www.SendWebRequest();
         if (www.result == UnityWebRequest.Result.Success)
@@ -206,16 +284,11 @@ public class ManifestDB
     public string GetManifestPath(string hash, bool createPath = true)
     {
         string path = $"{Path.GetDirectoryName(DBPath)}/dat/{hash.Substring(0, 2)}";
-        if (createPath && !Directory.Exists(path))
+        if (createPath)
         {
             Directory.CreateDirectory(path);
         }
         return path + $"/{hash}";
-    }
-
-    public static string GetManifestRequestUrl(string hash)
-    {
-        return $"{MANIFEST_ROOT_URL}/{hash.Substring(0, 2)}/{hash}";
     }
 
     public static ManifestEntry GetLocalPlatformEntry(ManifestEntry[] platformEntrys)
