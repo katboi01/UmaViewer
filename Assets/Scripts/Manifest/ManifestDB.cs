@@ -13,10 +13,11 @@ public class ManifestDB
 {
     public SqliteConnection MetaDB;
     public static string DBPath;
-    public const string DefaultDBPath = "umamusume/meta";
     public Action<string> callback;
-    public ManifestDB(string DBPath = DefaultDBPath)
+
+    public ManifestDB()
     {
+        string DBPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\meta";
         ManifestDB.DBPath = DBPath;
         if (File.Exists(DBPath))
         {
@@ -25,6 +26,7 @@ public class ManifestDB
         }
         else
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(DBPath));
             SqliteConnection.CreateFile(DBPath);
             MetaDB = new SqliteConnection($@"Data Source={DBPath}");
             MetaDB.Open();
@@ -51,7 +53,7 @@ public class ManifestDB
         callback?.Invoke("Checking Resource Version");
         yield return UpdateMetaDB();
         yield return UpdateMasterDB();
-        callback?.Invoke($"Done");
+        callback?.Invoke($"Done. Please restart the application.");
     }
 
     //umamusume uses the manifest file to generate meta database.
