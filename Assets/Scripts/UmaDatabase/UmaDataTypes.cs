@@ -128,5 +128,6 @@ public enum UmaFileType
     uianimation,
     transferevent,
     teambuilding,
-    challengematch
+    challengematch,
+    collectevent
 }

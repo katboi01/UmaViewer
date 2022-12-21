@@ -53,16 +53,9 @@ public class UmaDatabaseController
     {
         try
         {
-            if (Application.platform == RuntimePlatform.Android)
-            {
-                metaDb = new SqliteConnection($@"Data Source={GetGameRootPath()}/meta;");
-                masterDb = new SqliteConnection($@"Data Source={GetGameRootPath()}/master/master.mdb;");
-            }
-            else
-            {
-                metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
-                masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
-            }
+            metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
+            masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
+
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
 

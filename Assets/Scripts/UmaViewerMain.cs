@@ -5,6 +5,9 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using static ManifestCategory;
+using BaseNcoding;
+using System.Text;
 
 public class UmaViewerMain : MonoBehaviour
 {
