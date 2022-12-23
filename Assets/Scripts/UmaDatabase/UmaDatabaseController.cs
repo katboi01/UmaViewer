@@ -66,7 +66,7 @@ public class UmaDatabaseController
         }
         catch
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{GetGameRootPath()}/meta\n{GetGameRootPath()}/master/master.mdb";
+            UmaViewerUI.Instance.LyricsText.text = $"Database not found: {GetGameRootPath()}\\meta\n{GetGameRootPath()}\\master\\master.mdb";
             UmaViewerUI.Instance.LyricsText.color = Color.red;
         }
     }
