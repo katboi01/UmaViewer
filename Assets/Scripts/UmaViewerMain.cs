@@ -30,6 +30,7 @@ public class UmaViewerMain : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        new Config();
         Application.targetFrameRate = -1;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
         AbChara = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath)).ToList();
@@ -41,18 +42,22 @@ public class UmaViewerMain : MonoBehaviour
     private IEnumerator Start()
     {
         Dictionary<int, string> enNames = new Dictionary<int, string>();
-        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
+
+        if(Config.Instance.Language == Language.En)
         {
-            if (string.IsNullOrEmpty(txt)) return;
-            var umaData = JArray.Parse(txt);
-            foreach (var item in umaData)
+            yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
             {
-                if (!enNames.ContainsKey((int)item["charaId"]))
+                if (string.IsNullOrEmpty(txt)) return;
+                var umaData = JArray.Parse(txt);
+                foreach (var item in umaData)
                 {
-                    enNames.Add((int)item["charaId"], item["charaNameEnglish"].ToString());
+                    if (!enNames.ContainsKey((int)item["charaId"]))
+                    {
+                        enNames.Add((int)item["charaId"], item["charaNameEnglish"].ToString());
+                    }
                 }
-            }
-        });
+            });
+        }
 
         var UmaCharaData = UmaDatabaseController.Instance.CharaData;
         foreach (var item in UmaCharaData)
@@ -79,7 +84,7 @@ public class UmaViewerMain : MonoBehaviour
         var asset = AbList.FirstOrDefault(a => a.Name.Equals("livesettings"));
         if (asset != null)
         {
-            string filePath = UmaDatabaseController.GetABPath(asset);
+            string filePath = asset.FilePath;
             if (File.Exists(filePath))
             {
                 AssetBundle bundle = AssetBundle.LoadFromFile(filePath);

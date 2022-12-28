@@ -148,7 +148,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
         LoadedAssetCount++;
-        string filePath = UmaDatabaseController.GetABPath(entry);
+        string filePath = entry.FilePath;
         var container =  Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
         container.Name = Path.GetFileName(entry.Name) + "\n" + entry.Url;
         container.Button.onClick.AddListener(() => {Process.Start("explorer.exe", "/select," + filePath);});
