@@ -1,4 +1,5 @@
 using Gallop;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -10,7 +11,6 @@ public class UmaContainer : MonoBehaviour
     public GameObject Body;
     public GameObject Tail;
     public GameObject Head;
-    public GameObject PhysicsController;
 
     public List<Texture2D> TailTextures = new List<Texture2D>();
 
@@ -61,8 +61,9 @@ public class UmaContainer : MonoBehaviour
     [Header("Physics")]
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
-
-
+    public GameObject PhysicsContainer;
+    public ClothController ClothController;
+    public float BodyScale = 1;
     public void Initialize()
     {
         TrackTarget = Camera.main.gameObject;
@@ -133,7 +134,8 @@ public class UmaContainer : MonoBehaviour
 
     public void SetHeight(int scale)
     {
-        transform.Find("Position").localScale *= (scale / 160f);//WIP
+        BodyScale = (scale / 160f);
+        transform.Find("Position").localScale *= BodyScale;//WIP
     }
 
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
@@ -167,18 +169,41 @@ public class UmaContainer : MonoBehaviour
 
     public void LoadPhysics()
     {
-        cySpringDataContainers = new List<CySpringDataContainer>(PhysicsController.GetComponentsInChildren<CySpringDataContainer>());
-        var bones = new List<Transform>(GetComponentsInChildren<Transform>());
-        var colliders = new List<GameObject>();
+        cySpringDataContainers = new List<CySpringDataContainer>(PhysicsContainer.GetComponentsInChildren<CySpringDataContainer>());
+        ClothController = new ClothController(gameObject);
+        return;
+        foreach(var springData in cySpringDataContainers)
+        {
+            CySpringCollisionDataAsset cySpringCollisionDataAsset = new CySpringCollisionDataAsset();
+            cySpringCollisionDataAsset.dataList = springData.collisionParam;
+            CySpringParamDataAsset cySpringParamDataAsset = new CySpringParamDataAsset();
+            cySpringParamDataAsset.elements = springData.springParam;
+            if (cySpringCollisionDataAsset != null && cySpringParamDataAsset != null)
+            {
+                var  category = Character3DBase.Parts.eCategory.Body;
+                if (springData.gameObject.name.Contains("chr"))
+                {
+                    category = Character3DBase.Parts.eCategory.Head;
+                }
+                var cloth = new ClothController.Cloth(category, cySpringCollisionDataAsset, cySpringParamDataAsset, category == Character3DBase.Parts.eCategory.Head ? "Head" : "Hip");
+                cloth.Build(new List<string>());
+                ClothController.AddCloth(cloth);
+            }
+        }
 
-        foreach (CySpringDataContainer spring in cySpringDataContainers)
-        {
-            colliders.AddRange(spring.InitiallizeCollider(bones));
-        }
-        foreach (CySpringDataContainer spring in cySpringDataContainers)
-        {
-            spring.InitializePhysics(bones, colliders);
-        }
+        ClothController.CreateCollision(CySpringCollisionComponent.ePurpose.Generic, BodyScale, 1);
+        ClothController.BindSpring();
+        //var bones = new List<Transform>(GetComponentsInChildren<Transform>());
+        //var colliders = new List<GameObject>();
+
+        //foreach (CySpringDataContainer spring in cySpringDataContainers)
+        //{
+        //    colliders.AddRange(spring.InitiallizeCollider(bones));
+        //}
+        //foreach (CySpringDataContainer spring in cySpringDataContainers)
+        //{
+        //    spring.InitializePhysics(bones, colliders);
+        //}
     }
 
     public void SetDynamicBoneEnable(bool isOn)
@@ -233,6 +258,11 @@ public class UmaContainer : MonoBehaviour
 
             TearControllers.ForEach(a => a.UpdateOffset());
         }
+    }
+
+    private void LateUpdate()
+    {
+        ClothController?.Update(0);
     }
 
     public void SetNextAnimationCut(string cutName)

@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: mtl_chr1038_26_eye
+  m_Shader: {fileID: 0}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _High0Tex:
+        m_Texture: {fileID: 2800000, guid: c2526707740d18b4ebe9a945eeaeb66f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _High1Tex:
+        m_Texture: {fileID: 2800000, guid: 6722c5fdf9615ea40a4fffcc9b071b12, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _High2Tex:
+        m_Texture: {fileID: 2800000, guid: 6516753c933e5554d949ba6002856085, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 6bf3fb6c5374fb440955ccd0a28a6d4b, type: 3}
+        m_Scale: {x: 0.25, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskColorTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WetTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _CylinderBlend: 0.25
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _EyePupliScale: 1
+    - _GlossMapScale: 1
+    - _Glossiness: 0.5
+    - _GlossyReflections: 1
+    - _Limit: 0.5
+    - _Metallic: 0
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _Saturation: 1
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _StencilComp: 0
+    - _StencilMask: 100
+    - _StencilOp: 0
+    - _ToonFeather: 0.1
+    - _ToonStep: 0.4
+    - _UVSec: 0
+    - _UseOriginalDirectionalLight: 0
+    - _WetRate: 1
+    - _ZTest: 4
+    - _ZWrite: 1
+    m_Colors:
+    - _CharaColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _High0Param: {r: 0, g: 0, b: 0, a: 1}
+    - _High1Param: {r: 0, g: 0, b: 0, a: 1}
+    - _High2Param: {r: 0, g: 0, b: 0, a: 0}
+    - _LightProbeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _MainParam: {r: 0, g: 0, b: 0, a: 1}
+    - _MaskColorB1: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskColorB2: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskColorG1: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskColorG2: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskColorR1: {r: 1, g: 1, b: 1, a: 1}
+    - _MaskColorR2: {r: 1, g: 1, b: 1, a: 1}
+    - _OriginalDirectionalLightDir: {r: 1, g: 1, b: 1, a: 1}
+    - _ToonBrightColor: {r: 1, g: 1, b: 1, a: 0}
+    - _ToonDarkColor: {r: 1, g: 1, b: 1, a: 0}
+  m_BuildTextureStacks: []

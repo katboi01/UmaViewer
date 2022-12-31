@@ -731,12 +731,12 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         if (bundle.name.Contains("cloth"))
                         {
-                            if (!CurrentUMAContainer.PhysicsController)
+                            if (!CurrentUMAContainer.PhysicsContainer)
                             {
-                                CurrentUMAContainer.PhysicsController = new GameObject("PhysicsController");
-                                CurrentUMAContainer.PhysicsController.transform.SetParent(CurrentUMAContainer.transform);
+                                CurrentUMAContainer.PhysicsContainer = new GameObject("PhysicsController");
+                                CurrentUMAContainer.PhysicsContainer.transform.SetParent(CurrentUMAContainer.transform);
                             }
-                            Instantiate(go, CurrentUMAContainer.PhysicsController.transform);
+                            Instantiate(go, CurrentUMAContainer.PhysicsContainer.transform);
                         }
                         else if (bundle.name.Contains("/head/"))
                         {

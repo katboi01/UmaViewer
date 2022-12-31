@@ -27,56 +27,56 @@ namespace Gallop
 
         public List<DynamicBone> DynamicBones = new List<DynamicBone>();
 
-        public List<GameObject> InitiallizeCollider(List<Transform> bones)
-        {
-            var colliders = new List<GameObject>();
-            foreach (CySpringCollisionData collider in collisionParam)
-            {
-                if (collider._isInner) continue;
-                var bone = bones.Find(a => { return a.name == collider._targetObjectName; });
-                if (bone)
-                {
+        //public List<GameObject> InitiallizeCollider(List<Transform> bones)
+        //{
+        //    var colliders = new List<GameObject>();
+        //    foreach (CySpringCollisionData collider in collisionParam)
+        //    {
+        //        if (collider._isInner) continue;
+        //        var bone = bones.Find(a => { return a.name == collider._targetObjectName; });
+        //        if (bone)
+        //        {
 
-                    var child = new GameObject(collider._collisionName);
-                    child.transform.SetParent(bone);
-                    child.transform.localPosition = Vector3.zero;
-                    child.transform.localRotation = Quaternion.identity;
-                    child.transform.localScale = Vector3.one;
-                    colliders.Add(child);
+        //            var child = new GameObject(collider._collisionName);
+        //            child.transform.SetParent(bone);
+        //            child.transform.localPosition = Vector3.zero;
+        //            child.transform.localRotation = Quaternion.identity;
+        //            child.transform.localScale = Vector3.one;
+        //            colliders.Add(child);
 
-                    switch (collider._type)
-                    {
-                        case CySpringCollisionData.CollisionType.Capsule:
-                            var dynamic = child.AddComponent<DynamicBoneCollider>();
-                            dynamic.ColliderName = collider._collisionName;
-                            child.transform.localPosition = (collider._offset + collider._offset2) / 2;
-                            child.transform.LookAt(child.transform.TransformPoint(collider._offset2));
-                            dynamic.m_Direction = DynamicBoneColliderBase.Direction.Z;
-                            dynamic.m_Height = (collider._offset - collider._offset2).magnitude + collider._radius;
-                            dynamic.m_Radius = collider._radius;
-                            dynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            break;
-                        case CySpringCollisionData.CollisionType.Sphere:
-                            var Spheredynamic = child.AddComponent<DynamicBoneCollider>();
-                            Spheredynamic.ColliderName = collider._collisionName;
-                            child.transform.localPosition = collider._offset;
-                            Spheredynamic.m_Radius = collider._radius;
-                            Spheredynamic.m_Height = collider._distance;
-                            Spheredynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            break;
-                        case CySpringCollisionData.CollisionType.Plane:
-                            var planedynamic = child.AddComponent<DynamicBonePlaneCollider>();
-                            planedynamic.ColliderName = collider._collisionName;
-                            child.transform.localPosition = collider._offset;
-                            planedynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
-                            break;
-                        case CySpringCollisionData.CollisionType.None:
-                            break;
-                    }
-                }
-            }
-            return colliders;
-        }
+        //            switch (collider._type)
+        //            {
+        //                case CySpringCollisionData.CollisionType.Capsule:
+        //                    var dynamic = child.AddComponent<DynamicBoneCollider>();
+        //                    dynamic.ColliderName = collider._collisionName;
+        //                    child.transform.localPosition = (collider._offset + collider._offset2) / 2;
+        //                    child.transform.LookAt(child.transform.TransformPoint(collider._offset2));
+        //                    dynamic.m_Direction = DynamicBoneColliderBase.Direction.Z;
+        //                    dynamic.m_Height = (collider._offset - collider._offset2).magnitude + collider._radius;
+        //                    dynamic.m_Radius = collider._radius;
+        //                    dynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+        //                    break;
+        //                case CySpringCollisionData.CollisionType.Sphere:
+        //                    var Spheredynamic = child.AddComponent<DynamicBoneCollider>();
+        //                    Spheredynamic.ColliderName = collider._collisionName;
+        //                    child.transform.localPosition = collider._offset;
+        //                    Spheredynamic.m_Radius = collider._radius;
+        //                    Spheredynamic.m_Height = collider._distance;
+        //                    Spheredynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+        //                    break;
+        //                case CySpringCollisionData.CollisionType.Plane:
+        //                    var planedynamic = child.AddComponent<DynamicBonePlaneCollider>();
+        //                    planedynamic.ColliderName = collider._collisionName;
+        //                    child.transform.localPosition = collider._offset;
+        //                    planedynamic.m_Bound = collider._isInner ? DynamicBoneColliderBase.Bound.Inside : DynamicBoneColliderBase.Bound.Outside;
+        //                    break;
+        //                case CySpringCollisionData.CollisionType.None:
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //    return colliders;
+        //}
 
         public void InitializePhysics(List<Transform> bones, List<GameObject> colliders)
         {
