@@ -922,6 +922,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void UpdateGameDB() {
         if (UpdateResVerCoroutine != null) return;
+        UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
         UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { LyricsText.text = msg; });
         StartCoroutine(UpdateResVerCoroutine);

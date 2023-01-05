@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Mono.Data.Sqlite;
 using System.Data;
+using Assets.Scripts;
 
 public class UmaDatabaseController
 {
@@ -157,5 +158,11 @@ public class UmaDatabaseController
         result.Load(sqlite_datareader);
         DataRow row = result.Rows[0];
         return row;
+    }
+
+    public void CloseAllConnection()
+    {
+        masterDb.Close();
+        metaDb.Close();
     }
 }
