@@ -275,7 +275,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentUMAContainer.Head)
         {
             var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
-            var bundle = AssetBundle.LoadFromFile(UmaDatabaseController.GetABPath(locatorEntry));
+            var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
             Main.LoadedBundles.Add(locatorEntry.Name, bundle);
             var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
             locator.name = "DrivenKeyLocator";
@@ -288,7 +288,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var mangaObjects = new List<GameObject>();
             mangaEntry.ForEach(entry =>
             {
-                AssetBundle ab = AssetBundle.LoadFromFile(UmaDatabaseController.GetABPath(entry));
+                AssetBundle ab = AssetBundle.LoadFromFile(entry.FilePath);
                 Main.LoadedBundles.Add(entry.Name, ab);
                 var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
                 obj.SetActive(false);
@@ -561,7 +561,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         List<AudioClip> clips = new List<AudioClip>();
         UmaViewerUI.Instance.LoadedAssetsAdd(awb);
-        string awbPath = UmaDatabaseController.GetABPath(awb); ;
+        string awbPath = awb.FilePath;
         if (!File.Exists(awbPath)) return clips;
 
         FileStream awbFile = File.OpenRead(awbPath);
@@ -599,7 +599,7 @@ public class UmaViewerBuilder : MonoBehaviour
         UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(lyricsVar));
         if (lyricsAsset != null)
         {
-            string filePath = UmaDatabaseController.GetABPath(lyricsAsset);
+            string filePath = lyricsAsset.FilePath;
             if (File.Exists(filePath))
             {
                 AssetBundle bundle;
@@ -664,7 +664,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
 
-        string filePath = UmaDatabaseController.GetABPath(entry);
+        string filePath = entry.FilePath;
         if (File.Exists(filePath))
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
@@ -1250,7 +1250,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         string value = $"chara/chr{id}/chr_icon_{id}";
         var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
-        string path = UmaDatabaseController.GetABPath(entry);
+        string path = entry.FilePath;
         if (File.Exists(path))
         {
             AssetBundle assetBundle = AssetBundle.LoadFromFile(path);

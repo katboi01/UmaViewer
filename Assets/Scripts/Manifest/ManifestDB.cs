@@ -17,7 +17,7 @@ public class ManifestDB
 
     public ManifestDB()
     {
-        string DBPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume\\meta";
+        string DBPath = $"{Config.Instance.MainPath}\\meta";
         ManifestDB.DBPath = DBPath;
         if (File.Exists(DBPath))
         {

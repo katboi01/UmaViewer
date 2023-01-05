@@ -11,6 +11,7 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
+    public string FilePath => $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
 }
 
 public class UmaCharaData

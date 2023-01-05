@@ -53,8 +53,8 @@ public class UmaDatabaseController
     {
         try
         {
-            metaDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\meta;");
-            masterDb = new SqliteConnection($@"Data Source={Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume\master\master.mdb;");
+            metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
+            masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
 
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
@@ -66,7 +66,7 @@ public class UmaDatabaseController
         }
         catch
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: {GetGameRootPath()}\\meta\n{GetGameRootPath()}\\master\\master.mdb";
+            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}/meta\n{Config.Instance.MainPath}/master/master.mdb";
             UmaViewerUI.Instance.LyricsText.color = Color.red;
         }
     }
@@ -157,24 +157,5 @@ public class UmaDatabaseController
         result.Load(sqlite_datareader);
         DataRow row = result.Rows[0];
         return row;
-    }
-
-    public static string GetABPath(UmaDatabaseEntry entry)
-    {
-        if (Application.platform == RuntimePlatform.Android)
-        {
-            return $"{GetGameRootPath()}/dat/{entry.Url.Substring(0, 2)}/{entry.Url}";
-        }
-
-        return $"{GetGameRootPath()}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-    }
-
-    public static string GetGameRootPath()
-    {
-        if (Application.platform == RuntimePlatform.Android)
-        {
-            return Application.persistentDataPath;
-        }
-        return $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\Cygames\\umamusume";
     }
 }
