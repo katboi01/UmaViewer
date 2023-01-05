@@ -19,20 +19,23 @@ public class ManifestDB
     {
         string DBPath = $"{Config.Instance.MainPath}\\meta";
         ManifestDB.DBPath = DBPath;
-        if (File.Exists(DBPath))
-        {
-            MetaDB = new SqliteConnection($@"Data Source={DBPath}");
-            MetaDB.Open();
-        }
-        else
+        if (!File.Exists(DBPath))
         {
             Directory.CreateDirectory(Path.GetDirectoryName(DBPath));
-            SqliteConnection.CreateFile(DBPath);
-            MetaDB = new SqliteConnection($@"Data Source={DBPath}");
-            MetaDB.Open();
-            SqliteCommand cmd = new SqliteCommand(
-                "CREATE TABLE `a` ( `i` INTEGER PRIMARY KEY,`n` TEXT NOT NULL,`d` TEXT,`g` INTEGER(4) NOT NULL,`l` INTEGER(8) NOT NULL,`c` INTEGER(8) NOT NULL,`h` TEXT NOT NULL,`m` TEXT NOT NULL,`k` INTEGER(1) NOT NULL,`s` INTEGER(1) NOT NULL,`p` INTEGER(4) NOT NULL DEFAULT 0)");
-            cmd.Connection = MetaDB;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(DBPath));
+        MetaDB = new SqliteConnection($@"Data Source={DBPath}");
+        MetaDB.Open();
+        SqliteCommand cmd = new SqliteCommand("SELECT name FROM sqlite_master");
+        cmd.Connection = MetaDB;
+        var reader = cmd.ExecuteReader();
+        var hasrows = reader.HasRows;
+        reader.Close();
+        if (!hasrows) //Is Empty DB
+        {
+            SqliteTransaction tran = MetaDB.BeginTransaction();
+            cmd.CommandText = "CREATE TABLE `a` ( `i` INTEGER PRIMARY KEY,`n` TEXT NOT NULL,`d` TEXT,`g` INTEGER(4) NOT NULL,`l` INTEGER(8) NOT NULL,`c` INTEGER(8) NOT NULL,`h` TEXT NOT NULL,`m` TEXT NOT NULL,`k` INTEGER(1) NOT NULL,`s` INTEGER(1) NOT NULL,`p` INTEGER(4) NOT NULL DEFAULT 0)";
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE INDEX `a0` ON `a`(`n`, `s`)";
             cmd.ExecuteNonQuery();
@@ -44,6 +47,7 @@ public class ManifestDB
             cmd.ExecuteNonQuery();
             cmd.CommandText = "CREATE INDEX `a1` ON `a`(`s`)";
             cmd.ExecuteNonQuery();
+            tran.Commit();
         }
     }
 
@@ -316,5 +320,6 @@ public class ManifestDB
         }
         return platformEntrys[0];
     }
+    
 }
 

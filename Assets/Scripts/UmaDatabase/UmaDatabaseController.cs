@@ -67,8 +67,10 @@ public class UmaDatabaseController
         }
         catch
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}/meta\n{Config.Instance.MainPath}/master/master.mdb";
+            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}\\meta\n{Config.Instance.MainPath}\\master\\master.mdb";
             UmaViewerUI.Instance.LyricsText.color = Color.red;
+            masterDb.Close();
+            metaDb.Close();
         }
     }
 
