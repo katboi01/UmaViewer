@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class CySpringParamDataElement
-{
+public class CySpringParamDataElement {
     [SerializeField]
     public string _boneName;
 

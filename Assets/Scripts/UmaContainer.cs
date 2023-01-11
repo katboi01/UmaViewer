@@ -170,40 +170,17 @@ public class UmaContainer : MonoBehaviour
     public void LoadPhysics()
     {
         cySpringDataContainers = new List<CySpringDataContainer>(PhysicsContainer.GetComponentsInChildren<CySpringDataContainer>());
-        ClothController = new ClothController(gameObject);
-        return;
-        foreach(var springData in cySpringDataContainers)
+        var bones = new List<Transform>(GetComponentsInChildren<Transform>());
+        var colliders = new List<GameObject>();
+
+        foreach (CySpringDataContainer spring in cySpringDataContainers)
         {
-            CySpringCollisionDataAsset cySpringCollisionDataAsset = new CySpringCollisionDataAsset();
-            cySpringCollisionDataAsset.dataList = springData.collisionParam;
-            CySpringParamDataAsset cySpringParamDataAsset = new CySpringParamDataAsset();
-            cySpringParamDataAsset.elements = springData.springParam;
-            if (cySpringCollisionDataAsset != null && cySpringParamDataAsset != null)
-            {
-                var  category = Character3DBase.Parts.eCategory.Body;
-                if (springData.gameObject.name.Contains("chr"))
-                {
-                    category = Character3DBase.Parts.eCategory.Head;
-                }
-                var cloth = new ClothController.Cloth(category, cySpringCollisionDataAsset, cySpringParamDataAsset, category == Character3DBase.Parts.eCategory.Head ? "Head" : "Hip");
-                cloth.Build(new List<string>());
-                ClothController.AddCloth(cloth);
-            }
+            colliders.AddRange(spring.InitiallizeCollider(bones));
         }
-
-        ClothController.CreateCollision(CySpringCollisionComponent.ePurpose.Generic, BodyScale, 1);
-        ClothController.BindSpring();
-        //var bones = new List<Transform>(GetComponentsInChildren<Transform>());
-        //var colliders = new List<GameObject>();
-
-        //foreach (CySpringDataContainer spring in cySpringDataContainers)
-        //{
-        //    colliders.AddRange(spring.InitiallizeCollider(bones));
-        //}
-        //foreach (CySpringDataContainer spring in cySpringDataContainers)
-        //{
-        //    spring.InitializePhysics(bones, colliders);
-        //}
+        foreach (CySpringDataContainer spring in cySpringDataContainers)
+        {
+            spring.InitializePhysics(bones, colliders);
+        }
     }
 
     public void SetDynamicBoneEnable(bool isOn)
@@ -257,12 +234,14 @@ public class UmaContainer : MonoBehaviour
             }
 
             TearControllers.ForEach(a => a.UpdateOffset());
+
+            ClothController?.Update(true);
         }
     }
 
     private void LateUpdate()
     {
-        ClothController?.Update(0);
+        
     }
 
     public void SetNextAnimationCut(string cutName)

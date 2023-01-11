@@ -9,59 +9,38 @@ public class CySpringCollisionData
         Sphere,
         None,
         Capsule,
-        Plane,
+        Plane
     }
 
-    private const string CollisionScaleTargetName = "S_Col";
+    [SerializeField]
+    public string _collisionName;
 
     [SerializeField]
-    private string _collisionName;
+    public string _targetObjectName;
 
     [SerializeField]
-    private string _targetObjectName;
+    public Vector3 _offset;
 
     [SerializeField]
-    private Vector3 _offset;
+    public Vector3 _offset2;
 
     [SerializeField]
-    private Vector3 _offset2;
+    public float _radius;
 
     [SerializeField]
-    private float _radius;
+    public CollisionType _type;
 
-    [SerializeField]
-    private CollisionType _type;
+    public Transform _transform;
 
-    private Transform _transform;
-
-    public bool _isOtherTarget;
     public float _distance;
     public Vector3 _normal;
     public bool _isInner;
-
     public string collisionName
     {
         get
         {
             return _collisionName;
         }
-        set
-        {
-            _collisionName = value;
-        }
-    }
-
-    public CySpringCollisionData()
-    {
-    }
-
-    public CySpringCollisionData(CySpringCollisionData refData)
-    {
-        _type = refData._type;
-        _collisionName = refData._collisionName;
-        _targetObjectName = refData._targetObjectName;
-        _offset = refData._offset;
-        _radius = refData._radius;
     }
 
     public CySpringCollisionData(string collisionName, string targetObjectName, Vector3 offset, float radius)
@@ -89,7 +68,7 @@ public class CySpringCollisionData
         {
             return null;
         }
-        if (_collisionName == "")
+        if (_collisionName == string.Empty)
         {
             return null;
         }
@@ -104,24 +83,19 @@ public class CySpringCollisionData
         }
         GameObject gameObject2 = new GameObject();
         _transform = gameObject2.transform;
-        _transform.SetParent(gameObject.transform, worldPositionStays: false);
-        float num = 1f;
-        if (_collisionName.IndexOf("S_Col", StringComparison.Ordinal) == 0)
-        {
-            num = root.CollisionScale;
-        }
+        _transform.SetParent(gameObject.transform, false);
         switch (_type)
         {
             case CollisionType.Sphere:
-                _transform.position += _offset * num;
+                _transform.position += _offset;
                 break;
         }
         _transform.name = _collisionName;
         CySpringCollisionComponent cySpringCollisionComponent = gameObject2.AddComponent<CySpringCollisionComponent>();
         cySpringCollisionComponent.CollisionType = _type;
-        cySpringCollisionComponent.Radius = _radius * num;
-        cySpringCollisionComponent.Offset = _offset * num;
-        cySpringCollisionComponent.Offset2 = _offset2 * num;
+        cySpringCollisionComponent.Radius = _radius;
+        cySpringCollisionComponent.Offset = _offset;
+        cySpringCollisionComponent.Offset2 = _offset2;
         return cySpringCollisionComponent;
     }
 }

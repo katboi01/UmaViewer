@@ -42,9 +42,9 @@ namespace Gallop
             List<Particle> particles = new List<Particle>();
             foreach (CySpringDataContainer spring in Container.cySpringDataContainers)
             {
-                foreach (DynamicBone dynamicBone in spring.DynamicBones)
+                foreach (DynamicBone dynamicbone in spring.DynamicBones)
                 {
-                    particles.AddRange(dynamicBone.Particles);
+                    particles.AddRange(dynamicbone.Particles);
                 }
             }
 
