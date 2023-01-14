@@ -30277,6 +30277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Characters: []
   Lives: []
+  Costumes: []
   ShadersLoaded: 0
 --- !u!4 &1564959566
 Transform:
@@ -30362,6 +30363,10 @@ MonoBehaviour:
   - {fileID: 586292659}
   - {fileID: 1294280876}
   UmaContainerPrefab: {fileID: 648541853701480401, guid: 1b51367a8eeaf0146b7bff4005281a2c,
+    type: 3}
+  UmaContainerCostumePrefab: {fileID: 648541853701480401, guid: ea673cd9df49c1a4789f5270d5d11eef,
+    type: 3}
+  UmaContainerLivePrefab: {fileID: 648541853701480401, guid: 054317c1d4f0f164cb9c312852b10af9,
     type: 3}
   UmaContainerSliderPrefab: {fileID: 648541853701480401, guid: 75962a0f68455494db9858ad95fb4ae8,
     type: 3}

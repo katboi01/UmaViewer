@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 5050386386052281307}
   - component: {fileID: 937176245766373427}
   m_Layer: 5
-  m_Name: UmaContainer_Slider
+  m_Name: UmaUIContainer_Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

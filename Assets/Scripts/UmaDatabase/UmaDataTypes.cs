@@ -80,6 +80,7 @@ public class LiveEntry
     public int MusicId;
     public string SongName;
     public string BackGroundId;
+    public Sprite Icon;
     public List<string[]> LiveSettings = new List<string[]>();
 
     public LiveEntry(string data)
@@ -91,6 +92,17 @@ public class LiveEntry
         }
         BackGroundId = LiveSettings[1][2];
     }
+}
+
+
+[System.Serializable]
+public class CostumeEntry
+{
+    public string Id;
+    public int CharaId;
+    public int BodyType;
+    public int BodyTypeSub;
+    public Sprite Icon;
 }
 
 public enum UmaFileType

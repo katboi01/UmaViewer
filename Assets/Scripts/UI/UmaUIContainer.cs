@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-
-
-
 public class UmaUIContainer : MonoBehaviour
 {
     enum TextType
@@ -67,5 +64,6 @@ public class UmaUIContainer : MonoBehaviour
     public Button Button;
     public Slider Slider;
     public Image Image;
+    public Image ToggleImage;
 }
 

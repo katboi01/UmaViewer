@@ -1263,6 +1263,39 @@ public class UmaViewerBuilder : MonoBehaviour
         return null;
     }
 
+    public Sprite LoadCostumeIcon(UmaDatabaseEntry item)
+    {
+        string path = item.FilePath;
+        if (File.Exists(path))
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
+            Texture2D texture = (Texture2D)assetBundle.LoadAsset(assetBundle.GetAllAssetNames()[0]);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+            return sprite;
+        }
+        return null;
+    }
+
+    public Sprite LoadLiveIcon(int musicid)
+    {
+        string value = $"live/jacket/jacket_icon_l_{musicid}";
+        var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
+        if(entry == null) return null;
+        string path = entry.FilePath;
+        if (File.Exists(path))
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
+            if (assetBundle.Contains($"jacket_icon_l_{musicid}"))
+            {
+                Texture2D texture = (Texture2D)assetBundle.LoadAsset($"jacket_icon_l_{musicid}");
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                return sprite;
+            }
+        }
+        return null;
+    }
+
+
     public void UnloadProp()
     {
         if (CurrentOtherContainer != null)

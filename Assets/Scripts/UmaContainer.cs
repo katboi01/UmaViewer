@@ -62,7 +62,6 @@ public class UmaContainer : MonoBehaviour
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
     public GameObject PhysicsContainer;
-    public ClothController ClothController;
     public float BodyScale = 1;
     public void Initialize()
     {
@@ -235,7 +234,6 @@ public class UmaContainer : MonoBehaviour
 
             TearControllers.ForEach(a => a.UpdateOffset());
 
-            ClothController?.Update(true);
         }
     }
 
