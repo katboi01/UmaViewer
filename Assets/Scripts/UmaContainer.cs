@@ -1,4 +1,5 @@
 using Gallop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -131,10 +132,21 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator.runtimeAnimatorController = OverrideController;
     }
 
-    public void SetHeight(int scale)
+    public void SetHeight(int scale = 0)
     {
-        BodyScale = (scale / 160f);
-        transform.Find("Position").localScale *= BodyScale;//WIP
+        if(scale == 0)
+        {
+            BodyScale = 1;
+        }
+        else if(scale == -1)
+        {
+            BodyScale = (Convert.ToInt32(CharaData["scale"]) / 160f);
+        }
+        else
+        {
+            BodyScale = (scale / 160f);
+        }
+        transform.Find("Position").localScale = new Vector3(BodyScale, BodyScale, BodyScale);
     }
 
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
@@ -237,10 +249,6 @@ public class UmaContainer : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
-    {
-        
-    }
 
     public void SetNextAnimationCut(string cutName)
     {

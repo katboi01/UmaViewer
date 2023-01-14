@@ -83,7 +83,7 @@ public class UmaViewerMain : MonoBehaviour
             var costume = new CostumeEntry();
             var name = Path.GetFileName(item.Name);
             costume.Id = name.Replace("dress_","");
-            costume.Icon = Builder.LoadCostumeIcon(item);
+            costume.Icon = Builder.LoadSprite(item);
             Costumes.Add(costume);
         }
 

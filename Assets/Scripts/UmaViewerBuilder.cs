@@ -345,7 +345,7 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.Initialize();
-        CurrentUMAContainer.SetHeight(Convert.ToInt32(CurrentUMAContainer.CharaData["scale"]));
+        CurrentUMAContainer.SetHeight(-1);
         LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
     }
 
@@ -1094,6 +1094,7 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
             CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
             CurrentUMAContainer.isAnimatorControl = false;
+            CurrentUMAContainer.SetHeight(-1);
         }
         else if (clip.name.Contains("tail"))
         {
@@ -1108,6 +1109,7 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
             CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
             CurrentUMAContainer.isAnimatorControl = true;
+            CurrentUMAContainer.SetHeight(0);
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
         }
         else if (clip.name.Contains("ear"))
@@ -1192,6 +1194,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 }
                 CurrentUMAContainer.isAnimatorControl = false;
+                CurrentUMAContainer.SetHeight(-1);
                 SetPreviewCamera(null);
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
@@ -1257,13 +1260,14 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 Texture2D texture = (Texture2D)assetBundle.LoadAsset($"chr_icon_{id}");
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                assetBundle.Unload(false);
                 return sprite;
             }
         }
         return null;
     }
 
-    public Sprite LoadCostumeIcon(UmaDatabaseEntry item)
+    public Sprite LoadSprite(UmaDatabaseEntry item)
     {
         string path = item.FilePath;
         if (File.Exists(path))
@@ -1271,6 +1275,7 @@ public class UmaViewerBuilder : MonoBehaviour
             AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
             Texture2D texture = (Texture2D)assetBundle.LoadAsset(assetBundle.GetAllAssetNames()[0]);
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+            assetBundle.Unload(false);
             return sprite;
         }
         return null;
@@ -1289,12 +1294,12 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 Texture2D texture = (Texture2D)assetBundle.LoadAsset($"jacket_icon_l_{musicid}");
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                assetBundle.Unload(false);
                 return sprite;
             }
         }
         return null;
     }
-
 
     public void UnloadProp()
     {
