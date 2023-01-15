@@ -1223,6 +1223,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
+                var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
+                if (earMotion != null)
+                {
+                    RecursiveLoadAsset(earMotion);
+                }
 
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger("next");

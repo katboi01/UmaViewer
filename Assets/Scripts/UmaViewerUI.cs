@@ -131,7 +131,6 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
 
-
         if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
         {
             if (Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
@@ -142,7 +141,6 @@ public class UmaViewerUI : MonoBehaviour
                 if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
                 {
                     var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
-
                     AnimationTitleText.text = AnimeClip.name;
                     AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
                     AnimationSlider.SetValueWithoutNotify(normalizedTime);
@@ -641,7 +639,7 @@ public class UmaViewerUI : MonoBehaviour
         if (umaId == -1)
         {
             var pageentrys = new List<PageManager.Entry>();
-            foreach (var entry in filteredList.Where(a => (a.Name.Contains($"/type0") || a.Name.Contains($"/type99") || a.Name.Contains($"anm_sty_")) && !a.Name.Contains($"/tail") && !a.Name.EndsWith($"_pos") && !a.Name.EndsWith($"_prop") && !a.Name.EndsWith($"_pose") && !a.Name.Contains($"_defaultmotion")))
+            foreach (var entry in filteredList.Where(a => (a.Name.Contains($"/type0") || a.Name.Contains($"/type99") || a.Name.Contains($"anm_sty_")) && !a.Name.Contains($"/tail") && !a.Name.EndsWith($"_pos") && !a.Name.Contains($"prop") && !a.Name.EndsWith($"_pose") && !a.Name.Contains($"_defaultmotion")))
             {
                 var pageentry = new PageManager.Entry();
                 pageentry.Name = Path.GetFileName(entry.Name);
@@ -969,8 +967,11 @@ public class UmaViewerUI : MonoBehaviour
             animator.speed = 0;
             animator.Play(0, 0, val);
             animator.Play(0, 2, val);
-            animator_cam.speed = 0;
-            animator_cam.Play(0, -1, val);
+            if (animator_cam.runtimeAnimatorController)
+            {
+                animator_cam.speed = 0;
+                animator_cam.Play(0, -1, val);
+            }
             if (animator_face)
             {
                 animator_face.speed = 0;
