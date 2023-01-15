@@ -1217,6 +1217,13 @@ public class UmaViewerBuilder : MonoBehaviour
                 CurrentUMAContainer.SetHeight(-1);
                 SetPreviewCamera(null);
 
+                //Some animations have facial animation
+                var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
+                if (facialMotion != null)
+                {
+                    RecursiveLoadAsset(facialMotion);
+                }
+
                 CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
                 CurrentUMAContainer.UmaAnimator.SetTrigger("next");
             }
