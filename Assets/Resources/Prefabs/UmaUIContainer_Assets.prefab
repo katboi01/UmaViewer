@@ -96,6 +96,7 @@ MonoBehaviour:
   Button: {fileID: 4701344421301256321}
   Slider: {fileID: 0}
   Image: {fileID: 0}
+  ToggleImage: {fileID: 0}
 --- !u!1 &4970516181956112805
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,8 +323,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

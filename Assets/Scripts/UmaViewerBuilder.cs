@@ -441,6 +441,13 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         CurrentUMAContainer.MergeModel();
+        var matList = new List<MeshRenderer>(CurrentUMAContainer.GetComponentsInChildren<MeshRenderer>());
+        var eyemat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Eye"));
+        var mouthmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mouth"));
+        var eyebrowLmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mayu_L"));
+        var eyebrowRmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mayu_R"));
+        UI.LoadFacialPanelsMini(eyemat.material, eyebrowLmat.material, eyebrowRmat.material, mouthmat.material);
+        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_min_eve_chr{id}_00_idle01_loop")));
     }
 
     public void LoadProp(UmaDatabaseEntry entry)
@@ -463,7 +470,6 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
         RecursiveLoadAsset(asset);
         RecursiveLoadAsset(BGasset);
-
     }
 
     //Use CriWare Library
@@ -511,19 +517,10 @@ public class UmaViewerBuilder : MonoBehaviour
     //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
     {
-        if (CurrentAudioSources.Count > 0)
-        {
-            var tmp = CurrentAudioSources[0];
-            CurrentAudioSources.Clear();
-            Destroy(tmp.gameObject);
-            UI.ResetAudioPlayer();
-        }
+        //load character voice
+        PlaySound(SongAwb);
 
-        foreach (AudioClip clip in LoadAudio(SongAwb))
-        {
-            AddAudioSource(clip);
-        }
-
+        //load BG
         string nameVar = $"snd_bgm_live_{songid}_oke";
         UmaDatabaseEntry BGawb = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
         if (BGawb != null)
@@ -536,6 +533,29 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         LoadLiveLyrics(songid);
+    }
+
+    public void PlaySound(UmaDatabaseEntry SongAwb, int subindex = -1)
+    {
+        if (CurrentAudioSources.Count > 0)
+        {
+            var tmp = CurrentAudioSources[0];
+            CurrentAudioSources.Clear();
+            Destroy(tmp.gameObject);
+            UI.ResetAudioPlayer();
+        }
+        if(subindex == -1)
+        {
+            foreach (AudioClip clip in LoadAudio(SongAwb))
+            {
+                AddAudioSource(clip);
+            }
+        }
+        else
+        {
+            AddAudioSource(LoadAudio(SongAwb)[subindex]);
+        }
+        
     }
 
     private void AddAudioSource(AudioClip clip)
