@@ -79,6 +79,8 @@ public class LiveEntry
 {
     public int MusicId;
     public string SongName;
+    public int MemberCount;
+    public int DefaultDress;
     public string BackGroundId;
     public Sprite Icon;
     public List<string[]> LiveSettings = new List<string[]>();

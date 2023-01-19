@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class UmaViewerBuilder : MonoBehaviour
 {
@@ -459,17 +460,16 @@ public class UmaViewerBuilder : MonoBehaviour
         RecursiveLoadAsset(entry);
     }
 
-    public void LoadLive(LiveEntry live)
+    public void LoadLive(LiveEntry live,List<LiveCharacterSelect> characters)
     {
-        var asset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith("cutt_son" + live.MusicId));
-        var BGasset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.EndsWith($"pfb_env_live{live.BackGroundId}_controller000"));
-        if (asset == null || BGasset == null) return;
+        characters.ForEach(a => {
+            if (a.CharaId == 0 || a.CostumeId == "") {
+                a.CharaId = Main.Characters[Random.Range(0, Main.Characters.Count)].Id;
+                a.CostumeId = "00";
+            }
+        });//fill empty
 
-        UnloadLive();
-        UnloadAllBundle();
-        CurrentLiveContainer = new GameObject(Path.GetFileName(asset.Name)).AddComponent<UmaContainer>();
-        RecursiveLoadAsset(asset);
-        RecursiveLoadAsset(BGasset);
+
     }
 
     //Use CriWare Library

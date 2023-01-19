@@ -71,6 +71,18 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject BG_HSVPickerObj;
     public Image BG_Image;
 
+    [Header("live settings")]
+    public Sprite CharaIconDefault;
+    public Sprite CostumeIconDefault;
+    public LiveCharacterSelect CurrentSeletChara;
+    public GameObject LiveSelectPrefab;
+    public GameObject LiveSelectPannel;
+    public GameObject SelectCharacterPannel;
+    public ScrollRect LiveSelectList;
+    public Image LiveSelectImage;
+    public Text LiveSelectInfoText;
+    private LiveEntry currentLive;
+
     [Header("settings")]
     public TMP_InputField SSWidth;
     public TMP_InputField SSHeight;
@@ -92,6 +104,7 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
     public GameObject UmaContainerAssetsPrefab;
+
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;
 
@@ -207,12 +220,12 @@ public class UmaViewerUI : MonoBehaviour
             container3.Name = container3.name = chara.Id + " " + chara.Name;
             container3.Button.onClick.AddListener(() => {
                 HighlightChildImage(CharactersList.content, container3);
-                ListCostumes(charaInstance.Id, false);
+                ListCostumes(charaInstance, false);
             });
 
             if (chara.Icon)
             {
-                container3.Image.sprite = chara.Icon;
+                container3.Image.sprite = (chara.Icon == null ? CharaIconDefault : chara.Icon);
                 container3.Image.enabled = true;
             }
 
@@ -225,7 +238,7 @@ public class UmaViewerUI : MonoBehaviour
 
             if (chara.Icon)
             {
-                container4.Image.sprite = chara.Icon;
+                container4.Image.sprite = (chara.Icon == null ? CharaIconDefault : chara.Icon);
                 container4.Image.enabled = true;
             }
         }
@@ -247,7 +260,7 @@ public class UmaViewerUI : MonoBehaviour
             container2.Name = container2.name = chara.Id + " " + chara.Name;
             container2.Button.onClick.AddListener(() => {
                 HighlightChildImage(MiniCharactersList.content, container2);
-                ListCostumes(charaInstance.Id, true);
+                ListCostumes(charaInstance, true);
             });
 
             if (chara.Icon)
@@ -442,7 +455,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Image.enabled = container.Image.sprite;
             container.Button.onClick.AddListener(() => {
                 HighlightChildImage(LiveList.content, container);
-                Builder.LoadLive(live);
+                ShowLiveSelectPannel(live);
             });
 
             var CharaContainer = Instantiate(UmaContainerLivePrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
@@ -509,30 +522,72 @@ public class UmaViewerUI : MonoBehaviour
         ScenePageCtrl.Initialize(pageentrys, SceneList);
     }
 
-    void ListCostumes(int umaId, bool mini)
+    public void PlayLive()
+    {
+        if (currentLive == null) return;
+        var selectlist = LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>();
+        if(selectlist != null)
+        {
+            Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
+            LiveSelectPannel.SetActive(false);
+        }
+    }
+
+    void ShowLiveSelectPannel(LiveEntry entry)
+    {
+        LiveSelectPannel.SetActive(true);
+        for (int i = LiveSelectList.content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(LiveSelectList.content.GetChild(i).gameObject);
+        }
+        
+        currentLive = entry;
+        LiveSelectImage.sprite = entry.Icon;
+        LiveSelectInfoText.text = $"{entry.SongName}\nMembers Count: {entry.MemberCount}";
+        for (int i = 0; i < entry.MemberCount; i++)
+        {
+            var chara = Instantiate(LiveSelectPrefab, LiveSelectList.content).GetComponent<LiveCharacterSelect>();
+            chara.IndexText.text = (i + 1).ToString();
+            chara.GetComponent<Button>().onClick.AddListener(() => {
+                chara.SelectChara(this);
+                foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
+                {
+                    t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
+                }
+            });
+        }
+    }
+
+    void ListCostumes(CharaEntry chara, bool mini)
     {
         ScrollRect costumeList = mini ? MiniCostumeList : CostumeList;
         for (int i = costumeList.content.childCount - 1; i >= 0; i--)
         {
             Destroy(costumeList.content.GetChild(i).gameObject);
         }
-        string nameVar = mini ? $"pfb_mbdy{umaId}" : $"pfb_bdy{umaId}";
+        string nameVar = mini ? $"pfb_mbdy{chara.Id}" : $"pfb_bdy{chara.Id}";
         foreach (var entry in Main.AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
         {
             var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
             string[] split = entry.Name.Split('_');
             string costumeId = split[split.Length - 1];
             container.Name = container.name = GetCostumeName(costumeId);
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(costumeList.content, container);
-                StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
-            });
-
-            
-            var icon = Main.Costumes.FirstOrDefault(a => (a.CharaId == umaId&&a.BodyTypeSub == int.Parse(costumeId)));
-            if (icon == null) icon = Main.Costumes[0];
-            container.Image.sprite = icon.Icon;
+            var icon = Main.Costumes.FirstOrDefault(a => (a.CharaId == chara.Id && a.BodyTypeSub == int.Parse(costumeId)));
+            container.Image.sprite = (icon == null ? CostumeIconDefault : icon.Icon);
             container.Image.enabled = true;
+            container.Button.onClick.AddListener(() => {
+                if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
+                {
+                    CurrentSeletChara.SetValue(chara.Id, costumeId, chara.Icon, container.Image.sprite);
+                }
+                else
+                {
+                    HighlightChildImage(costumeList.content, container);
+                    StartCoroutine(Builder.LoadUma(chara.Id, costumeId, mini));
+                }
+            });
+            
+            
         }
         //Common costumes
         List<string> costumes = new List<string>();
@@ -547,18 +602,24 @@ public class UmaViewerUI : MonoBehaviour
                 string costumeId = id;
                 var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
                 container.Name = container.name = GetCostumeName(id);
-                container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(costumeList.content, container);
-                    StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
-                });
-
                 var data = costumeId.Split('_');
                 var bodytype = int.Parse(data[0]);
                 var bodysub = int.Parse(data[1]);
-                var icon = Main.Costumes.FirstOrDefault(a => a.BodyType == bodytype&& a.BodyTypeSub == bodysub);
-                if (icon == null) icon = Main.Costumes[0];
-                container.Image.sprite = icon.Icon;
+
+                var icon = Main.Costumes.FirstOrDefault(a => a.BodyType == bodytype && a.BodyTypeSub == bodysub);
+                container.Image.sprite = (icon == null ? CostumeIconDefault : icon.Icon);
                 container.Image.enabled = true;
+                container.Button.onClick.AddListener(() => {
+                    if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
+                    {
+                        CurrentSeletChara.SetValue(chara.Id, costumeId, chara.Icon, container.Image.sprite);
+                    }
+                    else
+                    {
+                        HighlightChildImage(costumeList.content, container);
+                        StartCoroutine(Builder.LoadUma(chara.Id, costumeId, mini));
+                    }
+                });
             }
         }
     }

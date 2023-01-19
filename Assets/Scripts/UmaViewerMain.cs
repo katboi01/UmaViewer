@@ -116,6 +116,9 @@ public class UmaViewerMain : MonoBehaviour
                 {
                     var musicId = Convert.ToInt32(item["music_id"]);
                     var songName = item["songname"].ToString();
+                    var membercount = Convert.ToInt32(item["live_member_number"]);
+                    var defaultdress = Convert.ToInt32(item["default_main_dress"]);
+
                     if (!Lives.Where(c => c.MusicId == musicId).Any())
                     {
                         if (bundle.Contains(musicId.ToString()))
@@ -126,8 +129,10 @@ public class UmaViewerMain : MonoBehaviour
                             {
                                 MusicId = musicId,
                                 SongName = songName,
+                                MemberCount = membercount,
+                                DefaultDress = defaultdress,
                                 Icon = UmaViewerBuilder.Instance.LoadLiveIcon(musicId)
-                            });
+                            }); 
                         }
                     }
                 }
