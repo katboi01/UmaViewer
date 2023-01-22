@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,14 +22,18 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect CostumeList;
     public ScrollRect AnimationSetList;
     public ScrollRect AnimationList;
+    public PageManager AnimationPageCtrl;
     [Header("mini models")]
     public ScrollRect MiniCharactersList;
     public ScrollRect MiniCostumeList;
     public ScrollRect MiniAnimationSetList;
     public ScrollRect MiniAnimationList;
+    public PageManager MiniAnimationPageCtrl;
     [Header("other")]
     public ScrollRect PropList;
+    public PageManager PropPageCtrl;
     public ScrollRect SceneList;
+    public PageManager ScenePageCtrl;
 
     public ScrollRect EmotionList;
     public Transform FacialList;
@@ -42,6 +45,9 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect LiveList;
     public ScrollRect LiveSoundList;
     public ScrollRect LiveCharaSoundList;
+    public ScrollRect NormalSoundList;
+    public ScrollRect NormalSubSoundList;
+    public PageManager NormalSoundCtrl;
 
     [Header("audio")]
     public Slider AudioSlider;
@@ -57,6 +63,13 @@ public class UmaViewerUI : MonoBehaviour
     public TextMeshProUGUI AnimationTitleText;
     public TextMeshProUGUI AnimationSpeedText;
     public TextMeshProUGUI AnimationProgressText;
+
+    [Header("backgrounds")]
+    public ScrollRect BackGroundList;
+    public PageManager BackGroundPageCtrl;
+    public GameObject BackGroundCameraObj;
+    public GameObject BG_HSVPickerObj;
+    public Image BG_Image;
 
     [Header("settings")]
     public TMP_InputField SSWidth;
@@ -75,6 +88,8 @@ public class UmaViewerUI : MonoBehaviour
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
     public GameObject UmaContainerPrefab;
+    public GameObject UmaContainerCostumePrefab;
+    public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
     public GameObject UmaContainerAssetsPrefab;
     private int LoadedAssetCount = 0;
@@ -136,21 +151,26 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    public void HighlightChildImage(Transform mainObject, Image child)
+    public void HighlightChildImage(Transform mainObject, UmaUIContainer child)
     {
-        foreach(var t in mainObject.GetComponentsInChildren<Image>())
+        foreach(var t in mainObject.GetComponentsInChildren<UmaUIContainer>())
         {
             if (t.transform.parent != mainObject) continue;
-            t.color = t == child ? UIColor2 : UIColor1;
+            t.ToggleImage.enabled = (t == child);
         }
     }
 
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
+        foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
+        {
+            if (ui.Name == Path.GetFileName(entry.Name)) return;
+        }
+
         LoadedAssetCount++;
         string filePath = entry.FilePath;
         var container =  Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
-        container.Name = Path.GetFileName(entry.Name) + "\n" + entry.Url;
+        container.Name = Path.GetFileName(entry.Name);
         container.Button.onClick.AddListener(() => {Process.Start("explorer.exe", "/select," + filePath);});
         LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 35);
     }
@@ -167,19 +187,17 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadModelPanels()
     {
-        var container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name = container.name = "Generic";
-        var imageInstance = container.GetComponent<Image>();
-        container.Button.onClick.AddListener(() => {
-            HighlightChildImage(AnimationSetList.content, imageInstance);
+        var container1 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        container1.Name = container1.name = "Generic";
+        container1.Button.onClick.AddListener(() => {
+            HighlightChildImage(AnimationSetList.content, container1);
             ListAnimations(-1, false);
         });
 
-        container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name = container.name = "Tail";
-        imageInstance = container.GetComponent<Image>();
-        container.Button.onClick.AddListener(() => {
-            HighlightChildImage(AnimationSetList.content, imageInstance);
+        var container2 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        container2.Name = container2.name = "Tail";
+        container2.Button.onClick.AddListener(() => {
+            HighlightChildImage(AnimationSetList.content, container2);
             ListAnimations(-2, false);
         });
 
@@ -187,32 +205,70 @@ public class UmaViewerUI : MonoBehaviour
         {
             var charaInstance = chara;
 
-            container = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = chara.Id + " " + chara.Name;
-            var imageInstance1 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(CharactersList.content, imageInstance1);
+            var container3 = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
+            container3.Name = container3.name = chara.Id + " " + chara.Name;
+            container3.Button.onClick.AddListener(() => {
+                HighlightChildImage(CharactersList.content, container3);
                 ListCostumes(charaInstance.Id, false);
             });
 
             if (chara.Icon)
             {
-                container.Image.sprite = chara.Icon;
-                container.Image.enabled = true;
+                container3.Image.sprite = chara.Icon;
+                container3.Image.enabled = true;
             }
 
-            container = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = chara.Id + " " + chara.Name;
-            var imageInstance2 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(AnimationSetList.content, imageInstance2);
+            var container4 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+            container4.Name = container4.name = chara.Id + " " + chara.Name;
+            container4.Button.onClick.AddListener(() => {
+                HighlightChildImage(AnimationSetList.content, container4);
                 ListAnimations(charaInstance.Id, false);
             });
 
             if (chara.Icon)
             {
-                container.Image.sprite = chara.Icon;
-                container.Image.enabled = true;
+                container4.Image.sprite = chara.Icon;
+                container4.Image.enabled = true;
+            }
+        }
+    }
+
+    public void LoadMiniModelPanels()
+    {
+        var container1 = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
+        container1.Name = container1.name = "General";
+        container1.Button.onClick.AddListener(() => {
+            HighlightChildImage(MiniAnimationSetList.content, container1);
+            ListAnimations(-1, true);
+        });
+
+        foreach (var chara in Main.Characters.OrderBy(c => c.Id))
+        {
+            var charaInstance = chara;
+            var container2 = Instantiate(UmaContainerPrefab, MiniCharactersList.content).GetComponent<UmaUIContainer>();
+            container2.Name = container2.name = chara.Id + " " + chara.Name;
+            container2.Button.onClick.AddListener(() => {
+                HighlightChildImage(MiniCharactersList.content, container2);
+                ListCostumes(charaInstance.Id, true);
+            });
+
+            if (chara.Icon)
+            {
+                container2.Image.sprite = chara.Icon;
+                container2.Image.enabled = true;
+            }
+
+            var container3 = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
+            container3.Name = container3.name = chara.Id + " " + chara.Name;
+            container3.Button.onClick.AddListener(() => {
+                HighlightChildImage(MiniAnimationSetList.content, container3);
+                ListAnimations(charaInstance.Id, true);
+            });
+
+            if (chara.Icon)
+            {
+                container3.Image.sprite = chara.Icon;
+                container3.Image.enabled = true;
             }
         }
     }
@@ -303,8 +359,53 @@ public class UmaViewerUI : MonoBehaviour
         InstantiateFacialPart(UmaContainerSliderPrefab, target, targetMorph, OtherList);
     }
 
+    public void LoadFacialPanelsMini(Material Eye, Material MayuL, Material MayuR, Material Mouth)
+    {
+        currentFaceDrivenKeyTarget = null;
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>(true))
+        {
+            Destroy(ui.gameObject);
+        }
+
+        var action = new Action<ScrollRect, string, Material, int>((list, name, mat, type) =>
+        {
+            if (mat == null) return;
+            var container = Instantiate(UmaContainerSliderPrefab, list.content).GetComponent<UmaUIContainer>();
+            container.Name = name;
+            container.Slider.wholeNumbers = true;
+            container.Slider.value = 0;
+            container.Slider.maxValue = 15;
+            container.Slider.minValue = 0;
+            container.Slider.onValueChanged.AddListener((a) =>
+            {
+                var val = Convert.ToInt32(a);
+                if (type == 0)
+                {
+                    mat.mainTextureOffset = new Vector2(0.25f * (val % 4), -0.25f * (val / 4));
+                }
+                else if(type == 1)
+                {
+                    var vector = mat.GetVector("_UVOffset");
+                    mat.SetVector("_UVOffset", new Vector4(0.25f * (val % 4), -0.25f * (val / 4), vector.z, vector.w));
+                }
+                else if(type == 2)
+                {
+                    var vector = mat.GetVector("_UVOffset");
+                    mat.SetVector("_UVOffset", new Vector4(vector.x, vector.y, 0.25f * (val % 4), -0.25f * (val / 4)));
+                }
+            });
+        });
+
+        action(EyeList, "Eye_L_Select", Eye, 2);
+        action(EyeList, "Eye_R_Select", Eye, 1);
+        action(MouthList, "Mouth_Select", Mouth, 0);
+        action(EyeBrowList, "Mayu_L_Select", MayuL, 0);
+        action(EyeBrowList, "Mayu_R_Select", MayuR, 0);
+    }
+
     public void UpdateFacialPanels()
     {
+        if(currentFaceDrivenKeyTarget)
         LoadFacialPanels(currentFaceDrivenKeyTarget);
     }
 
@@ -337,96 +438,77 @@ public class UmaViewerUI : MonoBehaviour
         foreach (var live in Main.Lives.OrderBy(c => c.MusicId))
         {
             var liveInstance = live;
-            var container = Instantiate(UmaContainerPrefab, LiveList.content).GetComponent<UmaUIContainer>();
+            var container = Instantiate(UmaContainerLivePrefab, LiveList.content).GetComponent<UmaUIContainer>();
             container.Name = " "+ live.MusicId + " " + live.SongName;
-            var imageInstance1 = container.GetComponent<Image>();
+            container.Image.sprite = live.Icon;
+            container.Image.enabled = container.Image.sprite;
             container.Button.onClick.AddListener(() => {
-                HighlightChildImage(LiveList.content, imageInstance1);
+                HighlightChildImage(LiveList.content, container);
                 Builder.LoadLive(live);
             });
 
-            var CharaContainer = Instantiate(UmaContainerPrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
+            var CharaContainer = Instantiate(UmaContainerLivePrefab, LiveSoundList.content).GetComponent<UmaUIContainer>();
             CharaContainer.Name = " " + live.MusicId + " " + live.SongName;
-            var CharaimageInstance1 = CharaContainer.GetComponent<Image>();
+            CharaContainer.Image.sprite = live.Icon;
+            CharaContainer.Image.enabled = CharaContainer.Image.sprite;
             CharaContainer.Button.onClick.AddListener(() => {
-                HighlightChildImage(LiveSoundList.content, CharaimageInstance1);
+                HighlightChildImage(LiveSoundList.content, container);
                 ListLiveSounds(live.MusicId);
             });
         }
     }
 
-    public void LoadMiniModelPanels()
+    public void LoadNormalSoundPanels()
     {
-        var container = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-        container.Name = container.name = "General";
-        var imageInstance = container.GetComponent<Image>();
-        container.Button.onClick.AddListener(() => {
-            HighlightChildImage(MiniAnimationSetList.content, imageInstance);
-            ListAnimations(-1, true);
-        });
-
-        foreach (var chara in Main.Characters.OrderBy(c => c.Id))
+        NormalSoundCtrl.Clear();
+        var pageentrys = new List<PageManager.Entry>();
+        foreach (var entry in Main.AbSounds.Where(a => (!a.Name.Contains("live")) && a.Name.EndsWith("awb")))
         {
-            var charaInstance = chara;
-            container = Instantiate(UmaContainerPrefab, MiniCharactersList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = chara.Id + " " + chara.Name;
-            var imageInstance1 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(MiniCharactersList.content, imageInstance1);
-                ListCostumes(charaInstance.Id, true);
-            });
-
-            if (chara.Icon)
+            var pageentry = new PageManager.Entry();
+            pageentry.Name = Path.GetFileNameWithoutExtension(entry.Name);
+            pageentry.OnClick = (container) =>
             {
-                container.Image.sprite = chara.Icon;
-                container.Image.enabled = true;
-            }
-
-            container = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = chara.Id + " " + chara.Name;
-            var imageInstance2 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(MiniAnimationSetList.content, imageInstance2);
-                ListAnimations(charaInstance.Id, true);
-            });
-
-            if (chara.Icon)
-            {
-                container.Image.sprite = chara.Icon;
-                container.Image.enabled = true;
-            }
+                HighlightChildImage(NormalSoundList.content, container);
+                ListNormalSubSounds(entry);
+            };
+            pageentrys.Add(pageentry);
         }
+        NormalSoundCtrl.Initialize(pageentrys, NormalSoundList);
     }
-
+   
     public void LoadPropPanel()
     {
+        var pageentrys = new List<PageManager.Entry>();
         foreach (var prop in Main.AbList.Where(a=>a.Name.Contains("pfb_chr_prop") && !a.Name.Contains("clothes")))
         {
-            var propInstance = prop;
-            var container = Instantiate(UmaContainerPrefab, PropList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = Path.GetFileName(prop.Name);
-            var imageInstance1 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(PropList.content, imageInstance1);
-                Builder.LoadProp(propInstance);
-            });
+            var pageentry = new PageManager.Entry();
+            pageentry.Name = Path.GetFileName(prop.Name);
+            pageentry.OnClick = (container) =>
+            {
+                HighlightChildImage(PropList.content, container);
+                Builder.LoadProp(prop);
+            };
+            pageentrys.Add(pageentry);
         }
+        PropPageCtrl.Initialize(pageentrys,PropList);
     }
 
     public void LoadMapPanel()
     {
+        var pageentrys = new List<PageManager.Entry>();
         foreach (var scene in Main.AbList.Where(a => a.Name.StartsWith("3d/env") && Path.GetFileName(a.Name).StartsWith("pfb_")))
         {
-            var sceneInstance = scene;
-            var container = Instantiate(UmaContainerPrefab, SceneList.content).GetComponent<UmaUIContainer>();
-            container.Name = container.name = Path.GetFileName(scene.Name);
-            container.FontSize = 19;
-            var imageInstance1 = container.GetComponent<Image>();
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(SceneList.content, imageInstance1);
-                Builder.LoadProp(sceneInstance);
-            });
+            var pageentry = new PageManager.Entry();
+            pageentry.Name = Path.GetFileName(scene.Name);
+            pageentry.FontSize = 19;
+            pageentry.OnClick = (container) =>
+            {
+                HighlightChildImage(SceneList.content, container);
+                Builder.LoadProp(scene);
+            };
+            pageentrys.Add(pageentry);
         }
+        ScenePageCtrl.Initialize(pageentrys, SceneList);
     }
 
     void ListCostumes(int umaId, bool mini)
@@ -439,14 +521,20 @@ public class UmaViewerUI : MonoBehaviour
         string nameVar = mini ? $"pfb_mbdy{umaId}" : $"pfb_bdy{umaId}";
         foreach (var entry in Main.AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
         {
-            var container = Instantiate(UmaContainerPrefab, costumeList.content).GetComponent<UmaUIContainer>();
+            var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
             string[] split = entry.Name.Split('_');
             string costumeId = split[split.Length - 1];
             container.Name = container.name = GetCostumeName(costumeId);
             container.Button.onClick.AddListener(() => {
-                HighlightChildImage(costumeList.content, container.GetComponent<Image>());
+                HighlightChildImage(costumeList.content, container);
                 StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
             });
+
+            
+            var icon = Main.Costumes.FirstOrDefault(a => (a.CharaId == umaId&&a.BodyTypeSub == int.Parse(costumeId)));
+            if (icon == null) icon = Main.Costumes[0];
+            container.Image.sprite = icon.Icon;
+            container.Image.enabled = true;
         }
         //Common costumes
         List<string> costumes = new List<string>();
@@ -459,14 +547,187 @@ public class UmaViewerUI : MonoBehaviour
             {
                 costumes.Add(id);
                 string costumeId = id;
-                var container = Instantiate(UmaContainerPrefab, costumeList.content).GetComponent<UmaUIContainer>();
+                var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
                 container.Name = container.name = GetCostumeName(id);
                 container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(costumeList.content, container.GetComponent<Image>());
+                    HighlightChildImage(costumeList.content, container);
                     StartCoroutine(Builder.LoadUma(umaId, costumeId, mini));
                 });
+
+                var data = costumeId.Split('_');
+                var bodytype = int.Parse(data[0]);
+                var bodysub = int.Parse(data[1]);
+                var icon = Main.Costumes.FirstOrDefault(a => a.BodyType == bodytype&& a.BodyTypeSub == bodysub);
+                if (icon == null) icon = Main.Costumes[0];
+                container.Image.sprite = icon.Icon;
+                container.Image.enabled = true;
             }
         }
+    }
+
+    void ListLiveSounds(int songid)
+    {
+        for (int i = LiveCharaSoundList.content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(LiveCharaSoundList.content.GetChild(i).gameObject);
+        }
+        string nameVar = $"snd_bgm_live_{songid}_chara";
+        foreach (var entry in Main.AbSounds.Where(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb")))
+        {
+            var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
+            string[] split = Path.GetFileNameWithoutExtension(entry.Name).Split('_');
+            string name = $"{ split[split.Length - 2]} {getCharaName(split[split.Length - 2])}";
+            container.Name = name;
+
+            var icon = Main.Characters.Find(a => a.Id.ToString().Equals(split[split.Length - 2]));
+            if (icon != null)
+            {
+                container.Image.sprite = icon.Icon;
+                container.Image.enabled = true;
+            }
+
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(LiveCharaSoundList.content, container);
+                if (isCriware)
+                {
+                    Builder.LoadLiveSoundCri(songid, entry);
+                }
+                else
+                {
+                    Builder.LoadLiveSound(songid, entry);
+                }
+            });
+        }
+
+    }
+
+    void ListNormalSubSounds(UmaDatabaseEntry awb)
+    {
+        for (int i = NormalSubSoundList.content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(NormalSubSoundList.content.GetChild(i).gameObject);
+        }
+
+        var subSounds = Builder.LoadAudio(awb);
+
+        foreach(var sound in subSounds)
+        {
+            var container = Instantiate(UmaContainerPrefab, NormalSubSoundList.content).GetComponent<UmaUIContainer>();
+            container.Name = $"Clip_{subSounds.IndexOf(sound)}";
+            container.Button.onClick.AddListener(() => {
+                HighlightChildImage(NormalSubSoundList.content, container);
+                Builder.PlaySound(awb, subSounds.IndexOf(sound));
+            });
+        }
+    }
+
+    void ListAnimations(int umaId, bool mini)
+    {
+        ScrollRect animationList = mini ? MiniAnimationList : AnimationList;
+        PageManager pageManager = mini ? MiniAnimationPageCtrl : AnimationPageCtrl;
+        for (int i = animationList.content.childCount - 1; i >= 0; i--)
+        {
+            Destroy(animationList.content.GetChild(i).gameObject);
+        }
+
+        var filteredList = Main.AbMotions.Where(a => !a.Name.Contains($"mirror")
+        && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
+        && !a.Name.Contains($"facial")
+        && !a.Name.Contains($"_cam")
+        && !a.Name.EndsWith($"_s")
+        && !a.Name.EndsWith($"_e")
+        );
+
+        if (umaId == -1)
+        {
+            var pageentrys = new List<PageManager.Entry>();
+            foreach (var entry in filteredList.Where(a => (a.Name.Contains($"/type0") || a.Name.Contains($"/type99") || a.Name.Contains($"anm_sty_")) && !a.Name.Contains($"/tail") && !a.Name.EndsWith($"_pos") && !a.Name.EndsWith($"_prop") && !a.Name.EndsWith($"_pose") && !a.Name.Contains($"_defaultmotion")))
+            {
+                var pageentry = new PageManager.Entry();
+                pageentry.Name = Path.GetFileName(entry.Name);
+                pageentry.FontSize = 20;
+                pageentry.OnClick = (container) => {
+                    HighlightChildImage(animationList.content, container);
+                    Builder.LoadAsset(entry);
+                    LoadedAnimation();
+                };
+                pageentrys.Add(pageentry);
+            }
+            pageManager.Initialize(pageentrys, animationList);
+        }
+        else if (umaId == -2)
+        {
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name = container.name = Path.GetFileName(entry.Name);
+                container.FontSize = 20;
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container);
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+            pageManager.ResetCtrl();
+        }
+        else
+        {
+            //Common animations
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains("pose")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name = container.name = Path.GetFileName(entry.Name);
+                container.FontSize = 20;
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container);
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+
+            //Skill animations
+            foreach (var entry in filteredList.Where(a => a.Name.Contains($"card/body/crd{umaId}")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name = container.name = Path.GetFileName(entry.Name);
+                container.FontSize = 20;
+                container.Button.onClick.AddListener(() => {
+                    HighlightChildImage(animationList.content, container);
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+            pageManager.ResetCtrl();
+        }
+    }
+
+    void ListBackgrounds()
+    {
+        var bglist = Main.AbList.Where(a => a.Name.StartsWith("bg/bg"));
+        var pageentrys = new List<PageManager.Entry>();
+        foreach (var entry in bglist)
+        {
+            var pageentry = new PageManager.Entry();
+            pageentry.Name = Path.GetFileName(entry.Name);
+            pageentry.Sprite = Builder.LoadSprite(entry);
+            if (pageentry.Sprite == null) continue;
+            pageentry.OnClick = (container) => {
+                HighlightChildImage(BackGroundList.content, container);
+                BG_Image.sprite = pageentry.Sprite;
+                BG_Image.SetVerticesDirty();
+            };
+
+            if(BG_Image.sprite == null)
+            {
+                BG_Image.sprite = pageentry.Sprite;
+                BG_Image.SetVerticesDirty();
+            }
+            pageentrys.Add(pageentry);
+        }
+        BackGroundPageCtrl.Initialize(pageentrys, BackGroundList);
     }
 
     public void SetCriWare(bool value)
@@ -482,42 +743,6 @@ public class UmaViewerUI : MonoBehaviour
     public void UpdateGifQualityLabel(float value)
     {
         GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
-    }
-
-    void ListLiveSounds(int songid)
-    {
-        for (int i = LiveCharaSoundList.content.childCount - 1; i >= 0; i--)
-        {
-            Destroy(LiveCharaSoundList.content.GetChild(i).gameObject);
-        }
-        string nameVar = $"snd_bgm_live_{songid}_chara";
-        foreach (var entry in Main.AbList.Where(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb")))
-        {
-            var container = Instantiate(UmaContainerPrefab, LiveCharaSoundList.content).GetComponent<UmaUIContainer>();
-            string[] split = Path.GetFileNameWithoutExtension(entry.Name).Split('_');
-            string name = $"{ split[split.Length - 2]} {getCharaName(split[split.Length - 2])}";
-            container.Name = name;
-
-            var icon = Main.Characters.Find(a => a.Id.ToString().Equals(split[split.Length - 2]));
-            if (icon != null)
-            {
-                container.Image.sprite = icon.Icon;
-                container.Image.enabled = true;
-            }
-
-            container.Button.onClick.AddListener(() => {
-                HighlightChildImage(LiveCharaSoundList.content, container.GetComponent<Image>());
-                if (isCriware)
-                {
-                    Builder.LoadLiveSoundCri(songid, entry);
-                }
-                else
-                {
-                    Builder.LoadLiveSound(songid, entry);
-                }
-            });
-        }
-
     }
 
     string getCharaName(string id)
@@ -563,84 +788,6 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    void ListAnimations(int umaId, bool mini)
-    {
-        ScrollRect animationList = mini ? MiniAnimationList : AnimationList;
-        for (int i = animationList.content.childCount - 1; i >= 0; i--)
-        {
-            Destroy(animationList.content.GetChild(i).gameObject);
-        }
-
-        var filteredList = Main.AbMotions.Where(a => !a.Name.Contains($"mirror")
-        && (mini ? a.Name.Contains($"mini") : !a.Name.Contains($"mini"))
-        && !a.Name.Contains($"facial") 
-        && !a.Name.Contains($"_cam")
-        && !a.Name.EndsWith($"_s")
-        && !a.Name.EndsWith($"_e")
-        );
-        
-        if (umaId == -1)
-        {
-            foreach (var entry in filteredList.Where(a=> (a.Name.Contains($"/type0") || a.Name.Contains($"/type99") || a.Name.Contains($"anm_sty_")) && !a.Name.Contains($"/tail") && !a.Name.EndsWith($"_pos") && !a.Name.EndsWith($"_prop") && !a.Name.EndsWith($"_pose") && !a.Name.Contains($"_defaultmotion")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 19;
-                container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
-            }
-        }
-        else if(umaId == -2)
-        {
-            foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 19;
-                container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
-            }
-        }
-        else
-        {
-            //Common animations
-            foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains("pose")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 19;
-                container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
-            }
-
-            //Skill animations
-            foreach (var entry in filteredList.Where(a => a.Name.Contains($"card/body/crd{umaId}")))
-            {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 19;
-                container.Button.onClick.AddListener(() => {
-                    HighlightChildImage(animationList.content, container.GetComponent<Image>());
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
-            }
-        }
-    }
-
     public void LoadedAnimation()
     {
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
@@ -683,14 +830,27 @@ public class UmaViewerUI : MonoBehaviour
 
     public void ChangeBackground(int index)
     {
-        if(index == 0)
+        BackGroundPageCtrl.ResetCtrl();
+        switch (index)
         {
-            Camera.main.clearFlags = CameraClearFlags.Skybox;
+            case 0:
+                Camera.main.clearFlags = CameraClearFlags.Skybox;
+                break;
+            case 1:
+                Camera.main.clearFlags = CameraClearFlags.SolidColor;
+                break;
+            case 2:
+                Camera.main.clearFlags = CameraClearFlags.Depth;
+                ListBackgrounds();
+                break;
+            default:
+                Camera.main.clearFlags = CameraClearFlags.Skybox;
+                break;
         }
-        else
-        {
-            Camera.main.clearFlags = CameraClearFlags.SolidColor;
-        }
+
+        BackGroundCameraObj.SetActive(index == 2);
+        BG_HSVPickerObj.SetActive(index != 2);
+        BackGroundPageCtrl.transform.parent.gameObject.SetActive(index == 2);
     }
 
     public void ChangeBackgroundColor(Color color)
@@ -922,6 +1082,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void UpdateGameDB() {
         if (UpdateResVerCoroutine != null) return;
+        UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
         UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { LyricsText.text = msg; });
         StartCoroutine(UpdateResVerCoroutine);

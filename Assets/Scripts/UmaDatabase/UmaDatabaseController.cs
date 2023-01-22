@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Mono.Data.Sqlite;
 using System.Data;
+using Assets.Scripts;
 
 public class UmaDatabaseController
 {
@@ -38,11 +39,14 @@ public class UmaDatabaseController
     public static string CharaPath = "3d/chara/";
     /// <summary> 3d/effect/ </summary>
     public static string EffectPath = "3d/effect/";
+    /// <summary> outgame/dress/ </summary>
+    public static string CostumePath = "outgame/dress/";
 
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<DataRow> CharaData;
     public IEnumerable<FaceTypeData> FaceTypeData;
     public IEnumerable<DataRow> LiveData;
+    public IEnumerable<DataRow> DressData;
 
     /// <summary> Meta Database Connection </summary>
     private SqliteConnection metaDb;
@@ -63,11 +67,14 @@ public class UmaDatabaseController
             CharaData = ReadMaster(masterDb);
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
+            DressData = ReadAllDressData(masterDb);
         }
         catch
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}/meta\n{Config.Instance.MainPath}/master/master.mdb";
+            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}\\meta\n{Config.Instance.MainPath}\\master\\master.mdb";
             UmaViewerUI.Instance.LyricsText.color = Color.red;
+            masterDb.Close();
+            metaDb.Close();
         }
     }
 
@@ -148,6 +155,21 @@ public class UmaDatabaseController
         }
     }
 
+    static IEnumerable<DataRow> ReadAllDressData(SqliteConnection conn)
+    {
+        SqliteCommand sqlite_cmd = conn.CreateCommand();
+        sqlite_cmd.CommandText =
+        $"SELECT * FROM dress_data";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        var result = new DataTable();
+        result.Load(sqlite_datareader);
+        var temp = result.Rows.GetEnumerator();
+        while (temp.MoveNext())
+        {
+            yield return (DataRow)temp.Current;
+        }
+    }
+
     public static DataRow ReadCharaData(int id)
     {
         SqliteCommand sqlite_cmd = instance.masterDb.CreateCommand();
@@ -157,5 +179,11 @@ public class UmaDatabaseController
         result.Load(sqlite_datareader);
         DataRow row = result.Rows[0];
         return row;
+    }
+
+    public void CloseAllConnection()
+    {
+        masterDb.Close();
+        metaDb.Close();
     }
 }

@@ -1,4 +1,6 @@
 using Gallop;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -10,7 +12,6 @@ public class UmaContainer : MonoBehaviour
     public GameObject Body;
     public GameObject Tail;
     public GameObject Head;
-    public GameObject PhysicsController;
 
     public List<Texture2D> TailTextures = new List<Texture2D>();
 
@@ -61,8 +62,8 @@ public class UmaContainer : MonoBehaviour
     [Header("Physics")]
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
-
-
+    public GameObject PhysicsContainer;
+    public float BodyScale = 1;
     public void Initialize()
     {
         TrackTarget = Camera.main.gameObject;
@@ -131,9 +132,21 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator.runtimeAnimatorController = OverrideController;
     }
 
-    public void SetHeight(int scale)
+    public void SetHeight(int scale = 0)
     {
-        transform.Find("Position").localScale *= (scale / 160f);//WIP
+        if(scale == 0)
+        {
+            BodyScale = 1;
+        }
+        else if(scale == -1)
+        {
+            BodyScale = (Convert.ToInt32(CharaData["scale"]) / 160f);
+        }
+        else
+        {
+            BodyScale = (scale / 160f);
+        }
+        transform.Find("Position").localScale = new Vector3(BodyScale, BodyScale, BodyScale);
     }
 
     public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
@@ -167,7 +180,7 @@ public class UmaContainer : MonoBehaviour
 
     public void LoadPhysics()
     {
-        cySpringDataContainers = new List<CySpringDataContainer>(PhysicsController.GetComponentsInChildren<CySpringDataContainer>());
+        cySpringDataContainers = new List<CySpringDataContainer>(PhysicsContainer.GetComponentsInChildren<CySpringDataContainer>());
         var bones = new List<Transform>(GetComponentsInChildren<Transform>());
         var colliders = new List<GameObject>();
 
@@ -232,8 +245,10 @@ public class UmaContainer : MonoBehaviour
             }
 
             TearControllers.ForEach(a => a.UpdateOffset());
+
         }
     }
+
 
     public void SetNextAnimationCut(string cutName)
     {

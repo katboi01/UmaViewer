@@ -17,11 +17,13 @@ public class UmaViewerMain : MonoBehaviour
 
     public List<CharaEntry> Characters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
+    public List<CostumeEntry> Costumes = new List<CostumeEntry>();
     public List<UmaDatabaseEntry> AbList = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbMotions = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbSounds = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbChara = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbEffect = new List<UmaDatabaseEntry>();
+    public List<UmaDatabaseEntry> CostumeList = new List<UmaDatabaseEntry>();
 
     [Header("Asset Memory")]
     public bool ShadersLoaded = false;
@@ -37,13 +39,14 @@ public class UmaViewerMain : MonoBehaviour
         AbMotions = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath)).ToList();
         AbEffect = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.EffectPath)).ToList();
         AbSounds = AbList.Where(ab => ab.Name.EndsWith(".awb") || ab.Name.EndsWith(".acb")).ToList();
+        CostumeList = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CostumePath)).ToList();
     }
 
     private IEnumerator Start()
     {
         Dictionary<int, string> enNames = new Dictionary<int, string>();
 
-        if(Config.Instance.Language == Language.En)
+        if (Config.Instance.Language == Language.En)
         {
             yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
             {
@@ -70,8 +73,29 @@ public class UmaViewerMain : MonoBehaviour
                     Name = enNames.ContainsKey(id) ? enNames[id] : item["charaname"].ToString(),
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id,
-                    ThemeColor = "#"+item["ui_nameplate_color_1"].ToString()
+                    ThemeColor = "#" + item["ui_nameplate_color_1"].ToString()
                 });
+            }
+        }
+
+        foreach (var item in CostumeList)
+        {
+            var costume = new CostumeEntry();
+            var name = Path.GetFileName(item.Name);
+            costume.Id = name.Replace("dress_","");
+            costume.Icon = Builder.LoadSprite(item);
+            Costumes.Add(costume);
+        }
+
+        var DressData = UmaDatabaseController.Instance.DressData;
+        foreach (var data in DressData)
+        {
+            var costume = Costumes.FirstOrDefault(a => a.Id.Split('_')[0].Contains(data["id"].ToString()) );
+            if (costume != null)
+            {
+                costume.CharaId = Convert.ToInt32(data["chara_id"]);
+                costume.BodyType = Convert.ToInt32(data["body_type"]);
+                costume.BodyTypeSub = Convert.ToInt32(data["body_type_sub"]);
             }
         }
 
@@ -101,7 +125,8 @@ public class UmaViewerMain : MonoBehaviour
                             Lives.Add(new LiveEntry(liveData.text)
                             {
                                 MusicId = musicId,
-                                SongName = songName
+                                SongName = songName,
+                                Icon = UmaViewerBuilder.Instance.LoadLiveIcon(musicId)
                             });
                         }
                     }
