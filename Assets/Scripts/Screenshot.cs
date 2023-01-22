@@ -19,7 +19,7 @@ public class Screenshot : MonoBehaviour
 
     public static void TakeScreenshot()
     {
-        var camera = UmaViewerBuilder.Instance.AnimationCamera.enabled ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
+        var camera = UmaViewerBuilder.Instance.AnimationCamera.gameObject.activeInHierarchy ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
         int width = int.Parse(UmaViewerUI.Instance.SSWidth.text);
         int height = int.Parse(UmaViewerUI.Instance.SSHeight.text);
         width = width == -1 ? Screen.width : width;
@@ -46,7 +46,7 @@ public class Screenshot : MonoBehaviour
 
     private IEnumerator RecordGif(int width, int height, bool transparent, int quality)
     {
-        var camera = UmaViewerBuilder.Instance.AnimationCamera.enabled ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
+        var camera = UmaViewerBuilder.Instance.AnimationCamera.gameObject.activeInHierarchy ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
         var ppLayer = camera.GetComponent<PostProcessLayer>();
         bool oldPpState = ppLayer.enabled;
         ppLayer.enabled = false;
