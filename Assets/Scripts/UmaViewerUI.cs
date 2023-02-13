@@ -1186,4 +1186,9 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void ChangeOutlineWidth(float val)
+    {
+        Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
+    }
+
 }

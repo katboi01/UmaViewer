@@ -856,6 +856,16 @@ public class UmaViewerBuilder : MonoBehaviour
                             m.shader = bodyAlphaShader;
                         }
 
+                        
+                        if (m.shader.name.Contains("Noline")&& m.shader.name.Contains("TSER"))
+                        {
+                            var s = ShaderList.Find(a=>a.name == m.shader.name.Replace("Noline", "")); //Generic costume shader need to change manually.
+                            if (s)
+                            {
+                                m.shader = s;
+                            }
+                        }
+
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
