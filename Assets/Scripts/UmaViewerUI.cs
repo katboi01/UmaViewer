@@ -1160,7 +1160,7 @@ public class UmaViewerUI : MonoBehaviour
         if (UpdateResVerCoroutine != null&&Config.Instance.WorkMode != WorkMode.Standalone) return;
         UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { MessagePannel.SetActive(true); MessageText.text = msg; });
+        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { ShowMessage(msg); });
         StartCoroutine(UpdateResVerCoroutine);
     }
 
@@ -1189,6 +1189,12 @@ public class UmaViewerUI : MonoBehaviour
     public void ChangeOutlineWidth(float val)
     {
         Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
+    }
+
+    public void ShowMessage(string msg)
+    {
+        MessagePannel.SetActive(true);
+        MessageText.text = msg;
     }
 
 }

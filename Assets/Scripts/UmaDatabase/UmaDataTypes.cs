@@ -30,8 +30,7 @@ public class UmaDatabaseEntry
         var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
         UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg) 
         {
-            UmaViewerUI.Instance.MessagePannel.SetActive(true);
-            UmaViewerUI.Instance.MessageText.text = msg; 
+            UmaViewerUI.Instance.ShowMessage(msg);
         });
     }
 

@@ -199,9 +199,17 @@ public class ManifestDB
             }
 
             callback?.Invoke($"Decompress master.mdb");
-            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master.mdb";
+            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master_umaviewer.mdb";
             Directory.CreateDirectory(Path.GetDirectoryName(masterPath));
-            File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+            try
+            {
+                File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+            }
+            catch 
+            {
+                callback?.Invoke($"Decompress master.mdb error");
+                yield break;
+            }
         }
     }
 

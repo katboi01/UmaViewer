@@ -60,13 +60,14 @@ public class UmaDatabaseController
             if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master_umaviewer.mdb;");
             }
             else
             {
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
             }
 
-            masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
 
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
@@ -77,21 +78,19 @@ public class UmaDatabaseController
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
         }
-        catch
+        catch 
         {
-            UmaViewerUI.Instance.MessagePannel.SetActive(true);
-            UmaViewerUI.Instance.MessageText.text = $"Database not found at: {Config.Instance.MainPath}";
+            CloseAllConnection();
+            var msg = $"Database not found at: {Config.Instance.MainPath}";
             if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                UmaViewerUI.Instance.MessageText.text += "\nPlease update the database in the settings panel";
+                msg += "\nPlease update the database in the settings panel";
             }
             else
             {
-                UmaViewerUI.Instance.MessageText.text += "\nPlease install the dmm game client";
+                msg += "\nPlease install the dmm game client";
             }
-
-            masterDb.Close();
-            metaDb.Close();
+            UmaViewerUI.Instance.ShowMessage(msg);
         }
     }
 

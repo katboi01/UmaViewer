@@ -36,8 +36,7 @@ public class Config
             }
             catch (Exception ex)
             {
-                UmaViewerUI.Instance.MessagePannel.SetActive(true);
-                UmaViewerUI.Instance.MessageText.text = "Config load error. Using default. " + ex.Message;
+                UmaViewerUI.Instance.ShowMessage("Config load error. Using default. " + ex.Message);
                 MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
             }
         }
@@ -48,8 +47,7 @@ public class Config
     public void UpdateConfig()
     {
         File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
-        UmaViewerUI.Instance.MessagePannel.SetActive(true);
-        UmaViewerUI.Instance.MessageText.text = "The configuration has changed. Please restart the application.";
+        UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.");
     }
 }
 
