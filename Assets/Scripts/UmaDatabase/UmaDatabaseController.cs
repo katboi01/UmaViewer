@@ -57,7 +57,15 @@ public class UmaDatabaseController
     {
         try
         {
-            metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
+            }
+            else
+            {
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
+            }
+
             masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
 
             metaDb.Open();
@@ -71,8 +79,17 @@ public class UmaDatabaseController
         }
         catch
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}\\meta\n{Config.Instance.MainPath}\\master\\master.mdb";
-            UmaViewerUI.Instance.LyricsText.color = Color.red;
+            UmaViewerUI.Instance.MessagePannel.SetActive(true);
+            UmaViewerUI.Instance.MessageText.text = $"Database not found at: {Config.Instance.MainPath}";
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                UmaViewerUI.Instance.MessageText.text += "\nPlease update the database in the settings panel";
+            }
+            else
+            {
+                UmaViewerUI.Instance.MessageText.text += "\nPlease install the dmm game client";
+            }
+
             masterDb.Close();
             metaDb.Close();
         }
@@ -186,4 +203,5 @@ public class UmaDatabaseController
         masterDb.Close();
         metaDb.Close();
     }
+
 }

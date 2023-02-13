@@ -1277,6 +1277,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         foreach (var bundle in Main.LoadedBundles)
         {
+            if(bundle.Value)
             bundle.Value.Unload(unloadAllObjects);
         }
         if (unloadAllObjects)

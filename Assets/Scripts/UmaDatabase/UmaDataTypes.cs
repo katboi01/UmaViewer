@@ -1,8 +1,8 @@
-﻿using RootMotion.Dynamics;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
+using System.IO;
 
 public class UmaDatabaseEntry
 {
@@ -11,7 +11,30 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
-    public string FilePath => $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
+    public string FilePath 
+    {
+        get 
+        {
+            var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
+            if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                UmaViewerMain.Instance.StartCoroutine(DownloadAsset(this));
+            }
+            return path;
+        }
+    } 
+
+
+    public static IEnumerator DownloadAsset(UmaDatabaseEntry entry)
+    {
+        var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        yield return UmaViewerDownload.DownloadAsset(entry, path , delegate(string msg) 
+        {
+            UmaViewerUI.Instance.MessagePannel.SetActive(true);
+            UmaViewerUI.Instance.MessageText.text = msg; 
+        });
+    }
+
 }
 
 public class UmaCharaData

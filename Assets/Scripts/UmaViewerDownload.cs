@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -23,6 +25,31 @@ public class UmaViewerDownload : MonoBehaviour
         else
         {
             callback(www.downloadHandler.text);
+        }
+    }
+
+    public static IEnumerator DownloadAsset(UmaDatabaseEntry entry,string path, Action<string> callback = null)
+    {
+        string baseurl = GetAssetRequestUrl(entry.Url);
+        if (!string.IsNullOrEmpty(Path.GetExtension(entry.Name)))
+        {
+            baseurl = GetGenericRequestUrl(entry.Url);
+        }
+
+        using UnityWebRequest www = UnityWebRequest.Get(baseurl);
+        callback?.Invoke($"Downloading missing asset : {Path.GetFileName(entry.Name)}\n");
+        yield return www.SendWebRequest();
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(www.error);
+            callback?.Invoke($"Failed to download resources : {www.error}");
+        }
+        else
+        {
+            Debug.Log("saving " + entry.Url);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.WriteAllBytes(path, www.downloadHandler.data);
+            callback?.Invoke($"Downloading missing asset : {Path.GetFileName(entry.Name)}\ncompleted, please load again");
         }
     }
 

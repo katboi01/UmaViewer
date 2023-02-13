@@ -1,4 +1,5 @@
 using Gallop;
+using SFB;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,18 +24,23 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect AnimationSetList;
     public ScrollRect AnimationList;
     public PageManager AnimationPageCtrl;
+
     [Header("mini models")]
     public ScrollRect MiniCharactersList;
     public ScrollRect MiniCostumeList;
     public ScrollRect MiniAnimationSetList;
     public ScrollRect MiniAnimationList;
     public PageManager MiniAnimationPageCtrl;
+
     [Header("other")]
     public ScrollRect PropList;
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
     public PageManager ScenePageCtrl;
+    public GameObject MessagePannel;
+    public Text MessageText;
 
+    [Header("lists")]
     public ScrollRect EmotionList;
     public Transform FacialList;
     public ScrollRect EarList;
@@ -48,6 +54,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect NormalSoundList;
     public ScrollRect NormalSubSoundList;
     public PageManager NormalSoundCtrl;
+
 
     [Header("audio")]
     public Slider AudioSlider;
@@ -92,13 +99,15 @@ public class UmaViewerUI : MonoBehaviour
     public Toggle GifTransparent;
     public Slider GifQuality;
     public TextMeshProUGUI GifQualityLabel;
-
     public Slider GifSlider;
     public Button GifButton;
     public Button VMDButton;
+    public Button UpdateDBButton;
+    public TMP_Dropdown WorkModeDropdown;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
+    [Header("prefabs")]
     public GameObject UmaContainerPrefab;
     public GameObject UmaContainerCostumePrefab;
     public GameObject UmaContainerLivePrefab;
@@ -128,6 +137,11 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
         if (Application.platform == RuntimePlatform.Android)
             canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
+    }
+    private void Start()
+    {
+        WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
+        UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
     }
 
     private void Update()
@@ -1143,11 +1157,33 @@ public class UmaViewerUI : MonoBehaviour
     }
 
     public void UpdateGameDB() {
-        if (UpdateResVerCoroutine != null) return;
+        if (UpdateResVerCoroutine != null&&Config.Instance.WorkMode != WorkMode.Standalone) return;
         UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { LyricsText.text = msg; });
+        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { MessagePannel.SetActive(true); MessageText.text = msg; });
         StartCoroutine(UpdateResVerCoroutine);
+    }
+
+    public void ChangeWorkMode(int mode)
+    {
+        if((int)Config.Instance.WorkMode != mode)
+        {
+            Config.Instance.WorkMode = (WorkMode)mode;
+            Config.Instance.UpdateConfig();
+        }
+    }
+
+    public void ChangeMainPath()
+    {
+        var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", Config.Instance.MainPath, false);
+        if (path != null && path.Length > 0 && !string.IsNullOrEmpty(path[0])) 
+        {
+            if(path[0] != Config.Instance.MainPath)
+            {
+                Config.Instance.MainPath = path[0];
+                Config.Instance.UpdateConfig();
+            }
+        }
     }
 
 }
