@@ -18,17 +18,17 @@ public class UmaDatabaseEntry
             var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
             if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                UmaViewerMain.Instance.StartCoroutine(DownloadAsset(this));
+                DownloadAsset(this);
             }
             return path;
         }
     } 
 
-
-    public static IEnumerator DownloadAsset(UmaDatabaseEntry entry)
+    //TODO Make it async
+    public static void DownloadAsset(UmaDatabaseEntry entry)
     {
         var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-        yield return UmaViewerDownload.DownloadAsset(entry, path , delegate(string msg) 
+        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg) 
         {
             UmaViewerUI.Instance.MessagePannel.SetActive(true);
             UmaViewerUI.Instance.MessageText.text = msg; 

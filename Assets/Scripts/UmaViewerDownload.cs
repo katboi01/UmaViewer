@@ -28,7 +28,7 @@ public class UmaViewerDownload : MonoBehaviour
         }
     }
 
-    public static IEnumerator DownloadAsset(UmaDatabaseEntry entry,string path, Action<string> callback = null)
+    public static void DownloadAssetSync(UmaDatabaseEntry entry,string path, Action<string> callback = null)
     {
         string baseurl = GetAssetRequestUrl(entry.Url);
         if (!string.IsNullOrEmpty(Path.GetExtension(entry.Name)))
@@ -37,8 +37,8 @@ public class UmaViewerDownload : MonoBehaviour
         }
 
         using UnityWebRequest www = UnityWebRequest.Get(baseurl);
-        callback?.Invoke($"Downloading missing asset : {Path.GetFileName(entry.Name)}\n");
-        yield return www.SendWebRequest();
+        www.SendWebRequest();
+        while (!www.isDone) { }
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(www.error);
@@ -49,7 +49,6 @@ public class UmaViewerDownload : MonoBehaviour
             Debug.Log("saving " + entry.Url);
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllBytes(path, www.downloadHandler.data);
-            callback?.Invoke($"Downloading missing asset : {Path.GetFileName(entry.Name)}\ncompleted, please load again");
         }
     }
 
