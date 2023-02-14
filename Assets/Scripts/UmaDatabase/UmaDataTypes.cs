@@ -124,6 +124,7 @@ public class CostumeEntry
 {
     public string Id;
     public int CharaId;
+    public string DressName;
     public int BodyType;
     public int BodyTypeSub;
     public Sprite Icon;

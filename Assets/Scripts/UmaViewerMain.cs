@@ -94,6 +94,7 @@ public class UmaViewerMain : MonoBehaviour
             if (costume != null)
             {
                 costume.CharaId = Convert.ToInt32(data["chara_id"]);
+                costume.DressName = data["dressname"].ToString();
                 costume.BodyType = Convert.ToInt32(data["body_type"]);
                 costume.BodyTypeSub = Convert.ToInt32(data["body_type_sub"]);
             }
