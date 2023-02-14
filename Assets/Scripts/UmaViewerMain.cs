@@ -16,6 +16,7 @@ public class UmaViewerMain : MonoBehaviour
     private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
 
     public List<CharaEntry> Characters = new List<CharaEntry>();
+    public List<CharaEntry> MobCharacters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
     public List<CostumeEntry> Costumes = new List<CostumeEntry>();
     public List<UmaDatabaseEntry> AbList = new List<UmaDatabaseEntry>();
@@ -78,6 +79,12 @@ public class UmaViewerMain : MonoBehaviour
             }
         }
 
+        var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
+        foreach (var item in MobCharaData)
+        {
+            //WIP
+        }
+
         foreach (var item in CostumeList)
         {
             var costume = new CostumeEntry();
@@ -104,7 +111,6 @@ public class UmaViewerMain : MonoBehaviour
         UI.LoadMiniModelPanels();
         UI.LoadPropPanel();
         UI.LoadMapPanel();
-
 
         var asset = AbList.FirstOrDefault(a => a.Name.Equals("livesettings"));
         if (asset != null)
