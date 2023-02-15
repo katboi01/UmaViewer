@@ -131,6 +131,7 @@ public class UmaDatabaseController
         return ReadMaster(conn, "SELECT * FROM mob_data");
     }
 
+
     static IEnumerable<DataRow> ReadMaster(SqliteConnection conn,string sql)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
@@ -178,14 +179,35 @@ public class UmaDatabaseController
         return ReadMaster(conn, $"SELECT * FROM dress_data C,(SELECT D.'index' dressid,D.'text' dressname FROM text_data D WHERE id like 14) T WHERE C.id like T.dressid");
     }
 
-    public static DataRow ReadCharaData(int id)
+    public static DataRow ReadCharaData(CharaEntry chara)
     {
-        foreach (var chara in instance.CharaData)
+        foreach (var charaentry in chara.IsMob ? instance.MobCharaData : instance.CharaData) 
         {
-            if (Convert.ToInt32(chara["id"]) == id)
+            if (Convert.ToInt32(charaentry[chara.IsMob ? "mob_id" : "id"]) == chara.Id) 
             {
-                return chara;
+                return charaentry;
             }
+        }
+        return null;
+    }
+
+
+    public static DataRow ReadMobDressColor(string mobid)
+    {
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
+        foreach(var data in results)
+        {
+            return data;
+        }
+        return null;
+    }
+
+    public static DataRow ReadMobHairColor(string colorid)
+    {
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
+        foreach(var data in results)
+        {
+            return data;
         }
         return null;
     }

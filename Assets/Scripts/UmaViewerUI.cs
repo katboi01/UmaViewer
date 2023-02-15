@@ -20,7 +20,10 @@ public class UmaViewerUI : MonoBehaviour
 
     [Header("normal models")]
     public ScrollRect CharactersList;
+    public ScrollRect MobCharactersList;
+    public PageManager MobCharactersPageCtrl;
     public ScrollRect CostumeList;
+    public ScrollRect MobCostumeList;
     public ScrollRect AnimationSetList;
     public ScrollRect AnimationList;
     public PageManager AnimationPageCtrl;
@@ -260,6 +263,26 @@ public class UmaViewerUI : MonoBehaviour
                 container4.Image.enabled = true;
             }
         }
+
+        var pageentrys = new List<PageManager.Entry>();
+        foreach (var chara in Main.MobCharacters.OrderBy(c => c.Id))
+        {
+            var charaInstance = chara;
+            var pageentry = new PageManager.Entry();
+
+            pageentry.Name = chara.Name;
+            pageentry.OnClick = (container) =>
+            {
+                HighlightChildImage(MobCharactersList.content, container);
+                ListCostumes(charaInstance, false);
+            };
+            if (chara.Icon)
+            {
+                pageentry.Sprite = chara.Icon;
+            }
+            pageentrys.Add(pageentry);
+        }
+        MobCharactersPageCtrl.Initialize(pageentrys, MobCharactersList);
     }
 
     public void LoadMiniModelPanels()
@@ -585,7 +608,7 @@ public class UmaViewerUI : MonoBehaviour
 
     void ListCostumes(CharaEntry chara, bool mini)
     {
-        ScrollRect costumeList = mini ? MiniCostumeList : CostumeList;
+        ScrollRect costumeList = mini ? MiniCostumeList : chara.IsMob ? MobCostumeList : CostumeList;
         for (int i = costumeList.content.childCount - 1; i >= 0; i--)
         {
             Destroy(costumeList.content.GetChild(i).gameObject);
@@ -607,25 +630,18 @@ public class UmaViewerUI : MonoBehaviour
                  {
                      if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
                      {
-                         CurrentSeletChara.SetValue(achara.Id, costumeId, achara.Icon, container.Image.sprite);
+                         CurrentSeletChara.SetValue(achara, costumeId, container.Image.sprite);
                      }
                      else
                      {
                          HighlightChildImage(costumeList.content, container);
-                         StartCoroutine(Builder.LoadUma(achara.Id, costumeId, mini));
+                         StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                      }
                  });
              }
         };
 
-        if(chara == null)
-        {
-            foreach(var cha in Main.Characters)
-            {
-                action.Invoke(cha);
-            }
-        }
-        else
+        if (!chara.IsMob)
         {
             action.Invoke(chara);
         }
@@ -654,12 +670,12 @@ public class UmaViewerUI : MonoBehaviour
                 {
                     if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
                     {
-                        CurrentSeletChara.SetValue(chara.Id, costumeId, chara.Icon, container.Image.sprite);
+                        CurrentSeletChara.SetValue(chara, costumeId, container.Image.sprite);
                     }
                     else
                     {
                         HighlightChildImage(costumeList.content, container);
-                        StartCoroutine(Builder.LoadUma(chara.Id, costumeId, mini));
+                        StartCoroutine(Builder.LoadUma(chara, costumeId, mini));
                     }
                 });
             }
@@ -891,7 +907,7 @@ public class UmaViewerUI : MonoBehaviour
             case "0004_01_00":
                 return "Towel";
             default:
-                return defaultname;
+                return (defaultname == "00")? "Default" : defaultname;
         }
     }
 

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class LiveCharacterSelect : MonoBehaviour
 {
-    public int CharaId;
+    public CharaEntry CharaEntry;
     public string CostumeId;
     public Image CharaImage;
     public Image BackGroundImage;
@@ -18,13 +18,13 @@ public class LiveCharacterSelect : MonoBehaviour
             ui.ToggleUIPanel(ui.SelectCharacterPannel);
     }
 
-    public void SetValue(int charaId, string costumeId,Sprite charaSprite, Sprite costumeSprite)
+    public void SetValue(CharaEntry charaentry, string costumeId, Sprite costumeSprite)
     {
-        CharaId = charaId;
+        CharaEntry = charaentry;
         CostumeId = costumeId;
-        CharaImage.sprite = charaSprite;
+        CharaImage.sprite = charaentry.Icon;
         BackGroundImage.enabled = true;
-        BackGroundImage.sprite = charaSprite;
+        BackGroundImage.sprite = charaentry.Icon;
         CostumeImage.sprite = costumeSprite;
     }
 }

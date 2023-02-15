@@ -47,6 +47,7 @@ public class UmaHeadData
     public int id;
     public string costumeId;
     public int tailId;
+    public CharaEntry chara;
 }
 
 public class UmaLyricsData
@@ -94,6 +95,7 @@ public class CharaEntry
     public Sprite Icon;
     public int Id;
     public string ThemeColor;
+    public bool IsMob;
 }
 
 [System.Serializable]

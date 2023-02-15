@@ -82,7 +82,19 @@ public class UmaViewerMain : MonoBehaviour
         var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
         foreach (var item in MobCharaData)
         {
-            //WIP
+            if (Convert.ToInt32(item["use_live"]) == 0) 
+            {
+                continue;
+            }
+
+            var id = Convert.ToInt32(item["mob_id"]);
+            MobCharacters.Add(new CharaEntry()
+            {
+                Name = $"Mob_{id}",
+                Icon = UmaViewerBuilder.Instance.LoadMobCharaIcon(id.ToString()),
+                Id = id,
+                IsMob = true
+            });
         }
 
         foreach (var item in CostumeList)
