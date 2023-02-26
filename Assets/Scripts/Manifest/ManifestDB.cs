@@ -248,7 +248,6 @@ public class ManifestDB
                     Debug.LogError("ReadLineError");
                     return null;
                 }
-
             }
             else
             {
@@ -290,6 +289,8 @@ public class ManifestDB
         else
         {
             Debug.LogError("Download Manifest Failed :" + www.error);
+            callback?.Invoke($"Download Manifest Failed :{www.error},Update aborted");
+            yield break;
         }
     }
 

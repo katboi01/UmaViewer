@@ -347,9 +347,11 @@ public class UmaViewerBuilder : MonoBehaviour
             var firsehead = CurrentUMAContainer.Head;
             var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
             var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
+            var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
             faceDriven._earTarget = earDriven._targetFaces;
             CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
+            CurrentUMAContainer.FaceOverrideData = faceOverride;
             faceDriven.DrivenKeyLocator = locator.transform;
             faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
 
@@ -633,9 +635,11 @@ public class UmaViewerBuilder : MonoBehaviour
             var firsehead = CurrentUMAContainer.Head;
             var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
             var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
+            var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
             faceDriven._earTarget = earDriven._targetFaces;
             CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
             CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
+            CurrentUMAContainer.FaceOverrideData = faceOverride;
             faceDriven.DrivenKeyLocator = locator.transform;
             faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
 
@@ -777,8 +781,6 @@ public class UmaViewerBuilder : MonoBehaviour
                 a.CostumeId = "00";
             }
         });//fill empty
-
-
     }
 
     //Use CriWare Library
@@ -1393,6 +1395,13 @@ public class UmaViewerBuilder : MonoBehaviour
                     }
                 }
             }
+        }
+
+        //shader effect
+        CurrentUMAContainer.ShaderEffectData = head.GetComponent<AssetHolder>()._assetTable["chara_shader_effect"] as CharaShaderEffectData;
+        if (CurrentUMAContainer.ShaderEffectData)
+        {
+            CurrentUMAContainer.ShaderEffectData.Initialize();
         }
     }
 

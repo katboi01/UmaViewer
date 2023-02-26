@@ -35,6 +35,8 @@ namespace Gallop
         Dictionary<Transform, Vector3> RotationRecorder = new Dictionary<Transform, Vector3>();
         Dictionary<Particle, Vector3> ParticleRecorder = new Dictionary<Particle, Vector3>();
 
+        List<FacialMorph> leftEyeMorph = new List<FacialMorph>();
+        List<FacialMorph> rightEyeMorph = new List<FacialMorph>();
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
@@ -53,6 +55,7 @@ namespace Gallop
                 for (int j = 0; j < _earTarget[i]._faceGroupInfo.Count; j++)
                 {
                     FacialMorph morph = new FacialMorph();
+                    morph.index = i;
                     morph.direction = j > 0;
                     morph.name = "Ear_" + i + "_" + (morph.direction ? "L" : "R");
                     morph.tag = Enum.GetName(typeof(EarType), i);
@@ -84,6 +87,7 @@ namespace Gallop
                 for (int j = 0; j < _eyebrowTarget[i]._faceGroupInfo.Count; j++)
                 {
                     FacialMorph morph = new FacialMorph();
+                    morph.index = i;
                     morph.direction = j > 0;
                     morph.name = "EyeBrow_" + i + "_" + (morph.direction ? "L" : "R");
                     morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialEyebrowId), i);
@@ -109,6 +113,7 @@ namespace Gallop
                 for (int j = 0; j < _eyeTarget[i]._faceGroupInfo.Count; j++)
                 {
                     FacialMorph morph = new FacialMorph();
+                    morph.index = i;
                     morph.direction = j > 0;
                     morph.name = "Eye_" + i + "_" + (morph.direction ? "L" : "R");
                     morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialEyeId), i);
@@ -134,7 +139,11 @@ namespace Gallop
                             if (morph.direction) LeftEyeYrange = morph;
                             else RightEyeYrange = morph;
                         }
-
+                        else
+                        {
+                            if (morph.direction) leftEyeMorph.Add(morph);
+                            else rightEyeMorph.Add(morph);
+                        }
                         EyeMorphs.Add(morph);
                     }
                 }
@@ -145,6 +154,7 @@ namespace Gallop
                 for (int j = 0; j < _mouthTarget[i]._faceGroupInfo.Count; j++)
                 {
                     FacialMorph morph = new FacialMorph();
+                    morph.index = i;
                     morph.direction = j > 0;
                     morph.name = "Mouth_" + i + "_" + j;
                     morph.tag = Enum.GetName(typeof(LiveTimelineDefine.FacialMouthId), i);
@@ -443,6 +453,7 @@ namespace Gallop
 
         public void FacialResetAll()
         {
+            
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
@@ -451,6 +462,10 @@ namespace Gallop
             FacialReset(BaseREyeMorph.trsArray);
             FacialReset(BaseMouthMorph.trsArray);
             ApplyRotation();
+            if (Container.FaceOverrideData)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -564,6 +579,59 @@ namespace Gallop
             Container.UmaFaceAnimator.Rebind();
             ProcessLocator();
             ChangeMorph();
+        }
+
+        public void OverrideFace(FaceOverrideData overrideData)
+        {
+            Action<List<FacialMorph>, FaceOverrideReplaceDataSet[]> action = delegate (List<FacialMorph> morphs, FaceOverrideReplaceDataSet[] datalist)
+            {
+                foreach (var data in datalist)
+                {
+                    if (data.IsOnlyBaseReplace)
+                    {
+                        if (morphs.Find(m => m.weight > 0) == null)
+                        {
+                            GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 1;
+                        }
+                        else
+                        {
+                            GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 0;
+                        }
+                    }
+
+                    foreach (var arr in data.DataArray)
+                    {
+                        bool changed = false;
+                        foreach(var src in arr.SrcArray)
+                        {
+                            if (src == LiveTimelineDefine.FacialEyeId.Base) continue;
+                            var srcmorph = GetMorphByType(morphs, src);
+                            if (srcmorph.weight > 0 && !changed)
+                            {
+                                changed = true;
+                                foreach (var dst in arr.DstArray)
+                                {
+                                    GetMorphByType(morphs, dst.Index).weight = Mathf.Lerp(0, dst.Weight, srcmorph.weight);
+                                }
+                            }
+                            srcmorph.weight = 0;
+                        }
+                    }
+                }
+            };
+
+            if (overrideData.IsBothEyesSetting)
+            {
+                action.Invoke(leftEyeMorph, overrideData.FaceOverrideArray);
+                action.Invoke(rightEyeMorph, overrideData.FaceOverrideArray);
+            }
+
+           
+        }
+
+        public FacialMorph GetMorphByType(List<FacialMorph> morphs, LiveTimelineDefine.FacialEyeId Type)
+        {
+            return morphs.Find(m => m.index == (int)Type);
         }
     }
 }

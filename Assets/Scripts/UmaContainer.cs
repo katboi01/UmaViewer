@@ -31,6 +31,7 @@ public class UmaContainer : MonoBehaviour
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
+    public FaceOverrideData FaceOverrideData;
     public GameObject HeadBone;
     public GameObject TrackTarget;
     public float EyeHeight;
@@ -71,6 +72,10 @@ public class UmaContainer : MonoBehaviour
     public List<CySpringDataContainer> cySpringDataContainers;
     public GameObject PhysicsContainer;
     public float BodyScale = 1;
+
+    [Header("Other")]
+    public CharaShaderEffectData ShaderEffectData;
+
     public void Initialize()
     {
         TrackTarget = Camera.main.gameObject;

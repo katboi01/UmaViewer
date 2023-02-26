@@ -10,6 +10,7 @@ namespace Gallop
     [System.Serializable]
     public class FacialMorph
     {
+        public int index;
         public string name;
         public string tag = "";
         public bool direction;
