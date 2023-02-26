@@ -51,6 +51,7 @@ public class GlobalValue : EditorWindow
     Vector4 _Global_FogLength;
 
     float _RimHorizonOffset;
+    float _UVEmissivePower;
 
     Color _AmbientColor;
 
@@ -77,6 +78,7 @@ public class GlobalValue : EditorWindow
         _GlobalCameraFov = EditorGUILayout.Slider("_GlobalCameraFov", _GlobalCameraFov, 0, 100);
         _CylinderBlend = EditorGUILayout.Slider("_CylinderBlend", _CylinderBlend, 0, 100);
         _RimHorizonOffset = EditorGUILayout.Slider("_RimHorizonOffset", _RimHorizonOffset, 0, 1);
+        _UVEmissivePower = EditorGUILayout.Slider("_UVEmissivePower", _UVEmissivePower, 0, 10);
         //Color
         _GlobalToonColor = EditorGUILayout.ColorField("“ı”∞—’…´", _GlobalToonColor);
         _Global_FogColor = EditorGUILayout.ColorField("_Global_FogColor", _Global_FogColor);
@@ -136,6 +138,7 @@ public class GlobalValue : EditorWindow
         Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov);
         Shader.SetGlobalFloat("_CylinderBlend", _CylinderBlend);
         Shader.SetGlobalFloat("_RimHorizonOffset", _RimHorizonOffset);
+        Shader.SetGlobalFloat("_UVEmissivePower", _UVEmissivePower);
         //Vector Array
         _MainParam.Clear();
         _MainParam.Add(_MainParam_0);

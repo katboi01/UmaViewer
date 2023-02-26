@@ -593,10 +593,7 @@ namespace Gallop
                         if (morph == null)
                         {
                             GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 1;
-                            Debug.LogError(morph.tag);
                         }
-                        else
-                            Debug.LogError(morph.tag);
                     }
 
                     foreach (var arr in data.DataArray)
