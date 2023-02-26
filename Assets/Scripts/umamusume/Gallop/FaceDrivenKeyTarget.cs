@@ -589,14 +589,14 @@ namespace Gallop
                 {
                     if (data.IsOnlyBaseReplace)
                     {
-                        if (morphs.Find(m => m.weight > 0) == null)
+                        var morph = morphs.Find(m => m.weight > 0);
+                        if (morph == null)
                         {
                             GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 1;
+                            Debug.LogError(morph.tag);
                         }
                         else
-                        {
-                            GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 0;
-                        }
+                            Debug.LogError(morph.tag);
                     }
 
                     foreach (var arr in data.DataArray)

@@ -1398,10 +1398,14 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         //shader effect
-        CurrentUMAContainer.ShaderEffectData = head.GetComponent<AssetHolder>()._assetTable["chara_shader_effect"] as CharaShaderEffectData;
-        if (CurrentUMAContainer.ShaderEffectData)
+        var assetholder = head.GetComponent<AssetHolder>();
+        if (assetholder)
         {
-            CurrentUMAContainer.ShaderEffectData.Initialize();
+            CurrentUMAContainer.ShaderEffectData = assetholder._assetTable["chara_shader_effect"] as CharaShaderEffectData;
+            if (CurrentUMAContainer.ShaderEffectData)
+            {
+                CurrentUMAContainer.ShaderEffectData.Initialize();
+            }
         }
     }
 
