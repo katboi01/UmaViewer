@@ -44,6 +44,7 @@ public class UmaDatabaseController
 
     public IEnumerable<UmaDatabaseEntry> MetaEntries;
     public IEnumerable<DataRow> CharaData;
+    public IEnumerable<DataRow> MobCharaData;
     public IEnumerable<FaceTypeData> FaceTypeData;
     public IEnumerable<DataRow> LiveData;
     public IEnumerable<DataRow> DressData;
@@ -57,24 +58,41 @@ public class UmaDatabaseController
     {
         try
         {
-            metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
-            masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master_umaviewer.mdb;");
+            }
+            else
+            {
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
+            }
+
 
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
 
             masterDb.Open();
-            CharaData = ReadMaster(masterDb);
+            CharaData = ReadCharaMaster(masterDb);
+            MobCharaData = ReadMobCharaMaster(masterDb);
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
         }
-        catch
+        catch 
         {
-            UmaViewerUI.Instance.LyricsText.text = $"Database not found: \n{Config.Instance.MainPath}\\meta\n{Config.Instance.MainPath}\\master\\master.mdb";
-            UmaViewerUI.Instance.LyricsText.color = Color.red;
-            masterDb.Close();
-            metaDb.Close();
+            CloseAllConnection();
+            var msg = $"Database not found at: {Config.Instance.MainPath}";
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                msg += "\nPlease update the database in the settings panel";
+            }
+            else
+            {
+                msg += "\nPlease install the dmm game client";
+            }
+            UmaViewerUI.Instance.ShowMessage(msg);
         }
     }
 
@@ -103,10 +121,21 @@ public class UmaDatabaseController
         return entries;
     }
 
-    static IEnumerable<DataRow> ReadMaster(SqliteConnection conn)
+    static IEnumerable<DataRow> ReadCharaMaster(SqliteConnection conn)
+    {
+        return ReadMaster(conn, "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid");
+    }
+
+    static IEnumerable<DataRow> ReadMobCharaMaster(SqliteConnection conn)
+    {
+        return ReadMaster(conn, "SELECT * FROM mob_data");
+    }
+
+
+    static IEnumerable<DataRow> ReadMaster(SqliteConnection conn,string sql)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid";
+        sqlite_cmd.CommandText = sql;
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
         var result = new DataTable();
         result.Load(sqlite_datareader);
@@ -142,43 +171,45 @@ public class UmaDatabaseController
 
     static IEnumerable<DataRow> ReadAllLiveData(SqliteConnection conn)
     {
-        SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = 
-        $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid";
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        var result = new DataTable();
-        result.Load(sqlite_datareader);
-        var temp = result.Rows.GetEnumerator();
-        while (temp.MoveNext()) 
-        {
-            yield return (DataRow)temp.Current;
-        }
+        return ReadMaster(conn, $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid");
     }
 
     static IEnumerable<DataRow> ReadAllDressData(SqliteConnection conn)
     {
-        SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText =
-        $"SELECT * FROM dress_data";
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        var result = new DataTable();
-        result.Load(sqlite_datareader);
-        var temp = result.Rows.GetEnumerator();
-        while (temp.MoveNext())
-        {
-            yield return (DataRow)temp.Current;
-        }
+        return ReadMaster(conn, $"SELECT * FROM dress_data C,(SELECT D.'index' dressid,D.'text' dressname FROM text_data D WHERE id like 14) T WHERE C.id like T.dressid");
     }
 
-    public static DataRow ReadCharaData(int id)
+    public static DataRow ReadCharaData(CharaEntry chara)
     {
-        SqliteCommand sqlite_cmd = instance.masterDb.CreateCommand();
-        sqlite_cmd.CommandText = $"SELECT * FROM chara_data WHERE id LIKE {id}";
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        var result = new DataTable();
-        result.Load(sqlite_datareader);
-        DataRow row = result.Rows[0];
-        return row;
+        foreach (var charaentry in chara.IsMob ? instance.MobCharaData : instance.CharaData) 
+        {
+            if (Convert.ToInt32(charaentry[chara.IsMob ? "mob_id" : "id"]) == chara.Id) 
+            {
+                return charaentry;
+            }
+        }
+        return null;
+    }
+
+
+    public static DataRow ReadMobDressColor(string mobid)
+    {
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
+        foreach(var data in results)
+        {
+            return data;
+        }
+        return null;
+    }
+
+    public static DataRow ReadMobHairColor(string colorid)
+    {
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
+        foreach(var data in results)
+        {
+            return data;
+        }
+        return null;
     }
 
     public void CloseAllConnection()
@@ -186,4 +217,5 @@ public class UmaDatabaseController
         masterDb.Close();
         metaDb.Close();
     }
+
 }

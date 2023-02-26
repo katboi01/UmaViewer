@@ -1,9 +1,10 @@
-using Unity;
 using System.Collections.Generic;
 using UnityEngine;
 using static DynamicBone;
+using System;
+using Object = UnityEngine.Object;
 
-[System.Serializable]
+[Serializable]
 public class AssetTable
 {
     public Object this[string key]
@@ -26,7 +27,7 @@ public class AssetTable
 }
 
 
-[System.Serializable]
+[Serializable]
 public class AssetTableValue
 {
     public float this[string key]
@@ -48,21 +49,21 @@ public class AssetTableValue
 }
 
 
-[System.Serializable]
+[Serializable]
 public class StringObjectPair
 {
     public string Key;
     public Object Value;
 }
 
-[System.Serializable]
+[Serializable]
 public class StringValuePair
 {
     public string Key;
     public float Value;
 }
 
-[System.Serializable]
+[Serializable]
 public class TrsArray
 {
     public string _path;
@@ -82,38 +83,38 @@ public class TrsArray
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class FaceGroupInfo
 {
     public List<TrsArray> _trsArray;
 }
 
-[System.Serializable]
+[Serializable]
 public class EyeTarget
 {
     public List<FaceGroupInfo> _faceGroupInfo;
 }
 
-[System.Serializable]
+[Serializable]
 public class EyebrowTarget
 {
     public List<FaceGroupInfo> _faceGroupInfo;
 }
 
-[System.Serializable]
+[Serializable]
 public class MouthTarget
 {
     public List<FaceGroupInfo> _faceGroupInfo;
 }
 
-[System.Serializable]
+[Serializable]
 public class TargetInfomation
 {
     public List<FaceGroupInfo> _faceGroupInfo;
 }
 
 
-[System.Serializable]
+[Serializable]
 public class ConnectedBoneData 
 {
     public string Bone1;
@@ -121,3 +122,27 @@ public class ConnectedBoneData
     public float Intensity;
     public bool IsFold;
 }
+
+
+[Serializable]
+public class FaceOverrideReplaceDataSet 
+{
+    public bool IsOnlyBaseReplace; 
+    public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId BaseReplaceFaceType;
+    public FaceOverrideReplaceData[] DataArray;
+}
+
+[Serializable]
+public class FaceOverrideReplaceData
+{
+    public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId[] SrcArray;
+    public FaceOverrideElement[] DstArray;
+}
+
+[Serializable]
+public class FaceOverrideElement 
+{
+    public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId Index; 
+    public float Weight; 
+}
+

@@ -50,7 +50,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
     public Vector4 _Global_FogLength;
 
     public float _RimHorizonOffset;
-
+    public float _UVEmissivePower;
     public Color _AmbientColor;
 
     public Vector2 scrollPosition = Vector2.zero;
@@ -74,6 +74,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
         Shader.SetGlobalFloat("_GlobalCameraFov", _GlobalCameraFov);
         Shader.SetGlobalFloat("_CylinderBlend", _CylinderBlend);
         Shader.SetGlobalFloat("_RimHorizonOffset", _RimHorizonOffset);
+        Shader.SetGlobalFloat("_UVEmissivePower", _UVEmissivePower);
         //Vector Array
         _MainParam.Clear();
         _MainParam.Add(_MainParam_0);

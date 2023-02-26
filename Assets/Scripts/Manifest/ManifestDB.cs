@@ -17,7 +17,7 @@ public class ManifestDB
 
     public ManifestDB()
     {
-        string DBPath = $"{Config.Instance.MainPath}\\meta";
+        string DBPath = $"{Config.Instance.MainPath}\\meta_umaviewer";
         ManifestDB.DBPath = DBPath;
         if (!File.Exists(DBPath))
         {
@@ -177,7 +177,7 @@ public class ManifestDB
         callback?.Invoke($"Checking master.mdb");
         SqliteCommand command = new SqliteCommand("SELECT h FROM a WHERE n LIKE 'master.mdb.lz4'", MetaDB);
         var reader = command.ExecuteReader();
-        
+
         if (reader.Read())
         {
             var hash = reader.GetString(0);
@@ -199,9 +199,17 @@ public class ManifestDB
             }
 
             callback?.Invoke($"Decompress master.mdb");
-            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master.mdb";
+            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master_umaviewer.mdb";
             Directory.CreateDirectory(Path.GetDirectoryName(masterPath));
-            File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+            try
+            {
+                File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+            }
+            catch 
+            {
+                callback?.Invoke($"Decompress master.mdb error");
+                yield break;
+            }
         }
     }
 
@@ -230,28 +238,25 @@ public class ManifestDB
 
         ulong count = reader.GetRowCount();
         ManifestEntry[] manifests = new ManifestEntry[count];
-        if (kind == Kind.Default)
+        for (ulong i = 0; i < count; i++)
         {
-            for (ulong i = 0; i < count; i++)
+            manifests[i].kind = (int)kind;
+            if (kind == Kind.Default)
             {
-                manifests[i].kind = (int)kind;
                 if (!reader.ReadLine(ManifestEntry.GetBsvParser(ManifestEntry.Format.Full, reader), ref manifests[i]))
                 {
                     Debug.LogError("ReadLineError");
                     return null;
                 }
             }
-        }
-        else
-        {
-            for (ulong i = 0; i < count; i++)
+            else
             {
-                manifests[i].kind = (int)kind;
                 if (!reader.ReadLine(ManifestEntry.GetBsvParser(ManifestEntry.Format.Simplified, reader), ref manifests[i]))
                 {
                     Debug.LogError("ReadLineError");
                     return null;
                 }
+
             }
         }
         return manifests;
@@ -284,6 +289,8 @@ public class ManifestDB
         else
         {
             Debug.LogError("Download Manifest Failed :" + www.error);
+            callback?.Invoke($"Download Manifest Failed :{www.error},Update aborted");
+            yield break;
         }
     }
 
@@ -320,6 +327,6 @@ public class ManifestDB
         }
         return platformEntrys[0];
     }
-    
+
 }
 

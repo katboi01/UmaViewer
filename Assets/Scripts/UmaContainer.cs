@@ -12,6 +12,7 @@ public class UmaContainer : MonoBehaviour
     public GameObject Body;
     public GameObject Tail;
     public GameObject Head;
+    public GameObject Hair;
 
     public List<Texture2D> TailTextures = new List<Texture2D>();
 
@@ -30,6 +31,7 @@ public class UmaContainer : MonoBehaviour
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
+    public FaceOverrideData FaceOverrideData;
     public GameObject HeadBone;
     public GameObject TrackTarget;
     public float EyeHeight;
@@ -59,11 +61,21 @@ public class UmaContainer : MonoBehaviour
     public bool IsMini = false;
     public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
 
+    [Header("Mob")]
+    public bool IsMob = false;
+    public DataRow MobDressColor;
+    public DataRow MobHeadColor;
+    public List<Texture2D> MobHeadTextures = new List<Texture2D>();
+
     [Header("Physics")]
     public bool EnablePhysics = true;
     public List<CySpringDataContainer> cySpringDataContainers;
     public GameObject PhysicsContainer;
     public float BodyScale = 1;
+
+    [Header("Other")]
+    public CharaShaderEffectData ShaderEffectData;
+
     public void Initialize()
     {
         TrackTarget = Camera.main.gameObject;
@@ -132,15 +144,40 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator.runtimeAnimatorController = OverrideController;
     }
 
+    public void MergeHairModel()
+    {
+        if (!Head || !Hair) return;
+
+        List<Transform> bodybones = new List<Transform>(Head.GetComponentsInChildren<Transform>());
+        List<Transform> emptyBones = new List<Transform>();
+
+        var headHolder = Head.GetComponent<AssetHolder>();
+        var hairHolder = Hair.GetComponent<AssetHolder>();
+
+        headHolder._assetTable.list.AddRange(hairHolder._assetTable.list);
+        headHolder._assetTableValue.list.AddRange(hairHolder._assetTableValue.list);
+        
+        //MergeHair
+        var hairskins = Hair.GetComponentsInChildren<SkinnedMeshRenderer>();
+        foreach (SkinnedMeshRenderer hairskin in hairskins)
+        {
+            hairskin.gameObject.transform.SetParent(Head.transform);
+            emptyBones.AddRange(MergeBone(hairskin, bodybones));
+        }
+        Hair.gameObject.SetActive(false);
+
+        emptyBones.ForEach(a => { if (a) Destroy(a.gameObject); });
+    }
+
     public void SetHeight(int scale = 0)
     {
-        if(scale == 0)
+        if (scale == 0)
         {
             BodyScale = 1;
         }
-        else if(scale == -1)
+        else if (scale == -1)
         {
-            BodyScale = (Convert.ToInt32(CharaData["scale"]) / 160f);
+            BodyScale = (Convert.ToInt32(CharaData[IsMob ? "chara_height" : "scale"]) / 160f);
         }
         else
         {
@@ -248,7 +285,6 @@ public class UmaContainer : MonoBehaviour
 
         }
     }
-
 
     public void SetNextAnimationCut(string cutName)
     {

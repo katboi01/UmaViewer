@@ -1,23 +1,27 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 public class Config
 {
+    public static string configPath = Application.dataPath + "/../Config.json";
     public static Config Instance;
     public string Version = "";
+
     public string LanguageTip = "Affects Uma names on the list. Language options: 0 - En, 1 - Jp";
     public Language Language = Language.En;
-    public string MainPathTip = "Path to game folder, eg. D:\\Backup\\Cygames\\umamusume or D:/Backup/Cygames/umamusume";
+
+    public string MainPathTip = "Path to game folder, eg. D:/Backup/Cygames/umamusume";
     public string MainPath = "";
+
+    public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client, Database needs to be updated manually";
+    public WorkMode WorkMode = WorkMode.Default;
+
 
     public Config()
     {
         //TODO: Updating config file
         Version = Application.version;
-        string configPath = Application.dataPath + "/../Config.json";
 
         MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
         if (!File.Exists(configPath))
@@ -32,12 +36,18 @@ public class Config
             }
             catch (Exception ex)
             {
-                UmaViewerUI.Instance.LyricsText.text = "Config load error. Using default path. " + ex.Message;
+                UmaViewerUI.Instance.ShowMessage("Config load error. Using default. " + ex.Message);
                 MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
             }
         }
 
         Instance = this;
+    }
+
+    public void UpdateConfig()
+    {
+        File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
+        UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.");
     }
 }
 
@@ -45,4 +55,10 @@ public enum Language
 {
     En,
     Jp
+}
+
+public enum WorkMode
+{
+    Default,
+    Standalone
 }

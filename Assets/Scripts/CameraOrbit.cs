@@ -131,12 +131,16 @@ public class CameraOrbit : MonoBehaviour
         if (Input.GetMouseButton(0) && controlOn)
         {
             position -= Input.GetAxis("Mouse X") * transform.right * OrbitCamSpeedSlider.value;
-            OrbitCamZoomSlider.value -= Input.mouseScrollDelta.y * OrbitCamZoomSpeedSlider.value;
             OrbitCamHeightSlider.value -= Input.GetAxis("Mouse Y") * OrbitCamSpeedSlider.value;
         }
         else
         {
             controlOn = false;
+        }
+
+        if (!eventSystem.IsPointerOverGameObject())
+        {
+            OrbitCamZoomSlider.value -= Input.mouseScrollDelta.y * OrbitCamZoomSpeedSlider.value;
         }
 
         if ((Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.LeftControl)) && !eventSystem.IsPointerOverGameObject())
@@ -152,6 +156,7 @@ public class CameraOrbit : MonoBehaviour
         {
             CameraTargetHelper.SetActive(false);
         }
+
 
         float camDist = OrbitCamZoomSlider.value;
         OrbitCamHeightSlider.maxValue = camDist + 1 - camDist * 0.2f;

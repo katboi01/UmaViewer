@@ -1,8 +1,8 @@
-﻿using RootMotion.Dynamics;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
+using System.IO;
 
 public class UmaDatabaseEntry
 {
@@ -11,7 +11,29 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
-    public string FilePath => $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
+    public string FilePath 
+    {
+        get 
+        {
+            var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
+            if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
+            {
+                DownloadAsset(this);
+            }
+            return path;
+        }
+    } 
+
+    //TODO Make it async
+    public static void DownloadAsset(UmaDatabaseEntry entry)
+    {
+        var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg) 
+        {
+            UmaViewerUI.Instance.ShowMessage(msg);
+        });
+    }
+
 }
 
 public class UmaCharaData
@@ -25,6 +47,7 @@ public class UmaHeadData
     public int id;
     public string costumeId;
     public int tailId;
+    public CharaEntry chara;
 }
 
 public class UmaLyricsData
@@ -72,6 +95,7 @@ public class CharaEntry
     public Sprite Icon;
     public int Id;
     public string ThemeColor;
+    public bool IsMob;
 }
 
 [System.Serializable]
@@ -79,6 +103,8 @@ public class LiveEntry
 {
     public int MusicId;
     public string SongName;
+    public int MemberCount;
+    public int DefaultDress;
     public string BackGroundId;
     public Sprite Icon;
     public List<string[]> LiveSettings = new List<string[]>();
@@ -100,6 +126,7 @@ public class CostumeEntry
 {
     public string Id;
     public int CharaId;
+    public string DressName;
     public int BodyType;
     public int BodyTypeSub;
     public Sprite Icon;
