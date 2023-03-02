@@ -453,7 +453,10 @@ namespace Gallop
 
         public void FacialResetAll()
         {
-            
+            if (Container.FaceOverrideData)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
@@ -462,10 +465,6 @@ namespace Gallop
             FacialReset(BaseREyeMorph.trsArray);
             FacialReset(BaseMouthMorph.trsArray);
             ApplyRotation();
-            if (Container.FaceOverrideData)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -583,36 +582,45 @@ namespace Gallop
 
         public void OverrideFace(FaceOverrideData overrideData)
         {
+
             Action<List<FacialMorph>, FaceOverrideReplaceDataSet[]> action = delegate (List<FacialMorph> morphs, FaceOverrideReplaceDataSet[] datalist)
             {
                 foreach (var data in datalist)
                 {
                     if (data.IsOnlyBaseReplace)
                     {
-                        var morph = morphs.Find(m => m.weight > 0);
+                        var replacemorph = GetMorphByType(morphs, data.BaseReplaceFaceType);
+                        var morph = morphs.Find(m => (m.weight > 0 && m != replacemorph));
                         if (morph == null)
                         {
-                            GetMorphByType(morphs, data.BaseReplaceFaceType).weight = 1;
+                            replacemorph.weight = 1;
+                            break;
                         }
+                        replacemorph.weight = 0;
                     }
 
                     foreach (var arr in data.DataArray)
                     {
+                        List<Action> targetMorph = new List<Action>();
                         bool changed = false;
-                        foreach(var src in arr.SrcArray)
+                        foreach (var src in arr.SrcArray)
                         {
                             if (src == LiveTimelineDefine.FacialEyeId.Base) continue;
                             var srcmorph = GetMorphByType(morphs, src);
-                            if (srcmorph.weight > 0 && !changed)
+                            foreach (var dst in arr.DstArray)
                             {
-                                changed = true;
-                                foreach (var dst in arr.DstArray)
+                                var dm = GetMorphByType(morphs, dst.Index);
+                                if (!changed)
                                 {
-                                    GetMorphByType(morphs, dst.Index).weight = Mathf.Lerp(0, dst.Weight, srcmorph.weight);
+                                    var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, srcmorph.weight));
+                                    targetMorph.Add(delegate () { dm.weight = weight; });
                                 }
+                                if (srcmorph != dm) srcmorph.weight = 0;
                             }
-                            srcmorph.weight = 0;
+                            changed = true;
+
                         }
+                        targetMorph.ForEach(a => a.Invoke());
                     }
                 }
             };
@@ -622,8 +630,6 @@ namespace Gallop
                 action.Invoke(leftEyeMorph, overrideData.FaceOverrideArray);
                 action.Invoke(rightEyeMorph, overrideData.FaceOverrideArray);
             }
-
-           
         }
 
         public FacialMorph GetMorphByType(List<FacialMorph> morphs, LiveTimelineDefine.FacialEyeId Type)
