@@ -46,14 +46,15 @@ public class UmaViewerMain : MonoBehaviour
     private IEnumerator Start()
     {
         Dictionary<int, string> enNames = new Dictionary<int, string>();
+        Dictionary<int, string> mobNames = new Dictionary<int, string>();
 
+        //Main chara names (En only)
         if (Config.Instance.Language == Language.En)
         {
             yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
             {
                 if (string.IsNullOrEmpty(txt)) return;
-                var umaData = JArray.Parse(txt);
-                foreach (var item in umaData)
+                foreach (var item in JArray.Parse(txt))
                 {
                     if (!enNames.ContainsKey((int)item["charaId"]))
                     {
@@ -62,6 +63,19 @@ public class UmaViewerMain : MonoBehaviour
                 }
             });
         }
+        //Mob names (EN & JP)
+        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
+        {
+            if (string.IsNullOrEmpty(txt)) return;
+            foreach (var item in JArray.Parse(txt))
+            {
+                if (!mobNames.ContainsKey((int)item["mobId"]))
+                {
+                    mobNames.Add((int)item["mobId"], Config.Instance.Language == Language.Jp ? item["mobName"].ToString() : item["mobNameEnglish"].ToString());
+                }
+            }
+        });
+
 
         var UmaCharaData = UmaDatabaseController.Instance.CharaData;
         foreach (var item in UmaCharaData)
@@ -88,9 +102,10 @@ public class UmaViewerMain : MonoBehaviour
             }
 
             var id = Convert.ToInt32(item["mob_id"]);
+            var name = mobNames.ContainsKey(id) ? mobNames[id] : "";
             MobCharacters.Add(new CharaEntry()
             {
-                Name = $"Mob_{id}",
+                Name = string.IsNullOrEmpty(name)? $"Mob_{id}" : name,
                 Icon = UmaViewerBuilder.Instance.LoadMobCharaIcon(id.ToString()),
                 Id = id,
                 IsMob = true
