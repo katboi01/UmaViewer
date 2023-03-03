@@ -34,7 +34,7 @@ public class UmaViewerMain : MonoBehaviour
     {
         Instance = this;
         new Config();
-        Application.targetFrameRate = -1;
+        Application.targetFrameRate = 120;
         AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
         AbChara = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath)).ToList();
         AbMotions = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath)).ToList();
