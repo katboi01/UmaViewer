@@ -273,7 +273,7 @@ namespace Gallop
             });
             OtherMorphs.Add(FaceMangaMorph);
 
-            foreach(var tear in Container.TearControllers)
+            foreach (var tear in Container.TearControllers)
             {
                 var index = Container.TearControllers.IndexOf(tear);
                 FacialOtherMorph FaceTearMorph = new FacialOtherMorph()
@@ -421,7 +421,7 @@ namespace Gallop
                         property.BindMaterial.SetFloat(property.PropertyName, property.Value);
                         break;
                     case BindProperty.BindType.Select:
-                        property.BindPrefab.ForEach(a=>a.SetActive((int)property.Value == property.BindPrefab.IndexOf(a)));
+                        property.BindPrefab.ForEach(a => a.SetActive((int)property.Value == property.BindPrefab.IndexOf(a)));
                         break;
                     case BindProperty.BindType.EyeSelect:
                         var count = property.BindPrefab.Count / 2;
@@ -432,7 +432,7 @@ namespace Gallop
                     case BindProperty.BindType.Enable:
                         if (property.Value <= 0)
                         {
-                            property.BindPrefab.ForEach(a =>a.SetActive(false));
+                            property.BindPrefab.ForEach(a => a.SetActive(false));
                         }
                         break;
                     case BindProperty.BindType.TearSide:
@@ -453,7 +453,7 @@ namespace Gallop
 
         public void FacialResetAll()
         {
-            if (Container.FaceOverrideData)
+            if (Container.FaceOverrideData&& Container.FaceOverrideData.Enable)
             {
                 OverrideFace(Container.FaceOverrideData);
             }
@@ -607,18 +607,21 @@ namespace Gallop
                         {
                             if (src == LiveTimelineDefine.FacialEyeId.Base) continue;
                             var srcmorph = GetMorphByType(morphs, src);
-                            foreach (var dst in arr.DstArray)
+                            if (srcmorph.weight > 0 && !changed)
                             {
-                                var dm = GetMorphByType(morphs, dst.Index);
-                                if (!changed)
+                                foreach (var dst in arr.DstArray)
                                 {
+                                    var dm = GetMorphByType(morphs, dst.Index);
                                     var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, srcmorph.weight));
                                     targetMorph.Add(delegate () { dm.weight = weight; });
                                 }
-                                if (srcmorph != dm) srcmorph.weight = 0;
+                                changed = true;
                             }
-                            changed = true;
 
+                            if (new List<FaceOverrideElement>(arr.DstArray).Find(f=>f.Index == src) == null) 
+                            { 
+                                srcmorph.weight = 0; 
+                            }
                         }
                         targetMorph.ForEach(a => a.Invoke());
                     }
@@ -638,6 +641,3 @@ namespace Gallop
         }
     }
 }
-
-
-

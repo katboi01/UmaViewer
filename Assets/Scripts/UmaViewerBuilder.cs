@@ -293,75 +293,7 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
 
         //Load FacialMorph
-        if (CurrentUMAContainer.Head)
-        {
-            var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
-            var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
-            Main.LoadedBundles.Add(locatorEntry.Name, bundle);
-            var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
-            locator.name = "DrivenKeyLocator";
-
-            var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
-            var eyeLocator_L = headBone.transform.Find("Eye_target_locator_L");
-            var eyeLocator_R = headBone.transform.Find("Eye_target_locator_R");
-
-            var mangaEntry = Main.AbEffect.FindAll(a => a.Name.StartsWith("3d/effect/charaemotion/pfb_eff_chr_emo_eye"));
-            var mangaObjects = new List<GameObject>();
-            mangaEntry.ForEach(entry =>
-            {
-                AssetBundle ab = AssetBundle.LoadFromFile(entry.FilePath);
-                Main.LoadedBundles.Add(entry.Name, ab);
-                var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
-                obj.SetActive(false);
-
-                var leftObj = Instantiate(obj, eyeLocator_L.transform);
-                new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
-                CurrentUMAContainer.LeftMangaObject.Add(leftObj);
-
-                var RightObj = Instantiate(obj, eyeLocator_R.transform);
-                if (RightObj.TryGetComponent<AssetHolder>(out var holder))
-                {
-                    if (holder._assetTableValue["invert"] > 0)
-                        RightObj.transform.localScale = new Vector3(-1, 1, 1);
-                }
-                new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
-                CurrentUMAContainer.RightMangaObject.Add(RightObj);
-            });
-
-            var tearEntry = Main.AbChara.FindAll(a => a.Name.StartsWith("3d/chara/common/tear/") && a.Name.Contains("pfb_chr_tear"));
-            if (tearEntry.Count > 0)
-            {
-                tearEntry.ForEach(a => RecursiveLoadAsset(a));
-            }
-            if (CurrentUMAContainer.TearPrefab_0 && CurrentUMAContainer.TearPrefab_1)
-            {
-                var p0 = CurrentUMAContainer.TearPrefab_0;
-                var p1 = CurrentUMAContainer.TearPrefab_1;
-                var t = headBone.transform;
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
-            }
-
-            var firsehead = CurrentUMAContainer.Head;
-            var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
-            var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
-            var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
-            faceDriven._earTarget = earDriven._targetFaces;
-            CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
-            CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
-            CurrentUMAContainer.FaceOverrideData = faceOverride;
-            faceDriven.DrivenKeyLocator = locator.transform;
-            faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
-
-            var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
-            emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
-            CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
-            emotionDriven.FaceDrivenKeyTarget = faceDriven;
-            emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
-            emotionDriven.Initialize();
-        }
+        LoadFaceMorph(id, costumeId);
 
         CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
         CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
@@ -581,75 +513,7 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
 
         //Load FacialMorph
-        if (CurrentUMAContainer.Head)
-        {
-            var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
-            var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
-            Main.LoadedBundles.Add(locatorEntry.Name, bundle);
-            var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
-            locator.name = "DrivenKeyLocator";
-
-            var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
-            var eyeLocator_L = headBone.transform.Find("Eye_target_locator_L");
-            var eyeLocator_R = headBone.transform.Find("Eye_target_locator_R");
-
-            var mangaEntry = Main.AbEffect.FindAll(a => a.Name.StartsWith("3d/effect/charaemotion/pfb_eff_chr_emo_eye"));
-            var mangaObjects = new List<GameObject>();
-            mangaEntry.ForEach(entry =>
-            {
-                AssetBundle ab = AssetBundle.LoadFromFile(entry.FilePath);
-                Main.LoadedBundles.Add(entry.Name, ab);
-                var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
-                obj.SetActive(false);
-
-                var leftObj = Instantiate(obj, eyeLocator_L.transform);
-                new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
-                CurrentUMAContainer.LeftMangaObject.Add(leftObj);
-
-                var RightObj = Instantiate(obj, eyeLocator_R.transform);
-                if (RightObj.TryGetComponent<AssetHolder>(out var holder))
-                {
-                    if (holder._assetTableValue["invert"] > 0)
-                        RightObj.transform.localScale = new Vector3(-1, 1, 1);
-                }
-                new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
-                CurrentUMAContainer.RightMangaObject.Add(RightObj);
-            });
-
-            var tearEntry = Main.AbChara.FindAll(a => a.Name.StartsWith("3d/chara/common/tear/") && a.Name.Contains("pfb_chr_tear"));
-            if (tearEntry.Count > 0)
-            {
-                tearEntry.ForEach(a => RecursiveLoadAsset(a));
-            }
-            if (CurrentUMAContainer.TearPrefab_0 && CurrentUMAContainer.TearPrefab_1)
-            {
-                var p0 = CurrentUMAContainer.TearPrefab_0;
-                var p1 = CurrentUMAContainer.TearPrefab_1;
-                var t = headBone.transform;
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
-                CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
-            }
-
-            var firsehead = CurrentUMAContainer.Head;
-            var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
-            var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
-            var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
-            faceDriven._earTarget = earDriven._targetFaces;
-            CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
-            CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
-            CurrentUMAContainer.FaceOverrideData = faceOverride;
-            faceDriven.DrivenKeyLocator = locator.transform;
-            faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
-
-            var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
-            emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
-            CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
-            emotionDriven.FaceDrivenKeyTarget = faceDriven;
-            emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
-            emotionDriven.Initialize();
-        }
+        LoadFaceMorph(id, costumeId);
 
         CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
         CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
@@ -1498,6 +1362,78 @@ public class UmaViewerBuilder : MonoBehaviour
                 CurrentUMAContainer.TearPrefab_1 = go;
             }
         }
+    }
+
+    private void LoadFaceMorph(int id, string costumeId)
+    {
+        if (!CurrentUMAContainer.Head) return;
+        var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
+        var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
+        Main.LoadedBundles.Add(locatorEntry.Name, bundle);
+        var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
+        locator.name = "DrivenKeyLocator";
+
+        var headBone = (GameObject)CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
+        var eyeLocator_L = headBone.transform.Find("Eye_target_locator_L");
+        var eyeLocator_R = headBone.transform.Find("Eye_target_locator_R");
+
+        var mangaEntry = Main.AbEffect.FindAll(a => a.Name.StartsWith("3d/effect/charaemotion/pfb_eff_chr_emo_eye"));
+        var mangaObjects = new List<GameObject>();
+        mangaEntry.ForEach(entry =>
+        {
+            AssetBundle ab = AssetBundle.LoadFromFile(entry.FilePath);
+            Main.LoadedBundles.Add(entry.Name, ab);
+            var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
+            obj.SetActive(false);
+
+            var leftObj = Instantiate(obj, eyeLocator_L.transform);
+            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
+            CurrentUMAContainer.LeftMangaObject.Add(leftObj);
+
+            var RightObj = Instantiate(obj, eyeLocator_R.transform);
+            if (RightObj.TryGetComponent<AssetHolder>(out var holder))
+            {
+                if (holder._assetTableValue["invert"] > 0)
+                    RightObj.transform.localScale = new Vector3(-1, 1, 1);
+            }
+            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
+            CurrentUMAContainer.RightMangaObject.Add(RightObj);
+        });
+
+        var tearEntry = Main.AbChara.FindAll(a => a.Name.StartsWith("3d/chara/common/tear/") && a.Name.Contains("pfb_chr_tear"));
+        if (tearEntry.Count > 0)
+        {
+            tearEntry.ForEach(a => RecursiveLoadAsset(a));
+        }
+        if (CurrentUMAContainer.TearPrefab_0 && CurrentUMAContainer.TearPrefab_1)
+        {
+            var p0 = CurrentUMAContainer.TearPrefab_0;
+            var p1 = CurrentUMAContainer.TearPrefab_1;
+            var t = headBone.transform;
+            CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
+            CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
+            CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
+            CurrentUMAContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
+        }
+
+        var firsehead = CurrentUMAContainer.Head;
+        var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
+        var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
+        var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
+        faceDriven._earTarget = earDriven._targetFaces;
+        CurrentUMAContainer.FaceDrivenKeyTarget = faceDriven;
+        CurrentUMAContainer.FaceDrivenKeyTarget.Container = CurrentUMAContainer;
+        CurrentUMAContainer.FaceOverrideData = faceOverride;
+        faceOverride?.SetEnable(UI.EnableFaceOverride);
+        faceDriven.DrivenKeyLocator = locator.transform;
+        faceDriven.Initialize(firsehead.GetComponentsInChildren<Transform>().ToList());
+
+        var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
+        emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
+        CurrentUMAContainer.FaceEmotionKeyTarget = emotionDriven;
+        emotionDriven.FaceDrivenKeyTarget = faceDriven;
+        emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData.ToList();
+        emotionDriven.Initialize();
     }
 
     private void LoadAnimation(AnimationClip clip)
