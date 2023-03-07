@@ -77,7 +77,7 @@ public class UmaViewerUI : MonoBehaviour
     [Header("backgrounds")]
     public ScrollRect BackGroundList;
     public PageManager BackGroundPageCtrl;
-    public GameObject BackGroundCameraObj;
+    public GameObject BG_Canvas;
     public GameObject BG_HSVPickerObj;
     public Image BG_Image;
 
@@ -107,6 +107,7 @@ public class UmaViewerUI : MonoBehaviour
     public Button VMDButton;
     public Button UpdateDBButton;
     public TMP_Dropdown WorkModeDropdown;
+    public TMP_Dropdown LanguageDropdown;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -144,6 +145,7 @@ public class UmaViewerUI : MonoBehaviour
     private void Start()
     {
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
+        LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
     }
 
@@ -963,7 +965,7 @@ public class UmaViewerUI : MonoBehaviour
                 Camera.main.clearFlags = CameraClearFlags.SolidColor;
                 break;
             case 2:
-                Camera.main.clearFlags = CameraClearFlags.Depth;
+                Camera.main.clearFlags = CameraClearFlags.SolidColor;
                 ListBackgrounds();
                 break;
             default:
@@ -971,8 +973,8 @@ public class UmaViewerUI : MonoBehaviour
                 break;
         }
 
-        BackGroundCameraObj.SetActive(index == 2);
         BG_HSVPickerObj.SetActive(index != 2);
+        BG_Canvas.SetActive(index == 2);
         BackGroundPageCtrl.transform.parent.gameObject.SetActive(index == 2);
     }
 
@@ -1213,6 +1215,15 @@ public class UmaViewerUI : MonoBehaviour
         ManifestDB dB = new ManifestDB();
         UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { ShowMessage(msg); });
         StartCoroutine(UpdateResVerCoroutine);
+    }
+
+    public void ChangeLanguage(int lang)
+    {
+        if ((int)Config.Instance.Language != lang)
+        {
+            Config.Instance.Language = (Language)lang;
+            Config.Instance.UpdateConfig();
+        }
     }
 
     public void ChangeWorkMode(int mode)
