@@ -5,9 +5,6 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
-using static ManifestCategory;
-using BaseNcoding;
-using System.Text;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -63,6 +60,7 @@ public class UmaViewerMain : MonoBehaviour
                 }
             });
         }
+        
         //Mob names (EN & JP)
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
         {

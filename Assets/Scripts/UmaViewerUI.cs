@@ -140,8 +140,6 @@ public class UmaViewerUI : MonoBehaviour
         AnimationPlayButton.onClick.AddListener(AnimationPause);
         AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
         AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
-        if (Application.platform == RuntimePlatform.Android)
-            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Shrink;
     }
     private void Start()
     {
@@ -168,7 +166,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             if (Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
             {
-                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop");
+                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.Contains("_loop");
                 var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
                 var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
                 if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
@@ -1000,6 +998,7 @@ public class UmaViewerUI : MonoBehaviour
             Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
         }
     }
+
     public void SetFaceOverrideEnable(bool isOn)
     {
         EnableFaceOverride = isOn;

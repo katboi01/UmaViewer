@@ -447,7 +447,7 @@ public class UmaViewerBuilder : MonoBehaviour
         var hairasset = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name == hair);
         bool isDefaultHead = true;
 
-        
+
         if (asset != null && hairasset != null)
         {
             //Load Face And Hair Textures
@@ -521,7 +521,7 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.Initialize();
         CurrentUMAContainer.SetHeight(-1);
-        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"homestand{personality.PadLeft(2,'0')}_loop")));
+        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"homestand{personality.PadLeft(2, '0')}_loop")));
     }
 
     private void LoadMiniUma(CharaEntry chara, string costumeId)
@@ -934,7 +934,7 @@ public class UmaViewerBuilder : MonoBehaviour
                         }
                         else if (bundle.name.Contains("/head/"))
                         {
-                            if (bundle.name.Contains("_hair")&&!bundle.name.Contains("mchr"))
+                            if (bundle.name.Contains("_hair") && !bundle.name.Contains("mchr"))
                             {
                                 LoadHair(go);
                             }
@@ -981,10 +981,10 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         CurrentUMAContainer.GenericBodyTextures.Add(tex2D);
                     }
-                    else if (bundle.name.Contains("_face")|| bundle.name.Contains("_hair"))
+                    else if (bundle.name.Contains("_face") || bundle.name.Contains("_hair"))
                     {
-                        if(CurrentUMAContainer.IsMob)
-                        CurrentUMAContainer.MobHeadTextures.Add(tex2D);
+                        if (CurrentUMAContainer.IsMob)
+                            CurrentUMAContainer.MobHeadTextures.Add(tex2D);
                     }
                     break;
             }
@@ -1199,7 +1199,7 @@ public class UmaViewerBuilder : MonoBehaviour
                             m.SetTexture("_ToonMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("shad_c")));
                             m.SetTexture("_TripleMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("base")));
                             m.SetTexture("_OptionMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("ctrl")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area")&&! t.name.Contains("_eye")));
+                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
                             SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "mayu", true);
                         }
                         if (m.name.EndsWith("mayu"))
@@ -1221,7 +1221,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     {
                         if (isMob)
                         {
-                            CurrentUMAContainer.CheekTex_0 = CurrentUMAContainer.MobHeadTextures.FindLast(a=>a.name.Contains("cheek0"));
+                            CurrentUMAContainer.CheekTex_0 = CurrentUMAContainer.MobHeadTextures.FindLast(a => a.name.Contains("cheek0"));
                             CurrentUMAContainer.CheekTex_1 = CurrentUMAContainer.MobHeadTextures.FindLast(a => a.name.Contains("cheek1"));
                         }
                         else
@@ -1289,7 +1289,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     m.shader = alphaShader;
                 }
 
-                if(m.name.EndsWith("_hair"))
+                if (m.name.EndsWith("_hair"))
                 {
                     m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("diff")));
                     m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("shad_c")));
@@ -1440,50 +1440,11 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (clip.name.EndsWith("_S"))
         {
-            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_s"] = clip;
         }
         else if (clip.name.EndsWith("_E"))
         {
-            CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
-        }
-        else if (clip.name.EndsWith("_loop"))
-        {
-            CurrentUMAContainer.UpBodyReset();
-            UmaDatabaseEntry motion_e = null, motion_s = null;
-            if (clip.name.EndsWith("_loop"))
-            {
-                motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            }
-
-            if (CurrentUMAContainer.OverrideController["clip_2"].name.EndsWith("_loop"))
-            {
-                motion_e = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e")));
-            }
-
-            if (CurrentUMAContainer.isAnimatorControl && CurrentUMAContainer.FaceDrivenKeyTarget)
-            {
-                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-            }
-
-            bool needTransit = false;
-            needTransit = (motion_s != null && motion_e != null);
-            if (needTransit)
-            {
-                RecursiveLoadAsset(motion_e);
-                RecursiveLoadAsset(motion_s);
-            }
-
-            SetPreviewCamera(null);
-            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
-            CurrentUMAContainer.OverrideController["clip_2"] = clip;
-
-            CurrentUMAContainer.UmaAnimator.Play("motion_1", -1);
-            CurrentUMAContainer.UmaAnimator.SetTrigger(needTransit ? "next_s" : "next");
-            CurrentUMAContainer.isAnimatorControl = false;
-            CurrentUMAContainer.SetHeight(-1);
         }
         else if (clip.name.Contains("tail"))
         {
@@ -1495,17 +1456,12 @@ public class UmaViewerBuilder : MonoBehaviour
         else if (clip.name.Contains("face"))
         {
             if (CurrentUMAContainer.IsMini) return;
-            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-            CurrentUMAContainer.FaceOverrideController["clip_1"] = clip;
-            CurrentUMAContainer.isAnimatorControl = true;
-            CurrentUMAContainer.SetHeight(0);
-            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
+            LoadFaceAnimation(clip);
         }
         else if (clip.name.Contains("ear"))
         {
             if (CurrentUMAContainer.IsMini) return;
-            CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
-            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
+            LoadEarAnimation(clip);
         }
         else if (clip.name.Contains("pos"))
         {
@@ -1517,12 +1473,61 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             SetPreviewCamera(clip);
         }
-        else
+        else if (clip.name.Contains("_loop"))
         {
             CurrentUMAContainer.UpBodyReset();
-            CurrentUMAContainer.UmaAnimator.Rebind();
+            if (CurrentUMAContainer.isAnimatorControl && CurrentUMAContainer.FaceDrivenKeyTarget)
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                CurrentUMAContainer.isAnimatorControl = false;
+            }
+
+            var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
+            if (facialMotion != null)
+            {
+                RecursiveLoadAsset(facialMotion);
+            }
+            var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
+            if (earMotion != null)
+            {
+                RecursiveLoadAsset(earMotion);
+            }
+
+            UmaDatabaseEntry motion_e = null, motion_s = null;
+            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            if (motion_s != null)
+            {
+                RecursiveLoadAsset(motion_s);
+            }
+
+            if (CurrentUMAContainer.OverrideController["clip_2"].name.Contains("_loop"))
+            {
+                motion_e = Main.AbMotions.FirstOrDefault(a => 
+                a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e"))
+                && !a.Name.Contains("hom_")); //home end animation not for interpolation
+
+                if (motion_e != null) 
+                {
+                    RecursiveLoadAsset(motion_e);
+                }
+            }
+
+            SetPreviewCamera(null);
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
-            var lastTime = CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            CurrentUMAContainer.OverrideController["clip_2"] = clip;
+
+            CurrentUMAContainer.UmaAnimator.Play("motion_1", -1, 0);
+            CurrentUMAContainer.UmaAnimator.SetTrigger((motion_s != null && motion_e != null) ? "next_e" : ((motion_s != null) ? "next_s" : "next"));
+        }
+        else
+        {
+            if (CurrentUMAContainer.FaceDrivenKeyTarget)
+            {
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+                CurrentUMAContainer.isAnimatorControl = false;
+            }
+            CurrentUMAContainer.UpBodyReset();
+            CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
             // If Cut-in, play immediately without state interpolation
             if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
@@ -1557,8 +1562,6 @@ public class UmaViewerBuilder : MonoBehaviour
                     SetPreviewCamera(null);
                 }
 
-                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-
                 if (clip.name.Contains("cti_crd"))
                 {
                     string[] param = clip.name.Split('_');
@@ -1575,15 +1578,11 @@ public class UmaViewerBuilder : MonoBehaviour
                         clip.AddEvent(aevent);
                     }
                 }
+
+                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
             }
             else
             {
-                if (CurrentUMAContainer.FaceDrivenKeyTarget)
-                {
-                    CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-                }
-                CurrentUMAContainer.isAnimatorControl = false;
-                CurrentUMAContainer.SetHeight(-1);
                 SetPreviewCamera(null);
 
                 //Some animations have facial animation
@@ -1598,9 +1597,98 @@ public class UmaViewerBuilder : MonoBehaviour
                     RecursiveLoadAsset(earMotion);
                 }
 
-                CurrentUMAContainer.UmaAnimator.Play("motion_1", 0, lastTime);
-                CurrentUMAContainer.UmaAnimator.SetTrigger("next");
+                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
             }
+        }
+    }
+
+    public void LoadFaceAnimation(AnimationClip clip)
+    {
+        if (clip.name.Contains("_S"))
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_s"] = clip;
+        }
+        else if (clip.name.Contains("_E"))
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_e"] = clip;
+        }
+        else if (clip.name.Contains("_loop"))
+        {
+            CurrentUMAContainer.isAnimatorControl = true;
+            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            UmaDatabaseEntry motion_e = null, motion_s = null;
+            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            if (motion_s != null)
+            {
+                RecursiveLoadAsset(motion_s);
+            }
+
+            if (CurrentUMAContainer.FaceOverrideController["clip_2"].name.Contains("_loop"))
+            {
+                motion_e = Main.AbMotions.FirstOrDefault(a => 
+                a.Name.EndsWith(CurrentUMAContainer.FaceOverrideController["clip_2"].name.Replace("_loop", "_e")) 
+                && !a.Name.Contains("hom_"));
+
+                if (motion_e != null)
+                {
+                    RecursiveLoadAsset(motion_e);
+                }
+            }
+
+            CurrentUMAContainer.FaceOverrideController["clip_1"] = CurrentUMAContainer.FaceOverrideController["clip_2"];
+            CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 0, 0);
+            CurrentUMAContainer.UmaFaceAnimator.SetTrigger((motion_s != null && motion_e != null) ? "next_e" : ((motion_s != null) ? "next_s" : "next"));
+        }
+        else
+        {
+            CurrentUMAContainer.isAnimatorControl = true;
+            CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            CurrentUMAContainer.FaceOverrideController["clip_2"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_2", 0, 0);
+        }
+    }
+
+    public void LoadEarAnimation(AnimationClip clip)
+    {
+        if (clip.name.Contains("_S"))
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_s_ear"] = clip;
+        }
+        else if (clip.name.Contains("_E"))
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_e_ear"] = clip;
+        }
+        else if (clip.name.Contains("_loop"))
+        {
+            UmaDatabaseEntry motion_e = null, motion_s = null;
+            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
+            if (motion_s != null)
+            {
+                RecursiveLoadAsset(motion_s);
+            }
+
+            if (CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Contains("_loop"))
+            {
+                motion_e = Main.AbMotions.FirstOrDefault(a => 
+                a.Name.EndsWith(CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Replace("_loop", "_e")) 
+                && !a.Name.Contains("hom_"));
+
+                if (motion_e != null)
+                {
+                    RecursiveLoadAsset(motion_e);
+                }
+            }
+
+            CurrentUMAContainer.FaceOverrideController["clip_1_ear"] = CurrentUMAContainer.FaceOverrideController["clip_2_ear"];
+            CurrentUMAContainer.FaceOverrideController["clip_2_ear"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_1", 1, 0);
+            CurrentUMAContainer.UmaFaceAnimator.SetTrigger((motion_s != null && motion_e != null) ? "next_e_ear" : ((motion_s != null) ? "next_s_ear" : "next_ear"));
+        }
+        else
+        {
+            CurrentUMAContainer.FaceOverrideController["clip_2_ear"] = clip;
+            CurrentUMAContainer.UmaFaceAnimator.Play("motion_2", 1, 0);
         }
     }
 
@@ -1615,10 +1703,12 @@ public class UmaViewerBuilder : MonoBehaviour
             (AnimationCameraAnimator.runtimeAnimatorController as AnimatorOverrideController)["clip_1"] = clip;
             AnimationCamera.enabled = true;
             AnimationCameraAnimator.Play("motion_1", 0, 0);
+            CurrentUMAContainer.SetHeight(0);
         }
         else
         {
             AnimationCamera.enabled = false;
+            CurrentUMAContainer.SetHeight(-1);
         }
     }
 
@@ -1823,7 +1913,7 @@ public class UmaViewerBuilder : MonoBehaviour
         mat.SetColor("_MaskToonColorB2", t6);
     }
 
-    private void SetMaskColor(Material mat, DataRow colordata, string prefix,bool hastoon)
+    private void SetMaskColor(Material mat, DataRow colordata, string prefix, bool hastoon)
     {
         mat.EnableKeyword("USE_MASK_COLOR");
         Color c1, c2, c3, c4, c5, c6, t1, t2, t3, t4, t5, t6;

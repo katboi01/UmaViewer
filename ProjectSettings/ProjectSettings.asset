@@ -74,7 +74,7 @@ PlayerSettings:
   androidMinimumWindowWidth: 400
   androidMinimumWindowHeight: 300
   androidFullscreenMode: 1
-  defaultIsNativeResolution: 1
+  defaultIsNativeResolution: 0
   macRetinaSupport: 1
   runInBackground: 1
   captureSingleScreen: 0
@@ -271,7 +271,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: be57be148b08f20409f61a4db5bab7e7, type: 3}
+      m_Icon: {fileID: 2800000, guid: 31c09c7e5e37c29478b22be3658099fc, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0
