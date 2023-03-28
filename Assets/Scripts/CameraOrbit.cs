@@ -40,6 +40,7 @@ public class CameraOrbit : MonoBehaviour
     [Header("Free Camera")]
     public GameObject FreeCamSettingsTab;
     public Slider FreeCamFovSlider;
+    public Slider FreeCamRotationSlider;
     public Slider FreeCamMoveSpeedSlider;
     public Slider FreeCamRotateSpeedSlider;
     bool FreeCamLeft = false;
@@ -194,13 +195,12 @@ public class CameraOrbit : MonoBehaviour
             lookRotation.y += Input.GetAxis("Mouse X") * rotateSpeed;
 
             lookRotation.x = Mathf.Clamp(lookRotation.x, -90, 90);
-
-            transform.localRotation = Quaternion.Euler(lookRotation.x, lookRotation.y, lookRotation.z);
         }
         else
         {
             FreeCamLeft = false;
         }
+        transform.localRotation = Quaternion.Euler(lookRotation.x, lookRotation.y, FreeCamRotationSlider.value);
 
         if (Input.GetMouseButtonDown(1) && !eventSystem.IsPointerOverGameObject())
         {
@@ -215,6 +215,7 @@ public class CameraOrbit : MonoBehaviour
         {
             FreeCamRight = false;
         }
+
     }
     #endregion
 }
