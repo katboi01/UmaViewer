@@ -48760,7 +48760,7 @@ MonoBehaviour:
   _Global_FogMinDistance: {x: 0, y: 0, z: 0, w: 0}
   _Global_FogLength: {x: 0, y: 0, z: 0, w: 0}
   _RimHorizonOffset: 0
-  _UVEmissivePower: 0
+  _UVEmissivePower: 1
   _AmbientColor: {r: 0, g: 0, b: 0, a: 0}
   scrollPosition: {x: 0, y: 0}
 --- !u!4 &2048991191
