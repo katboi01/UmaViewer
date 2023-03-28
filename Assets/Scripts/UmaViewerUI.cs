@@ -126,6 +126,7 @@ public class UmaViewerUI : MonoBehaviour
     public bool isCriware = false;
     public bool isHeadFix = false;
     public bool EnableEyeTracking = true;
+    public bool EnableFaceOverride = true;
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
@@ -997,6 +998,14 @@ public class UmaViewerUI : MonoBehaviour
         if (Builder.CurrentUMAContainer)
         {
             Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
+        }
+    }
+    public void SetFaceOverrideEnable(bool isOn)
+    {
+        EnableFaceOverride = isOn;
+        if (Builder.CurrentUMAContainer && Builder.CurrentUMAContainer.FaceOverrideData)
+        {
+            Builder.CurrentUMAContainer.FaceOverrideData.Enable = isOn;
         }
     }
 
