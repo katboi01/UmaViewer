@@ -9,6 +9,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class UmaViewerUI : MonoBehaviour
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
     public PageManager ScenePageCtrl;
-    public GameObject MessagePannel;
+    public ScrollRect MessageScrollRect;
     public Text MessageText;
 
     [Header("lists")]
@@ -1221,7 +1222,7 @@ public class UmaViewerUI : MonoBehaviour
         if (UpdateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
         UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg) { ShowMessage(msg); });
+        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { ShowMessage(msg,type); });
         StartCoroutine(UpdateResVerCoroutine);
     }
 
@@ -1261,10 +1262,16 @@ public class UmaViewerUI : MonoBehaviour
         Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
     }
 
-    public void ShowMessage(string msg)
+    public void ShowMessage(string msg, UIMessageType type)
     {
-        MessagePannel.SetActive(true);
-        MessageText.text = msg;
+        MessageText.text += type switch
+        {
+            UIMessageType.Error => string.Format("<color=red>{0}</color>\n", msg),
+            UIMessageType.Warning => string.Format("<color=yellow>{0}</color>\n", msg),
+            UIMessageType.Success => string.Format("<color=green>{0}</color>\n", msg),
+            _ => $"{msg}\n",
+        };
+        MessageScrollRect.gameObject.SetActive(true);
+        MessageScrollRect.verticalNormalizedPosition = 0;
     }
-
 }

@@ -13,8 +13,8 @@ public class ManifestDB
 {
     public SqliteConnection MetaDB;
     public static string DBPath;
-    public Action<string> callback;
-
+    public Action<string, UIMessageType> callback;
+    private bool isError;
     public ManifestDB()
     {
         string DBPath = $"{Config.Instance.MainPath}\\meta_umaviewer";
@@ -51,13 +51,14 @@ public class ManifestDB
         }
     }
 
-    public IEnumerator UpdateResourceVersion(Action<string> callback)
+    public IEnumerator UpdateResourceVersion(Action<string, UIMessageType> callback)
     {
+        isError = false;
         this.callback = callback;
-        callback?.Invoke("Checking Resource Version");
+        callback?.Invoke("Checking Resource Version", UIMessageType.Default);
         yield return UpdateMetaDB();
         yield return UpdateMasterDB();
-        callback?.Invoke($"Done. Please restart the application.");
+        callback?.Invoke(isError ? "Update aborted." : $"Done. Please restart the application.", isError ? UIMessageType.Error : UIMessageType.Success);
     }
 
     //umamusume uses the manifest file to generate meta database.
@@ -68,7 +69,7 @@ public class ManifestDB
     public IEnumerator UpdateMetaDB()
     {
         string rootHash = null;
-        callback?.Invoke("Getting resource version");
+        callback?.Invoke("Getting resource version", UIMessageType.Default);
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/MetaC/root", txt =>
         {
             if (string.IsNullOrEmpty(txt)) return;
@@ -81,7 +82,9 @@ public class ManifestDB
 
         if (rootHash == null)
         {
+            callback?.Invoke("Get RootHash Error", UIMessageType.Error);
             Debug.LogError("Get RootHash Error");
+            isError = true;
             yield break;
         }
 
@@ -99,7 +102,7 @@ public class ManifestDB
 
     public IEnumerator UpdateMetaDB(ManifestEntry rootEntry)
     {
-        if (MetaDB == null || MetaDB.State == System.Data.ConnectionState.Closed)
+        if (MetaDB == null || MetaDB.State != System.Data.ConnectionState.Open)
         {
             Debug.LogError("Open Meta Database Error");
             yield break;
@@ -112,12 +115,13 @@ public class ManifestDB
         UpdateManifestEntry(index, "manifest3", rootEntry, ref command);
 
         //Insert platform
-        callback?.Invoke("Reading Platform Manifest");
+        callback?.Invoke("Reading Platform Manifest", UIMessageType.Default);
         ManifestEntry[] platformEntrys = null;
         yield return GetManifest(rootEntry.hname, Kind.PlatformManifest, entrys => { platformEntrys = entrys; });
         if (platformEntrys == null)
         {
             Debug.LogError("Read PlatformManifest Error");
+            isError = true;
             MetaDB.Close();
             yield break;
         }
@@ -126,11 +130,13 @@ public class ManifestDB
         UpdateManifestEntry(index, "manifest2", platformEntry, ref command);
 
         //Insert AssetManifest
+        callback?.Invoke($"Reading Assets Manifest", UIMessageType.Default);
         ManifestEntry[] assetEntrys = null;
         yield return GetManifest(platformEntry.hname, Kind.AssetManifest, entrys => { assetEntrys = entrys; });
         if (assetEntrys == null)
         {
             Debug.LogError("Read AssetManifest Error");
+            isError = true;
             MetaDB.Close();
             yield break;
         }
@@ -139,7 +145,6 @@ public class ManifestDB
             for (int i = 0; i < assetEntrys.Length; i++)
             {
                 index++;
-                callback?.Invoke($"Reading Assets Manifest : {assetEntrys[i].tname} ({i + 1}/{assetEntrys.Length})");
                 UpdateManifestEntry(index, "manifest", assetEntrys[i], ref command);
             }
             tran.Commit();
@@ -153,13 +158,14 @@ public class ManifestDB
             if (assets == null)
             {
                 Debug.LogError("Read AssetManifest Error");
+                isError = true;
                 continue;
             }
+            callback?.Invoke($"Reading AssetBundles Manifest : {assetEntry.tname}", UIMessageType.Default);
             using SqliteTransaction tran = MetaDB.BeginTransaction();
             for (int i = 0; i < assets.Length; i++)
             {
                 index++;
-                callback?.Invoke($"Reading AssetBundles Manifest : {assetEntry.tname} ({i + 1}/{assets.Length})");
                 UpdateManifestEntry(index, assetEntry.tname, assets[i], ref command);
             }
             tran.Commit();
@@ -168,13 +174,17 @@ public class ManifestDB
 
     public IEnumerator UpdateMasterDB()
     {
-        if (MetaDB == null || MetaDB.State == System.Data.ConnectionState.Closed)
+        if (MetaDB == null || MetaDB.State != System.Data.ConnectionState.Open)
         {
             Debug.LogError("Open Meta Database Error");
+            isError = true;
             yield break;
         }
 
-        callback?.Invoke($"Checking master.mdb");
+        var masterPath = $"{Path.GetDirectoryName(DBPath)}\\master\\master_umaviewer.mdb";
+        var masterDir = Path.GetDirectoryName(masterPath);
+
+        callback?.Invoke($"Checking master.mdb", UIMessageType.Default);
         SqliteCommand command = new SqliteCommand("SELECT h FROM a WHERE n LIKE 'master.mdb.lz4'", MetaDB);
         var reader = command.ExecuteReader();
 
@@ -184,7 +194,7 @@ public class ManifestDB
             var path = GetManifestPath(hash);
             if (!File.Exists(path))
             {
-                callback?.Invoke($"Downloading master.mdb");
+                callback?.Invoke($"Downloading master.mdb", UIMessageType.Default);
                 UnityWebRequest www = UnityWebRequest.Get(UmaViewerDownload.GetGenericRequestUrl(hash));
                 yield return www.SendWebRequest();
                 if (www.result == UnityWebRequest.Result.Success)
@@ -194,20 +204,24 @@ public class ManifestDB
                 else
                 {
                     Debug.LogError("Download Master.mdb Failed :" + www.error);
+                    callback?.Invoke("Download Master.mdb Failed :" + www.error, UIMessageType.Error);
+                    isError = true;
                     yield break;
                 }
             }
 
-            callback?.Invoke($"Decompress master.mdb");
-            var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master_umaviewer.mdb";
-            Directory.CreateDirectory(Path.GetDirectoryName(masterPath));
+            callback?.Invoke($"Decompress master.mdb", UIMessageType.Default);
             try
             {
-                File.WriteAllBytes(masterPath, LZ4Util.DecompressFromFile(path));
+                Directory.CreateDirectory(masterDir);
+                var bytes = LZ4Util.DecompressFromFile(path);
+                File.WriteAllBytes(masterPath, bytes);
             }
-            catch 
+            catch (Exception e)
             {
-                callback?.Invoke($"Decompress master.mdb error");
+                Debug.LogError($"Decompress master.mdb Error: {e.Message}");
+                callback?.Invoke($"Decompress master.mdb Error", UIMessageType.Error);
+                isError = true;
                 yield break;
             }
         }
@@ -268,7 +282,7 @@ public class ManifestDB
         var path = GetManifestPath(hash);
         if (!File.Exists(path))
         {
-            this.callback?.Invoke($"Downloading Manifest :{hash}");
+            this.callback?.Invoke($"Downloading Manifest :{hash}", UIMessageType.Default);
             yield return DownloadManifest(hash);
         }
         if (File.Exists(path))
@@ -289,7 +303,8 @@ public class ManifestDB
         else
         {
             Debug.LogError("Download Manifest Failed :" + www.error);
-            callback?.Invoke($"Download Manifest Failed :{www.error},Update aborted");
+            callback?.Invoke($"Download Manifest Failed :{www.error}", UIMessageType.Error);
+            isError = true;
             yield break;
         }
     }

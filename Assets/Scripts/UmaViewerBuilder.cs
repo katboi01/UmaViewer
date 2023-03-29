@@ -1744,16 +1744,19 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         string value = $"chara/chr{id}/chr_icon_{id}";
         var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
-        string path = entry.FilePath;
-        if (File.Exists(path))
+        if (entry != null) 
         {
-            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
-            if (assetBundle.Contains($"chr_icon_{id}"))
+            string path = entry.FilePath;
+            if (File.Exists(path))
             {
-                Texture2D texture = (Texture2D)assetBundle.LoadAsset($"chr_icon_{id}");
-                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-                assetBundle.Unload(false);
-                return sprite;
+                AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
+                if (assetBundle.Contains($"chr_icon_{id}"))
+                {
+                    Texture2D texture = (Texture2D)assetBundle.LoadAsset($"chr_icon_{id}");
+                    Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                    assetBundle.Unload(false);
+                    return sprite;
+                }
             }
         }
         return null;
