@@ -14,7 +14,7 @@ public class Config
     public string MainPathTip = "Path to game folder, eg. D:/Backup/Cygames/umamusume";
     public string MainPath = "";
 
-    public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client, Database needs to be updated manually";
+    public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client(slow), Database needs to be updated manually";
     public WorkMode WorkMode = WorkMode.Default;
 
 

@@ -58,7 +58,7 @@ public class ManifestDB
         callback?.Invoke("Checking Resource Version", UIMessageType.Default);
         yield return UpdateMetaDB();
         yield return UpdateMasterDB();
-        callback?.Invoke(isError ? "Update aborted." : $"Done. Please restart the application.", isError ? UIMessageType.Error : UIMessageType.Success);
+        callback?.Invoke(isError ? "Update aborted." : $"Done. Please restart the application.\n", isError ? UIMessageType.Error : UIMessageType.Success);
     }
 
     //umamusume uses the manifest file to generate meta database.

@@ -31,7 +31,6 @@ public class UmaViewerDownload : MonoBehaviour
 
     public static void DownloadAssetSync(UmaDatabaseEntry entry,string path, Action<string , UIMessageType> callback = null)
     {
-        callback?.Invoke($"Downloading AssetBundle: {Path.GetFileName(entry.Name)}", UIMessageType.Default);
         string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
 
         using UnityWebRequest www = UnityWebRequest.Get(baseurl);
