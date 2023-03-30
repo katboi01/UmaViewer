@@ -14,7 +14,7 @@ public class Config
     public string MainPathTip = "Path to game folder, eg. D:/Backup/Cygames/umamusume";
     public string MainPath = "";
 
-    public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client, Database needs to be updated manually";
+    public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client(slow), Database needs to be updated manually";
     public WorkMode WorkMode = WorkMode.Default;
 
 
@@ -36,7 +36,7 @@ public class Config
             }
             catch (Exception ex)
             {
-                UmaViewerUI.Instance.ShowMessage("Config load error. Using default. " + ex.Message);
+                UmaViewerUI.Instance.ShowMessage("Config load error. Using default. " + ex.Message, UIMessageType.Error);
                 MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
             }
         }
@@ -47,7 +47,7 @@ public class Config
     public void UpdateConfig()
     {
         File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
-        UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.");
+        UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.", UIMessageType.Default);
     }
 }
 

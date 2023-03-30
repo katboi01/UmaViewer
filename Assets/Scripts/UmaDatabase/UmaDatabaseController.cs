@@ -92,7 +92,7 @@ public class UmaDatabaseController
             {
                 msg += "\nPlease install the dmm game client";
             }
-            UmaViewerUI.Instance.ShowMessage(msg);
+            UmaViewerUI.Instance.ShowMessage(msg, UIMessageType.Error);
         }
     }
 
@@ -131,7 +131,6 @@ public class UmaDatabaseController
         return ReadMaster(conn, "SELECT * FROM mob_data");
     }
 
-
     static IEnumerable<DataRow> ReadMaster(SqliteConnection conn,string sql)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
@@ -144,6 +143,7 @@ public class UmaDatabaseController
         {
             yield return (DataRow)temp.Current;
         }
+        sqlite_cmd.Dispose();
     }
 
     static IEnumerable<FaceTypeData> ReadFaceTypeData(SqliteConnection conn)
@@ -191,7 +191,6 @@ public class UmaDatabaseController
         return null;
     }
 
-
     public static DataRow ReadMobDressColor(string mobid)
     {
         var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
@@ -216,6 +215,11 @@ public class UmaDatabaseController
     {
         masterDb.Close();
         metaDb.Close();
+        masterDb.Dispose();
+        metaDb.Dispose();
+        SqliteConnection.ClearAllPools();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
     }
 
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using static UmaViewerUI;
 
 public class UmaViewerDownload : MonoBehaviour
 {
@@ -28,13 +29,9 @@ public class UmaViewerDownload : MonoBehaviour
         }
     }
 
-    public static void DownloadAssetSync(UmaDatabaseEntry entry,string path, Action<string> callback = null)
+    public static void DownloadAssetSync(UmaDatabaseEntry entry,string path, Action<string , UIMessageType> callback = null)
     {
-        string baseurl = GetAssetRequestUrl(entry.Url);
-        if (!string.IsNullOrEmpty(Path.GetExtension(entry.Name)))
-        {
-            baseurl = GetGenericRequestUrl(entry.Url);
-        }
+        string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
 
         using UnityWebRequest www = UnityWebRequest.Get(baseurl);
         www.SendWebRequest();
@@ -42,7 +39,7 @@ public class UmaViewerDownload : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(www.error);
-            callback?.Invoke($"Failed to download resources : {www.error}");
+            callback?.Invoke($"Failed to download resources : {www.error}", UIMessageType.Error);
         }
         else
         {

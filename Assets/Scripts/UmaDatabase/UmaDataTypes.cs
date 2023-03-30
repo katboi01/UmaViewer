@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
 using System.IO;
+using static UmaViewerUI;
 
 public class UmaDatabaseEntry
 {
@@ -28,9 +29,9 @@ public class UmaDatabaseEntry
     public static void DownloadAsset(UmaDatabaseEntry entry)
     {
         var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg) 
+        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg, UIMessageType type) 
         {
-            UmaViewerUI.Instance.ShowMessage(msg);
+            Instance.ShowMessage(msg, type);
         });
     }
 
@@ -132,6 +133,13 @@ public class CostumeEntry
     public Sprite Icon;
 }
 
+public enum UIMessageType
+{
+    Default,
+    Warning,
+    Error,
+    Success
+}
 public enum UmaFileType
 {
     _3d_cutt,

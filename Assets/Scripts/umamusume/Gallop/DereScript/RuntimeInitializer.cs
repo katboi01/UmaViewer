@@ -39,7 +39,7 @@ public class RuntimeInitializer : MonoBehaviour
         InitializeBeforeSceneLoad();
     }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void InitializeBeforeSceneLoad()
     {
         SaveManager.GetString("先にセーブデータを作成します");

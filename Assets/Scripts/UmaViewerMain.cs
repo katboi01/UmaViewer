@@ -5,9 +5,6 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
-using static ManifestCategory;
-using BaseNcoding;
-using System.Text;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -48,6 +45,11 @@ public class UmaViewerMain : MonoBehaviour
         Dictionary<int, string> enNames = new Dictionary<int, string>();
         Dictionary<int, string> mobNames = new Dictionary<int, string>();
 
+        if(Config.Instance.WorkMode == WorkMode.Standalone)
+        {
+            UI.ShowMessage("Initializing...",UIMessageType.Default);
+        }
+
         //Main chara names (En only)
         if (Config.Instance.Language == Language.En)
         {
@@ -63,6 +65,7 @@ public class UmaViewerMain : MonoBehaviour
                 }
             });
         }
+        
         //Mob names (EN & JP)
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
         {
