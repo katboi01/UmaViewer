@@ -1687,6 +1687,11 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         else
         {
+            if (CurrentUMAContainer.FaceOverrideController["clip_2"].name == "clip_2")
+            {
+                CurrentUMAContainer.isAnimatorControl = true;
+                CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
+            }
             CurrentUMAContainer.FaceOverrideController["clip_2_ear"] = clip;
             CurrentUMAContainer.UmaFaceAnimator.Play("motion_2", 1, 0);
         }

@@ -217,20 +217,28 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadModelPanels()
     {
-        var container1 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container1.Name = container1.name = "Generic";
-        container1.Button.onClick.AddListener(() =>
+        var containerG = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        containerG.Name = containerG.name = "Generic";
+        containerG.Button.onClick.AddListener(() =>
         {
-            HighlightChildImage(AnimationSetList.content, container1);
+            HighlightChildImage(AnimationSetList.content, containerG);
             ListAnimations(-1, false);
         });
 
-        var container2 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        container2.Name = container2.name = "Tail";
-        container2.Button.onClick.AddListener(() =>
+        var containerT = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        containerT.Name = containerT.name = "Tail";
+        containerT.Button.onClick.AddListener(() =>
         {
-            HighlightChildImage(AnimationSetList.content, container2);
+            HighlightChildImage(AnimationSetList.content, containerT);
             ListAnimations(-2, false);
+        });
+
+        var containerE = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
+        containerE.Name = containerE.name = "Ear";
+        containerE.Button.onClick.AddListener(() =>
+        {
+            HighlightChildImage(AnimationSetList.content, containerE);
+            ListAnimations(-3, false);
         });
 
         foreach (var chara in Main.Characters.OrderBy(c => c.Id))
@@ -780,6 +788,23 @@ public class UmaViewerUI : MonoBehaviour
         else if (umaId == -2)
         {
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
+            {
+                var entryInstance = entry;
+                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
+                container.Name = container.name = Path.GetFileName(entry.Name);
+                container.FontSize = 20;
+                container.Button.onClick.AddListener(() =>
+                {
+                    HighlightChildImage(animationList.content, container);
+                    Builder.LoadAsset(entryInstance);
+                    LoadedAnimation();
+                });
+            }
+            pageManager.ResetCtrl();
+        }
+        else if (umaId == -3)
+        {
+            foreach (var entry in Main.AbMotions.Where(a => a.Name.Contains($"type00_ear")&&!a.Name.EndsWith("driven") && !a.Name.Contains("touch")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
