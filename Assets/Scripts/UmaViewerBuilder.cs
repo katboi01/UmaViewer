@@ -23,7 +23,6 @@ public class UmaViewerBuilder : MonoBehaviour
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
     public UmaContainer CurrentUMAContainer;
-    public UmaContainer CurrentLiveContainer;
     public UmaContainer CurrentOtherContainer;
 
     public UmaHeadData CurrentHead;
@@ -914,10 +913,11 @@ public class UmaViewerBuilder : MonoBehaviour
                             LoadAnimation(aClip);
                         }
 
-                        if (CurrentLiveContainer || aClip.name.Contains("tear"))
+                        if (aClip.name.Contains("tear"))
                         {
                             break;
                         }
+
                         UnloadBundle(bundle, false);
                         break;
                     }
@@ -1336,7 +1336,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadProp(GameObject go)
     {
-        var container = (go.name.Contains("Cutt_son") || go.name.Contains("pfb_env_live")) ? CurrentLiveContainer : CurrentOtherContainer;
+        var container = CurrentOtherContainer;
         var prop = Instantiate(go, container.transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
@@ -1738,7 +1738,6 @@ public class UmaViewerBuilder : MonoBehaviour
         if (unloadAllObjects)
         {
             if (CurrentUMAContainer) Destroy(CurrentUMAContainer);
-            if (CurrentLiveContainer) Destroy(CurrentLiveContainer);
             if (CurrentOtherContainer) Destroy(CurrentOtherContainer);
         }
         Main.LoadedBundles.Clear();
@@ -1826,14 +1825,6 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentOtherContainer != null)
         {
             Destroy(CurrentOtherContainer.gameObject);
-        }
-    }
-
-    public void UnloadLive()
-    {
-        if (CurrentLiveContainer != null)
-        {
-            Destroy(CurrentLiveContainer.gameObject);
         }
     }
 
