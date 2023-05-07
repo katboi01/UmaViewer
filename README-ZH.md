@@ -20,7 +20,7 @@
        - ...\\...
 1. 从[Releases](https://github.com/kagari-bi/UmaChat/releases)选项卡下载最新的UmaChat.zip文件。
 1. 将压缩包解压到任何地方。
-1. 运行UmaViewer.exe
+1. 运行UmaChat.exe
 
 ------------
 
