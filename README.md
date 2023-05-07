@@ -1,4 +1,4 @@
-# UmaChat(voice included)
+# UmaChat
 It is based on [UmaViewer](https://github.com/katboi01/UmaViewer), thanks a lot.
 
 Unity application that makes it easy to view assets from Uma Musume: Pretty Derby.
