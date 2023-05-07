@@ -43,11 +43,6 @@ And, you can have a conversation with the Umamusume who can become your computer
 1. Right-click on the Umamusume again to hide the dialog box.
 
 ### To do list
-1. Support for more Umamusume (currently only supports conversations with Riceshower).
-1. Changing the Umamusume's actions based on the content of the response through emotion recognition.
-1. Changes in the Umamusume's mouth shape while speaking.
-1. More interaction events.
-
 ||||
 | ------------ | ------------ | ------------ |
 | ✓ - Working | / - Incomplete  | x - Unsupported  |
