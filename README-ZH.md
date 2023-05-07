@@ -36,7 +36,7 @@
 1. 除了聊天功能外，与原始项目[UmaViewer](https://github.com/katboi01/UmaViewer)几乎没有区别。您可以查看原始项目以了解现有功能。
 1. 选择马娘后，单击StartChatting按钮将使窗口全屏并透明化，将马娘变成桌宠。您还可以按中键拖动马娘（此外还保留了原始功能，例如按住左键并拖动以旋转相机，滚动滚轮以放大或缩小等）。
 ### 聊天
-1. 准备您的OpenAI帐户的api_key、百度帐户的appid和key（用于将Chatgpt的回应翻译成日语，然后使用vits进行推断），以及一个代理。
+1. 准备您的OpenAI帐户的api_key、百度帐户的appid和key（用于将Chatgpt的回应翻译成日语，然后使用vits进行推理），以及一个代理。
 1. 使用我的另一个仓库[UmaChat_WebApi](https://github.com/kagari-bi/UmaChat_WebApi)运行Web应用程序。
 1. 在马娘上右键单击以弹出一个对话框，您可以在其中输入文本。按住Shift+Enter创建新行，单独按Enter提交。
 1. 现在您可以与马娘进行愉快的聊天了。在对话的音频和文本播放完毕后，对话框将被清空，您可以再次输入内容。
