@@ -1,11 +1,15 @@
-# Uma Viewer (2)
+# UmaChat
 
-Unity application that makes it easy to view assets from Uma Musume: Pretty Derby.
+此项目基于[UmaViewer](https://github.com/katboi01/UmaViewer)，非常感谢。
 
-### Requirements/Installation
-- For Users:
-1. [Uma Musume: Pretty Derby DMM](https://dmg.umamusume.jp/) with full data download is required to run the viewer.
-1. Confirm your file listing in C:\\Users\\*you*\AppData\LocalLow\Cygames\umamusume\ looks like this:
+这是一个Unity应用程序，可以轻松查看《Uma Musume: Pretty Derby》的资源。
+
+此外，您还可以与可以成为您电脑桌面宠物的马娘进行对话。
+
+### 要求/安装方法
+- 对于用户:
+1. 要使用该程序，需要[Uma Musume: Pretty Derby DMM](https://dmg.umamusume.jp/) 并完成全部数据下载。
+1. 确认您在C:\Users\you\AppData\LocalLow\Cygames\umamusume\中的文件列表如下所示：
    * umamusume\
      * **meta**
      * master\
@@ -14,60 +18,39 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
        - 2A\\...
        - 2B\\...
        - ...\\...
-1. Download the most recent UmaViewer.zip file from [Releases](https://github.com/katboi01/UmaViewer/releases/) tab.
-1. Extract the archive anywhere, can be extracted over previous version.
-1. Run the UmaViewer.exe
+1. 从Releases选项卡下载最新的UmaChat.zip文件。
+1. 将压缩包解压到任何地方。
+1. 运行UmaViewer.exe
 
 ------------
 
-- For Developers/Contributors
-1. [Unity Hub](https://unity3d.com/get-unity/download) with [Unity Engine Version 2020.3.28f1](unityhub://2020.3.28f1/f5400f52e03f) is recommended. It should be possible to run it on newer 2020.3.X versions.
-1. Clone or download and extract this repository.
-1. Import and Open the project in Unity Hub, missing files should be automatically repaired.
-1. Open the Assets/Scenes/Version2 scene.
-   - note: If there are errors in the console, [JSON .NET For Unity](https://assetstore.unity.com/packages/tools/input-management/json-net-for-unity-11347) may be required
+- 对于开发者/贡献者
+1. 推荐使用[Unity Hub](https://unity3d.com/get-unity/download)及[Unity Engine Version 2020.3.28f1](unityhub://2020.3.28f1/f5400f52e03f). 在2020.3.X的较新版本上运行也应该是可以的。
+1. 克隆或下载并解压此仓库。
+1. 在Unity Hub中导入并打开项目，缺失的文件应该会自动修复。
+1. 打开Assets/Scenes/Version2场景。
+注意：如果控制台中有错误，可能需要JSON .NET For Unity
 
-### Features
+## 如何使用
+### 基本
+1. 除了聊天功能外，与原始项目UmaViewer几乎没有区别。您可以查看原始项目以了解现有功能。
+1. 选择马娘后，单击StartChatting按钮将使窗口全屏并透明化，将马娘变成桌宠。您还可以按中键拖动马娘（此外还保留了原始功能，例如按住左键并拖动以旋转相机，滚动滚轮以放大或缩小等）。
+### 聊天
+1. 准备您的OpenAI帐户的api_key、百度帐户的appid和key（用于将Chatgpt的回应翻译成日语，然后使用vits进行推断），以及一个代理。
+1. 使用我的另一个仓库[UmaChat_WebApi](https://github.com/kagari-bi/UmaChat_WebApi)运行Web应用程序。
+1. 在马娘上右键单击以弹出一个对话框，您可以在其中输入文本。按住Shift+Enter创建新行，单独按Enter提交。
+1. 现在您可以与马娘进行愉快的聊天了。在对话的音频和文本播放完毕后，对话框将被清空，您可以再次输入内容。
+1. 再次右键单击马娘以隐藏对话框。
 
+### 应该会追加的功能
 ||||
 | ------------ | ------------ | ------------ |
 | ✓ - Working | / - Incomplete  | x - Unsupported  |
 
 |||
 | ------------ | ------------ |
-| Viewing main character models/animations | ✓  |
-| Swapping costumes/animations between characters | ✓  |
-| Viewing chibi models/animations | ✓  |
-| Viewing mob (NPC) models | ✓ |
-| Playing facial animations, custom sliders | ✓  |
-| Cloth/Hair physics | ✓  |
-| Playing Live Audio with Lyrics | ✓  |
-| Exporting animations to MMD | ✓  |
-| Recording animations (.gif), screenshots | ✓  |
-| Viewing Props, Scenery, Live scenes | /  |
-| Exporting models | x  |
-
-
-All characters and animations are supported
-
-<img src="https://user-images.githubusercontent.com/59540382/222418271-a6e4ce82-b3a5-47ba-9fc9-4d85120218ec.png" height="350" />
-
-Mobs / background characters as well
-
-<img src="https://user-images.githubusercontent.com/32562737/219174232-7d0a0eec-8b1c-4571-9c08-8474e06dd3a8.png" height="350" />
-
-Mixing outfits and animations
-
-<img src="https://user-images.githubusercontent.com/59540382/222420757-609e1f77-d762-4b39-a7d0-d1fb2d3b79a3.png" height="350" />
-
-Screenshot and .gif recording
-
-<img src="https://user-images.githubusercontent.com/59540382/222421579-582be5db-5839-4f7c-bf1b-80efc812c4e0.gif" height="350" />
-
-and more
-
-<img src="https://user-images.githubusercontent.com/59540382/222422871-12e80e0b-778b-4f42-b581-5e4af5cd6df9.png" height="350" />
-
-
-### Special Thank to:
-MarshmallowAndroid: [UmaMusumeExplorer](https://github.com/MarshmallowAndroid/UmaMusumeExplorer) for acb/awb decoder.
+| 支持更多的马娘 | /  |
+| 根据回应内容通过情感识别改变马娘的动作 | ✓  |
+| 根据回应内容通过情感识别改变马娘的表情 | x  |
+| 在马娘说话时改变其口型 | x  |
+| 更多互动事件 | x |
