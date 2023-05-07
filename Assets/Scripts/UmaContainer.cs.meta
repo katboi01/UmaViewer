@@ -3,7 +3,30 @@ guid: 23381f145fc0db543b2702e49f4bfe28
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Body: {instanceID: 0}
+  - Tail: {instanceID: 0}
+  - Head: {instanceID: 0}
+  - Hair: {instanceID: 0}
+  - UmaAnimator: {instanceID: 0}
+  - OverrideController: {instanceID: 0}
+  - UmaFaceAnimator: {instanceID: 0}
+  - FaceOverrideController: {instanceID: 0}
+  - UpBodyBone: {instanceID: 0}
+  - FaceDrivenKeyTarget: {instanceID: 0}
+  - FaceEmotionKeyTarget: {instanceID: 0}
+  - FaceOverrideData: {instanceID: 0}
+  - HeadBone: {instanceID: 0}
+  - TrackTarget: {instanceID: 0}
+  - FaceMaterial: {instanceID: 0}
+  - CheekTex_0: {instanceID: 0}
+  - CheekTex_1: {instanceID: 0}
+  - CheekTex_2: {instanceID: 0}
+  - TearPrefab_0: {instanceID: 0}
+  - TearPrefab_1: {instanceID: 0}
+  - PhysicsContainer: {instanceID: 0}
+  - ShaderEffectData: {instanceID: 0}
+  - dialogBox: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

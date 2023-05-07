@@ -1436,7 +1436,7 @@ public class UmaViewerBuilder : MonoBehaviour
         emotionDriven.Initialize();
     }
 
-    private void LoadAnimation(AnimationClip clip)
+    public void LoadAnimation(AnimationClip clip)
     {
         if (clip.name.EndsWith("_S"))
         {
@@ -1502,11 +1502,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
             if (CurrentUMAContainer.OverrideController["clip_2"].name.Contains("_loop"))
             {
-                motion_e = Main.AbMotions.FirstOrDefault(a => 
+                motion_e = Main.AbMotions.FirstOrDefault(a =>
                 a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e"))
                 && !a.Name.Contains("hom_")); //home end animation not for interpolation
 
-                if (motion_e != null) 
+                if (motion_e != null)
                 {
                     RecursiveLoadAsset(motion_e);
                 }

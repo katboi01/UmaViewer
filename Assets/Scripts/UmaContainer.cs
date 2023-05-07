@@ -8,6 +8,9 @@ using UnityEngine;
 
 public class UmaContainer : MonoBehaviour
 {
+    // 添加MeshCollider变量
+    private MeshCollider meshCollider;
+
     public DataRow CharaData;
     public GameObject Body;
     public GameObject Tail;
@@ -78,6 +81,10 @@ public class UmaContainer : MonoBehaviour
 
     public void Initialize()
     {
+        // 添加MeshCollider组件
+        meshCollider = gameObject.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = GetComponentInChildren<SkinnedMeshRenderer>().sharedMesh;
+
         TrackTarget = Camera.main.gameObject;
         UpBodyPosition = UpBodyBone.transform.localPosition;
         UpBodyRotation = UpBodyBone.transform.localRotation;
@@ -85,6 +92,42 @@ public class UmaContainer : MonoBehaviour
         //Models must be merged before handling extra morphs
         if (FaceDrivenKeyTarget)
             FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
+    }
+
+    // 添加鼠标拖拽变量
+    private Vector3 screenPoint;
+    private Vector3 offset;
+    private bool isMiddleMouseButtonDown = false;
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(2))
+        {
+            OnMiddleMouseDown();
+            isMiddleMouseButtonDown = true;
+        }
+        else if (Input.GetMouseButtonUp(2))
+        {
+            isMiddleMouseButtonDown = false;
+        }
+
+        if (isMiddleMouseButtonDown)
+        {
+            OnMiddleMouseDrag();
+        }
+    }
+
+    private void OnMiddleMouseDown()
+    {
+        screenPoint = Camera.main.WorldToScreenPoint(transform.position);
+        offset = transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
+    }
+
+    private void OnMiddleMouseDrag()
+    {
+        Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+        Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
+        transform.position = curPosition;
     }
 
     public void MergeModel()

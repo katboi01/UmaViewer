@@ -60,7 +60,7 @@ public class CameraOrbit : MonoBehaviour
 
     void Update()
     {
-        if(CameraMode != CameraModeDropdown.value)
+        if (CameraMode != CameraModeDropdown.value)
         {
             switch (CameraMode) //old
             {
@@ -123,7 +123,7 @@ public class CameraOrbit : MonoBehaviour
     {
         TargetCenter = Vector3.zero;
 
-        Camera.main.fieldOfView = OrbitCamFovSlider.value;
+        Camera.main.fieldOfView = 10;
         Vector3 position = transform.position;
 
         if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
@@ -145,21 +145,6 @@ public class CameraOrbit : MonoBehaviour
             OrbitCamZoomSlider.value -= Input.mouseScrollDelta.y * OrbitCamZoomSpeedSlider.value;
         }
 
-        if ((Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.LeftControl)) && !eventSystem.IsPointerOverGameObject())
-        {
-            CameraTargetHelper.SetActive(true);
-        }
-        if ((Input.GetMouseButton(2) || Input.GetKey(KeyCode.LeftControl)) && CameraTargetHelper.activeSelf)
-        {
-            OrbitCamTargetHeightSlider.value -= Input.GetAxis("Mouse Y");
-            CameraTargetHelper.transform.position = OrbitCamTargetHeightSlider.value * Vector3.up;
-        }
-        if (Input.GetMouseButtonUp(2) || Input.GetKeyUp(KeyCode.LeftControl))
-        {
-            CameraTargetHelper.SetActive(false);
-        }
-
-
         float camDist = OrbitCamZoomSlider.value;
         OrbitCamHeightSlider.maxValue = camDist + 1 - camDist * 0.2f;
         OrbitCamHeightSlider.minValue = -camDist + 1 + camDist * 0.2f;
@@ -169,7 +154,7 @@ public class CameraOrbit : MonoBehaviour
         position.y = TargetCenter.y + OrbitCamHeightSlider.value; //set camera height
         transform.position = position;  //set final position of camera at target
         transform.LookAt(target); //look at target position
-        transform.Rotate(0,0,OrbitCamRotationSlider.value);
+        transform.Rotate(0, 0, OrbitCamRotationSlider.value);
         transform.position = target - transform.forward * camDist; //move away from target
     }
 
@@ -208,7 +193,7 @@ public class CameraOrbit : MonoBehaviour
         }
         if (Input.GetMouseButton(1) && FreeCamRight)
         {
-            transform.position += Input.GetAxis("Mouse X") * transform.right  * Time.deltaTime * moveSpeed;
+            transform.position += Input.GetAxis("Mouse X") * transform.right * Time.deltaTime * moveSpeed;
             transform.position += Input.GetAxis("Mouse Y") * transform.up * Time.deltaTime * moveSpeed;
         }
         else
