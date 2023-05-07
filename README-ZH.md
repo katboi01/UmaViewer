@@ -29,7 +29,7 @@
 1. 克隆或下载并解压此仓库。
 1. 在Unity Hub中导入并打开项目，缺失的文件应该会自动修复。
 1. 打开Assets/Scenes/Version2场景。
-注意：如果控制台中有错误，可能需要JSON .NET For Unity
+注意：如果控制台中有错误，可能需要[JSON .NET For Unity](https://assetstore.unity.com/packages/tools/input-management/json-net-for-unity-11347)
 
 ## 如何使用
 ### 基本
