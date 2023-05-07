@@ -21,7 +21,7 @@ And, you can have a conversation with the Umamusume who can become your computer
        - ...\\...
 1. Download the most recent UmaViewer.zip file from [Releases](https://github.com/kagari-bi/UmaChat/releases) tab.
 1. Extract the archive anywhere, can be extracted over previous version.
-1. Run the UmaViewer.exe
+1. Run the UmaChat.exe
 
 ------------
 
