@@ -1,3 +1,5 @@
+[中文文档看这里](https://github.com/kagari-bi/UmaChat/blob/master/README-ZH.md)
+
 # UmaChat
 It is based on [UmaViewer](https://github.com/katboi01/UmaViewer), thanks a lot.
 
