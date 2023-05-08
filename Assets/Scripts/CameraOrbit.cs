@@ -123,7 +123,7 @@ public class CameraOrbit : MonoBehaviour
     {
         TargetCenter = Vector3.zero;
 
-        Camera.main.fieldOfView = 10;
+        Camera.main.fieldOfView = OrbitCamFovSlider.value;
         Vector3 position = transform.position;
 
         if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
