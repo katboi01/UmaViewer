@@ -1840,6 +1840,10 @@ public class UmaViewerBuilder : MonoBehaviour
             UmaViewerUI.Instance.currentFaceDrivenKeyTarget = null;
             UmaViewerUI.Instance.LoadEmotionPanels(null);
             UmaViewerUI.Instance.LoadFacialPanels(null);
+            foreach(Transform t in UmaViewerUI.Instance.MaterialsList.content)
+            {
+                Destroy(t.gameObject);
+            }
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
