@@ -40,6 +40,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
+    public ScrollRect MaterialsList;
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
@@ -118,6 +119,7 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
     public GameObject UmaContainerAssetsPrefab;
+    public UmaUIContainer UmaContainerTogglePrefab;
 
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;

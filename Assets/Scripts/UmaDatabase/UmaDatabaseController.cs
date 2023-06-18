@@ -98,15 +98,15 @@ public class UmaDatabaseController
 
     static IEnumerable<UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
-        List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = "SELECT m,n,h,c,d FROM a";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
         while (sqlite_datareader.Read())
         {
+            UmaDatabaseEntry entry = null;
             try
             {
-                UmaDatabaseEntry entry = new UmaDatabaseEntry()
+                entry = new UmaDatabaseEntry()
                 {
                     Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as String),
                     Name = sqlite_datareader["n"] as String,
@@ -114,11 +114,12 @@ public class UmaDatabaseController
                     Checksum = sqlite_datareader["c"].ToString(),
                     Prerequisites = sqlite_datareader["d"] as String
                 };
-                entries.Add(entry);
             }
             catch(Exception e) { Debug.LogError("Error caught: " + e); }
+
+            if (entry != null)
+                yield return entry;
         }
-        return entries;
     }
 
     static IEnumerable<DataRow> ReadCharaMaster(SqliteConnection conn)

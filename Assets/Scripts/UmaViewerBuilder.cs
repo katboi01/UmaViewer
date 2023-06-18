@@ -1367,7 +1367,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadFaceMorph(int id, string costumeId)
     {
         if (!CurrentUMAContainer.Head) return;
-        var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name.EndsWith("3d/animator/drivenkeylocator"));
+        var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name == "3d/animator/drivenkeylocator");
         var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
         Main.LoadedBundles.Add(locatorEntry.Name, bundle);
         var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
@@ -1836,6 +1836,10 @@ public class UmaViewerBuilder : MonoBehaviour
             UmaViewerUI.Instance.currentFaceDrivenKeyTarget = null;
             UmaViewerUI.Instance.LoadEmotionPanels(null);
             UmaViewerUI.Instance.LoadFacialPanels(null);
+            foreach(Transform t in UmaViewerUI.Instance.MaterialsList.content)
+            {
+                Destroy(t.gameObject);
+            }
             Destroy(CurrentUMAContainer.gameObject);
         }
     }
