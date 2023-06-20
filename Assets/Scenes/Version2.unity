@@ -41081,7 +41081,6 @@ MonoBehaviour:
   TransMaterialCharas: {fileID: 2100000, guid: 822a9b0732637f04b88e39818d097a19, type: 2}
   TransMaterialProps: {fileID: 2100000, guid: 59dfbb3f0a697874c81bba8ff758c891, type: 2}
   CurrentUMAContainer: {fileID: 0}
-  CurrentLiveContainer: {fileID: 0}
   CurrentOtherContainer: {fileID: 0}
   hairShader: {fileID: 0}
   faceShader: {fileID: 0}
