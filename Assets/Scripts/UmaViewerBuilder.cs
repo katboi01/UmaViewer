@@ -1,6 +1,7 @@
 ﻿using CriWare;
 using CriWareFormats;
 using Gallop;
+using MiniJSON;
 using NAudio.Wave;
 using System;
 using System.Collections;
@@ -290,6 +291,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
+        CurrentUMAContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
 
         //Load FacialMorph
         LoadFaceMorph(id, costumeId);
@@ -298,9 +300,12 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.Initialize();
+        CurrentUMAContainer.Initialize(!UI.isTPose);
         CurrentUMAContainer.SetHeight(-1);
-        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
+        if (!UI.isTPose)
+        {
+            LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
+        }
     }
 
     private void LoadMobUma(CharaEntry chara, string costumeId, int bodyid = -1)
@@ -510,6 +515,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
+        CurrentUMAContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
 
         //Load FacialMorph
         LoadFaceMorph(id, costumeId);
@@ -518,9 +524,12 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.Initialize();
+        CurrentUMAContainer.Initialize(!UI.isTPose);
         CurrentUMAContainer.SetHeight(-1);
-        LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"homestand{personality.PadLeft(2, '0')}_loop")));
+        if (!UI.isTPose)
+        {
+            LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"homestand{personality.PadLeft(2, '0')}_loop")));
+        }
     }
 
     private void LoadMiniUma(CharaEntry chara, string costumeId)

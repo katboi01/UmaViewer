@@ -128,6 +128,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public bool isCriware = false;
     public bool isHeadFix = false;
+    public bool isTPose = false;
+    public bool DynamicBoneEnable = true;
     public bool EnableEyeTracking = true;
     public bool EnableFaceOverride = true;
 
@@ -893,6 +895,11 @@ public class UmaViewerUI : MonoBehaviour
         isHeadFix = value;
     }
 
+    public void SetTPose(bool value)
+    {
+        isTPose = value;
+    }
+
     public void UpdateGifQualityLabel(float value)
     {
         GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
@@ -1012,6 +1019,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetDynamicBoneEnable(bool isOn)
     {
+        DynamicBoneEnable = isOn;
         if (Builder.CurrentUMAContainer)
         {
             Builder.CurrentUMAContainer.SetDynamicBoneEnable(isOn);

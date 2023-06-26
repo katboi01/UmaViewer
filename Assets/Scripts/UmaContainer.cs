@@ -77,14 +77,14 @@ public class UmaContainer : MonoBehaviour
     public CharaShaderEffectData ShaderEffectData;
     private List<MaterialHelper> Materials = new List<MaterialHelper>();
 
-    public void Initialize()
+    public void Initialize(bool smile)
     {
         TrackTarget = Camera.main.gameObject;
         UpBodyPosition = UpBodyBone.transform.localPosition;
         UpBodyRotation = UpBodyBone.transform.localRotation;
 
         //Models must be merged before handling extra morphs
-        if (FaceDrivenKeyTarget)
+        if (FaceDrivenKeyTarget && smile)
             FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
     }
 
