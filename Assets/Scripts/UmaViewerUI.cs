@@ -1309,4 +1309,12 @@ public class UmaViewerUI : MonoBehaviour
         MessageScrollRect.gameObject.SetActive(true);
         MessageScrollRect.verticalNormalizedPosition = 0;
     }
+
+    public void ExportTextures()
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
+        }
+    }
 }
