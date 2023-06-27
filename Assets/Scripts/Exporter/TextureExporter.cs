@@ -31,7 +31,7 @@ public class TextureExporter
     {
         string m_Path = Application.dataPath;
 
-        string savePath = m_Path + "/../Texture2D/" + gameobj.name + "/";
+        string savePath = m_Path + "/../Exported/" + gameobj.name + "/Texture2D/";
 
         if (!Directory.Exists(savePath))
         {

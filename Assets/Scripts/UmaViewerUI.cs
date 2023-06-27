@@ -1310,10 +1310,12 @@ public class UmaViewerUI : MonoBehaviour
         MessageScrollRect.verticalNormalizedPosition = 0;
     }
 
-    public void ExportTextures()
+    public void ExportModel()
     {
         if (Builder.CurrentUMAContainer)
         {
+            //TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
+            ModelExporter.exportModel(Builder.CurrentUMAContainer.gameObject);
             TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
         }
     }
