@@ -17,7 +17,7 @@ namespace UnityGLTF
 	{
 		private struct MeshAccessors
 		{
-			public AccessorId aPosition, aNormal, aTangent, aTexcoord0, aTexcoord1, aColor0;
+			public AccessorId aPosition, aNormal, aTangent, aTexcoord0, aTexcoord1, aTexcoord2, aColor0;
 			public Dictionary<int, MeshPrimitive> subMeshPrimitives;
 		}
 
@@ -243,7 +243,7 @@ namespace UnityGLTF
 
 			if (!_meshToPrims.ContainsKey(meshObj))
 			{
-				AccessorId aPosition = null, aNormal = null, aTangent = null, aTexcoord0 = null, aTexcoord1 = null, aColor0 = null;
+				AccessorId aPosition = null, aNormal = null, aTangent = null, aTexcoord0 = null, aTexcoord1 = null, aTexcoord2 = null, aColor0 = null;
 
 				aPosition = ExportAccessor(SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.vertices, SchemaExtensions.CoordinateSpaceConversionScale));
 
@@ -259,7 +259,10 @@ namespace UnityGLTF
 				if (meshObj.uv2.Length != 0)
 					aTexcoord1 = ExportAccessor(SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv2));
 
-				if (settings.ExportVertexColors && meshObj.colors.Length != 0)
+                if (meshObj.uv3.Length != 0)
+                    aTexcoord2 = ExportAccessor(SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv3));
+
+                if (settings.ExportVertexColors && meshObj.colors.Length != 0)
 					aColor0 = ExportAccessor(QualitySettings.activeColorSpace == ColorSpace.Linear ? meshObj.colors : meshObj.colors.ToLinear(), true);
 
 				aPosition.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
@@ -267,7 +270,8 @@ namespace UnityGLTF
 				if (aTangent != null) aTangent.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
 				if (aTexcoord0 != null) aTexcoord0.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
 				if (aTexcoord1 != null) aTexcoord1.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
-				if (aColor0 != null) aColor0.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
+                if (aTexcoord2 != null) aTexcoord2.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
+                if (aColor0 != null) aColor0.Value.BufferView.Value.Target = BufferViewTarget.ArrayBuffer;
 
 				_meshToPrims.Add(meshObj, new MeshAccessors()
 				{
@@ -276,7 +280,8 @@ namespace UnityGLTF
 					aTangent = aTangent,
 					aTexcoord0 = aTexcoord0,
 					aTexcoord1 = aTexcoord1,
-					aColor0 = aColor0,
+                    aTexcoord2 = aTexcoord2,
+                    aColor0 = aColor0,
 					subMeshPrimitives = new Dictionary<int, MeshPrimitive>()
 				});
 			}
@@ -312,7 +317,9 @@ namespace UnityGLTF
 						primitive.Attributes.Add(SemanticProperties.TEXCOORD_0, accessors.aTexcoord0);
 					if (accessors.aTexcoord1 != null)
 						primitive.Attributes.Add(SemanticProperties.TEXCOORD_1, accessors.aTexcoord1);
-					if (accessors.aColor0 != null)
+                    if (accessors.aTexcoord2 != null)
+                        primitive.Attributes.Add(SemanticProperties.TEXCOORD_2, accessors.aTexcoord2);
+                    if (accessors.aColor0 != null)
 						primitive.Attributes.Add(SemanticProperties.COLOR_0, accessors.aColor0);
 
 					primitive.Material = null;
