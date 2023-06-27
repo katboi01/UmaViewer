@@ -1,0 +1,25 @@
+{
+  "name": "org.khronos.unitygltf",
+  "displayName": "UnityGLTF",
+  "version": "1.24.0-pre.2",
+  "unity": "2019.4",
+  "description": "Unity3D library for importing and exporting GLTF 2.0 assets. https://github.com/KhronosGroup/UnityGLTF",
+  "keywords": [
+    "gltf",
+    "khronos",
+    "runtime",
+    "loader"
+  ],
+  "author": "Khronos Group",
+  "samples": [
+    {
+      "displayName": "Sample Scenes",
+      "description": "Various scenes showing GLTF functionality.",
+      "path": "Samples~/Sample Scenes"
+    }
+  ],
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.0",
+    "com.unity.modules.imageconversion": "1.0.0"
+  }
+}

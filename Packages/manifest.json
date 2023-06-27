@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.formats.fbx": "5.0.0",
     "com.unity.ide.rider": "2.0.7",
     "com.unity.ide.visualstudio": "2.0.16",
@@ -9,7 +10,6 @@
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.4.8",
     "com.unity.ugui": "1.0.0",
-    "org.khronos.unitygltf": "https://github.com/prefrontalcortex/UnityGLTF.git?path=/UnityGLTF/Assets/UnityGLTF",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
