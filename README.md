@@ -45,7 +45,7 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 | Exporting animations to MMD | ✓  |
 | Recording animations (.gif), screenshots | ✓  |
 | Viewing Props, Scenery, Live scenes | /  |
-| Exporting models | x  |
+| Exporting models | /  |
 
 
 All characters and animations are supported
