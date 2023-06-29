@@ -568,7 +568,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadMapPanel()
     {
         var pageentrys = new List<PageManager.Entry>();
-        foreach (var scene in Main.AbList.Where(a => a.Name.StartsWith("3d/env") && Path.GetFileName(a.Name).StartsWith("pfb_")))
+        foreach (var scene in Main.AbList.Where(a => ((a.Name.StartsWith("3d/env") && Path.GetFileName(a.Name).StartsWith("pfb_")) || a.Name.StartsWith("cutt/cutt_son") && Path.GetFileName(a.Name).StartsWith("cutt_son"))))
         {
             var pageentry = new PageManager.Entry();
             pageentry.Name = Path.GetFileName(scene.Name);
