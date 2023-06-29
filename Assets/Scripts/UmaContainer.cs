@@ -316,6 +316,8 @@ public class UmaContainer : MonoBehaviour
                 {
                     if (dragCollider && dragCollider.attachedRigidbody)
                     {
+                        PuppetMaster.pinWeight = 0.75f;
+                        PuppetMaster.muscleWeight = 0.25f;
                         dragCollider.attachedRigidbody.isKinematic = true;
                         dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
                         //LookAt Mouse when Dragging
@@ -335,6 +337,8 @@ public class UmaContainer : MonoBehaviour
                 }
                 else
                 {
+                    PuppetMaster.pinWeight = 1;
+                    PuppetMaster.muscleWeight = 1;
                     //LookAt Camera
                     TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
                     if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
@@ -434,15 +438,14 @@ public class UmaContainer : MonoBehaviour
         new List<IKSolverLimb>(ik.solvers.limbs).ForEach(i => i.IKRotationWeight = 0);
         ik.solvers.lookAt.IKPositionWeight = 1;
         ik.solvers.lookAt.headWeight = 0.8f;
-        ik.solvers.lookAt.bodyWeight = 0.2f;
+        ik.solvers.lookAt.bodyWeight = 0.25f;
+        ik.solvers.lookAt.clampWeightHead = 0.62f;
         ik.solvers.lookAt.target = TrackTarget.transform;
         IK = ik;
 
         BipedRagdollCreator.Create(r, options);
         PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
         PuppetMaster.FlattenHierarchy();
-        PuppetMaster.pinWeight = 0.8f;
-        PuppetMaster.muscleWeight = 0.3f;
     }
 
     class MaterialHelper
