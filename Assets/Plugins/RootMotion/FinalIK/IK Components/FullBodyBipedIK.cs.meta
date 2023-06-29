@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a70e525c82ce9413fa4d940ad7fcf1db
+labels:
+- InverseKinematics
+- IK
+- FullBodyIK
+timeCreated: 1519038538
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 9999
+  icon: {fileID: 2800000, guid: 89e0c79ada10847639ab1754e12413a7, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

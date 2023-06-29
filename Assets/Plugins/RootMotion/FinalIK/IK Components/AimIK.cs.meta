@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 5013856973b27429d937d256dc082f2e
+labels:
+- InverseKinematics
+- IK
+- Aim
+- AimingSystem
+timeCreated: 1511881277
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 9997
+  icon: {fileID: 2800000, guid: 14a4d69b319a04b75bb03f351a174cec, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
