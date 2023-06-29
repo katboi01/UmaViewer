@@ -44,6 +44,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
+    public ScrollRect MaterialsList;
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
@@ -122,6 +123,7 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
     public GameObject UmaContainerAssetsPrefab;
+    public UmaUIContainer UmaContainerTogglePrefab;
 
     private int LoadedAssetCount = 0;
     [SerializeField] private RectTransform LoadedAssetsPanel;
@@ -130,6 +132,8 @@ public class UmaViewerUI : MonoBehaviour
 
     public bool isCriware = false;
     public bool isHeadFix = false;
+    public bool isTPose = false;
+    public bool DynamicBoneEnable = true;
     public bool EnableEyeTracking = true;
     public bool EnableFaceOverride = true;
 
@@ -895,6 +899,11 @@ public class UmaViewerUI : MonoBehaviour
         isHeadFix = value;
     }
 
+    public void SetTPose(bool value)
+    {
+        isTPose = value;
+    }
+
     public void UpdateGifQualityLabel(float value)
     {
         GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
@@ -1014,6 +1023,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetDynamicBoneEnable(bool isOn)
     {
+        DynamicBoneEnable = isOn;
         if (Builder.CurrentUMAContainer)
         {
             Builder.CurrentUMAContainer.SetDynamicBoneEnable(isOn);
@@ -1302,6 +1312,16 @@ public class UmaViewerUI : MonoBehaviour
         };
         MessageScrollRect.gameObject.SetActive(true);
         MessageScrollRect.verticalNormalizedPosition = 0;
+    }
+
+    public void ExportModel()
+    {
+        if (Builder.CurrentUMAContainer)
+        {
+            //TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
+            ModelExporter.exportModel(Builder.CurrentUMAContainer.gameObject);
+            TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
+        }
     }
 
     public void Debug()

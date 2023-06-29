@@ -45,7 +45,7 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 | Exporting animations to MMD | ✓  |
 | Recording animations (.gif), screenshots | ✓  |
 | Viewing Props, Scenery, Live scenes | /  |
-| Exporting models | x  |
+| Exporting models | /  |
 
 
 All characters and animations are supported
@@ -68,6 +68,8 @@ and more
 
 <img src="https://user-images.githubusercontent.com/59540382/222422871-12e80e0b-778b-4f42-b581-5e4af5cd6df9.png" height="350" />
 
+### Also check out:
+[UmaChat by kagari](https://github.com/kagari-bi/UmaChat) - model viewer fork that lets you chat with Umas using AI + TTS
 
 ### Special Thank to:
 MarshmallowAndroid: [UmaMusumeExplorer](https://github.com/MarshmallowAndroid/UmaMusumeExplorer) for acb/awb decoder.

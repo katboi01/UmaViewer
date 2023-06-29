@@ -75,15 +75,16 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Other")]
     public CharaShaderEffectData ShaderEffectData;
+    private List<MaterialHelper> Materials = new List<MaterialHelper>();
 
-    public void Initialize()
+    public void Initialize(bool smile)
     {
         TrackTarget = Camera.main.gameObject;
         UpBodyPosition = UpBodyBone.transform.localPosition;
         UpBodyRotation = UpBodyBone.transform.localRotation;
 
         //Models must be merged before handling extra morphs
-        if (FaceDrivenKeyTarget)
+        if (FaceDrivenKeyTarget && smile)
             FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
     }
 
@@ -142,6 +143,38 @@ public class UmaContainer : MonoBehaviour
         UmaAnimator.avatar = AvatarBuilder.BuildGenericAvatar(gameObject, gameObject.name);
         OverrideController = Instantiate(UmaViewerBuilder.Instance.OverrideController);
         UmaAnimator.runtimeAnimatorController = OverrideController;
+
+        //Materials
+        foreach (var rend in gameObject.GetComponentsInChildren<Renderer>())
+        {
+            for(int i = 0; i < rend.materials.Length; i++)
+            {
+                Material mat = rend.materials[i];
+
+                var matHlp = Materials.FirstOrDefault(m => m.Mat == mat);
+                if (matHlp == null)
+                {
+                    matHlp = new MaterialHelper()
+                    {
+                        Mat = mat,
+                        Renderers = new Dictionary<Renderer, List<int>>(),
+                        Toggle = Instantiate(UmaViewerUI.Instance.UmaContainerTogglePrefab, UmaViewerUI.Instance.MaterialsList.content)
+                    };
+                    matHlp.Toggle.Name = mat.name;
+                    matHlp.Toggle.Toggle.onValueChanged.AddListener((value) => { Debug.Log("e"); matHlp.ToggleMaterials(value); });
+                    Materials.Add(matHlp);
+                }
+
+                if (!matHlp.Renderers.ContainsKey(rend))
+                {
+                    matHlp.Renderers.Add(rend, new List<int> { i });
+                }
+                else
+                {
+                    matHlp.Renderers[rend].Add(i);
+                }
+            }
+        }
     }
 
     public void MergeHairModel()
@@ -303,6 +336,30 @@ public class UmaContainer : MonoBehaviour
         {
             UpBodyBone.transform.localPosition = UpBodyPosition;
             UpBodyBone.transform.localRotation = UpBodyRotation;
+        }
+    }
+
+    class MaterialHelper
+    {
+        public Material Mat;
+        public UmaUIContainer Toggle;
+        public Dictionary<Renderer, List<int>> Renderers;
+    
+        public void ToggleMaterials(bool value)
+        {
+            foreach(var rend in Renderers)
+            {
+                Debug.Log(rend.Key.name);
+                Material[] mat = new Material[rend.Key.materials.Length];
+                for(int i = 0; i < mat.Length; i++)
+                {
+                    //if material slot is not in list, keep current material
+                    //if material slot in list and toggle is on - assign original
+                    //if material slot in list and toggle is off - assign invisible
+                    mat[i] = rend.Value.Contains(i) ? (value? Mat : UmaViewerBuilder.Instance.TransMaterialCharas ): rend.Key.materials[i];
+                }
+                rend.Key.materials = mat;
+            }
         }
     }
 }

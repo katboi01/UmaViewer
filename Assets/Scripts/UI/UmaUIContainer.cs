@@ -63,6 +63,7 @@ public class UmaUIContainer : MonoBehaviour
     public Text Text;
     public Button Button;
     public Slider Slider;
+    public Toggle Toggle;
     public Image Image;
     public Image ToggleImage;
 }
