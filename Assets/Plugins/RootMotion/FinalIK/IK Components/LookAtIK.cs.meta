@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 776adaaacdc5c4e8ab0395120a6e972b
+labels:
+- InverseKinematics
+- IK
+- LookAtIK
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 9997
+  icon: {fileID: 2800000, guid: dc3f34dec09f54c4d8a48bf1a653b179, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

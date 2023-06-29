@@ -1,4 +1,8 @@
 using Gallop;
+using RootMotion;
+using RootMotion.Demos;
+using RootMotion.Dynamics;
+using RootMotion.FinalIK;
 using SFB;
 using System;
 using System.Collections;
@@ -183,7 +187,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void HighlightChildImage(Transform mainObject, UmaUIContainer child)
     {
-        foreach(var t in mainObject.GetComponentsInChildren<UmaUIContainer>())
+        foreach (var t in mainObject.GetComponentsInChildren<UmaUIContainer>())
         {
             if (t.transform.parent != mainObject) continue;
             t.ToggleImage.enabled = (t == child);
@@ -626,29 +630,29 @@ public class UmaViewerUI : MonoBehaviour
 
         Action<CharaEntry> action = delegate (CharaEntry achara)
         {
-             string nameVar = mini ? $"pfb_mbdy{achara.Id}" : $"pfb_bdy{achara.Id}";
-             foreach (var entry in Main.AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
-             {
-                 var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
-                 string[] split = entry.Name.Split('_');
-                 string costumeId = split[split.Length - 1];
-                 var dressdata = Main.Costumes.FirstOrDefault(a => (a.CharaId == achara.Id && a.BodyTypeSub == int.Parse(costumeId)));
-                 container.Name = container.name = GetCostumeName(costumeId, (dressdata == null ? costumeId : dressdata.DressName));
-                 container.Image.sprite = (dressdata == null ? CostumeIconDefault : dressdata.Icon);
-                 container.Image.enabled = true;
-                 container.Button.onClick.AddListener(() =>
-                 {
-                     if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
-                     {
-                         CurrentSeletChara.SetValue(achara, costumeId, container.Image.sprite);
-                     }
-                     else
-                     {
-                         HighlightChildImage(costumeList.content, container);
-                         StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
-                     }
-                 });
-             }
+            string nameVar = mini ? $"pfb_mbdy{achara.Id}" : $"pfb_bdy{achara.Id}";
+            foreach (var entry in Main.AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
+            {
+                var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
+                string[] split = entry.Name.Split('_');
+                string costumeId = split[split.Length - 1];
+                var dressdata = Main.Costumes.FirstOrDefault(a => (a.CharaId == achara.Id && a.BodyTypeSub == int.Parse(costumeId)));
+                container.Name = container.name = GetCostumeName(costumeId, (dressdata == null ? costumeId : dressdata.DressName));
+                container.Image.sprite = (dressdata == null ? CostumeIconDefault : dressdata.Icon);
+                container.Image.enabled = true;
+                container.Button.onClick.AddListener(() =>
+                {
+                    if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
+                    {
+                        CurrentSeletChara.SetValue(achara, costumeId, container.Image.sprite);
+                    }
+                    else
+                    {
+                        HighlightChildImage(costumeList.content, container);
+                        StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
+                    }
+                });
+            }
         };
 
         if (!chara.IsMob)
@@ -804,7 +808,7 @@ public class UmaViewerUI : MonoBehaviour
         }
         else if (umaId == -3)
         {
-            foreach (var entry in Main.AbMotions.Where(a => a.Name.Contains($"type00_ear")&&!a.Name.EndsWith("driven") && !a.Name.Contains("touch")))
+            foreach (var entry in Main.AbMotions.Where(a => a.Name.Contains($"type00_ear") && !a.Name.EndsWith("driven") && !a.Name.Contains("touch")))
             {
                 var entryInstance = entry;
                 var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
@@ -934,7 +938,7 @@ public class UmaViewerUI : MonoBehaviour
             case "0004_01_00":
                 return "Towel";
             default:
-                return (defaultname == "00")? "Default" : defaultname;
+                return (defaultname == "00") ? "Default" : defaultname;
         }
     }
 
@@ -1247,7 +1251,7 @@ public class UmaViewerUI : MonoBehaviour
         if (UpdateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
         UmaDatabaseController.Instance.CloseAllConnection();
         ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { ShowMessage(msg,type); });
+        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { ShowMessage(msg, type); });
         StartCoroutine(UpdateResVerCoroutine);
     }
 
@@ -1298,5 +1302,42 @@ public class UmaViewerUI : MonoBehaviour
         };
         MessageScrollRect.gameObject.SetActive(true);
         MessageScrollRect.verticalNormalizedPosition = 0;
+    }
+
+    public void Debug()
+    {
+        var container = Builder.CurrentUMAContainer;
+        if (!container) return;
+        var animator = container.GetComponent<Animator>();
+        BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
+        BipedRagdollCreator.Options options = BipedRagdollCreator.AutodetectOptions(r);
+
+        var ik = container.gameObject.AddComponent<BipedIK>();
+        ik.references.root = container.transform;
+        ik.references.pelvis = r.hips;
+        ik.references.spine = new Transform[] { r.spine, r.chest };
+        ik.references.leftThigh = r.leftUpperLeg;
+        ik.references.leftCalf = r.leftLowerLeg;
+        ik.references.leftFoot = r.leftFoot;
+        ik.references.rightThigh = r.rightUpperLeg;
+        ik.references.rightCalf = r.rightLowerLeg;
+        ik.references.rightFoot = r.rightFoot;
+        ik.references.leftUpperArm = r.leftUpperArm;
+        ik.references.leftForearm = r.leftLowerArm;
+        ik.references.leftHand = r.leftHand;
+        ik.references.rightUpperArm = r.rightUpperArm;
+        ik.references.rightForearm = r.rightLowerArm;
+        ik.references.rightHand = r.rightHand;
+        ik.references.head = r.head;
+
+        new List<IKSolver>(ik.solvers.ikSolvers).ForEach(i => i.IKPositionWeight = 0);
+        new List<IKSolverLimb>(ik.solvers.limbs).ForEach(i => i.IKRotationWeight = 0);
+        ik.solvers.lookAt.IKPositionWeight = 1;
+        ik.solvers.lookAt.headWeight = 0.8f;
+        ik.solvers.lookAt.bodyWeight = 0.2f;
+        ik.solvers.lookAt.target = Camera.main.transform;
+        //BipedRagdollCreator.Create(r, options);
+        //var master = PuppetMaster.SetUp(container.transform, 8, 9);
+        //master.FlattenHierarchy();
     }
 }

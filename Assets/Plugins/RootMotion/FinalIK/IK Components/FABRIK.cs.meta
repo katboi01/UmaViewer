@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 52af154b35b9e48af96507346dc649ba
+labels:
+- InverseKinematics
+- IK
+- FABRIK
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 9997
+  icon: {fileID: 2800000, guid: 1ccc9218a62cd44dda0ddb5fa15c62cc, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
