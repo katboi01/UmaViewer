@@ -1849,7 +1849,15 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 Destroy(t.gameObject);
             }
-            Destroy(CurrentUMAContainer.gameObject);
+
+            if(CurrentUMAContainer.transform.parent && CurrentUMAContainer.transform.parent.name.Contains("Root")) 
+            {
+                Destroy(CurrentUMAContainer.transform.parent.gameObject);
+            }
+            else
+            {
+                Destroy(CurrentUMAContainer.gameObject);
+            }
         }
     }
 

@@ -74,8 +74,9 @@ namespace RootMotion.Dynamics {
 
 			for (int i = 0; i < muscles.Length; i++) {
 				if (Vector3.SqrMagnitude(muscles[i].joint.transform.position - muscles[i].target.position) > 0.001f) {
-					if (log) Debug.LogError("The position of each muscle needs to match with the position of it's target. Muscle '" + muscles[i].joint.name + "' position does not match with it's target. Right-click on the PuppetMaster component's header and select 'Fix Muscle Positions' from the context menu.", muscles[i].joint.transform);
-					return false;
+
+					if (log) Debug.LogWarning("The position of each muscle needs to match with the position of it's target. Muscle '" + muscles[i].joint.name + "' position does not match with it's target. Right-click on the PuppetMaster component's header and select 'Fix Muscle Positions' from the context menu.", muscles[i].joint.transform);
+					//return false;
 				}
 			}
 

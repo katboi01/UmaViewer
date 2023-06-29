@@ -361,6 +361,16 @@ namespace Gallop
             ApplyRotation();
         }
 
+        public void ChangeMorphEye()
+        {
+            FacialResetEye();
+            ProcessMorph(LeftEyeXrange);
+            ProcessMorph(LeftEyeYrange);
+            ProcessMorph(RightEyeXrange);
+            ProcessMorph(RightEyeYrange);
+            ApplyRotationEye();
+        }
+
         public void ClearMorph()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
@@ -453,7 +463,7 @@ namespace Gallop
 
         public void FacialResetAll()
         {
-            if (Container.FaceOverrideData&& Container.FaceOverrideData.Enable)
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
             {
                 OverrideFace(Container.FaceOverrideData);
             }
@@ -465,6 +475,17 @@ namespace Gallop
             FacialReset(BaseREyeMorph.trsArray);
             FacialReset(BaseMouthMorph.trsArray);
             ApplyRotation();
+        }
+
+        public void FacialResetEye()
+        {
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
+            FacialReset(BaseLEyeMorph.trsArray);
+            FacialReset(BaseREyeMorph.trsArray);
+            ApplyRotationEye();
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -500,6 +521,20 @@ namespace Gallop
             }
         }
 
+        public void ApplyRotationEye()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+               foreach (TrsArray trs in trsArray)
+               {
+                   if(trs.transform)
+                   trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+               }
+            };
+            applyRotation.Invoke(BaseLEyeMorph.trsArray);
+            applyRotation.Invoke(BaseREyeMorph.trsArray);
+        }
+
         public void ChangeMorphWeight(FacialMorph morph, float val)
         {
             Container.isAnimatorControl = false;
@@ -520,7 +555,14 @@ namespace Gallop
             LeftEyeYrange.weight = ly;
             RightEyeXrange.weight = rx;
             RightEyeYrange.weight = ry;
-            ChangeMorph();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                ChangeMorph();
+            }
+            else
+            {
+                ChangeMorphEye();
+            }
         }
 
         public void ProcessLocator()
@@ -618,9 +660,9 @@ namespace Gallop
                                 changed = true;
                             }
 
-                            if (new List<FaceOverrideElement>(arr.DstArray).Find(f=>f.Index == src) == null) 
-                            { 
-                                srcmorph.weight = 0; 
+                            if (new List<FaceOverrideElement>(arr.DstArray).Find(f => f.Index == src) == null)
+                            {
+                                srcmorph.weight = 0;
                             }
                         }
                         targetMorph.ForEach(a => a.Invoke());

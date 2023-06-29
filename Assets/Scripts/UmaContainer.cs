@@ -1,4 +1,6 @@
 using Gallop;
+using RootMotion.Dynamics;
+using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,7 +35,7 @@ public class UmaContainer : MonoBehaviour
     public FaceEmotionKeyTarget FaceEmotionKeyTarget;
     public FaceOverrideData FaceOverrideData;
     public GameObject HeadBone;
-    public GameObject TrackTarget;
+    public Transform TrackTarget;
     public float EyeHeight;
     public bool EnableEyeTracking = true;
     public Material FaceMaterial;
@@ -79,13 +81,18 @@ public class UmaContainer : MonoBehaviour
 
     public void Initialize(bool smile)
     {
-        TrackTarget = Camera.main.gameObject;
+        TrackTarget = new GameObject("TrackTarget").transform;
+        TrackTarget.SetParent(transform);
+        TrackTarget.position = HeadBone.transform.TransformPoint(0, 0, 10);
+
         UpBodyPosition = UpBodyBone.transform.localPosition;
         UpBodyRotation = UpBodyBone.transform.localRotation;
 
         //Models must be merged before handling extra morphs
         if (FaceDrivenKeyTarget && smile)
             FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
+
+        CreateIK();
     }
 
     public void MergeModel()
@@ -274,12 +281,23 @@ public class UmaContainer : MonoBehaviour
         }
     }
 
+    Collider dragCollider;
+    float dragdistance;
+    Vector3 dragStartPos;
     private void FixedUpdate()
     {
         if (!IsMini)
         {
             if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
             {
+                if (!IK.enabled)
+                {
+                    IK.enabled = true;
+                    if(PuppetMaster.mode != PuppetMaster.Mode.Active)
+                    {
+                        PuppetMaster.mode = PuppetMaster.Mode.Active;
+                    }
+                }
                 var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up * EyeHeight;
                 var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
                 var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
@@ -288,6 +306,51 @@ public class UmaContainer : MonoBehaviour
 
                 var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
                 FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+                var cam = Camera.main;
+                var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
+                var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
+                var worldPos = cam.ScreenToWorldPoint(mousePos);
+                
+                //Hold D key to Drag Body
+                if (Input.GetKey(KeyCode.D))
+                {
+                    if (dragCollider && dragCollider.attachedRigidbody)
+                    {
+                        dragCollider.attachedRigidbody.isKinematic = true;
+                        dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
+                        //LookAt Mouse when Dragging
+                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, worldPos, Time.fixedDeltaTime * 3);
+                    }
+                    else
+                    {
+                        if (Physics.Raycast(cam.ScreenPointToRay(mousePos), out RaycastHit hit))
+                        {
+                            dragCollider = hit.collider;
+                            dragStartPos = (hit.point - hit.collider.transform.position);
+                            dragdistance = cam.transform.InverseTransformPoint(hit.point).magnitude;
+                        }
+                        //LookAt Camera
+                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
+                    }
+                }
+                else
+                {
+                    //LookAt Camera
+                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
+                    if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
+                    dragCollider = null;
+                }
+            }
+            else
+            {
+                if (IK.enabled)
+                {
+                    IK.enabled = false;
+                    if (PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
+                    {
+                        PuppetMaster.mode = PuppetMaster.Mode.Kinematic;
+                    }
+                }
             }
 
             if (isAnimatorControl)
@@ -337,6 +400,49 @@ public class UmaContainer : MonoBehaviour
             UpBodyBone.transform.localPosition = UpBodyPosition;
             UpBodyBone.transform.localRotation = UpBodyRotation;
         }
+    }
+
+    BipedIK IK;
+    PuppetMaster PuppetMaster;
+    public void CreateIK()
+    {
+        if (IsMini) return;
+        var container = this;
+        var animator = container.GetComponent<Animator>();
+        BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
+        BipedRagdollCreator.Options options = BipedRagdollCreator.AutodetectOptions(r);
+
+        var ik = container.gameObject.AddComponent<BipedIK>();
+        ik.references.root = container.transform;
+        ik.references.pelvis = r.hips;
+        ik.references.spine = new Transform[] { r.spine, r.chest };
+        ik.references.leftThigh = r.leftUpperLeg;
+        ik.references.leftCalf = r.leftLowerLeg;
+        ik.references.leftFoot = r.leftFoot;
+        ik.references.rightThigh = r.rightUpperLeg;
+        ik.references.rightCalf = r.rightLowerLeg;
+        ik.references.rightFoot = r.rightFoot;
+        ik.references.leftUpperArm = r.leftUpperArm;
+        ik.references.leftForearm = r.leftLowerArm;
+        ik.references.leftHand = r.leftHand;
+        ik.references.rightUpperArm = r.rightUpperArm;
+        ik.references.rightForearm = r.rightLowerArm;
+        ik.references.rightHand = r.rightHand;
+        ik.references.head = r.head;
+
+        new List<IKSolver>(ik.solvers.ikSolvers).ForEach(i => i.IKPositionWeight = 0);
+        new List<IKSolverLimb>(ik.solvers.limbs).ForEach(i => i.IKRotationWeight = 0);
+        ik.solvers.lookAt.IKPositionWeight = 1;
+        ik.solvers.lookAt.headWeight = 0.8f;
+        ik.solvers.lookAt.bodyWeight = 0.2f;
+        ik.solvers.lookAt.target = TrackTarget.transform;
+        IK = ik;
+
+        BipedRagdollCreator.Create(r, options);
+        PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
+        PuppetMaster.FlattenHierarchy();
+        PuppetMaster.pinWeight = 0.8f;
+        PuppetMaster.muscleWeight = 0.3f;
     }
 
     class MaterialHelper

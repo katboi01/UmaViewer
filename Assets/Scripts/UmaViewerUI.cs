@@ -1323,41 +1323,4 @@ public class UmaViewerUI : MonoBehaviour
             TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
         }
     }
-
-    public void Debug()
-    {
-        var container = Builder.CurrentUMAContainer;
-        if (!container) return;
-        var animator = container.GetComponent<Animator>();
-        BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
-        BipedRagdollCreator.Options options = BipedRagdollCreator.AutodetectOptions(r);
-
-        var ik = container.gameObject.AddComponent<BipedIK>();
-        ik.references.root = container.transform;
-        ik.references.pelvis = r.hips;
-        ik.references.spine = new Transform[] { r.spine, r.chest };
-        ik.references.leftThigh = r.leftUpperLeg;
-        ik.references.leftCalf = r.leftLowerLeg;
-        ik.references.leftFoot = r.leftFoot;
-        ik.references.rightThigh = r.rightUpperLeg;
-        ik.references.rightCalf = r.rightLowerLeg;
-        ik.references.rightFoot = r.rightFoot;
-        ik.references.leftUpperArm = r.leftUpperArm;
-        ik.references.leftForearm = r.leftLowerArm;
-        ik.references.leftHand = r.leftHand;
-        ik.references.rightUpperArm = r.rightUpperArm;
-        ik.references.rightForearm = r.rightLowerArm;
-        ik.references.rightHand = r.rightHand;
-        ik.references.head = r.head;
-
-        new List<IKSolver>(ik.solvers.ikSolvers).ForEach(i => i.IKPositionWeight = 0);
-        new List<IKSolverLimb>(ik.solvers.limbs).ForEach(i => i.IKRotationWeight = 0);
-        ik.solvers.lookAt.IKPositionWeight = 1;
-        ik.solvers.lookAt.headWeight = 0.8f;
-        ik.solvers.lookAt.bodyWeight = 0.2f;
-        ik.solvers.lookAt.target = Camera.main.transform;
-        //BipedRagdollCreator.Create(r, options);
-        //var master = PuppetMaster.SetUp(container.transform, 8, 9);
-        //master.FlattenHierarchy();
-    }
 }

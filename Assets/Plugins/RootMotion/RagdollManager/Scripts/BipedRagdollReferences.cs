@@ -212,29 +212,31 @@ namespace RootMotion.Dynamics {
 			BipedRagdollReferences r = new BipedRagdollReferences();
 
 			if (!animator.isHuman) {
-			
-				r.root = GameObject.Find("Position").transform;
+				List<Transform> list = new List<Transform>(animator.gameObject.GetComponentsInChildren<Transform>());
+				list.Find(t => t.name.Equals("Position"));
 
-				r.hips = GameObject.Find("Hip").transform;
-				r.spine = GameObject.Find("Spine").transform;
-				r.chest = GameObject.Find("Chest").transform;
-				r.head = GameObject.Find("Head").transform;
+				r.root = list.Find(t => t.name.Equals("Position"));
 
-				r.leftUpperArm = GameObject.Find("Arm_L").transform;
-				r.leftLowerArm = GameObject.Find("Elbow_L").transform;
-				r.leftHand = GameObject.Find("Wrist_L").transform;
+				r.hips = list.Find(t => t.name.Equals("Hip"));
+				r.spine = list.Find(t => t.name.Equals("Spine"));
+				r.chest = list.Find(t => t.name.Equals("Chest"));
+				r.head = list.Find(t => t.name.Equals("Head"));
 
-				r.rightUpperArm = GameObject.Find("Arm_R").transform;
-				r.rightLowerArm = GameObject.Find("Elbow_R").transform;
-				r.rightHand = GameObject.Find("Wrist_R").transform;
+				r.leftUpperArm = list.Find(t => t.name.Equals("Arm_L"));
+				r.leftLowerArm = list.Find(t => t.name.Equals("Elbow_L"));
+				r.leftHand = list.Find(t => t.name.Equals("Wrist_L"));
 
-				r.leftUpperLeg = GameObject.Find("Thigh_L").transform;
-				r.leftLowerLeg = GameObject.Find("Knee_L").transform;
-				r.leftFoot = GameObject.Find("Ankle_L").transform;
+				r.rightUpperArm = list.Find(t => t.name.Equals("Arm_R"));
+				r.rightLowerArm = list.Find(t => t.name.Equals("Elbow_R"));
+				r.rightHand = list.Find(t => t.name.Equals("Wrist_R"));
 
-				r.rightUpperLeg = GameObject.Find("Thigh_R").transform;
-				r.rightLowerLeg = GameObject.Find("Knee_R").transform;
-				r.rightFoot = GameObject.Find("Ankle_R").transform;
+				r.leftUpperLeg = list.Find(t => t.name.Equals("Thigh_L"));
+				r.leftLowerLeg = list.Find(t => t.name.Equals("Knee_L"));
+				r.leftFoot = list.Find(t => t.name.Equals("Ankle_L"));
+
+				r.rightUpperLeg = list.Find(t => t.name.Equals("Thigh_R"));
+				r.rightLowerLeg = list.Find(t => t.name.Equals("Knee_R"));
+				r.rightFoot = list.Find(t => t.name.Equals("Ankle_R"));
 				return r;
 			}
 
