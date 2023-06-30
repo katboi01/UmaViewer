@@ -477,6 +477,7 @@ public class UmaContainer : MonoBehaviour
         ik.solvers.lookAt.bodyWeight = 0.25f;
         ik.solvers.lookAt.clampWeightHead = 0.62f;
         ik.solvers.lookAt.target = TrackTarget.transform;
+        ik.solvers.lookAt.spineWeightCurve = new AnimationCurve(new Keyframe[2] { new Keyframe(0f, 1f), new Keyframe(1f, 0.3f) });
         IK = ik;
 
         BipedRagdollCreator.Create(r, options);

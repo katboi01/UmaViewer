@@ -300,8 +300,8 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.Initialize(!UI.isTPose);
         CurrentUMAContainer.SetHeight(-1);
+        CurrentUMAContainer.Initialize(!UI.isTPose);
         if (!UI.isTPose)
         {
             LoadAsset(UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{id}_00_idle01_loop")));
