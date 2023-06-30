@@ -364,10 +364,7 @@ namespace Gallop
         public void ChangeMorphEye()
         {
             FacialResetEye();
-            ProcessMorph(LeftEyeXrange);
-            ProcessMorph(LeftEyeYrange);
-            ProcessMorph(RightEyeXrange);
-            ProcessMorph(RightEyeYrange);
+            EyeMorphs.ForEach(morph => ProcessMorph(morph));
             ApplyRotationEye();
         }
 
@@ -542,11 +539,17 @@ namespace Gallop
             ChangeMorph();
         }
 
-        public void ChangeMorphWeight(BindProperty property, float val)
+        public void ChangeMorphWeight(BindProperty property, float val, FacialMorph morph)
         {
             Container.isAnimatorControl = false;
             property.Value = val < 0 ? 0 : val;
             ChangeMorph();
+
+            if (property.Type == BindProperty.BindType.Enable && morph.name.Contains("Manga"))
+            {
+                ChangeMorphWeight(EyeMorphs[42], val > 0 ? 1 : 0);
+                ChangeMorphWeight(EyeMorphs[43], val > 0 ? 1 : 0);
+            }
         }
 
         public void SetEyeRange(float lx, float ly, float rx, float ry)

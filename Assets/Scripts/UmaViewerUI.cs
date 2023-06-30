@@ -1,8 +1,4 @@
 using Gallop;
-using RootMotion;
-using RootMotion.Demos;
-using RootMotion.Dynamics;
-using RootMotion.FinalIK;
 using SFB;
 using System;
 using System.Collections;
@@ -392,12 +388,7 @@ public class UmaViewerUI : MonoBehaviour
                     }
                     container.Slider.onValueChanged.AddListener((a) =>
                     {
-                        target.ChangeMorphWeight(prop, a);
-                        if (prop.Type == BindProperty.BindType.Enable && morph.name.Contains("Manga"))
-                        {
-                            target.ChangeMorphWeight(target.EyeMorphs[42], container.Slider.value > 0 ? 1 : 0);
-                            target.ChangeMorphWeight(target.EyeMorphs[43], container.Slider.value > 0 ? 1 : 0);
-                        }
+                        target.ChangeMorphWeight(prop, a, morph);
                     });
                 }
             }
@@ -1318,9 +1309,13 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (Builder.CurrentUMAContainer)
         {
-            //TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
-            ModelExporter.exportModel(Builder.CurrentUMAContainer.gameObject);
-            TextureExporter.exportAllTexture(Builder.CurrentUMAContainer.gameObject);
+            var container = Builder.CurrentUMAContainer;
+            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, container.gameObject.name, "pmx");
+            if (!string.IsNullOrEmpty(path))
+            {
+                ModelExporter.exportModel(path,container.gameObject);
+                TextureExporter.exportAllTexture(Path.GetDirectoryName(path),container.gameObject);
+            }
         }
     }
 }

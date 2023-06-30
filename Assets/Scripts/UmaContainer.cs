@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class UmaContainer : MonoBehaviour
 {
@@ -290,7 +291,7 @@ public class UmaContainer : MonoBehaviour
         {
             if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
             {
-                if (!IK.enabled)
+                if (IK && !IK.enabled)
                 {
                     IK.enabled = true;
                     if(PuppetMaster.mode != PuppetMaster.Mode.Active)
@@ -316,8 +317,11 @@ public class UmaContainer : MonoBehaviour
                 {
                     if (dragCollider && dragCollider.attachedRigidbody)
                     {
-                        PuppetMaster.pinWeight = 0.75f;
-                        PuppetMaster.muscleWeight = 0.25f;
+                        if (PuppetMaster)
+                        {
+                            PuppetMaster.pinWeight = 0.75f;
+                            PuppetMaster.muscleWeight = 0.25f;
+                        }
                         dragCollider.attachedRigidbody.isKinematic = true;
                         dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
                         //LookAt Mouse when Dragging
@@ -337,8 +341,11 @@ public class UmaContainer : MonoBehaviour
                 }
                 else
                 {
-                    PuppetMaster.pinWeight = 1;
-                    PuppetMaster.muscleWeight = 1;
+                    if (PuppetMaster)
+                    {
+                        PuppetMaster.pinWeight = 1;
+                        PuppetMaster.muscleWeight = 1;
+                    }
                     //LookAt Camera
                     TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
                     if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
@@ -347,7 +354,7 @@ public class UmaContainer : MonoBehaviour
             }
             else
             {
-                if (IK.enabled)
+                if (IK && IK.enabled)
                 {
                     IK.enabled = false;
                     if (PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
@@ -385,6 +392,35 @@ public class UmaContainer : MonoBehaviour
 
         }
     }
+    public MeshRenderer debug;
+    private void Update()
+    {
+        //if (Input.GetMouseButtonDown(1))
+        //{
+        //    var cam = Camera.main;
+        //    var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
+        //    var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
+        //    var worldPos = cam.ScreenToWorldPoint(mousePos);
+        //    if (Physics.Raycast(Camera.main.ScreenPointToRay(mousePos), out RaycastHit hit))
+        //    {
+        //        hit.rigidbody.AddForce(Camera.main.transform.forward * 50, ForceMode.Impulse);
+
+        //        FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[0], 2, FaceDrivenKeyTarget.OtherMorphs[2]);
+        //        FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[1], 1, FaceDrivenKeyTarget.OtherMorphs[2]);
+        //        Invoke(nameof(Test), 0.3f);
+        //    }
+        //}
+    }
+
+    //public void Test()
+    //{
+    //    FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[0], 0, FaceDrivenKeyTarget.OtherMorphs[2]);
+    //    FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[1], 0, FaceDrivenKeyTarget.OtherMorphs[2]);
+    //    FaceEmotionKeyTarget.FaceEmotionKey.ForEach(e => { if (e.target) e.Weight = 0; });
+    //    var tmp = FaceEmotionKeyTarget.FaceEmotionKey[Random.Range(22, 26)];
+    //    tmp.Weight = 1;
+    //    FaceDrivenKeyTarget.ChangeMorph();
+    //}
 
     public void SetNextAnimationCut(string cutName)
     {
@@ -412,7 +448,7 @@ public class UmaContainer : MonoBehaviour
     {
         if (IsMini) return;
         var container = this;
-        var animator = container.GetComponent<Animator>();
+        var animator = UmaAnimator;
         BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
         BipedRagdollCreator.Options options = BipedRagdollCreator.AutodetectOptions(r);
 
@@ -447,6 +483,7 @@ public class UmaContainer : MonoBehaviour
         PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
         PuppetMaster.FlattenHierarchy();
     }
+
 
     class MaterialHelper
     {

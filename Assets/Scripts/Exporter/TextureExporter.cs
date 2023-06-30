@@ -27,11 +27,9 @@ public class TextureExporter
         return readableText;
     }
 
-    static public void exportAllTexture(GameObject gameobj)
+    static public void exportAllTexture(string path, GameObject gameobj)
     {
-        string m_Path = Application.dataPath;
-
-        string savePath = m_Path + "/../Exported/" + gameobj.name + "/Texture2D/";
+        string savePath = path + "/Texture2D/";
 
         if (!Directory.Exists(savePath))
         {
