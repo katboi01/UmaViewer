@@ -325,7 +325,7 @@ public class UmaContainer : MonoBehaviour
                         dragCollider.attachedRigidbody.isKinematic = true;
                         dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
                         //LookAt Mouse when Dragging
-                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, worldPos, Time.fixedDeltaTime * 3);
+                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, dragCollider.transform.position, Time.fixedDeltaTime * 3);
                     }
                     else
                     {
