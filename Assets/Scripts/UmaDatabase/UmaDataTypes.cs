@@ -138,7 +138,8 @@ public enum UIMessageType
     Default,
     Warning,
     Error,
-    Success
+    Success,
+    Close
 }
 public enum UmaFileType
 {

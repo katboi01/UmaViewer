@@ -1152,7 +1152,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void AnimationSpeedChange(float val)
     {
-        AnimationSpeedText.text = string.Format("Animation Speed: {0:F2}", val);
+        AnimationSpeedText.text = string.Format("Speed: {0:F2}", val);
         if (!Builder.CurrentUMAContainer || !Builder.CurrentUMAContainer.UmaAnimator) return;
         Builder.CurrentUMAContainer.UmaAnimator.speed = val;
         Builder.AnimationCameraAnimator.speed = val;
@@ -1275,7 +1275,7 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    public void ChangeMainPath()
+    public void ChangeDataPath()
     {
         var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", Config.Instance.MainPath, false);
         if (path != null && path.Length > 0 && !string.IsNullOrEmpty(path[0]))
@@ -1300,9 +1300,10 @@ public class UmaViewerUI : MonoBehaviour
             UIMessageType.Error => string.Format("<color=red>{0}</color>\n", msg),
             UIMessageType.Warning => string.Format("<color=yellow>{0}</color>\n", msg),
             UIMessageType.Success => string.Format("<color=green>{0}</color>\n", msg),
+            UIMessageType.Close => string.Format("<color=green>{0}</color>\n", msg),
             _ => $"{msg}\n",
         };
-        MessageScrollRect.gameObject.SetActive(true);
+        MessageScrollRect.gameObject.SetActive(type != UIMessageType.Close);
         MessageScrollRect.verticalNormalizedPosition = 0;
     }
 

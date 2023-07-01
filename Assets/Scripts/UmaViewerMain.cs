@@ -176,6 +176,11 @@ public class UmaViewerMain : MonoBehaviour
                 UI.LoadLivePanels();
             }
         }
+
+        if (Config.Instance.WorkMode == WorkMode.Standalone)
+        {
+            UI.ShowMessage("Done.", UIMessageType.Close);
+        }
     }
 
     public void OpenUrl(string url)
