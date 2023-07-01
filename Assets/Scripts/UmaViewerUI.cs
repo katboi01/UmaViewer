@@ -351,6 +351,7 @@ public class UmaViewerUI : MonoBehaviour
                 foreach (var prop in extraMorph.BindProperties)
                 {
                     var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
+                    Debug.Log(morph.name);
                     container.Name = $"{morph.locator.name}({prop.Type})";
                     container.Slider.value = prop.Value;
                     switch (prop.Type)

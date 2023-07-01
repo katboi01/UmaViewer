@@ -28,6 +28,10 @@ namespace Gallop.Live.Cutt
         private void Awake()
         {
             InitializeTimeLineData();
+            if (Director.instance)
+            {
+                Director.instance._liveTimelineControl = this;
+            }
         }
 
         public void InitializeTimeLineData()

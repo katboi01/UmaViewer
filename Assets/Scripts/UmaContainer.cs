@@ -76,9 +76,13 @@ public class UmaContainer : MonoBehaviour
     public GameObject PhysicsContainer;
     public float BodyScale = 1;
 
+    [Header("Live")]
+    public bool IsLive = false;
+
     [Header("Other")]
     public CharaShaderEffectData ShaderEffectData;
     private List<MaterialHelper> Materials = new List<MaterialHelper>();
+
 
     public void Initialize(bool smile)
     {

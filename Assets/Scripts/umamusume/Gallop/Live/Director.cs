@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Gallop.Live.Cutt;
 using static Director;
+using UnityEditor.SceneManagement;
 
 namespace Gallop.Live
 {
@@ -150,11 +151,11 @@ namespace Gallop.Live
         private const float LiveTotalTimeMargin = 0;
         private const float MaxOutlineOffLength = 99999;
         private const int FINALIZE_CAMERA_DEPTH = 19;
-        private static Director _instance; 
+        private static Director _instance = null; 
         [SerializeField] 
         private Director.State _state; 
         private bool _isDestroyed;
-        private LiveTimelineControl _liveTimelineControl; 
+        public LiveTimelineControl _liveTimelineControl; //Edited to public
         private bool _isFinished; 
         private readonly RandomTable<float> _randomTable; 
         private RandomRatioTable _blinkLightRandomRatioTable; 
@@ -167,7 +168,7 @@ namespace Gallop.Live
         private bool _isEnableBloom; 
         private bool _isBloom; 
         private bool _isDof; 
-        private StageController _stageController; 
+        public StageController _stageController; //Edited to public
         private bool _isEnabledStageController; 
         public RenderTexture[] MonitorTextureArray; 
         [SerializeField] 
@@ -255,7 +256,7 @@ namespace Gallop.Live
         private Vector3 _tempRateVector; 
         private Vector3 _tempAttachRateVector;
 
-        public static Director Instance { get; }
+        public static Director instance => _instance;
         public static bool HasInstance { get; }
         public LiveTimelineControl LiveTimelineControl { get; }
         public Director.DisplayMode displayMode { get; set; }
@@ -303,18 +304,38 @@ namespace Gallop.Live
         public static RegisterInfo[] EffectRegisterInfoArray { get; set; }
         public static Dictionary<string, List<string>> FlashSeCueNameDict { get; set; }
 
-        //Testing
+        //
         public LiveEntry live;
         private const string CUTT_PATH = "cutt/cutt_son{0}/cutt_son{0}";
+        private const string STAGE_PATH = "3d/env/live/live{0}/pfb_env_live{0}_controller000";
 
         private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
+
+        public List<Transform> charaObjs;
 
         private void Awake()
         {
             if (live != null)
             {
+                _instance = this;
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
+                Debug.Log(live.BackGroundId);
                 Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), this.gameObject.transform);
+                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
+
+                //Make CharacterObject
+                var characterStandPos = this._liveTimelineControl.transform.Find("CharacterStandPos");
+                int counter = 0;
+                foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>()) {
+                    if (trans == characterStandPos)
+                    {
+                        continue;
+                    }
+                    var newObj = Instantiate(trans, this.transform);
+                    newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
+                    charaObjs.Add(newObj.transform);
+                    counter++;
+                };
             }
         }
     }

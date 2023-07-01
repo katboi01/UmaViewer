@@ -24,7 +24,7 @@ namespace RootMotion.Dynamics {
 		/// Sets up a Puppet using a single ragdoll character. This will duplicate the ragdoll character, remove the ragdoll components from the original and use it as the animated target.
 		/// </summary>
 		public static PuppetMaster SetUp(Transform target, int characterControllerLayer, int ragdollLayer) {
-			Transform ragdoll = ((GameObject)GameObject.Instantiate(target.gameObject, target.position, target.rotation)).transform;
+			Transform ragdoll = ((GameObject)GameObject.Instantiate(target.gameObject, target.position, target.rotation, target.transform.parent)).transform;
 
 			PuppetMaster puppetMaster = ragdoll.gameObject.AddComponent<PuppetMaster>();
 			puppetMaster.SetUpTo(target, characterControllerLayer, ragdollLayer);

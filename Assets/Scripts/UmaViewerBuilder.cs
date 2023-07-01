@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using Random = UnityEngine.Random;
 
 public class UmaViewerBuilder : MonoBehaviour
@@ -80,6 +81,22 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
             LoadNormalUma(chara, costumeId);
         }
+
+        yield break;
+    }
+
+    public IEnumerator LoadLiveUma(List<LiveCharacterSelect> characters)
+    {
+        UnloadAllBundle();
+        for (int i = 0; i < characters.Count; i++)
+        {
+            CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainer>();
+            CurrentUMAContainer.IsLive = true;
+            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+            CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+            LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+        }
+
 
         yield break;
     }
@@ -653,6 +670,8 @@ public class UmaViewerBuilder : MonoBehaviour
                 a.CostumeId = "00";
             }
         });//fill empty
+
+
         GameObject MainLive = new GameObject("Live");
         GameObject Director = new GameObject("Director");
 
@@ -661,6 +680,8 @@ public class UmaViewerBuilder : MonoBehaviour
         Instantiate(mController, MainLive.transform);
 
         Destroy(Director);
+
+        StartCoroutine(LoadLiveUma(characters));
     }
 
     //Use CriWare Library
@@ -848,6 +869,20 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
+    public AssetBundle LoadOrGet(UmaDatabaseEntry entry)
+    {
+        if ((Main.LoadedBundles.ContainsKey(entry.Name)))
+        {
+            return Main.LoadedBundles[entry.Name];
+        }
+        else
+        {
+            var bundle = AssetBundle.LoadFromFile(entry.FilePath);
+            Main.LoadedBundles.Add(entry.Name, bundle);
+            return bundle;
+        }
+    }
+
     public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null )
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
@@ -872,10 +907,12 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
     {
         Debug.Log("Loading " + entry.Name);
-        if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
-
         string filePath = entry.FilePath;
-        if (File.Exists(filePath))
+        if (Main.LoadedBundles.ContainsKey(entry.Name)) 
+        {
+            LoadBundle(Main.LoadedBundles[entry.Name], IsSubAsset, SetParent);
+        }
+        else if (File.Exists(filePath))
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
             if (bundle == null)
@@ -982,7 +1019,10 @@ public class UmaViewerBuilder : MonoBehaviour
                         break;
                     }
                 case Shader sha:
-                    ShaderList.Add(sha);
+                    if (!ShaderList.Contains(sha))
+                    {
+                        ShaderList.Add(sha);
+                    }
                     break;
                 case Texture2D tex2D:
 
@@ -1355,6 +1395,8 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         var container = CurrentOtherContainer;
         var prop = Instantiate(go, SetParent ? SetParent : container.transform);
+
+        /*
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -1363,6 +1405,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 m.shader = Shader.Find("Unlit/Transparent Cutout");
             }
         }
+        */
     }
 
     public void LoadAssetPath(string path, Transform SetParent)
@@ -1393,8 +1436,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         if (!CurrentUMAContainer.Head) return;
         var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name == "3d/animator/drivenkeylocator");
-        var bundle = AssetBundle.LoadFromFile(locatorEntry.FilePath);
-        Main.LoadedBundles.Add(locatorEntry.Name, bundle);
+        var bundle = LoadOrGet(locatorEntry);
         var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
         locator.name = "DrivenKeyLocator";
 
@@ -1406,8 +1448,7 @@ public class UmaViewerBuilder : MonoBehaviour
         var mangaObjects = new List<GameObject>();
         mangaEntry.ForEach(entry =>
         {
-            AssetBundle ab = AssetBundle.LoadFromFile(entry.FilePath);
-            Main.LoadedBundles.Add(entry.Name, ab);
+            AssetBundle ab = LoadOrGet(entry);
             var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
             obj.SetActive(false);
 
