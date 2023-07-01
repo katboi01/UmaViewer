@@ -1,3 +1,4 @@
+using Cutt;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -237,8 +238,8 @@ namespace Gallop.Live.Cutt
 		public float TotalTimeLength;
 		public bool Lyrics;
 		public LiveTimelineDefine.SheetIndex SheetType;
-		public LiveTimelineKeyTimescaleDataList timescaleKeys;
-		public LiveTimelineKeyCameraPositionDataList cameraPosKeys;
+        [SerializeField] public LiveTimelineKeyTimescaleDataList timescaleKeys;
+        [SerializeField] public LiveTimelineKeyCameraPositionDataList cameraPosKeys;
 
 		//[SerializeField]用于该类在别的脚本里定义的时候
 		[SerializeField] public LiveTimelineKeyCameraLookAtDataList cameraLookAtKeys;
@@ -312,14 +313,12 @@ namespace Gallop.Live.Cutt
 		[SerializeField] public List<LiveTimelineEffectData> effectList;
 
 		[SerializeField] public LiveTimelineKeyTiltShiftDataList tiltShiftKeys;
-
-		[SerializeField] public List<LiveTimelineA2UConfigData> a2uConfigList;
-		[SerializeField] public List<LiveTimelineA2UData> a2uList;
-
-		[SerializeField] public LiveTimelineKeyTitleDataList titleKeys;
+        [SerializeField] public LiveTimelineKeyFlashPlayerDataList flashPlayerKeys;
+        [SerializeField] public LiveTimelineKeyTitleDataList titleKeys;
 
 		[SerializeField] public List<LiveTimelineSpotlight3dData> spotlight3dList;
-		[SerializeField] public List<LiveTimelineNodeScaleData> nodeScaleList;
+        [SerializeField] public List<LiveTimelineCharaNodeData> CharaNodeDataList;
+        [SerializeField] public List<LiveTimelineNodeScaleData> nodeScaleList;
 
 		[SerializeField] public LiveTimelineKeyCharaFootLightDataList charaFootLightKeys;
 
@@ -349,7 +348,7 @@ namespace Gallop.Live.Cutt
 
 
 
-		/*
+        /*
 		//终于可以调用AB包了，虽然后面发现没什么用...说不定什么时候能用到
 		private void Start()
 		{
@@ -370,6 +369,6 @@ namespace Gallop.Live.Cutt
 			}
 		}
 		*/
-	}
+    }
 }
 

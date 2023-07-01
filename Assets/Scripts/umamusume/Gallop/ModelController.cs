@@ -19,5 +19,11 @@ namespace Gallop
             Multiply = 1,
             Max = 2
         }
+
+        public struct ModelDepthInfo
+        {
+            public int index; // 0x0
+            public float depthOrder; // 0x4
+        }
     }
 }

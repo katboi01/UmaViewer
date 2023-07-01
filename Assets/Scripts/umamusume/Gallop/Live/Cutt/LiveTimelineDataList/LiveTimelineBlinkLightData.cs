@@ -25,20 +25,21 @@ namespace Gallop.Live.Cutt
     [System.Serializable]
     public class LiveTimelineKeyBlinkLightData : LiveTimelineKeyWithInterpolate
     {
-        public Color[] color0Array;
-        public Color[] color1Array;
-        public float[] powerArray;
-        public bool[] isReverseHueArray;
-        public BlinkLightPattern pattern; 
-        public BlinkLightColorType colorType; 
-        public float powerMin; 
-        public float powerMax; 
-        public int loopCount;
-        public float waitTime;
-        public float turnOnTime;
-        public float turnOffTime;
-        public float keepTime;
-        public float intervalTime;
+        public LiveDefine.LightBlendMode LightBlendMode; // 0x30
+        public Color[] color0Array; // 0x38
+        public Color[] color1Array; // 0x40
+        public float[] powerArray; // 0x48
+        public bool[] isReverseHueArray; // 0x50
+        public BlinkLightPattern pattern; // 0x58
+        public BlinkLightColorType colorType; // 0x5C
+        public float powerMin; // 0x60
+        public float powerMax; // 0x64
+        public int loopCount; // 0x68
+        public float waitTime; // 0x6C
+        public float turnOnTime; // 0x70
+        public float turnOffTime; // 0x74
+        public float keepTime; // 0x78
+        public float intervalTime; // 0x7C
     }
 
     [System.Serializable]

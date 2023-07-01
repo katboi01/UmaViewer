@@ -32,13 +32,14 @@ namespace Gallop.Live.Cutt
         public float outlineWidthPower;
         public Color outlineColor;
         public ModelController.OutlineColorBlend outlineColorBlend;
+        public LiveDefine.LightBlendMode LightBlendMode;
+        public bool IsProjector;
         public LiveTimelineKeyLoopType loopType;
         public int loopCount;
         public int loopExecutedCount;
         public int loopIntervalFrame;
         public bool isPasteLoopUnit;
         public bool isChangeLoopInterpolate;
-        public bool IsProjector;
         public float f32;
         public LiveTimelineKeyLoopType _loopType;
         public int _loopCount;
@@ -56,6 +57,7 @@ namespace Gallop.Live.Cutt
     [System.Serializable]
     public class LiveTimelineBgColor1Data : ILiveTimelineGroupDataWithName
     {
+        private const string default_name = "BgColor1";
         public LiveTimelineKeyBgColor1DataList keys;
     }
 }

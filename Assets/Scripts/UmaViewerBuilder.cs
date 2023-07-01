@@ -653,6 +653,14 @@ public class UmaViewerBuilder : MonoBehaviour
                 a.CostumeId = "00";
             }
         });//fill empty
+        GameObject MainLive = new GameObject("Live");
+        GameObject Director = new GameObject("Director");
+
+        Gallop.Live.Director mController = Director.AddComponent<Gallop.Live.Director>();
+        mController.live = live;
+        Instantiate(mController, MainLive.transform);
+
+        Destroy(Director);
     }
 
     //Use CriWare Library
@@ -840,7 +848,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
+    public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null )
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
         {
@@ -848,20 +856,20 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 if (prerequisite.StartsWith(UmaDatabaseController.CharaPath))
                 {
-                    RecursiveLoadAsset(Main.AbChara.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                    RecursiveLoadAsset(Main.AbChara.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
                 }
                 else if (prerequisite.StartsWith(UmaDatabaseController.MotionPath))
                 {
-                    RecursiveLoadAsset(Main.AbMotions.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                    RecursiveLoadAsset(Main.AbMotions.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
                 }
                 else
-                    RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true);
+                    RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
             }
         }
-        LoadAsset(entry, IsSubAsset);
+        LoadAsset(entry, IsSubAsset, SetParent);
     }
 
-    public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false)
+    public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
     {
         Debug.Log("Loading " + entry.Name);
         if (Main.LoadedBundles.ContainsKey(entry.Name)) return;
@@ -877,7 +885,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             Main.LoadedBundles.Add(entry.Name, bundle);
             UI.LoadedAssetsAdd(entry);
-            LoadBundle(bundle, IsSubAsset);
+            LoadBundle(bundle, IsSubAsset, SetParent);
         }
         else
         {
@@ -885,7 +893,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadBundle(AssetBundle bundle, bool IsSubAsset = false)
+    private void LoadBundle(AssetBundle bundle, bool IsSubAsset = false, Transform SetParent = null)
     {
         if (bundle.name == "shader.a")
         {
@@ -968,7 +976,7 @@ public class UmaViewerBuilder : MonoBehaviour
                         {
                             if (!IsSubAsset)
                             {
-                                LoadProp(go);
+                                LoadProp(go, SetParent);
                             }
                         }
                         break;
@@ -1343,10 +1351,10 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadProp(GameObject go)
+    private void LoadProp(GameObject go, Transform SetParent = null)
     {
         var container = CurrentOtherContainer;
-        var prop = Instantiate(go, container.transform);
+        var prop = Instantiate(go, SetParent ? SetParent : container.transform);
         foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.sharedMaterials)
@@ -1354,6 +1362,14 @@ public class UmaViewerBuilder : MonoBehaviour
                 //Shaders can be differentiated by checking m.shader.name
                 m.shader = Shader.Find("Unlit/Transparent Cutout");
             }
+        }
+    }
+
+    public void LoadAssetPath(string path, Transform SetParent)
+    {
+        foreach(var asset in UmaViewerMain.Instance.AbList.Where(a => a.Name == path))
+        {
+            RecursiveLoadAsset(asset, false, SetParent);
         }
     }
 
