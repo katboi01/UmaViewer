@@ -4,11 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using System.Linq;
 using Gallop.Live.Cutt;
 using static Director;
 using UnityEditor.SceneManagement;
 using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 using System.Data;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 
 namespace Gallop.Live
 {
@@ -310,6 +312,9 @@ namespace Gallop.Live
         public LiveEntry live;
         private const string CUTT_PATH = "cutt/cutt_son{0}/cutt_son{0}";
         private const string STAGE_PATH = "3d/env/live/live{0}/pfb_env_live{0}_controller000";
+        private const string SONG_PATH = "sound/l/{0}/snd_bgm_live_{0}_oke_01.awb";
+        private const string VOCAL_PATH = "sound/l/{0}/snd_bgm_live_{0}_chara_{1}_01.awb";
+        private const string RANDOM_VOCAL_PATH = "sound/l/{0}/snd_bgm_live_{0}_chara";
 
         private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
 
@@ -318,6 +323,10 @@ namespace Gallop.Live
         public List<Animation> charaAnims;
 
         public List<LiveTimelineCharaMotSeqData> seqData;
+
+        public bool _isLiveScene;
+
+        public AudioSource liveSong;
 
         private void Awake()
         {
@@ -355,11 +364,10 @@ namespace Gallop.Live
 
         public void InitializeTimeline()
         {
-            //Move?
             _liveTimelineControl.InitCharaMotionSequence();
         }
 
-        public void Play()
+        public void Play(int songid, int charaid)
         {
             /*
             int counter = 0;
@@ -380,7 +388,30 @@ namespace Gallop.Live
                 }
             }
             */
-            seqData = this._liveTimelineControl.data.worksheetList[0].charaMotSeqList;
+            Debug.Log(songid);
+            Debug.Log(charaid);
+            Debug.Log(string.Format(VOCAL_PATH, songid, charaid));
+
+            var entry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(VOCAL_PATH, songid, charaid)));
+            if (entry == null)
+            {
+                List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
+                foreach (var random in UmaViewerMain.Instance.AbSounds.Where(a => (a.Name.Contains(string.Format(RANDOM_VOCAL_PATH, songid)) && a.Name.EndsWith("awb"))))
+                {
+                    entries.Add(random);
+                }
+                if (entries.Count > 0)
+                {
+                    entry = entries[UnityEngine.Random.Range(0, entries.Count - 1)];
+                }
+            }
+            if(entry != null)
+            {
+                Debug.Log(entry.Name);
+                UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
+                liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
+            }
+
             _isLiveSetup = true;
             _liveCurrentTime = 0;
         }
@@ -417,8 +448,16 @@ namespace Gallop.Live
         {
             if (_isLiveSetup)
             {
-                _liveCurrentTime += Time.deltaTime;
-                OnTimelineUpdate(_liveCurrentTime);
+                if(false)
+                {
+                    _liveCurrentTime = liveSong.time;
+                    OnTimelineUpdate(_liveCurrentTime);
+                }
+                else
+                {
+                    _liveCurrentTime += Time.deltaTime;
+                    OnTimelineUpdate(_liveCurrentTime);
+                }
             }
             else
             {

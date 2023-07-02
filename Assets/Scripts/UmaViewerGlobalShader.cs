@@ -127,6 +127,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
     private void FixedUpdate()
     {
         //Used to calculate the correct outline
+        //Outline need more adjust in live
         if (UmaViewerBuilder.Instance.CurrentUMAContainer)
         {
             if (UmaViewerBuilder.Instance.CurrentUMAContainer.UpBodyBone)

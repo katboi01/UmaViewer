@@ -588,7 +588,11 @@ public class UmaViewerUI : MonoBehaviour
         if (selectlist != null)
         {
             LiveTime = true;
-            Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
+            SetEyeTrackingEnable(false);
+            GameObject.Find("LoadingCanvas").GetComponent<Canvas>().enabled = true;
+            CallAfterDelay.Create(0, () => {
+                Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
+            });
             LiveSelectPannel.SetActive(false);
         }
     }

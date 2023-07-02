@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using Random = UnityEngine.Random;
 
@@ -671,8 +672,6 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         });//fill empty
 
-        UI.SetEyeTrackingEnable(false);
-
         GameObject MainLive = new GameObject("Live");
         GameObject Director = new GameObject("Director");
 
@@ -686,7 +685,47 @@ public class UmaViewerBuilder : MonoBehaviour
 
         Gallop.Live.Director.instance.InitializeTimeline();
 
-        Gallop.Live.Director.instance.Play();
+        //Gallop.Live.Director.instance.Play();
+        List<GameObject> transferObjs = new List<GameObject>();
+        transferObjs.Add(MainLive);
+        transferObjs.Add(GameObject.Find("ViewerMain"));
+        transferObjs.Add(GameObject.Find("GlobalShaderController"));
+        transferObjs.Add(GameObject.Find("Camera"));
+        transferObjs.Add(GameObject.Find("Directional Light"));
+        transferObjs.Add(GameObject.Find("AnimationCameraRoot"));
+        StartCoroutine(LoadLiveSceneAsync("LiveScene", transferObjs, live.MusicId, characters[0].CharaEntry.Id));
+
+    }
+
+    IEnumerator LoadLiveSceneAsync(string sceneName, List<GameObject> go, int songid, int charaid)
+    {
+        // Set the current Scene to be able to unload it later
+        Scene currentScene = SceneManager.GetActiveScene();
+
+        // The Application loads the Scene in the background at the same time as the current Scene.
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+
+        // Wait until the last operation fully loads to return anything
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+
+        // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
+        foreach(var obj in go)
+        {
+            SceneManager.MoveGameObjectToScene(obj, SceneManager.GetSceneByName(sceneName));
+        }
+
+        
+        // Unload the previous Scene
+        //Scene scene = SceneManager.GetSceneByName(sceneName);
+
+        //SceneManager.SetActiveScene(scene);
+
+        SceneManager.UnloadSceneAsync(currentScene);
+
+        Gallop.Live.Director.instance.Play(songid, charaid);
     }
 
     //Use CriWare Library
@@ -732,7 +771,7 @@ public class UmaViewerBuilder : MonoBehaviour
     }
 
     //Use decrypt function
-    public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb)
+    public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
     {
         //load character voice
         PlaySound(SongAwb);
@@ -749,7 +788,10 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        LoadLiveLyrics(songid);
+        if (needLyrics)
+        {
+            LoadLiveLyrics(songid);
+        }
     }
 
     public void PlaySound(UmaDatabaseEntry SongAwb, int subindex = -1)
