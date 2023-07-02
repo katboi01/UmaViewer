@@ -85,20 +85,20 @@ public class UmaViewerBuilder : MonoBehaviour
         yield break;
     }
 
-    public IEnumerator LoadLiveUma(List<LiveCharacterSelect> characters)
+    public void LoadLiveUma(List<LiveCharacterSelect> characters)
     {
         UnloadAllBundle();
         for (int i = 0; i < characters.Count; i++)
         {
-            CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainer>();
-            CurrentUMAContainer.IsLive = true;
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-            CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-            LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+            if (characters[i].CharaEntry.Name != "")
+            {
+                CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainer>();
+                CurrentUMAContainer.IsLive = true;
+                CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+            }
         }
-
-
-        yield break;
     }
 
     private void LoadNormalUma(CharaEntry chara, string costumeId)
@@ -666,11 +666,12 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             if (a.CharaEntry == null || a.CostumeId == "")
             {
-                a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count)];
-                a.CostumeId = "00";
+                //a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count)];
+                //a.CostumeId = "00";
             }
         });//fill empty
 
+        UI.SetEyeTrackingEnable(false);
 
         GameObject MainLive = new GameObject("Live");
         GameObject Director = new GameObject("Director");
@@ -681,7 +682,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
         Destroy(Director);
 
-        StartCoroutine(LoadLiveUma(characters));
+        LoadLiveUma(characters);
+
+        Gallop.Live.Director.instance.InitializeTimeline();
+
+        Gallop.Live.Director.instance.Play();
     }
 
     //Use CriWare Library
@@ -962,8 +967,14 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 case AnimationClip aClip:
                     {
+                        if (UI.LiveTime)
+                        {
+                            break;
+                        }
+
                         if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator && CurrentUMAContainer.UmaAnimator.runtimeAnimatorController)
                         {
+                            Debug.Log("LiveTime" + UI.LiveTime.ToString());
                             LoadAnimation(aClip);
                         }
 

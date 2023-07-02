@@ -133,6 +133,8 @@ public class UmaViewerUI : MonoBehaviour
     public bool EnableEyeTracking = true;
     public bool EnableFaceOverride = true;
 
+    public bool LiveTime = false;
+
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
     private IEnumerator UpdateResVerCoroutine;
@@ -585,6 +587,7 @@ public class UmaViewerUI : MonoBehaviour
         var selectlist = LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>();
         if (selectlist != null)
         {
+            LiveTime = true;
             Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
             LiveSelectPannel.SetActive(false);
         }
@@ -957,6 +960,7 @@ public class UmaViewerUI : MonoBehaviour
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
     public void ToggleUIPanel(GameObject go)
     {
+
         if (go.activeSelf || !TogglablePanels.Contains(go))
         {
             go.SetActive(!go.activeSelf);

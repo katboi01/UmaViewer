@@ -7,6 +7,8 @@ using UnityEngine;
 using Gallop.Live.Cutt;
 using static Director;
 using UnityEditor.SceneManagement;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using System.Data;
 
 namespace Gallop.Live
 {
@@ -161,9 +163,9 @@ namespace Gallop.Live
         private RandomRatioTable _blinkLightRandomRatioTable; 
         private float _sceneFrameRate; 
         [SerializeField] 
-        private float _liveCurrentTime; 
+        public float _liveCurrentTime;  //Edited to public
         private bool _isRequestFadeOut; 
-        private bool _isLiveSetup; 
+        public bool _isLiveSetup; //Edit to pulic
         [SerializeField] 
         private bool _isEnableBloom; 
         private bool _isBloom; 
@@ -313,6 +315,10 @@ namespace Gallop.Live
 
         public List<Transform> charaObjs;
 
+        public List<Animation> charaAnims;
+
+        public List<LiveTimelineCharaMotSeqData> seqData;
+
         private void Awake()
         {
             if (live != null)
@@ -324,6 +330,7 @@ namespace Gallop.Live
                 Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
 
                 //Make CharacterObject
+                
                 var characterStandPos = this._liveTimelineControl.transform.Find("CharacterStandPos");
                 int counter = 0;
                 foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>()) {
@@ -336,6 +343,86 @@ namespace Gallop.Live
                     charaObjs.Add(newObj.transform);
                     counter++;
                 };
+                
+
+                //Set Animation
+                
+
+                
+                
+            }
+        }
+
+        public void InitializeTimeline()
+        {
+            //Move?
+            _liveTimelineControl.InitCharaMotionSequence();
+        }
+
+        public void Play()
+        {
+            /*
+            int counter = 0;
+
+            var motionSeq = this._liveTimelineControl.data.worksheetList[0].charaMotSeqList;
+            foreach (var seq in motionSeq)
+            {
+                var anim = seq.keys.thisList[4].clip;
+                var container = charaObjs[counter].GetComponentInChildren<UmaContainer>();
+                Debug.Log(container);
+                if (container != null)
+                {
+                    var animation = container.gameObject.AddComponent<Animation>();
+                    animation.AddClip(anim, anim.name);
+                    animation.Play(anim.name);
+
+                    counter++;
+                }
+            }
+            */
+            seqData = this._liveTimelineControl.data.worksheetList[0].charaMotSeqList;
+            _isLiveSetup = true;
+            _liveCurrentTime = 0;
+        }
+
+        private void OnTimelineUpdate(float _liveCurrentTime)
+        {
+            /*
+            var seqs = seqData[0].keys.thisList;
+            var container = charaObjs[0].GetComponentInChildren<UmaContainer>();
+
+            for(int i = seqs.Count - 1; i >=0; i--)
+            {
+                Debug.Log(_liveCurrentTime);
+                if (_liveCurrentTime >= (double)seqs[i].frame/60)
+                {
+                    Debug.Log("Ê±¼ä:" + ((double)seqs[i].frame / 60).ToString());
+
+                    AnimationClip anim = seqs[i].clip;
+                    double start = (double)seqs[i].motionHeadFrame/60;
+                    double interval = _liveCurrentTime - (double)seqs[i].frame/ 60;
+
+                    Debug.Log("time:" + interval.ToString());
+
+                    anim.SampleAnimation(container.gameObject, (float)(start + interval));
+
+                    break;
+                }
+            }
+            */
+            _liveTimelineControl.AlterUpdate(_liveCurrentTime);
+        }
+
+        void Update()
+        {
+            if (_isLiveSetup)
+            {
+                _liveCurrentTime += Time.deltaTime;
+                OnTimelineUpdate(_liveCurrentTime);
+            }
+            else
+            {
+                _liveCurrentTime = 0;
             }
         }
     }
