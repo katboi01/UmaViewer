@@ -774,7 +774,10 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
     {
         //load character voice
-        PlaySound(SongAwb);
+        if (SongAwb != null)
+        {
+            PlaySound(SongAwb);
+        }
 
         //load BG
         string nameVar = $"snd_bgm_live_{songid}_oke";
@@ -1536,7 +1539,9 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         var firsehead = CurrentUMAContainer.Head;
-        var faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
+        var origin_faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
+        var faceDriven = new FaceDrivenKeyTarget();
+        DeepCopy.CopyValues(origin_faceDriven, faceDriven);
         var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
         var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
         faceDriven._earTarget = earDriven._targetFaces;

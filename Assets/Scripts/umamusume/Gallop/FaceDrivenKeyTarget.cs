@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static DynamicBone;
+using static Gallop.DrivenKeyComponent;
 
 namespace Gallop
 {
@@ -368,6 +369,13 @@ namespace Gallop
             ApplyRotationEye();
         }
 
+        public void ChangeMorphMouth()
+        {
+            FacialResetMouth();
+            MouthMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEye();
+        }
+
         public void ClearMorph()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
@@ -386,6 +394,10 @@ namespace Gallop
 
         private void ProcessMorph(FacialMorph morph)
         {
+            if (morph.weight == 0)
+            {
+                return;
+            }
             foreach (TrsArray trs in morph.trsArray)
             {
                 if (trs.isPhysics && Container.EnablePhysics)
@@ -483,6 +495,16 @@ namespace Gallop
             FacialReset(BaseLEyeMorph.trsArray);
             FacialReset(BaseREyeMorph.trsArray);
             ApplyRotationEye();
+        }
+
+        public void FacialResetMouth()
+        {
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
+            FacialReset(BaseMouthMorph.trsArray);
+            ApplyRotation();
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -683,6 +705,88 @@ namespace Gallop
         public FacialMorph GetMorphByType(List<FacialMorph> morphs, LiveTimelineDefine.FacialEyeId Type)
         {
             return morphs.Find(m => m.index == (int)Type);
+        }
+
+        private LiveTimelineKeyLipSyncData _prevKeyData;
+        private LiveTimelineKeyLipSyncData _lastKeyData;
+
+        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_)
+        {
+            //Debug.Log((float)keyData_.frame);
+            //Debug.Log(liveTime_);
+
+            if(_lastKeyData != keyData_)
+            {
+                _prevKeyData = _lastKeyData;
+            }
+
+            float keyTime = (float)keyData_.frame / 60;
+
+            float easeTime = (float)keyData_.time/ 60;
+
+            float passTime = liveTime_ - keyTime;
+
+            float weightRatio = 0;
+
+            if (passTime >= easeTime)
+            {
+                weightRatio = 1;
+            }
+            else
+            {
+                float ratio = passTime / easeTime;
+                switch (keyData_.interpolateType)
+                {
+                    case InterpolateType.Linear:
+                        weightRatio = ratio;
+                        break;
+                    case InterpolateType.EaseIn:
+                        weightRatio = Easing.EaseIn(ratio);
+                        break;
+                    case InterpolateType.EaseOut:
+                        weightRatio = Easing.EaseOut(ratio);
+                        break;
+                    case InterpolateType.EaseInOut:
+                        weightRatio = Easing.EaseInOut(ratio);
+                        break;
+                    default:
+                        weightRatio = ratio;
+                        break;
+                }
+            }
+
+
+            MouthMorphs.ForEach(morph => morph.weight = 0);
+
+            if (_prevKeyData != null)
+            {
+                if(weightRatio != 1)
+                {
+                    foreach (var part in _prevKeyData.facialPartsDataArray)
+                    {
+                        if (part.FacialPartsId == 0 ) { continue; }
+                        MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevKeyData.weight / 100);
+                    }
+                }
+                else
+                {
+                    foreach (var part in _prevKeyData.facialPartsDataArray)
+                    {
+                        if (part.FacialPartsId == 0) { continue; }
+                        MouthMorphs[part.FacialPartsId - 1].weight = 0;
+                    }
+                }
+            } 
+
+            foreach (var part in keyData_.facialPartsDataArray)
+            {
+                if (part.FacialPartsId == 0) { continue; }
+                MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)keyData_.weight / 100);
+            }
+
+            ChangeMorphMouth();
+
+            _lastKeyData = keyData_;
         }
     }
 }

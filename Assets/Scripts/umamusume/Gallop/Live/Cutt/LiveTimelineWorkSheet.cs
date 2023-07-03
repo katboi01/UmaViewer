@@ -1,5 +1,6 @@
 using Cutt;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
@@ -117,14 +118,40 @@ namespace Gallop.Live.Cutt
 	}
 
 	[System.Serializable]
-	public class LiveTimelineKeyDataListTemplate<T>
-	{
+	public class LiveTimelineKeyDataListTemplate<T> : ILiveTimelineKeyDataList where T : LiveTimelineKey
+    {
 		[SerializeField]
 		private LiveTimelineKeyDataListAttr _attribute;
 		[SerializeField]
 		private TimelineKeyPlayMode _playMode;
 		public List<T> thisList;
-	}
+
+        public int Count => thisList.Count;
+
+        public LiveTimelineKey this[int index]
+        {
+            get
+            {
+                return thisList[index];
+            }
+            set
+            {
+                thisList[index] = value as T;
+            }
+        }
+
+        public LiveTimelineKey FindCurrentKey(float currentTime)
+		{
+            for (int i = thisList.Count - 1; i >= 0; i--)
+            {
+                if (currentTime >= (double)thisList[i].frame / 60)
+                {
+                    return thisList[i];
+                }
+            }
+			return null;
+        }
+    }
 
 	[System.Serializable]
 	public abstract class LiveTimelineKey

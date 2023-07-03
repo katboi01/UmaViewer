@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static RootMotion.FinalIK.IKSolverVR;
 
 namespace Gallop.Live.Cutt
 {
@@ -22,6 +24,8 @@ namespace Gallop.Live.Cutt
         private LiveTimelineMotionSequence[] _motionSequenceArray;
 
         public LiveTimelineKeyCharaMotionSeqDataList[] _keyArray;
+
+        public event Action<LiveTimelineKeyLipSyncData, float> OnUpdateLipSync;
 
         public void CopyValues<T>(T from, T to)
         {
@@ -88,6 +92,7 @@ namespace Gallop.Live.Cutt
         public void AlterUpdate(float liveTime)
         {
             AlterUpdate_CharaMotionSequence(liveTime);
+            AlterUpdate_LipSync(liveTime);
         }
 
         public void AlterUpdate_CharaMotionSequence(float liveTime)
@@ -96,6 +101,24 @@ namespace Gallop.Live.Cutt
             {
                 motion.AlterUpdate(liveTime);
             }
+        }
+
+        public void AlterUpdate_LipSync(float liveTime)
+        {
+            var lipDataList = data.worksheetList[0].ripSyncKeys;
+
+            LiveTimelineKey curKey = null;
+            FindTimelineKeyCurrent(out curKey, lipDataList, liveTime);
+            if (curKey != null)
+            {
+                LiveTimelineKeyLipSyncData arg = curKey as LiveTimelineKeyLipSyncData;
+                this.OnUpdateLipSync(arg, liveTime);
+            }
+        }
+
+        public void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, float curTime)
+        {
+            curKey = keys.FindCurrentKey(curTime);
         }
     }
 

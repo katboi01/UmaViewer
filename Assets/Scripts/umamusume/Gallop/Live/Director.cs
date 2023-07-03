@@ -308,7 +308,7 @@ namespace Gallop.Live
         public static RegisterInfo[] EffectRegisterInfoArray { get; set; }
         public static Dictionary<string, List<string>> FlashSeCueNameDict { get; set; }
 
-        //
+        //real work start
         public LiveEntry live;
         private const string CUTT_PATH = "cutt/cutt_son{0}/cutt_son{0}";
         private const string STAGE_PATH = "3d/env/live/live{0}/pfb_env_live{0}_controller000";
@@ -365,29 +365,42 @@ namespace Gallop.Live
         public void InitializeTimeline()
         {
             _liveTimelineControl.InitCharaMotionSequence();
+
+            _liveTimelineControl.OnUpdateLipSync += delegate (LiveTimelineKeyLipSyncData keyData_, float liveTime_)
+            {
+                /*
+                for (int k = 0; k < MemberUnitNumber; k++)
+                {
+                    int num4 = k % MemberUnitNumber;
+                    if (_characterObjects[num4].isSetting)
+                    {
+                        _characterObjects[num4].faceController.AlterUpdateAutoLip(liveTime_, keyData_, (LiveCharaPosition)num4);
+                    }
+                }
+                */
+
+                
+                for (int k = 0; k < charaObjs.Count; k++)
+                {
+                    var container = charaObjs[k].GetComponentInChildren<UmaContainer>();
+                    if(container != null)
+                    {
+                        container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_);
+                    }
+                }
+                
+                /*
+                var container = charaObjs[0].GetComponentInChildren<UmaContainer>();
+                if (container != null)
+                {
+                    container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_);
+                }
+                */
+            };
         }
 
         public void Play(int songid, int charaid)
         {
-            /*
-            int counter = 0;
-
-            var motionSeq = this._liveTimelineControl.data.worksheetList[0].charaMotSeqList;
-            foreach (var seq in motionSeq)
-            {
-                var anim = seq.keys.thisList[4].clip;
-                var container = charaObjs[counter].GetComponentInChildren<UmaContainer>();
-                Debug.Log(container);
-                if (container != null)
-                {
-                    var animation = container.gameObject.AddComponent<Animation>();
-                    animation.AddClip(anim, anim.name);
-                    animation.Play(anim.name);
-
-                    counter++;
-                }
-            }
-            */
             Debug.Log(songid);
             Debug.Log(charaid);
             Debug.Log(string.Format(VOCAL_PATH, songid, charaid));
@@ -408,9 +421,10 @@ namespace Gallop.Live
             if(entry != null)
             {
                 Debug.Log(entry.Name);
-                UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
-                liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
             }
+
+            UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
+            liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
 
             _isLiveSetup = true;
             _liveCurrentTime = 0;
@@ -418,29 +432,6 @@ namespace Gallop.Live
 
         private void OnTimelineUpdate(float _liveCurrentTime)
         {
-            /*
-            var seqs = seqData[0].keys.thisList;
-            var container = charaObjs[0].GetComponentInChildren<UmaContainer>();
-
-            for(int i = seqs.Count - 1; i >=0; i--)
-            {
-                Debug.Log(_liveCurrentTime);
-                if (_liveCurrentTime >= (double)seqs[i].frame/60)
-                {
-                    Debug.Log("Ê±¼ä:" + ((double)seqs[i].frame / 60).ToString());
-
-                    AnimationClip anim = seqs[i].clip;
-                    double start = (double)seqs[i].motionHeadFrame/60;
-                    double interval = _liveCurrentTime - (double)seqs[i].frame/ 60;
-
-                    Debug.Log("time:" + interval.ToString());
-
-                    anim.SampleAnimation(container.gameObject, (float)(start + interval));
-
-                    break;
-                }
-            }
-            */
             _liveTimelineControl.AlterUpdate(_liveCurrentTime);
         }
 
@@ -448,16 +439,8 @@ namespace Gallop.Live
         {
             if (_isLiveSetup)
             {
-                if(false)
-                {
-                    _liveCurrentTime = liveSong.time;
-                    OnTimelineUpdate(_liveCurrentTime);
-                }
-                else
-                {
-                    _liveCurrentTime += Time.deltaTime;
-                    OnTimelineUpdate(_liveCurrentTime);
-                }
+                _liveCurrentTime += Time.deltaTime;
+                OnTimelineUpdate(_liveCurrentTime);
             }
             else
             {
