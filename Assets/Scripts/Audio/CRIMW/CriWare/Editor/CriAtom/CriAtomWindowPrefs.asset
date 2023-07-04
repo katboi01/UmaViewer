@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outputAssetsRoot: 
   useCommonKey: 1
-  cuesheetKeyList: []
+  cuesheetKeyList:
+  - cuesheetGuid: 000000000
+    key: 75923756697503
