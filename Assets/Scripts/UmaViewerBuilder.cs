@@ -665,10 +665,8 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         GameObject MainLive = new GameObject("Live");
         GameObject Director = new GameObject("Director");
-        //Gallop.Live.Director.instance.Play();
         List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
-                    Director,
                     GameObject.Find("ViewerMain"),
                     GameObject.Find("Camera"),
                     GameObject.Find("Directional Light"),
@@ -678,7 +676,6 @@ public class UmaViewerBuilder : MonoBehaviour
         UmaSceneController.instance.LoadScene("LiveScene",
             delegate ()
             {
-                
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
 
@@ -699,11 +696,10 @@ public class UmaViewerBuilder : MonoBehaviour
 
                 LoadLiveUma(characters);
 
-                Gallop.Live.Director.instance.InitializeTimeline();
-
             },
             delegate ()
             {
+                Gallop.Live.Director.instance.InitializeTimeline();
                 Gallop.Live.Director.instance.Play(live.MusicId, characters[0].CharaEntry.Id);
             }
         );

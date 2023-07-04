@@ -198,6 +198,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
+        if (!LoadedAssetsPanel) return;
         foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
         {
             if (ui.Name == Path.GetFileName(entry.Name)) return;
@@ -589,9 +590,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             LiveTime = true;
             SetEyeTrackingEnable(false);
-            CallAfterDelay.Create(0, () => {
-                Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
-            });
+            Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
             LiveSelectPannel.SetActive(false);
         }
     }

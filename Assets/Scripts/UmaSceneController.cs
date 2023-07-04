@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 public class UmaSceneController:MonoBehaviour
 {
     public static UmaSceneController instance;
-
+    public GameObject CavansPrefab;
+    public GameObject CavansInstance;
     private void Awake()
     {
         if (instance)
@@ -18,19 +19,21 @@ public class UmaSceneController:MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    public void LoadScene(string name, Action onNewSceneLoaded, Action onPrevSceneUnLoaded)
+    public void LoadScene(string name, Action OnSceneloaded, Action OnLastSceneUnloaded)
     {
-        StartCoroutine(LoadLiveSceneAsync("LiveScene", onNewSceneLoaded, onPrevSceneUnLoaded));
+        StartCoroutine(LoadLiveSceneAsync(name, OnSceneloaded, OnLastSceneUnloaded));
     }
 
-    IEnumerator LoadLiveSceneAsync(string sceneName, Action onNewSceneLoaded, Action onPrevSceneUnLoaded)
+    IEnumerator LoadLiveSceneAsync(string sceneName, Action OnSceneloaded, Action OnLastSceneUnloaded)
     {
-        AsyncOperation asyncTransitionLoad = SceneManager.LoadSceneAsync("TransitionScene", LoadSceneMode.Additive);
-        yield return new WaitUntil(() => asyncTransitionLoad.isDone);
-
-        Animation loadingCanvas = GameObject.Find("LoadingCanvas").GetComponent<Animation>();
-        loadingCanvas.Play("SceneTransition_s");
-        yield return new WaitUntil(() => !loadingCanvas.isPlaying);
+        if (CavansInstance)
+        {
+            Destroy(CavansInstance);
+        }
+        CavansInstance = Instantiate(CavansPrefab, transform);
+        var animation = CavansInstance.GetComponent<Animation>();
+        animation.Play("SceneTransition_s");
+        yield return new WaitUntil(() => !animation.isPlaying);
 
         // Set the current Scene to be able to unload it later
         Scene currentScene = SceneManager.GetActiveScene();
@@ -41,21 +44,17 @@ public class UmaSceneController:MonoBehaviour
         // Wait until the last operation fully loads to return anything
         yield return new WaitUntil(()=> asyncLoad.isDone);
 
-        onNewSceneLoaded.Invoke();
+        OnSceneloaded.Invoke();
 
         // Unload the previous Scene
         AsyncOperation asyncUnLoad = SceneManager.UnloadSceneAsync(currentScene);
         yield return new WaitUntil(() => asyncUnLoad.isDone);
 
+        OnLastSceneUnloaded.Invoke();
 
-        onPrevSceneUnLoaded.Invoke();
-
-        loadingCanvas.Play("SceneTransition_e");
-        yield return new WaitUntil(() => !loadingCanvas.isPlaying);
-
-        // Unload the Transition Scene
-        AsyncOperation asyncTransitionUnLoad = SceneManager.UnloadSceneAsync("TransitionScene");
-        yield return new WaitUntil(() => asyncTransitionUnLoad.isDone);
+        animation.Play("SceneTransition_e");
+        yield return new WaitUntil(() => !animation.isPlaying);
+        Destroy(CavansInstance);
     }
 }
 
