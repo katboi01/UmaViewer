@@ -589,7 +589,6 @@ public class UmaViewerUI : MonoBehaviour
         {
             LiveTime = true;
             SetEyeTrackingEnable(false);
-            GameObject.Find("LoadingCanvas").GetComponent<Canvas>().enabled = true;
             CallAfterDelay.Create(0, () => {
                 Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
             });

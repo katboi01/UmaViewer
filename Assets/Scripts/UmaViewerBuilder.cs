@@ -663,70 +663,53 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(LiveEntry live, List<LiveCharacterSelect> characters)
     {
-        characters.ForEach(a =>
-        {
-            if (a.CharaEntry == null || a.CostumeId == "")
-            {
-                //a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count)];
-                //a.CostumeId = "00";
-            }
-        });//fill empty
-
         GameObject MainLive = new GameObject("Live");
         GameObject Director = new GameObject("Director");
-
-        Gallop.Live.Director mController = Director.AddComponent<Gallop.Live.Director>();
-        mController.live = live;
-        Instantiate(mController, MainLive.transform);
-
-        Destroy(Director);
-
-        LoadLiveUma(characters);
-
-        Gallop.Live.Director.instance.InitializeTimeline();
-
         //Gallop.Live.Director.instance.Play();
-        List<GameObject> transferObjs = new List<GameObject>();
-        transferObjs.Add(MainLive);
-        transferObjs.Add(GameObject.Find("ViewerMain"));
-        transferObjs.Add(GameObject.Find("GlobalShaderController"));
-        transferObjs.Add(GameObject.Find("Camera"));
-        transferObjs.Add(GameObject.Find("Directional Light"));
-        transferObjs.Add(GameObject.Find("AnimationCameraRoot"));
-        StartCoroutine(LoadLiveSceneAsync("LiveScene", transferObjs, live.MusicId, characters[0].CharaEntry.Id));
+        List<GameObject> transferObjs = new List<GameObject>() {
+                    MainLive,
+                    Director,
+                    GameObject.Find("ViewerMain"),
+                    GameObject.Find("Camera"),
+                    GameObject.Find("Directional Light"),
+                    GameObject.Find("AnimationCameraRoot")
+                };
 
+        UmaSceneController.instance.LoadScene("LiveScene",
+            delegate ()
+            {
+                
+                // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
+                transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
+
+                characters.ForEach(a =>
+                {
+                    if (a.CharaEntry == null || a.CostumeId == "")
+                    {
+                        //a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count)];
+                        //a.CostumeId = "00";
+                    }
+                });//fill empty
+
+                Gallop.Live.Director mController = Director.AddComponent<Gallop.Live.Director>();
+                mController.live = live;
+                Instantiate(mController, MainLive.transform);
+
+                Destroy(Director);
+
+                LoadLiveUma(characters);
+
+                Gallop.Live.Director.instance.InitializeTimeline();
+
+            },
+            delegate ()
+            {
+                Gallop.Live.Director.instance.Play(live.MusicId, characters[0].CharaEntry.Id);
+            }
+        );
     }
 
-    IEnumerator LoadLiveSceneAsync(string sceneName, List<GameObject> go, int songid, int charaid)
-    {
-        // Set the current Scene to be able to unload it later
-        Scene currentScene = SceneManager.GetActiveScene();
-
-        // The Application loads the Scene in the background at the same time as the current Scene.
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-
-        // Wait until the last operation fully loads to return anything
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-
-        // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
-        foreach(var obj in go)
-        {
-            SceneManager.MoveGameObjectToScene(obj, SceneManager.GetSceneByName(sceneName));
-        }
-
-        
-        // Unload the previous Scene
-        //Scene scene = SceneManager.GetSceneByName(sceneName);
-
-        //SceneManager.SetActiveScene(scene);
-
-        SceneManager.UnloadSceneAsync(currentScene);
-
-        Gallop.Live.Director.instance.Play(songid, charaid);
-    }
+    
 
     //Use CriWare Library
     public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
