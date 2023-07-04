@@ -11,7 +11,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LiveScene.unity
     guid: fd2aa604854afa848a69857be81b7231
-  - enabled: 1
-    path: Assets/Scenes/Loading.unity
-    guid: 059e685c063fb484ea6f6757a392a45f
   m_configObjects: {}
