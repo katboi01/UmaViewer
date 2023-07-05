@@ -18,7 +18,7 @@ using Random = UnityEngine.Random;
 public class UmaViewerBuilder : MonoBehaviour
 {
     public static UmaViewerBuilder Instance;
-    UmaViewerMain Main => UmaViewerMain.Instance;
+    public static UmaViewerMain Main => UmaViewerMain.Instance;
     UmaViewerUI UI => UmaViewerUI.Instance;
 
     public List<AssetBundle> Loaded;
@@ -667,10 +667,13 @@ public class UmaViewerBuilder : MonoBehaviour
         GameObject Director = new GameObject("Director");
         List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
+                    GameObject.Find("CriWare"),
+                    GameObject.Find("CriWareLibraryInitializer"),
                     GameObject.Find("ViewerMain"),
                     GameObject.Find("Camera"),
                     GameObject.Find("Directional Light"),
-                    GameObject.Find("AnimationCameraRoot")
+                    GameObject.Find("AnimationCameraRoot"),
+                    GameObject.Find("AudioManager")
                 };
 
         UmaSceneController.instance.LoadScene("LiveScene",
@@ -700,7 +703,7 @@ public class UmaViewerBuilder : MonoBehaviour
             delegate ()
             {
                 Gallop.Live.Director.instance.InitializeTimeline();
-                Gallop.Live.Director.instance.Play(live.MusicId, characters[0].CharaEntry.Id);
+                Gallop.Live.Director.instance.Play(live.MusicId, characters);
             }
         );
     }
@@ -708,7 +711,8 @@ public class UmaViewerBuilder : MonoBehaviour
     
 
     //Use CriWare Library
-    public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
+    /*
+    public CriAtomSource LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
     {
         //清理
         if (CurrentAudioSources.Count > 0)
@@ -722,6 +726,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Debug.Log(SongAwb.Name);
 
         //获取总线数
+
         Debug.Log(CriAtomExAcf.GetNumDspSettings());
 
         string busName = CriAtomExAcf.GetDspSettingNameByIndex(0);
@@ -782,17 +787,13 @@ public class UmaViewerBuilder : MonoBehaviour
         //播放
         source.Play(cueNameList[0]);
 
+        return source;
+
         //source.SetBusSendLevelOffset(1, 1);
 
 
-        /*
-        for (int i = 0; i < 17; i++)
-        {
-            Debug.Log(source.player.GetParameterFloat32((CriAtomEx.Parameter)i));
-        }
-        */
-        
     }
+    */
 
     //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
@@ -941,7 +942,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    public AssetBundle LoadOrGet(UmaDatabaseEntry entry)
+    public static AssetBundle LoadOrGet(UmaDatabaseEntry entry)
     {
         if ((Main.LoadedBundles.ContainsKey(entry.Name)))
         {

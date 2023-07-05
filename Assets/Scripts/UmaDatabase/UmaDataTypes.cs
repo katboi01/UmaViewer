@@ -4,6 +4,9 @@ using UnityEngine;
 using Gallop;
 using System.IO;
 using static UmaViewerUI;
+using System.Xml.Linq;
+using System.Windows.Markup;
+using System;
 
 public class UmaDatabaseEntry
 {
@@ -118,6 +121,32 @@ public class LiveEntry
             LiveSettings.Add(lines[i].Split(','));
         }
         BackGroundId = LiveSettings[1][2];
+    }
+}
+
+public class PartEntry
+{
+    public Dictionary<string, List<float>> PartSettings = new Dictionary<string, List<float>>();
+
+    public PartEntry(string data)
+    {
+        string[] lines = data.Split("\n"[0]);
+
+        string[] names = lines[0].Split(',');
+
+        foreach (var name in names)
+        {
+            PartSettings[name] = new List<float>();
+        }
+
+        for (int i = 1; i < lines.Length - 1; i++)
+        {
+            var values = lines[i].Split(',');
+            for (int j = 0; j < names.Length; j++)
+            {
+                PartSettings[names[j]].Add((float)Convert.ToDouble(values[j]));
+            }
+        }
     }
 }
 

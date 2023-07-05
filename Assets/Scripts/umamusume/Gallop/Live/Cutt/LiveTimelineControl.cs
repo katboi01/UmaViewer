@@ -27,6 +27,8 @@ namespace Gallop.Live.Cutt
 
         public event Action<LiveTimelineKeyLipSyncData, float> OnUpdateLipSync;
 
+        public event Action<FacialDataUpdateInfo, float> OnUpdateFacial;
+
         public void CopyValues<T>(T from, T to)
         {
             var json = JsonUtility.ToJson(from);
@@ -93,6 +95,7 @@ namespace Gallop.Live.Cutt
         {
             AlterUpdate_CharaMotionSequence(liveTime);
             AlterUpdate_LipSync(liveTime);
+            AlterUpdate_FacialData(liveTime);
         }
 
         public void AlterUpdate_CharaMotionSequence(float liveTime)
@@ -103,22 +106,67 @@ namespace Gallop.Live.Cutt
             }
         }
 
+        public void AlterUpdate_FacialData(float liveTime)
+        {
+            var facialDataList = data.worksheetList[0].facial1Set;
+            FacialDataUpdateInfo updateInfo = default(FacialDataUpdateInfo);
+            if (facialDataList != null)
+            {
+                SetupFacialUpdateInfo_Eye(ref updateInfo, facialDataList.eyeKeys, liveTime);
+                this.OnUpdateFacial(updateInfo, liveTime);
+            }
+        }
+
+        private void SetupFacialUpdateInfo_Eye(ref FacialDataUpdateInfo updateInfo, LiveTimelineKeyFacialEyeDataList keys, float time)
+        {
+            LiveTimelineKey liveTimelineKey = null;
+            LiveTimelineKey liveTimelineKey2 = null;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
+            liveTimelineKey = curKey.key;
+            liveTimelineKey2 = curKey.nextKey;
+            updateInfo.eyeCur = liveTimelineKey as LiveTimelineKeyFacialEyeData;
+            updateInfo.eyeNext = liveTimelineKey2 as LiveTimelineKeyFacialEyeData;
+            updateInfo.eyeKeyIndex = curKey.index;
+        }
+
         public void AlterUpdate_LipSync(float liveTime)
         {
             var lipDataList = data.worksheetList[0].ripSyncKeys;
 
-            LiveTimelineKey curKey = null;
-            FindTimelineKeyCurrent(out curKey, lipDataList, liveTime);
-            if (curKey != null)
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(lipDataList, liveTime);
+
+            if (curKey != null && curKey.index != -1)
             {
-                LiveTimelineKeyLipSyncData arg = curKey as LiveTimelineKeyLipSyncData;
+                LiveTimelineKeyLipSyncData arg = curKey.key as LiveTimelineKeyLipSyncData;
                 this.OnUpdateLipSync(arg, liveTime);
             }
         }
 
-        public void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, float curTime)
+        public static void FindTimelineKeyCurrent(out LiveTimelineKeyIndex curKey, ILiveTimelineKeyDataList keys, float curTime)
         {
             curKey = keys.FindCurrentKey(curTime);
+        }
+
+        public static void UpdateTimelineKeyCurrent(out LiveTimelineKeyIndex curKey, ILiveTimelineKeyDataList keys, float curTime)
+        {
+            curKey = keys.UpdateCurrentKey(curTime);
+        }
+
+        public static LiveTimelineKeyIndex AlterUpdate_Key(ILiveTimelineKeyDataList keys, float curTime)
+        {
+            LiveTimelineKeyIndex curKey = keys.TimeKeyIndex;
+
+            if (curKey.index == -1)
+            {
+                FindTimelineKeyCurrent(out curKey, keys, curTime);
+            }
+            else
+            {
+                UpdateTimelineKeyCurrent(out curKey, keys, curTime);
+            }
+
+            return curKey;
         }
     }
 

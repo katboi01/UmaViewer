@@ -58,61 +58,20 @@ namespace Gallop.Live.Cutt
         {
             if (_currentKey != null && _tempAnim != null)
             {
-                /*
-                var seqs = _currentKey.thisList;
+                LiveTimelineKeyIndex curKey = LiveTimelineControl.AlterUpdate_Key(_currentKey, currentTime);
 
-                for (int i = seqs.Count - 1; i >= 0; i--)
+                if (curKey != null && curKey.index != -1)
                 {
-                    Debug.Log(currentTime);
-                    if (currentTime >= (double)seqs[i].frame / 60)
-                    {
-                        Debug.Log("Ê±¼ä:" + ((double)seqs[i].frame / 60).ToString());
+                    LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
 
-                        AnimationClip anim = seqs[i].clip;
-                        double start = (double)seqs[i].motionHeadFrame / 60;
-                        double interval = currentTime - (double)seqs[i].frame / 60;
-
-                        Debug.Log("time:" + interval.ToString());
-
-                        //anim.SampleAnimation(container.gameObject, (float)(start + interval));
-                        _tempAnim[anim.name].time = (float)(start + interval);
-                        _tempAnim.Play(anim.name);
-
-                        break;
-                    }
-                }
-                */
-
-                var timelineKey = GetKey(currentTime);
-
-                //if ( _prevKey != timelineKey ) Play animation all the time not affect performance maybe?
-                if ( true )
-                {
-                    AnimationClip anim = timelineKey.clip;
-                    double start = (double)timelineKey.motionHeadFrame / 60;
-                    double interval = currentTime - (double)timelineKey.frame / 60;
+                    AnimationClip anim = arg.clip;
+                    double start = (double)arg.motionHeadFrame / 60;
+                    double interval = currentTime - (double)arg.frame / 60;
 
                     _tempAnim[anim.name].time = (float)(start + interval);
                     _tempAnim.Play(anim.name);
-
-                    _prevKey = timelineKey;
                 }
             }
-        }
-
-        public LiveTimelineKeyCharaMotionData GetKey(float time)
-        {
-            var seqs = _currentKey.thisList;
-
-            for (int i = seqs.Count - 1; i >= 0; i--)
-            {
-                if (time >= (double)seqs[i].frame / 60)
-                {
-                    return seqs[i];
-                }
-            }
-
-            return seqs[0];
         }
     }
 }

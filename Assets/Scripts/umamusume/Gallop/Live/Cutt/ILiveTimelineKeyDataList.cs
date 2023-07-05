@@ -14,8 +14,10 @@ namespace Gallop.Live.Cutt
         //public abstract string Description { get; set; }
         //public abstract int depthCounter { get; }
 
-        LiveTimelineKey FindCurrentKey(float currentTime);
+        public abstract LiveTimelineKeyIndex TimeKeyIndex { get; }
 
+        LiveTimelineKeyIndex FindCurrentKey(float currentTime);
 
+        LiveTimelineKeyIndex UpdateCurrentKey(float currentTime);
     }
 }

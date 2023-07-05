@@ -11,6 +11,7 @@ using UnityEditor.SceneManagement;
 using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 using System.Data;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using CriWare;
 
 namespace Gallop.Live
 {
@@ -312,9 +313,10 @@ namespace Gallop.Live
         public LiveEntry live;
         private const string CUTT_PATH = "cutt/cutt_son{0}/cutt_son{0}";
         private const string STAGE_PATH = "3d/env/live/live{0}/pfb_env_live{0}_controller000";
-        private const string SONG_PATH = "sound/l/{0}/snd_bgm_live_{0}_oke_01.awb";
-        private const string VOCAL_PATH = "sound/l/{0}/snd_bgm_live_{0}_chara_{1}_01.awb";
+        private const string SONG_PATH = "sound/l/{0}/snd_bgm_live_{0}_oke_01";
+        private const string VOCAL_PATH = "sound/l/{0}/snd_bgm_live_{0}_chara_{1}_01";
         private const string RANDOM_VOCAL_PATH = "sound/l/{0}/snd_bgm_live_{0}_chara";
+        private const string LIVE_PART_PATH = "live/musicscores/m{0}/m{0}_part";
 
         private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
 
@@ -328,6 +330,14 @@ namespace Gallop.Live
 
         public AudioSource liveSong;
 
+        public List<CriAtomSource> liveVocal;
+        public CriAtomSource liveMusic;
+
+        public PartEntry partInfo;
+
+        public bool _syncTime = false;
+        public bool _soloMode = true;
+
         private void Awake()
         {
             if (live != null)
@@ -336,7 +346,7 @@ namespace Gallop.Live
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
                 Debug.Log(live.BackGroundId);
                 Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), this.gameObject.transform);
-                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
+                //Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
 
                 //Make CharacterObject
                 
@@ -352,13 +362,16 @@ namespace Gallop.Live
                     charaObjs.Add(newObj.transform);
                     counter++;
                 };
-                
 
-                //Set Animation
-                
+                //Get live parts info
+                UmaDatabaseEntry partAsset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Contains(string.Format(LIVE_PART_PATH, live.MusicId)));
 
-                
-                
+                Debug.Log(partAsset.Name);
+
+                AssetBundle bundle = UmaViewerBuilder.LoadOrGet(partAsset);
+                TextAsset partData = bundle.LoadAsset<TextAsset>($"m{live.MusicId}_part");
+                partInfo = new PartEntry(partData.text);
+
             }
         }
 
@@ -368,18 +381,6 @@ namespace Gallop.Live
 
             _liveTimelineControl.OnUpdateLipSync += delegate (LiveTimelineKeyLipSyncData keyData_, float liveTime_)
             {
-                /*
-                for (int k = 0; k < MemberUnitNumber; k++)
-                {
-                    int num4 = k % MemberUnitNumber;
-                    if (_characterObjects[num4].isSetting)
-                    {
-                        _characterObjects[num4].faceController.AlterUpdateAutoLip(liveTime_, keyData_, (LiveCharaPosition)num4);
-                    }
-                }
-                */
-
-                
                 for (int k = 0; k < charaObjs.Count; k++)
                 {
                     var container = charaObjs[k].GetComponentInChildren<UmaContainer>();
@@ -388,43 +389,81 @@ namespace Gallop.Live
                         container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_);
                     }
                 }
-                
-                /*
+            };
+            _liveTimelineControl.OnUpdateFacial += delegate (FacialDataUpdateInfo updateInfo_, float liveTime_)
+            {
                 var container = charaObjs[0].GetComponentInChildren<UmaContainer>();
-                if (container != null)
-                {
-                    container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_);
-                }
-                */
+                container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
             };
         }
 
-        public void Play(int songid, int charaid)
+        public void Play(int songid, List<LiveCharacterSelect> characters)
         {
             Debug.Log(songid);
-            Debug.Log(charaid);
-            Debug.Log(string.Format(VOCAL_PATH, songid, charaid));
 
-            var entry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(VOCAL_PATH, songid, charaid)));
-            if (entry == null)
+            
+            if (!_soloMode)
             {
-                List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
-                foreach (var random in UmaViewerMain.Instance.AbSounds.Where(a => (a.Name.Contains(string.Format(RANDOM_VOCAL_PATH, songid)) && a.Name.EndsWith("awb"))))
+                for (int i = 0; i < characters.Count; i++)
                 {
-                    entries.Add(random);
-                }
-                if (entries.Count > 0)
-                {
-                    entry = entries[UnityEngine.Random.Range(0, entries.Count - 1)];
-                }
-            }
-            if(entry != null)
-            {
-                Debug.Log(entry.Name);
-            }
+                    if (characters[i].CharaEntry.Name != "" && i < 3)
+                    {
+                        var charaid = characters[i].CharaEntry.Id;
 
-            UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
-            liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
+                        var entry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(VOCAL_PATH, songid, charaid)) && a.Name.EndsWith("awb"));
+                        if (entry == null)
+                        {
+                            List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
+                            foreach (var random in UmaViewerMain.Instance.AbSounds.Where(a => (a.Name.Contains(string.Format(RANDOM_VOCAL_PATH, songid)) && a.Name.EndsWith("awb"))))
+                            {
+                                entries.Add(random);
+                            }
+                            if (entries.Count > 0)
+                            {
+                                entry = entries[UnityEngine.Random.Range(0, entries.Count - 1)];
+                            }
+                        }
+
+                        if (entry != null)
+                        {
+                            Debug.Log(entry.Name);
+                            liveVocal.Add(UmaViewerAudio.ApplyCueSheet(entry.Name.Split('.')[0]));
+                        }
+                    }
+                }
+
+
+                liveMusic = UmaViewerAudio.ApplyCueSheet(string.Format(SONG_PATH, songid));
+
+                foreach (var vocal in liveVocal)
+                {
+                    vocal.Play(0);
+                }
+                liveMusic.Play(0);
+            }
+            else
+            {
+                var entry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(VOCAL_PATH, songid, characters[0].CharaEntry.Id)) && a.Name.EndsWith("awb"));
+                if (entry == null)
+                {
+                    List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
+                    foreach (var random in UmaViewerMain.Instance.AbSounds.Where(a => (a.Name.Contains(string.Format(RANDOM_VOCAL_PATH, songid)) && a.Name.EndsWith("awb"))))
+                    {
+                        entries.Add(random);
+                    }
+                    if (entries.Count > 0)
+                    {
+                        entry = entries[UnityEngine.Random.Range(0, entries.Count - 1)];
+                    }
+                }
+                if (entry != null)
+                {
+                    Debug.Log(entry.Name);
+                }
+
+                UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
+                liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
+            }
 
             _isLiveSetup = true;
             _liveCurrentTime = 0;
@@ -433,18 +472,40 @@ namespace Gallop.Live
         private void OnTimelineUpdate(float _liveCurrentTime)
         {
             _liveTimelineControl.AlterUpdate(_liveCurrentTime);
+            if (!_soloMode)
+            {
+                UmaViewerAudio.AlterUpdate(_liveCurrentTime, partInfo, liveVocal);
+            }
         }
 
         void Update()
         {
             if (_isLiveSetup)
             {
-                _liveCurrentTime += Time.deltaTime;
-                OnTimelineUpdate(_liveCurrentTime);
-            }
-            else
-            {
-                _liveCurrentTime = 0;
+                if(_syncTime == false)
+                {
+                    if (!_soloMode)
+                    {
+                        if(liveMusic.time > 0)
+                        {
+                            _liveCurrentTime = liveMusic.time / 1000;
+                            _syncTime = true;
+                        }
+                    }
+                    else
+                    {
+                        if(liveSong.time > 0)
+                        {
+                            _liveCurrentTime = liveSong.time;
+                            _syncTime = true;
+                        }
+                    }
+                }
+                else
+                {
+                    _liveCurrentTime += Time.deltaTime;
+                    OnTimelineUpdate(_liveCurrentTime);
+                }
             }
         }
     }

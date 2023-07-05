@@ -126,7 +126,12 @@ namespace Gallop.Live.Cutt
 		private TimelineKeyPlayMode _playMode;
 		public List<T> thisList;
 
+        
+        public LiveTimelineKeyIndex thisTimeKeyIndex = new LiveTimelineKeyIndex();
+
         public int Count => thisList.Count;
+        public LiveTimelineKeyIndex TimeKeyIndex => thisTimeKeyIndex;
+
 
         public LiveTimelineKey this[int index]
         {
@@ -140,20 +145,61 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        public LiveTimelineKey FindCurrentKey(float currentTime)
+        public LiveTimelineKeyIndex FindCurrentKey(float currentTime)
 		{
             for (int i = thisList.Count - 1; i >= 0; i--)
             {
                 if (currentTime >= (double)thisList[i].frame / 60)
                 {
-                    return thisList[i];
+                    thisTimeKeyIndex.index = i;
+                    thisTimeKeyIndex.key = thisList[i];
+					if(i+1 != thisList.Count)
+					{
+                        thisTimeKeyIndex.nextKey = thisList[i + 1];
+					}
+					else
+					{
+                        thisTimeKeyIndex.nextKey = null;
+                    }
+					return thisTimeKeyIndex;
                 }
             }
 			return null;
         }
+
+		public LiveTimelineKeyIndex UpdateCurrentKey(float currentTime)
+		{
+            if (thisTimeKeyIndex.nextKey != null)
+			{
+                if (currentTime >= (double)thisTimeKeyIndex.nextKey.frame / 60)
+                {
+                    thisTimeKeyIndex.index++;
+                    thisTimeKeyIndex.key = thisList[thisTimeKeyIndex.index];
+                    if (thisTimeKeyIndex.index + 1 != thisList.Count)
+                    {
+                        thisTimeKeyIndex.nextKey = thisList[thisTimeKeyIndex.index + 1];
+                    }
+                    else
+                    {
+                        thisTimeKeyIndex.nextKey = null;
+                    }
+                }
+            }
+                
+			return thisTimeKeyIndex;
+
+        }
     }
 
-	[System.Serializable]
+    [System.Serializable]
+    public class LiveTimelineKeyIndex
+    {
+		public int index = -1;
+        public LiveTimelineKey key = null;
+		public LiveTimelineKey nextKey = null;
+    }
+
+    [System.Serializable]
 	public abstract class LiveTimelineKey
 	{
 		public int frame;

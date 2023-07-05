@@ -723,7 +723,7 @@ public class UmaViewerUI : MonoBehaviour
                 HighlightChildImage(LiveCharaSoundList.content, container);
                 if (isCriware)
                 {
-                    Builder.LoadLiveSoundCri(songid, entry);
+                    //Builder.LoadLiveSoundCri(songid, entry);
                 }
                 else
                 {

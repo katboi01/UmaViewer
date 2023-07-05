@@ -3,83 +3,140 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static CriWare.CriAtomExCategory.ReactDuckerParameter;
 
 public class UmaViewerAudio
 {
-    static public void LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
+
+    static UmaViewerMain Main => UmaViewerMain.Instance;
+    public struct UmaSoundInfo
     {
-        Debug.Log(SongAwb.Name);
+        public string acbPath;
+        public string awbPath;
+    }
 
-        //获取总线数
-        Debug.Log(CriAtomExAcf.GetNumDspSettings());
+    static public UmaSoundInfo getSoundPath(string name)
+    {
+        Debug.Log(name);
+        UmaSoundInfo info;
+        info.acbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("acb")).FilePath;
+        info.awbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb")).FilePath;
+        return info;
+    }
 
-        string busName = CriAtomExAcf.GetDspSettingNameByIndex(0);
-
-        var dspSetInfo = new CriAtomExAcf.AcfDspSettingInfo();
-
-
-
-        Debug.Log(CriAtomExAcf.GetDspSettingInformation(busName, out dspSetInfo));
-
-        Debug.Log(dspSetInfo.name);
-        Debug.Log(dspSetInfo.numExtendBuses);
-        Debug.Log(dspSetInfo.numBuses);
-        Debug.Log(dspSetInfo.numSnapshots);
-        Debug.Log(dspSetInfo.snapshotStartIndex);
-
-        var busInfo = new CriAtomExAcf.AcfDspBusInfo();
-
-        for (ushort i = 0; i < dspSetInfo.numExtendBuses; i++)
-        {
-            Debug.Log(i);
-            Debug.Log(CriAtomExAcf.GetDspBusInformation(i, out busInfo));
-
-            Debug.Log(busInfo.name);
-            Debug.Log(busInfo.volume);
-            Debug.Log(busInfo.numFxes);
-            Debug.Log(busInfo.numBusLinks);
-        }
-
-        //获取Acb文件和Awb文件的路径
-        string nameVar = SongAwb.Name.Split('.')[0].Split('/').Last();
-
-        //使用Live的Bgm
-        //nameVar = $"snd_bgm_live_{songid}_oke";
-
-        LoadSound Loader = (LoadSound)ScriptableObject.CreateInstance("LoadSound");
-        LoadSound.UmaSoundInfo soundInfo = Loader.getSoundPath(nameVar);
-
-        //音频组件添加路径，载入音频
-        CriAtom.AddCueSheet(nameVar, soundInfo.acbPath, soundInfo.awbPath);
-
-        //获得当前音频信息
-        CriAtomEx.CueInfo[] cueInfoList;
-        List<string> cueNameList = new List<string>();
-        cueInfoList = CriAtom.GetAcb(nameVar).GetCueInfoList();
-        foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
-        {
-            cueNameList.Add(cueInfo.name);
-            Debug.Log(cueInfo.type);
-            Debug.Log(cueInfo.userData);
-        }
+    static public CriAtomSource ApplyCueSheet(string cueName)
+    {
+        UmaSoundInfo soundInfo = getSoundPath(cueName);
+        CriAtom.AddCueSheet(cueName, soundInfo.acbPath, soundInfo.awbPath);
 
         //创建播放器
         CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
         source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
-        source.cueSheet = nameVar;
+        source.cueSheet = cueName;
 
-        //播放
-        source.Play(cueNameList[0]);
+        source.use3dPositioning = false;
 
-        //source.SetBusSendLevelOffset(1, 1);
+        return source;
+    }
 
+    public enum PartForm
+    {
+        center = 0,
+        left = 1,
+        right = 2
+    }
 
-        /*
-        for (int i = 0; i < 17; i++)
+    static public void AlterUpdate(float _liveCurrentTime, PartEntry partInfo, List<CriAtomSource> liveVocal)
+    {
+        var timeLineData = partInfo.PartSettings["time"];
+        var targetIndex = 0;
+        for (int i = timeLineData.Count - 1; i >= 0; i--)
         {
-            Debug.Log(source.player.GetParameterFloat32((CriAtomEx.Parameter)i));
+            if (_liveCurrentTime >= (double)timeLineData[i] / 1000)
+            {
+                targetIndex = i;
+                break;
+            }
         }
-        */
 
+        var volumeMixer = 0;
+        var useMixer = false;
+
+        float _999_count = 0;
+
+        for (int i = 0; i < liveVocal.Count; i++)
+        {
+            string partName = ((PartForm)i).ToString();
+
+            if (partInfo.PartSettings.ContainsKey(partName)){
+                var value = partInfo.PartSettings[partName][targetIndex];
+
+                if (value == 0)
+                {
+                    liveVocal[i].volume = 0;
+                    volumeMixer += 1;
+                }
+                else
+                {
+                    liveVocal[i].volume = 1;
+                    liveVocal[i].player.SetSelectorLabel("BGM_Selector", $"SelectorLabel_{value-1}");
+                }
+
+                
+                float volume;
+                if (partInfo.PartSettings.ContainsKey(partName + "_vol"))
+                {
+                    volume = partInfo.PartSettings[partName + "_vol"][targetIndex];
+                    if(volume != 999)
+                    {
+                        liveVocal[i].volume *= volume;
+                    }
+                    else
+                    {
+                        _999_count += 1;
+                    }
+                }  
+            }
+        }
+
+        if (_999_count == liveVocal.Count)
+        {
+            useMixer = true;
+        }
+
+        if (useMixer)
+        {
+            switch (volumeMixer)
+            {
+                case 0:
+                    liveVocal[0].volume = 0.7056f;
+                    liveVocal[1].volume = 0.56f;
+                    liveVocal[2].volume = 0.56f;
+                    break;
+                case 1:
+                    for (int i = 0; i < liveVocal.Count; i++)
+                    {
+                        if (liveVocal[i].volume != 0)
+                        {
+                            liveVocal[i].volume = 0.7031f;
+                        }
+                    }
+                    break;
+                case 2:
+                    for (int i = 0; i < liveVocal.Count; i++)
+                    {
+                        if (liveVocal[i].volume != 0)
+                        {
+                            liveVocal[i].volume = 0.9954f;
+                        }
+                    }
+                    break;
+                default:
+                    liveVocal[0].volume = 0f;
+                    liveVocal[1].volume = 0f;
+                    liveVocal[2].volume = 0f;
+                    break;
+            }
+        }
     }
 }

@@ -373,7 +373,7 @@ namespace Gallop
         {
             FacialResetMouth();
             MouthMorphs.ForEach(morph => ProcessMorph(morph));
-            ApplyRotationEye();
+            ApplyRotationMouth();
         }
 
         public void ClearMorph()
@@ -504,7 +504,7 @@ namespace Gallop
                 OverrideFace(Container.FaceOverrideData);
             }
             FacialReset(BaseMouthMorph.trsArray);
-            ApplyRotation();
+            ApplyRotationMouth();
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -552,6 +552,19 @@ namespace Gallop
             };
             applyRotation.Invoke(BaseLEyeMorph.trsArray);
             applyRotation.Invoke(BaseREyeMorph.trsArray);
+        }
+
+        public void ApplyRotationMouth()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if (trs.transform)
+                        trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                }
+            };
+            applyRotation.Invoke(BaseMouthMorph.trsArray);
         }
 
         public void ChangeMorphWeight(FacialMorph morph, float val)
@@ -707,17 +720,17 @@ namespace Gallop
             return morphs.Find(m => m.index == (int)Type);
         }
 
-        private LiveTimelineKeyLipSyncData _prevKeyData;
-        private LiveTimelineKeyLipSyncData _lastKeyData;
+        private LiveTimelineKeyLipSyncData _prevLipKeyData;
+        private LiveTimelineKeyLipSyncData _lastLipKeyData;
 
         public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_)
         {
             //Debug.Log((float)keyData_.frame);
             //Debug.Log(liveTime_);
 
-            if(_lastKeyData != keyData_)
+            if(_lastLipKeyData != keyData_)
             {
-                _prevKeyData = _lastKeyData;
+                _prevLipKeyData = _lastLipKeyData;
             }
 
             float keyTime = (float)keyData_.frame / 60;
@@ -758,19 +771,19 @@ namespace Gallop
 
             MouthMorphs.ForEach(morph => morph.weight = 0);
 
-            if (_prevKeyData != null)
+            if (_prevLipKeyData != null)
             {
                 if(weightRatio != 1)
                 {
-                    foreach (var part in _prevKeyData.facialPartsDataArray)
+                    foreach (var part in _prevLipKeyData.facialPartsDataArray)
                     {
                         if (part.FacialPartsId == 0 ) { continue; }
-                        MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevKeyData.weight / 100);
+                        MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevLipKeyData.weight / 100);
                     }
                 }
                 else
                 {
-                    foreach (var part in _prevKeyData.facialPartsDataArray)
+                    foreach (var part in _prevLipKeyData.facialPartsDataArray)
                     {
                         if (part.FacialPartsId == 0) { continue; }
                         MouthMorphs[part.FacialPartsId - 1].weight = 0;
@@ -786,7 +799,124 @@ namespace Gallop
 
             ChangeMorphMouth();
 
-            _lastKeyData = keyData_;
+            _lastLipKeyData = keyData_;
+        }
+
+        private LiveTimelineKeyFacialEyeData _prevEyesKeyData;
+        private LiveTimelineKeyFacialEyeData _lastEyesKeyData;
+
+        public void AlterUpdateFacialNew(ref FacialDataUpdateInfo updateInfo_, float liveTime_)
+        {
+            if(updateInfo_.eyeCur != null)
+            {
+                if (_lastEyesKeyData != updateInfo_.eyeCur)
+                {
+                    _prevEyesKeyData = _lastEyesKeyData;
+                }
+
+                float keyTime = (float)updateInfo_.eyeCur.frame / 60;
+
+
+                float duringTime;
+                if (updateInfo_.eyeNext != null)
+                {
+                    duringTime = updateInfo_.eyeNext.frame - updateInfo_.eyeCur.frame;
+                }
+                else
+                {
+                    duringTime = updateInfo_.eyeCur.time;
+                }
+
+                float easeTime;
+
+                if (duringTime < updateInfo_.eyeCur.time)
+                {
+                    easeTime = (float)duringTime / 60;
+                }
+                else
+                {
+                    easeTime = (float)updateInfo_.eyeCur.time / 60;
+                }
+
+
+                float passTime = liveTime_ - keyTime;
+
+                float weightRatio = 0;
+
+                if (passTime >= easeTime)
+                {
+                    weightRatio = 1;
+                }
+                else
+                {
+                    float ratio = passTime / easeTime;
+                    switch (updateInfo_.eyeCur.interpolateType)
+                    {
+                        case InterpolateType.Linear:
+                            weightRatio = ratio;
+                            break;
+                        case InterpolateType.EaseIn:
+                            weightRatio = Easing.EaseIn(ratio);
+                            break;
+                        case InterpolateType.EaseOut:
+                            weightRatio = Easing.EaseOut(ratio);
+                            break;
+                        case InterpolateType.EaseInOut:
+                            weightRatio = Easing.EaseInOut(ratio);
+                            break;
+                        default:
+                            weightRatio = ratio;
+                            break;
+                    }
+                }
+
+                EyeMorphs.ForEach(morph => morph.weight = 0);
+
+                if (_prevEyesKeyData != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyesKeyData.weight / 100);
+                        }
+                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyesKeyData.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyeMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyeMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.eyeCur.facialPartsDataArrayL)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    leftEyeMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyeCur.weight / 100);
+                }
+                foreach (var part in updateInfo_.eyeCur.facialPartsDataArrayR)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    rightEyeMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyeCur.weight / 100);
+                }
+
+                ChangeMorphEye();
+
+                _lastEyesKeyData = updateInfo_.eyeCur;
+            }
         }
     }
 }
