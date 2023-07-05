@@ -110,8 +110,15 @@ public class UmaViewerAudio
             {
                 case 0:
                     liveVocal[0].volume = 0.7056f;
-                    liveVocal[1].volume = 0.56f;
-                    liveVocal[2].volume = 0.56f;
+                    if(liveVocal.Count > 2)
+                    {
+                        liveVocal[2].volume = 0.56f;
+                    }
+                    if (liveVocal.Count > 1)
+                    {
+                        liveVocal[1].volume = 0.56f;
+
+                    }
                     break;
                 case 1:
                     for (int i = 0; i < liveVocal.Count; i++)
@@ -132,9 +139,10 @@ public class UmaViewerAudio
                     }
                     break;
                 default:
-                    liveVocal[0].volume = 0f;
-                    liveVocal[1].volume = 0f;
-                    liveVocal[2].volume = 0f;
+                    for (int i = 0; i < liveVocal.Count; i++)
+                    {
+                        liveVocal[i].volume = 0;
+                    }
                     break;
             }
         }

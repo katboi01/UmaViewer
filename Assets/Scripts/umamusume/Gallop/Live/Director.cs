@@ -336,7 +336,7 @@ namespace Gallop.Live
         public PartEntry partInfo;
 
         public bool _syncTime = false;
-        public bool _soloMode = true;
+        public bool _soloMode = false;
 
         private void Awake()
         {
@@ -401,7 +401,20 @@ namespace Gallop.Live
         {
             Debug.Log(songid);
 
-            
+            var charaCount = 0;
+            for (int i = 0; i < characters.Count; i++)
+            {
+                if (characters[i].CharaEntry.Name != "")
+                {
+                    charaCount += 1;
+                }
+            }
+            if(charaCount == 1)
+            {
+                _soloMode = true;
+            }
+
+
             if (!_soloMode)
             {
                 for (int i = 0; i < characters.Count; i++)
