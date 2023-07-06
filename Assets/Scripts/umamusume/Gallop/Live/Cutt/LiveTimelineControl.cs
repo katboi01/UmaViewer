@@ -113,6 +113,8 @@ namespace Gallop.Live.Cutt
             if (facialDataList != null)
             {
                 SetupFacialUpdateInfo_Eye(ref updateInfo, facialDataList.eyeKeys, liveTime);
+                SetupFacialUpdateInfo_Eyebrow(ref updateInfo, facialDataList.eyebrowKeys, liveTime);
+                SetupFacialUpdateInfo_Ear(ref updateInfo, facialDataList.earKeys, liveTime);
                 this.OnUpdateFacial(updateInfo, liveTime);
             }
         }
@@ -128,6 +130,32 @@ namespace Gallop.Live.Cutt
             updateInfo.eyeCur = liveTimelineKey as LiveTimelineKeyFacialEyeData;
             updateInfo.eyeNext = liveTimelineKey2 as LiveTimelineKeyFacialEyeData;
             updateInfo.eyeKeyIndex = curKey.index;
+        }
+
+        private void SetupFacialUpdateInfo_Eyebrow(ref FacialDataUpdateInfo updateInfo, LiveTimelineKeyFacialEyebrowDataList keys, float time)
+        {
+            LiveTimelineKey liveTimelineKey = null;
+            LiveTimelineKey liveTimelineKey2 = null;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
+            liveTimelineKey = curKey.key;
+            liveTimelineKey2 = curKey.nextKey;
+            updateInfo.eyebrowCur = liveTimelineKey as LiveTimelineKeyFacialEyebrowData;
+            updateInfo.eyebrowNext = liveTimelineKey2 as LiveTimelineKeyFacialEyebrowData;
+            updateInfo.eyebrowKeyIndex = curKey.index;
+        }
+
+        private void SetupFacialUpdateInfo_Ear(ref FacialDataUpdateInfo updateInfo, LiveTimelineKeyFacialEarDataList keys, float time)
+        {
+            LiveTimelineKey liveTimelineKey = null;
+            LiveTimelineKey liveTimelineKey2 = null;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
+            liveTimelineKey = curKey.key;
+            liveTimelineKey2 = curKey.nextKey;
+            updateInfo.earCur = liveTimelineKey as LiveTimelineKeyFacialEarData;
+            updateInfo.earNext = liveTimelineKey2 as LiveTimelineKeyFacialEarData;
+            updateInfo.earKeyIndex = curKey.index;
         }
 
         public void AlterUpdate_LipSync(float liveTime)

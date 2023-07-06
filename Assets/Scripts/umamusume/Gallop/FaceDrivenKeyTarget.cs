@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static DynamicBone;
 using static Gallop.DrivenKeyComponent;
+using static Gallop.FaceDrivenKeyTarget;
 
 namespace Gallop
 {
@@ -38,6 +39,12 @@ namespace Gallop
 
         List<FacialMorph> leftEyeMorph = new List<FacialMorph>();
         List<FacialMorph> rightEyeMorph = new List<FacialMorph>();
+
+        List<FacialMorph> leftEyebrowMorph = new List<FacialMorph>();
+        List<FacialMorph> rightEyebrowMorph = new List<FacialMorph>();
+
+        List<FacialMorph> leftEarMorph = new List<FacialMorph>();
+        List<FacialMorph> rightEarMorph = new List<FacialMorph>();
         public void Initialize(List<Transform> objs)
         {
             Objs = objs;
@@ -78,6 +85,9 @@ namespace Gallop
                     }
                     else
                     {
+                        if (morph.direction) leftEarMorph.Add(morph);
+                        else rightEarMorph.Add(morph);
+
                         EarMorphs.Add(morph);
                     }
                 }
@@ -104,6 +114,9 @@ namespace Gallop
                     }
                     else
                     {
+                        if (morph.direction) leftEyebrowMorph.Add(morph);
+                        else rightEyebrowMorph.Add(morph);
+
                         EyeBrowMorphs.Add(morph);
                     }
                 }
@@ -140,11 +153,10 @@ namespace Gallop
                             if (morph.direction) LeftEyeYrange = morph;
                             else RightEyeYrange = morph;
                         }
-                        else
-                        {
-                            if (morph.direction) leftEyeMorph.Add(morph);
-                            else rightEyeMorph.Add(morph);
-                        }
+
+                        if (morph.direction) leftEyeMorph.Add(morph);
+                        else rightEyeMorph.Add(morph);
+
                         EyeMorphs.Add(morph);
                     }
                 }
@@ -376,6 +388,20 @@ namespace Gallop
             ApplyRotationMouth();
         }
 
+        public void ChangeMorphEyebrow()
+        {
+            FacialResetEyebrow();
+            EyeBrowMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEyebrow();
+        }
+
+        public void ChangeMorphEar()
+        {
+            FacialResetEar();
+            EarMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEar();
+        }
+
         public void ClearMorph()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
@@ -494,7 +520,7 @@ namespace Gallop
             }
             FacialReset(BaseLEyeMorph.trsArray);
             FacialReset(BaseREyeMorph.trsArray);
-            ApplyRotationEye();
+            //ApplyRotationEye();
         }
 
         public void FacialResetMouth()
@@ -504,7 +530,29 @@ namespace Gallop
                 OverrideFace(Container.FaceOverrideData);
             }
             FacialReset(BaseMouthMorph.trsArray);
-            ApplyRotationMouth();
+            //ApplyRotationMouth();
+        }
+
+        public void FacialResetEyebrow()
+        {
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
+            FacialReset(BaseLEyeBrowMorph.trsArray);
+            FacialReset(BaseREyeBrowMorph.trsArray);
+            //ApplyRotationEyebrow();
+        }
+
+        public void FacialResetEar()
+        {
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
+            FacialReset(BaseLEarMorph.trsArray);
+            FacialReset(BaseREarMorph.trsArray);
+            //ApplyRotationEyebrow();
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -565,6 +613,48 @@ namespace Gallop
                 }
             };
             applyRotation.Invoke(BaseMouthMorph.trsArray);
+        }
+
+        public void ApplyRotationEyebrow()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if (trs.transform)
+                        trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                }
+            };
+            applyRotation.Invoke(BaseLEyeBrowMorph.trsArray);
+            applyRotation.Invoke(BaseREyeBrowMorph.trsArray);
+        }
+
+        public void ApplyRotationEar()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if(trs.isPhysics && Container.EnablePhysics)
+                    {
+                        trs.physicsParticle.m_InitLocalRotation = RotationConvert.fromMaya(ParticleRecorder[trs.physicsParticle]);
+                    }
+                    else if (trs.transform)
+                    {
+                        if (RotationRecorder.ContainsKey(trs.transform))
+                        {
+                            //Debug.Log("Key Found:" + trs.transform.name);
+                            trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                        }
+                        else
+                        {
+                            //Debug.Log("No Key Found:" + trs.transform.name);
+                        }
+                    }   
+                }
+            };
+            applyRotation.Invoke(BaseLEarMorph.trsArray);
+            applyRotation.Invoke(BaseREarMorph.trsArray);
         }
 
         public void ChangeMorphWeight(FacialMorph morph, float val)
@@ -723,16 +813,24 @@ namespace Gallop
         private LiveTimelineKeyLipSyncData _prevLipKeyData;
         private LiveTimelineKeyLipSyncData _lastLipKeyData;
 
-        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_)
+        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
         {
-            //Debug.Log((float)keyData_.frame);
-            //Debug.Log(liveTime_);
+
+            if(_switch == 0)
+            {
+                _prevLipKeyData = null;
+                _lastLipKeyData = null;
+                MouthMorphs.ForEach(morph => morph.weight = 0);
+                ChangeMorphMouth();
+                return;
+            }
 
             if(_lastLipKeyData != keyData_)
             {
                 _prevLipKeyData = _lastLipKeyData;
             }
 
+            /*
             float keyTime = (float)keyData_.frame / 60;
 
             float easeTime = (float)keyData_.time/ 60;
@@ -767,7 +865,8 @@ namespace Gallop
                         break;
                 }
             }
-
+            */
+            float weightRatio = CalcMorphWeight(liveTime_, keyData_.time, keyData_.interpolateType, keyData_, null);
 
             MouthMorphs.ForEach(morph => morph.weight = 0);
 
@@ -805,6 +904,12 @@ namespace Gallop
         private LiveTimelineKeyFacialEyeData _prevEyesKeyData;
         private LiveTimelineKeyFacialEyeData _lastEyesKeyData;
 
+        private LiveTimelineKeyFacialEyebrowData _prevEyebrowsKeyData;
+        private LiveTimelineKeyFacialEyebrowData _lastEyebrowsKeyData;
+
+        private LiveTimelineKeyFacialEarData _prevEarsKeyData;
+        private LiveTimelineKeyFacialEarData _lastEarsKeyData;
+
         public void AlterUpdateFacialNew(ref FacialDataUpdateInfo updateInfo_, float liveTime_)
         {
             if(updateInfo_.eyeCur != null)
@@ -814,61 +919,7 @@ namespace Gallop
                     _prevEyesKeyData = _lastEyesKeyData;
                 }
 
-                float keyTime = (float)updateInfo_.eyeCur.frame / 60;
-
-
-                float duringTime;
-                if (updateInfo_.eyeNext != null)
-                {
-                    duringTime = updateInfo_.eyeNext.frame - updateInfo_.eyeCur.frame;
-                }
-                else
-                {
-                    duringTime = updateInfo_.eyeCur.time;
-                }
-
-                float easeTime;
-
-                if (duringTime < updateInfo_.eyeCur.time)
-                {
-                    easeTime = (float)duringTime / 60;
-                }
-                else
-                {
-                    easeTime = (float)updateInfo_.eyeCur.time / 60;
-                }
-
-
-                float passTime = liveTime_ - keyTime;
-
-                float weightRatio = 0;
-
-                if (passTime >= easeTime)
-                {
-                    weightRatio = 1;
-                }
-                else
-                {
-                    float ratio = passTime / easeTime;
-                    switch (updateInfo_.eyeCur.interpolateType)
-                    {
-                        case InterpolateType.Linear:
-                            weightRatio = ratio;
-                            break;
-                        case InterpolateType.EaseIn:
-                            weightRatio = Easing.EaseIn(ratio);
-                            break;
-                        case InterpolateType.EaseOut:
-                            weightRatio = Easing.EaseOut(ratio);
-                            break;
-                        case InterpolateType.EaseInOut:
-                            weightRatio = Easing.EaseInOut(ratio);
-                            break;
-                        default:
-                            weightRatio = ratio;
-                            break;
-                    }
-                }
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeCur.time, updateInfo_.eyeCur.interpolateType, updateInfo_.eyeCur, updateInfo_.eyeNext);
 
                 EyeMorphs.ForEach(morph => morph.weight = 0);
 
@@ -917,6 +968,191 @@ namespace Gallop
 
                 _lastEyesKeyData = updateInfo_.eyeCur;
             }
+
+            if (updateInfo_.eyebrowCur != null)
+            {
+                if (_lastEyebrowsKeyData != updateInfo_.eyebrowCur)
+                {
+                    _prevEyebrowsKeyData = _lastEyebrowsKeyData;
+                }
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyebrowCur.time, updateInfo_.eyebrowCur.interpolateType, updateInfo_.eyebrowCur, updateInfo_.eyebrowNext);
+
+                EyeBrowMorphs.ForEach(morph => morph.weight = 0);
+
+                if (_prevEyebrowsKeyData != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyebrowsKeyData.weight / 100);
+                        }
+                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyebrowsKeyData.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyebrowMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyebrowMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.eyebrowCur.facialPartsDataArrayL)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    leftEyebrowMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyebrowCur.weight / 100);
+                }
+                foreach (var part in updateInfo_.eyebrowCur.facialPartsDataArrayR)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    rightEyebrowMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyebrowCur.weight / 100);
+                }
+
+                ChangeMorphEyebrow();
+
+                _lastEyebrowsKeyData = updateInfo_.eyebrowCur;
+            }
+
+            if (updateInfo_.earCur != null)
+            {
+                if (_lastEarsKeyData != updateInfo_.earCur)
+                {
+                    _prevEarsKeyData = _lastEarsKeyData;
+                }
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.earCur.time, updateInfo_.earCur.interpolateType, updateInfo_.earCur, updateInfo_.earNext);
+
+                EarMorphs.ForEach(morph => morph.weight = 0);
+
+                if (_prevEarsKeyData != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        var partL = _prevEarsKeyData.facialEarIdL;
+
+                        if (partL != 0)
+                        {
+                            leftEarMorph[partL - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
+                        }
+
+                        var partR = _prevEarsKeyData.facialEarIdR;
+
+                        if (partR != 0)
+                        {
+                            leftEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
+                        }
+                    }
+                    else
+                    {
+                        var partL = _prevEarsKeyData.facialEarIdL;
+
+                        if (partL != 0)
+                        {
+                            leftEarMorph[partL - 1].weight = 0;
+                        }
+
+                        var partR = _prevEarsKeyData.facialEarIdR;
+
+                        if (partR != 0)
+                        {
+                            leftEarMorph[partR - 1].weight = 0;
+                        }
+                    }
+                }
+
+                var curPartL = updateInfo_.earCur.facialEarIdL;
+
+                if (curPartL != 0)
+                {
+                    leftEarMorph[curPartL - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
+                }
+
+                var curPartR = updateInfo_.earCur.facialEarIdR;
+
+                if (curPartR != 0)
+                {
+                    leftEarMorph[curPartR - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
+                }
+
+                ChangeMorphEar();
+
+                _lastEarsKeyData = updateInfo_.earCur;
+            }
+        }
+
+        public float CalcMorphWeight(float time, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
+        {
+
+            float keyTime = (float)curKey.frame / 60;
+
+
+            float duringTime;
+            if (nextKey != null)
+            {
+                duringTime = nextKey.frame - curKey.frame;
+            }
+            else
+            {
+                duringTime = interFrame;
+            }
+
+            float easeTime;
+
+            if (duringTime < interFrame)
+            {
+                easeTime = (float)duringTime / 60;
+            }
+            else
+            {
+                easeTime = (float)interFrame / 60;
+            }
+
+
+            float passTime = time - keyTime;
+
+            float weightRatio = 0;
+
+            if (passTime >= easeTime)
+            {
+                weightRatio = 1;
+            }
+            else
+            {
+                float ratio = passTime / easeTime;
+                switch (interType)
+                {
+                    case InterpolateType.Linear:
+                        weightRatio = ratio;
+                        break;
+                    case InterpolateType.EaseIn:
+                        weightRatio = Easing.EaseIn(ratio);
+                        break;
+                    case InterpolateType.EaseOut:
+                        weightRatio = Easing.EaseOut(ratio);
+                        break;
+                    case InterpolateType.EaseInOut:
+                        weightRatio = Easing.EaseInOut(ratio);
+                        break;
+                    default:
+                        weightRatio = ratio;
+                        break;
+                }
+            }
+
+            return weightRatio;
         }
     }
 }

@@ -12,6 +12,7 @@ using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCou
 using System.Data;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using CriWare;
+using static UmaViewerAudio;
 
 namespace Gallop.Live
 {
@@ -386,7 +387,7 @@ namespace Gallop.Live
                     var container = charaObjs[k].GetComponentInChildren<UmaContainer>();
                     if(container != null)
                     {
-                        container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_);
+                        container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_, ((int)keyData_.character >> k) % 2);
                     }
                 }
             };

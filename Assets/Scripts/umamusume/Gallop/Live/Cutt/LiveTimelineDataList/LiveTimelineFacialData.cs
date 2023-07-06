@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-	[System.Serializable]
+    [System.Serializable]
 	public class LiveTimelineKeyFacialFaceData : LiveTimelineKey
 	{
 		public int facialId;

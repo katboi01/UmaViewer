@@ -49,6 +49,8 @@ public class UmaViewerAudio
     static public void AlterUpdate(float _liveCurrentTime, PartEntry partInfo, List<CriAtomSource> liveVocal)
     {
         var timeLineData = partInfo.PartSettings["time"];
+
+        //need to improve
         var targetIndex = 0;
         for (int i = timeLineData.Count - 1; i >= 0; i--)
         {
