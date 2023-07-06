@@ -816,8 +816,6 @@ namespace Gallop
             {
                 _prevLipKeyData = null;
                 _lastLipKeyData = null;
-                MouthMorphs.ForEach(morph => morph.weight = 0);
-                ChangeMorphMouth();
                 return;
             }
 
@@ -826,42 +824,6 @@ namespace Gallop
                 _prevLipKeyData = _lastLipKeyData;
             }
 
-            /*
-            float keyTime = (float)keyData_.frame / 60;
-
-            float easeTime = (float)keyData_.time/ 60;
-
-            float passTime = liveTime_ - keyTime;
-
-            float weightRatio = 0;
-
-            if (passTime >= easeTime)
-            {
-                weightRatio = 1;
-            }
-            else
-            {
-                float ratio = passTime / easeTime;
-                switch (keyData_.interpolateType)
-                {
-                    case InterpolateType.Linear:
-                        weightRatio = ratio;
-                        break;
-                    case InterpolateType.EaseIn:
-                        weightRatio = Easing.EaseIn(ratio);
-                        break;
-                    case InterpolateType.EaseOut:
-                        weightRatio = Easing.EaseOut(ratio);
-                        break;
-                    case InterpolateType.EaseInOut:
-                        weightRatio = Easing.EaseInOut(ratio);
-                        break;
-                    default:
-                        weightRatio = ratio;
-                        break;
-                }
-            }
-            */
             float weightRatio = CalcMorphWeight(liveTime_, keyData_.time, keyData_.interpolateType, keyData_, null);
 
             MouthMorphs.ForEach(morph => morph.weight = 0);
@@ -897,6 +859,9 @@ namespace Gallop
             _lastLipKeyData = keyData_;
         }
 
+        private LiveTimelineKeyFacialMouthData _prevMouthKeyData;
+        private LiveTimelineKeyFacialMouthData _lastMouthKeyData;
+
         private LiveTimelineKeyFacialEyeData _prevEyesKeyData;
         private LiveTimelineKeyFacialEyeData _lastEyesKeyData;
 
@@ -908,7 +873,48 @@ namespace Gallop
 
         public void AlterUpdateFacialNew(ref FacialDataUpdateInfo updateInfo_, float liveTime_)
         {
-            if(updateInfo_.eyeCur != null)
+            if (updateInfo_.mouthCur != null)
+            {
+                if (_lastMouthKeyData != updateInfo_.mouthCur)
+                {
+                    _prevMouthKeyData = _lastMouthKeyData;
+                }
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.mouthCur.time, updateInfo_.mouthCur.interpolateType, updateInfo_.mouthCur, updateInfo_.mouthNext);
+
+                MouthMorphs.ForEach(morph => morph.weight = 0);
+
+                if (_prevMouthKeyData != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in _prevMouthKeyData.facialPartsDataArray)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevMouthKeyData.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in _prevMouthKeyData.facialPartsDataArray)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            MouthMorphs[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.mouthCur.facialPartsDataArray)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.mouthCur.weight / 100);
+                }
+
+                ChangeMorphMouth();
+
+                _lastMouthKeyData = updateInfo_.mouthCur;
+            }
+            if (updateInfo_.eyeCur != null)
             {
                 if (_lastEyesKeyData != updateInfo_.eyeCur)
                 {
