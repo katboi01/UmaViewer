@@ -402,7 +402,7 @@ namespace Gallop
             ApplyRotationEar();
         }
 
-        public void ClearMorph()
+        public void ClearAllWeights()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
             EyeBrowMorphs.ForEach(morph => morph.weight = 0);
@@ -520,7 +520,6 @@ namespace Gallop
             }
             FacialReset(BaseLEyeMorph.trsArray);
             FacialReset(BaseREyeMorph.trsArray);
-            //ApplyRotationEye();
         }
 
         public void FacialResetMouth()
@@ -530,7 +529,6 @@ namespace Gallop
                 OverrideFace(Container.FaceOverrideData);
             }
             FacialReset(BaseMouthMorph.trsArray);
-            //ApplyRotationMouth();
         }
 
         public void FacialResetEyebrow()
@@ -541,7 +539,6 @@ namespace Gallop
             }
             FacialReset(BaseLEyeBrowMorph.trsArray);
             FacialReset(BaseREyeBrowMorph.trsArray);
-            //ApplyRotationEyebrow();
         }
 
         public void FacialResetEar()
@@ -552,7 +549,6 @@ namespace Gallop
             }
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
-            //ApplyRotationEyebrow();
         }
 
         public void FacialReset(List<TrsArray> trsArrays)

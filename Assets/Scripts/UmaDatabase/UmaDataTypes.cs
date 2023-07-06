@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
 using System.IO;
 using static UmaViewerUI;
-using System.Xml.Linq;
-using System.Windows.Markup;
 using System;
 
 public class UmaDatabaseEntry
@@ -72,24 +69,9 @@ public class FaceTypeData
 {
     public string label, eyebrow_l, eyebrow_r, eye_l, eye_r, mouth, inverce_face_type;
     public int mouth_shape_type, set_face_group;
-
     public FaceEmotionKeyTarget target;
-
     public List<EmotionKey> emotionKeys;
-
-    private float _weight;
-    public float Weight
-    {
-        get
-        {
-            return _weight;
-        }
-        set
-        {
-            _weight = value;
-            target.UpdateAllFacialKeyTargets();
-        }
-    }
+    public float weight;
 }
 
 [System.Serializable]

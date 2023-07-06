@@ -495,7 +495,7 @@ public class UmaViewerUI : MonoBehaviour
             }
             var container = Instantiate(UmaContainerSliderPrefab, EmotionList.content).GetComponent<UmaUIContainer>();
             container.Name = emotion.label;
-            container.Slider.value = emotion.Weight;
+            container.Slider.value = emotion.weight;
             container.Slider.maxValue = 1;
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) => { target.ChangeEmotionWeight(emotion, a); });

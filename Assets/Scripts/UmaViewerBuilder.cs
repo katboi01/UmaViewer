@@ -2015,7 +2015,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             if (CurrentUMAContainer.FaceDrivenKeyTarget)
             {
-                CurrentUMAContainer.FaceDrivenKeyTarget.ClearMorph();
+                CurrentUMAContainer.FaceDrivenKeyTarget.ClearAllWeights();
                 CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
             }
         }

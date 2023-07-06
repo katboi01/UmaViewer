@@ -44,7 +44,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                 }
                 else
                 {
-                    newValue.morph = morphs.Where(a => a.tag == splitArray[0] && a.direction == direction).First();
+                    newValue.morph = morphs.FirstOrDefault(a => a.tag == splitArray[0] && a.direction == direction);
                 }
                 newValue.weight = Convert.ToInt32(splitArray[1]);
                 faceTypeData.emotionKeys.Add(newValue);
@@ -58,7 +58,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
                 }
                 else
                 {
-                    newValue.morph = morphs.Where(a => a.tag == morphName && a.direction == direction).First();
+                    newValue.morph = morphs.FirstOrDefault(a => a.tag == morphName && a.direction == direction);
                 }
                 newValue.weight = 100;
                 faceTypeData.emotionKeys.Add(newValue);
@@ -70,14 +70,15 @@ public class FaceEmotionKeyTarget : ScriptableObject
     public void ChangeEmotionWeight(FaceTypeData emotion, float val)
     {
         FaceDrivenKeyTarget.Container.isAnimatorControl = false;
-        emotion.Weight = val;
+        emotion.weight = val;
+        FaceDrivenKeyTarget.ClearAllWeights();
+        UpdateAllTargetWeight();
         FaceDrivenKeyTarget.ChangeMorph();
     }
 
-    public void UpdateAllFacialKeyTargets()
+    public void UpdateAllTargetWeight()
     {
         if (FaceDrivenKeyTarget == null) return;
-        FaceDrivenKeyTarget.ClearMorph();
         
         foreach (var emotion in FaceEmotionKey)
         {
@@ -85,7 +86,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
             {
                 foreach (var key in emotion.emotionKeys)
                 {
-                    key.morph.weight += key.weight / 100 * emotion.Weight;
+                    key.morph.weight += key.weight / 100 * emotion.weight;
                 }
             }
         }
