@@ -201,7 +201,7 @@ namespace Gallop.Live.Cutt
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(lipDataList, liveTime);
 
-            if (curKey != null && curKey.index != -1 && curKey.nextKey != null)
+            if (curKey != null && curKey.index != -1)
             {
                 LiveTimelineKeyLipSyncData arg = curKey.key as LiveTimelineKeyLipSyncData;
                 this.OnUpdateLipSync(arg, liveTime);

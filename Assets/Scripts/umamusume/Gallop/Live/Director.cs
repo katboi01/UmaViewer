@@ -337,7 +337,7 @@ namespace Gallop.Live
         public PartEntry partInfo;
 
         public bool _syncTime = false;
-        public bool _soloMode = true;
+        public bool _soloMode = false;
 
         public int characterCount = 0;
         public int allowCount = 0;
@@ -525,7 +525,7 @@ namespace Gallop.Live
                 else
                 {
                     _liveCurrentTime += Time.deltaTime;
-                    Debug.Log(_liveCurrentTime * 60);
+                    //Debug.Log(_liveCurrentTime * 60);
                     OnTimelineUpdate(_liveCurrentTime);
                 }
             }

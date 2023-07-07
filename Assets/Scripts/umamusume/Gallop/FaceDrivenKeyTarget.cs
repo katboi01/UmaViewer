@@ -811,8 +811,8 @@ namespace Gallop
 
         public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
         {
-
-            if(_switch == 0)
+            //|| lockMouth
+            if (_switch == 0 || lockMouth)
             {
                 _prevLipKeyData = null;
                 _lastLipKeyData = null;
@@ -871,10 +871,21 @@ namespace Gallop
         private LiveTimelineKeyFacialEarData _prevEarsKeyData;
         private LiveTimelineKeyFacialEarData _lastEarsKeyData;
 
+        public bool lockMouth = false;
+
         public void AlterUpdateFacialNew(ref FacialDataUpdateInfo updateInfo_, float liveTime_)
         {
             if (updateInfo_.mouthCur != null)
             {
+                if((int)updateInfo_.mouthCur.attribute == 131072)
+                {
+                    lockMouth = true;
+                }
+                else
+                {
+                    lockMouth = false;
+                }
+
                 if (_lastMouthKeyData != updateInfo_.mouthCur)
                 {
                     _prevMouthKeyData = _lastMouthKeyData;
