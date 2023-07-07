@@ -337,7 +337,7 @@ namespace Gallop.Live
         public PartEntry partInfo;
 
         public bool _syncTime = false;
-        public bool _soloMode = false;
+        public bool _soloMode = true;
 
         public int characterCount = 0;
         public int allowCount = 0;
