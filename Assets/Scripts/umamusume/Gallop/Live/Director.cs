@@ -525,6 +525,7 @@ namespace Gallop.Live
                 else
                 {
                     _liveCurrentTime += Time.deltaTime;
+                    Debug.Log(_liveCurrentTime * 60);
                     OnTimelineUpdate(_liveCurrentTime);
                 }
             }
