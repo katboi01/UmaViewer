@@ -128,7 +128,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
     {
         //Used to calculate the correct outline
         //Outline need more adjust in live
-        if (!UmaViewerUI.Instance.LiveTime)
+        if (UmaViewerBuilder.Instance.AnimationCamera != null)
         {
             if (UmaViewerBuilder.Instance.CurrentUMAContainer)
             {

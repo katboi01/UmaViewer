@@ -9,7 +9,8 @@ namespace Gallop.Live.Cutt
         // Fields
         public LiveTimelineKeyFacialFaceData faceCur; // 0x0
         public LiveTimelineKeyFacialFaceData faceNext; // 0x8
-        public LiveTimelineKeyFacialMouthData mouth; // 0x10
+        public LiveTimelineKeyFacialMouthData mouthCur; // 0x10
+        public LiveTimelineKeyFacialMouthData mouthNext; // 0x10
         public LiveTimelineKeyFacialEyeData eyeCur; // 0x18
         public LiveTimelineKeyFacialEyeData eyeNext; // 0x20
         public LiveTimelineKeyFacialEyebrowData eyebrowCur; // 0x28

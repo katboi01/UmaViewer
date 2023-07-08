@@ -339,6 +339,9 @@ namespace Gallop.Live
         public bool _syncTime = false;
         public bool _soloMode = false;
 
+        public int characterCount = 0;
+        public int allowCount = 0;
+
         private void Awake()
         {
             if (live != null)
@@ -376,9 +379,11 @@ namespace Gallop.Live
             }
         }
 
-        public void InitializeTimeline()
+        public void InitializeTimeline(int count)
         {
-            _liveTimelineControl.InitCharaMotionSequence();
+            allowCount = count;
+
+            _liveTimelineControl.InitCharaMotionSequence(_liveTimelineControl.data.characterSettings.motionSequenceIndices);
 
             _liveTimelineControl.OnUpdateLipSync += delegate (LiveTimelineKeyLipSyncData keyData_, float liveTime_)
             {
@@ -391,10 +396,13 @@ namespace Gallop.Live
                     }
                 }
             };
-            _liveTimelineControl.OnUpdateFacial += delegate (FacialDataUpdateInfo updateInfo_, float liveTime_)
+            _liveTimelineControl.OnUpdateFacial += delegate (FacialDataUpdateInfo updateInfo_, float liveTime_, int position)
             {
-                var container = charaObjs[0].GetComponentInChildren<UmaContainer>();
-                container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
+                if( position < charaObjs.Count)
+                {
+                    var container = charaObjs[position].GetComponentInChildren<UmaContainer>();
+                    container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
+                }
             };
         }
 
@@ -402,15 +410,14 @@ namespace Gallop.Live
         {
             Debug.Log(songid);
 
-            var charaCount = 0;
             for (int i = 0; i < characters.Count; i++)
             {
                 if (characters[i].CharaEntry.Name != "")
                 {
-                    charaCount += 1;
+                    characterCount += 1;
                 }
             }
-            if(charaCount == 1)
+            if(characterCount == 1)
             {
                 _soloMode = true;
             }
@@ -518,6 +525,7 @@ namespace Gallop.Live
                 else
                 {
                     _liveCurrentTime += Time.deltaTime;
+                    //Debug.Log(_liveCurrentTime * 60);
                     OnTimelineUpdate(_liveCurrentTime);
                 }
             }

@@ -666,9 +666,8 @@ public class UmaViewerBuilder : MonoBehaviour
                     GameObject.Find("CriWare"),
                     GameObject.Find("CriWareLibraryInitializer"),
                     GameObject.Find("ViewerMain"),
-                    GameObject.Find("Camera"),
                     GameObject.Find("Directional Light"),
-                    GameObject.Find("AnimationCameraRoot"),
+                    GameObject.Find("GlobalShaderController"),
                     GameObject.Find("AudioManager")
                 };
 
@@ -698,7 +697,7 @@ public class UmaViewerBuilder : MonoBehaviour
             },
             delegate ()
             {
-                Gallop.Live.Director.instance.InitializeTimeline();
+                Gallop.Live.Director.instance.InitializeTimeline(characters.Count);
                 Gallop.Live.Director.instance.Play(live.MusicId, characters);
             }
         );
