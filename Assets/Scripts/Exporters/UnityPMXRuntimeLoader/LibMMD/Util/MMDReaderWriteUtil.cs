@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace LibMMD.Util
 {
-    public static class MMDReaderUtil
+    public static class MMDReaderWriteUtil
     {
         const float WorldSizeAmplifier = 0.08f;
 
@@ -30,11 +30,40 @@ namespace LibMMD.Util
             return str;
         }
 
+        public static void WriteStringFixedLength(BinaryWriter writer, string str, int length, Encoding encoding)
+        {
+            if (length < 0)
+            {
+                throw new MMDFileParseException("pmx string length is negative");
+            }
+
+            if (str.Length > length)
+            {
+                str = str.Substring(0, length);
+            }
+            else if (str.Length < length)
+            {
+                str = str.PadRight(length, '\0');
+            }
+
+            var bytes = encoding.GetBytes(str);
+            writer.Write(bytes);
+        }
+
+
         public static string ReadSizedString(BinaryReader reader, Encoding encoding)
         {
             var length = reader.ReadInt32();
             return ReadStringFixedLength(reader, length, encoding);
         }
+
+        public static void WriteSizedString(BinaryWriter writer, string str, Encoding encoding)
+        {
+            var length = encoding.GetByteCount(str);
+            writer.Write(length);
+            WriteStringFixedLength(writer, str, length, encoding);
+        }
+
 
         public static Vector4 ReadVector4(BinaryReader reader)
         {
@@ -46,6 +75,15 @@ namespace LibMMD.Util
             return ret;
         }
 
+        public static void WriteVector4(BinaryWriter writer, Vector4 vector)
+        {
+            writer.Write(MathUtil.ZeroToNaN(vector.x));
+            writer.Write(MathUtil.ZeroToNaN(vector.y));
+            writer.Write(MathUtil.ZeroToNaN(vector.z));
+            writer.Write(MathUtil.ZeroToNaN(vector.w));
+        }
+
+
         public static Quaternion ReadQuaternion(BinaryReader reader)
         {
             var ret = new Quaternion();
@@ -54,6 +92,13 @@ namespace LibMMD.Util
             ret.z = -MathUtil.NanToZero(reader.ReadSingle());
             ret.w = MathUtil.NanToZero(reader.ReadSingle());
             return ret;
+        }
+        public static void WriteQuaternion(BinaryWriter writer, Quaternion quaternion)
+        {
+            writer.Write(-MathUtil.ZeroToNaN(quaternion.x));
+            writer.Write(MathUtil.ZeroToNaN(quaternion.y));
+            writer.Write(-MathUtil.ZeroToNaN(quaternion.z));
+            writer.Write(MathUtil.ZeroToNaN(quaternion.w));
         }
 
         public static Vector3 ReadVector3(BinaryReader reader)
@@ -70,6 +115,19 @@ namespace LibMMD.Util
             return ret;
         }
 
+        public static void WriteVector3(BinaryWriter writer, Vector3 vector)
+        {
+            WriteAmpVector3(writer, vector, WorldSizeAmplifier);
+        }
+
+        public static void WriteAmpVector3(BinaryWriter writer, Vector3 vector, float amp)
+        {
+            writer.Write(MathUtil.ZeroToNaN(-vector.x / amp));
+            writer.Write(MathUtil.ZeroToNaN(vector.y / amp));
+            writer.Write(MathUtil.ZeroToNaN(-vector.z / amp));
+        }
+
+
         public static Vector3 ReadRawCoordinateVector3(BinaryReader reader)
         {
             var ret = new Vector3();
@@ -77,6 +135,13 @@ namespace LibMMD.Util
             ret[1] = MathUtil.NanToZero(reader.ReadSingle()) * WorldSizeAmplifier;
             ret[2] = MathUtil.NanToZero(reader.ReadSingle()) * WorldSizeAmplifier;
             return ret;
+        }
+
+        public static void WriteRawCoordinateVector3(BinaryWriter writer, Vector3 vector)
+        {
+            writer.Write(MathUtil.ZeroToNaN(vector.x / WorldSizeAmplifier)); // x
+            writer.Write(MathUtil.ZeroToNaN(vector.y / WorldSizeAmplifier)); // y
+            writer.Write(MathUtil.ZeroToNaN(vector.z / WorldSizeAmplifier)); // z
         }
 
 
@@ -87,6 +152,13 @@ namespace LibMMD.Util
             ret[1] = MathUtil.NanToZero(reader.ReadSingle());
             return ret;
         }
+
+        public static void WriteVector2(BinaryWriter writer, Vector2 vector)
+        {
+            writer.Write(MathUtil.ZeroToNaN(vector.x));
+            writer.Write(MathUtil.ZeroToNaN(vector.y));
+        }
+
 
         public static int ReadIndex(BinaryReader reader, int size)
         {
@@ -103,6 +175,25 @@ namespace LibMMD.Util
             }
         }
 
+        public static void WriteIndex(BinaryWriter writer, int index, int size)
+        {
+            switch (size)
+            {
+                case 1:
+                    writer.Write((sbyte)index);
+                    break;
+                case 2:
+                    writer.Write((ushort)index);
+                    break;
+                case 4:
+                    writer.Write(index);
+                    break;
+                default:
+                    throw new MMDFileParseException("invalid index size: " + size);
+            }
+        }
+
+
         public static Color ReadColor(BinaryReader reader, bool readA)
         {
             var ret = new Color
@@ -113,6 +204,17 @@ namespace LibMMD.Util
                 a = readA ? reader.ReadSingle() : 1.0f
             };
             return ret;
+        }
+
+        public static void WriteColor(BinaryWriter writer, Color color, bool writeA)
+        {
+            writer.Write(color.r);
+            writer.Write(color.g);
+            writer.Write(color.b);
+            if (writeA)
+            {
+                writer.Write(color.a);
+            }
         }
 
         public static bool Eof(BinaryReader binaryReader)

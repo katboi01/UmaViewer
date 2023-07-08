@@ -1,4 +1,7 @@
-﻿using System;
+﻿using LibMMD.Material;
+using System;
+using System.Collections.Generic;
+using static LibMMD.Reader.PMXReader;
 
 namespace LibMMD.Model
 {
@@ -16,6 +19,10 @@ namespace LibMMD.Model
         public Morph[] Morphs { get; set; }
         public MMDRigidBody[] Rigidbodies { get; set; }
         public MMDJoint[] Joints { get; set; }
+
+        public PmxConfig PmxConfig;
+        public List<MMDTexture> TextureList = new List<MMDTexture>();
+        public List<PMXEntryItem> Entrys = new List<PMXEntryItem>();
 
         public void Normalize()
         {
@@ -78,6 +85,21 @@ namespace LibMMD.Model
                     }
                 }
             }
+        }
+    }
+
+    public class PMXEntryItem
+    {
+        public string EntryItemName;
+        public string EntryItemNameEn;
+        public bool IsSpecial;
+        public List<Element> Elements;
+
+        public class Element 
+        {
+            public bool IsMorph;
+            public int MorphIndex;
+            public int BoneIndex;
         }
     }
 }

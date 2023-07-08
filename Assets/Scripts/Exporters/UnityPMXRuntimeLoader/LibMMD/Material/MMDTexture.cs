@@ -1,9 +1,11 @@
-﻿namespace LibMMD.Material
+﻿using System;
+
+namespace LibMMD.Material
 {
     public class MMDTexture
     {
         public string TexturePath { get; set; }
-
+        public bool IsGlobalToon;
         public MMDTexture(string texturePath)
         {
             TexturePath = texturePath;
@@ -31,5 +33,6 @@
         {
             
         }
+     
     }
 }
