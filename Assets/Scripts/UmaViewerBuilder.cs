@@ -1,7 +1,5 @@
-﻿using CriWare;
-using CriWareFormats;
+﻿using CriWareFormats;
 using Gallop;
-using MiniJSON;
 using NAudio.Wave;
 using System;
 using System.Collections;
@@ -12,8 +10,6 @@ using System.Linq;
 using UmaMusumeAudio;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
-using Random = UnityEngine.Random;
 
 public class UmaViewerBuilder : MonoBehaviour
 {
@@ -1563,7 +1559,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         var firsehead = CurrentUMAContainer.Head;
         var origin_faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
-        var faceDriven = new FaceDrivenKeyTarget();
+        var faceDriven = ScriptableObject.CreateInstance<FaceDrivenKeyTarget>();
         DeepCopy.CopyValues(origin_faceDriven, faceDriven);
         var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
         var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;

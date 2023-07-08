@@ -4,9 +4,6 @@ using UnityEditor;
 class SelectAllOfTagHash : ScriptableWizard
 {
 
-    string tagName = "ExampleTag";
-
-
     [MenuItem("Hash/Get Hash")]
     static void SelectAllOfTagHashWizard()
     {

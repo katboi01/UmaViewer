@@ -3,10 +3,6 @@ using UnityEditor;
 
 class SelectAllOfTagSingle : ScriptableWizard
 {
-
-    string tagName = "ExampleTag";
-
-
     [MenuItem("Example/Get")]
     static void SelectAllOfTagSingleWizard()
     {

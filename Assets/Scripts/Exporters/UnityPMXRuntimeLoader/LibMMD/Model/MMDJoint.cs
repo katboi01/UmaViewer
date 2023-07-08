@@ -2,9 +2,9 @@
 
 namespace LibMMD.Model
 {
-    public class Joint
+    public class MMDJoint
     {
-        public Joint()
+        public MMDJoint()
         {
             AssociatedRigidBodyIndex = new int[2];
         }

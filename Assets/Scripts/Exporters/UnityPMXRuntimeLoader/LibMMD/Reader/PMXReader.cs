@@ -49,10 +49,10 @@ namespace LibMMD.Reader
         private static void ReadJoints(BinaryReader reader, RawMMDModel model, PmxConfig pmxConfig)
         {
             var constraintNum = reader.ReadInt32();
-            model.Joints = new Model.Joint[constraintNum];
+            model.Joints = new Model.MMDJoint[constraintNum];
             for (var i = 0; i < constraintNum; ++i)
             {
-                var joint = new Model.Joint
+                var joint = new Model.MMDJoint
                 {
                     Name = MMDReaderUtil.ReadSizedString(reader, pmxConfig.Encoding),
                     NameEn = MMDReaderUtil.ReadSizedString(reader, pmxConfig.Encoding)

@@ -15,7 +15,7 @@ namespace LibMMD.Model
         public Bone[] Bones { get; set; }
         public Morph[] Morphs { get; set; }
         public MMDRigidBody[] Rigidbodies { get; set; }
-        public Joint[] Joints { get; set; }
+        public MMDJoint[] Joints { get; set; }
 
         public void Normalize()
         {

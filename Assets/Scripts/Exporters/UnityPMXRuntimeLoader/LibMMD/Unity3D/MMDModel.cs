@@ -350,7 +350,7 @@ namespace LibMMD.Unity3D
             int jointCount = model.RawMMDModel.Joints.Length;
             for (int i = 0; i < jointCount; i++)
             {
-                LibMMD.Model.Joint mmdJoint = model.RawMMDModel.Joints[i];
+                LibMMD.Model.MMDJoint mmdJoint = model.RawMMDModel.Joints[i];
                 int jointFromBoneIndex = model.RawMMDModel.Rigidbodies[mmdJoint.AssociatedRigidBodyIndex[0]].AssociatedBoneIndex;
                 int jointToBoneIndex = model.RawMMDModel.Rigidbodies[mmdJoint.AssociatedRigidBodyIndex[1]].AssociatedBoneIndex;
                 if (bonesCount <= jointFromBoneIndex || bonesCount <= jointToBoneIndex) { continue; }

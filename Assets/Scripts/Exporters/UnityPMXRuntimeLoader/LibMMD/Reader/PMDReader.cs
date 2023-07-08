@@ -64,10 +64,10 @@ namespace LibMMD.Reader
         private static void ReadConstraints(BinaryReader reader, RawMMDModel model)
         {
             var constraintNum = reader.ReadUInt32();
-            model.Joints = new Model.Joint[constraintNum];
+            model.Joints = new Model.MMDJoint[constraintNum];
             for (var i = 0; i < constraintNum; ++i)
             {
-                var constraint = new Model.Joint();
+                var constraint = new Model.MMDJoint();
                 constraint.Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
                 constraint.AssociatedRigidBodyIndex[0] = reader.ReadInt32();
                 constraint.AssociatedRigidBodyIndex[1] = reader.ReadInt32();
