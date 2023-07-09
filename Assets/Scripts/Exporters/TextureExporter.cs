@@ -27,36 +27,37 @@ public class TextureExporter
         return readableText;
     }
 
-    static public void exportAllTexture(string path, GameObject gameobj)
+    static public string[] ExportAllTexture(string path, GameObject gameobj)
     {
         string savePath = path + "/Texture2D/";
-
+        List<string> textureNames = new List<string>();
         if (!Directory.Exists(savePath))
         {
             Directory.CreateDirectory(savePath);
         }
 
-        foreach (SkinnedMeshRenderer skin_mesh in gameobj.transform.GetComponentsInChildren<SkinnedMeshRenderer>())
+        foreach (Renderer renderer in gameobj.transform.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material mat in skin_mesh.sharedMaterials)
+            foreach (Material mat in renderer.sharedMaterials)
             {
                 //获得材质的所有属性名，如果改属性名对应的是贴图，提取该贴图
                 Shader mat_shader = mat.shader;
                 int p_num = mat_shader.GetPropertyCount();
-                Debug.Log(p_num);
                 for (int i = 0; i < p_num; i++)
                 {
                     string p_name = mat_shader.GetPropertyName(i);
                     if (mat_shader.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Texture)
                     {
-                        //Debug.Log("Hello!");
-                        Debug.Log(p_name);
                         Texture2D mat_texture = (Texture2D)mat.GetTexture(p_name);
                         if (mat_texture)
                         {
-                            //Debug.Log("There is a Name!");
                             string tex_name = mat_texture.name;
                             string tex_path = savePath + tex_name + ".png";
+                            var dpath = "Texture2D/" + tex_name + ".png";
+                            if (!textureNames.Contains(dpath))
+                            {
+                                textureNames.Add(dpath);
+                            }
                             if (!File.Exists(tex_path))
                             {
                                 mat_texture = duplicateTexture(mat_texture);
@@ -68,42 +69,7 @@ public class TextureExporter
                 }
             }
         }
-
-        foreach (MeshRenderer mr in gameobj.transform.GetComponentsInChildren<MeshRenderer>())
-        {
-            foreach (Material mat in mr.sharedMaterials)
-            {
-                //获得材质的所有属性名，如果改属性名对应的是贴图，提取该贴图
-                Shader mat_shader = mat.shader;
-                int p_num = mat_shader.GetPropertyCount();
-                Debug.Log(p_num);
-                for (int i = 0; i < p_num; i++)
-                {
-                    //Debug.Log(mat_shader.GetPropertyName(i));
-                    //Debug.Log(mat_shader.GetPropertyType(i));
-                    string p_name = mat_shader.GetPropertyName(i);
-                    if (mat_shader.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Texture)
-                    {
-                        //Debug.Log("Hello!");
-                        Debug.Log(p_name);
-                        Texture2D mat_texture = (Texture2D)mat.GetTexture(p_name);
-                        if (mat_texture)
-                        {
-                            //Debug.Log("There is a Name!");
-                            string tex_name = mat_texture.name;
-                            string tex_path = savePath + tex_name + ".png";
-                            if (!File.Exists(tex_path))
-                            {
-                                mat_texture = duplicateTexture(mat_texture);
-                                byte[] bytes = mat_texture.EncodeToPNG();
-                                File.WriteAllBytes(tex_path, bytes);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         Debug.Log("提取成功");
+        return textureNames.ToArray();
     }
 }

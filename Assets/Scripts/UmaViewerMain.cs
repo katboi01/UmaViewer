@@ -88,7 +88,8 @@ public class UmaViewerMain : MonoBehaviour
             {
                 Characters.Add(new CharaEntry()
                 {
-                    Name = enNames.ContainsKey(id) ? enNames[id] : item["charaname"].ToString(),
+                    Name = item["charaname"].ToString(),
+                    EnName = enNames.ContainsKey(id) ? enNames[id] : "",
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id,
                     ThemeColor = "#" + item["ui_nameplate_color_1"].ToString()

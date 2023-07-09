@@ -55,7 +55,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         int id = chara.Id;
         CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainer>();
-
+        CurrentUMAContainer.CharaEntry = chara;
         UnloadAllBundle();
 
         if (mini)

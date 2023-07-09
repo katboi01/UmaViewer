@@ -254,7 +254,7 @@ public class UmaViewerUI : MonoBehaviour
             var charaInstance = chara;
 
             var container3 = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
-            container3.Name = container3.name = chara.Id + " " + chara.Name;
+            container3.Name = container3.name = chara.Id + " " + chara.GetName();
             container3.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(CharactersList.content, container3);
@@ -268,7 +268,7 @@ public class UmaViewerUI : MonoBehaviour
             }
 
             var container4 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-            container4.Name = container4.name = chara.Id + " " + chara.Name;
+            container4.Name = container4.name = chara.Id + " " + chara.GetName();
             container4.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(AnimationSetList.content, container4);
@@ -288,7 +288,7 @@ public class UmaViewerUI : MonoBehaviour
             var charaInstance = chara;
             var pageentry = new PageManager.Entry();
 
-            pageentry.Name = chara.Name;
+            pageentry.Name = chara.GetName();
             pageentry.OnClick = (container) =>
             {
                 HighlightChildImage(MobCharactersList.content, container);
@@ -317,7 +317,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var charaInstance = chara;
             var container2 = Instantiate(UmaContainerPrefab, MiniCharactersList.content).GetComponent<UmaUIContainer>();
-            container2.Name = container2.name = chara.Id + " " + chara.Name;
+            container2.Name = container2.name = chara.Id + " " + chara.GetName();
             container2.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(MiniCharactersList.content, container2);
@@ -331,7 +331,7 @@ public class UmaViewerUI : MonoBehaviour
             }
 
             var container3 = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-            container3.Name = container3.name = chara.Id + " " + chara.Name;
+            container3.Name = container3.name = chara.Id + " " + chara.GetName();
             container3.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(MiniAnimationSetList.content, container3);
@@ -903,7 +903,7 @@ public class UmaViewerUI : MonoBehaviour
     string getCharaName(string id)
     {
         var entry = Main.Characters.FirstOrDefault(a => a.Id.ToString().Equals(id));
-        return (entry == null) ? id.ToString() : entry.Name;
+        return (entry == null) ? id.ToString() : entry.GetName();
     }
 
     public static string GetCostumeName(string costumeId, string defaultname)
@@ -1317,11 +1317,11 @@ public class UmaViewerUI : MonoBehaviour
         var container = Builder.CurrentUMAContainer;
         if (container)
         {
-            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, container.gameObject.name, "pmx");
+            var entry = container.CharaEntry;
+            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{entry.Id}_{entry.GetName()}", "pmx");
             if (!string.IsNullOrEmpty(path))
             {
-                ModelExporter.exportModel(path,container.gameObject);
-                TextureExporter.exportAllTexture(Path.GetDirectoryName(path),container.gameObject);
+                ModelExporter.ExportModel(container, path);
             }
         }
     }

@@ -20,7 +20,6 @@ namespace LibMMD.Model
         public MMDRigidBody[] Rigidbodies { get; set; }
         public MMDJoint[] Joints { get; set; }
 
-        public PmxConfig PmxConfig;
         public List<MMDTexture> TextureList = new List<MMDTexture>();
         public List<PMXEntryItem> Entrys = new List<PMXEntryItem>();
 

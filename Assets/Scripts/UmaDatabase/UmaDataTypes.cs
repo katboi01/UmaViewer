@@ -78,10 +78,15 @@ public class FaceTypeData
 public class CharaEntry
 {
     public string Name;
+    public string EnName;
     public Sprite Icon;
     public int Id;
     public string ThemeColor;
     public bool IsMob;
+    public string GetName()
+    {
+        return string.IsNullOrEmpty(EnName) ? Name : EnName;
+    }
 }
 
 [System.Serializable]

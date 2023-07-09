@@ -36,18 +36,12 @@ namespace LibMMD.Util
             {
                 throw new MMDFileParseException("pmx string length is negative");
             }
-
-            if (str.Length > length)
+            
+            if(length > 0)
             {
-                str = str.Substring(0, length);
+                var bytes = encoding.GetBytes(str);
+                writer.Write(bytes);
             }
-            else if (str.Length < length)
-            {
-                str = str.PadRight(length, '\0');
-            }
-
-            var bytes = encoding.GetBytes(str);
-            writer.Write(bytes);
         }
 
 

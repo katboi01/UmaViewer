@@ -508,7 +508,7 @@ namespace LibMMD.Unity3D
             switch (op.Type)
             {
                 case SkinningOperator.SkinningType.SkinningBdef1:
-                    var b def1 = (SkinningOperator.Bdef1)op.Param;
+                    var bdef1 = (SkinningOperator.Bdef1)op.Param;
                     ret.boneIndex0 = bdef1.BoneId;
                     ret.weight0 = 1.0f;
                     break;

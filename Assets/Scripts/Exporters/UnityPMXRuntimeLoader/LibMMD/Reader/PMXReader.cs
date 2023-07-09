@@ -31,7 +31,7 @@ namespace LibMMD.Reader
             }
 
             var model = new RawMMDModel();
-            var pmxConfig = model.PmxConfig = ReadPmxConfig(reader, model);
+            var pmxConfig = ReadPmxConfig(reader, model);
             ReadModelNameAndDescription(reader, model, pmxConfig);
             ReadVertices(reader, model, pmxConfig);
             ReadTriangles(reader, model, pmxConfig);

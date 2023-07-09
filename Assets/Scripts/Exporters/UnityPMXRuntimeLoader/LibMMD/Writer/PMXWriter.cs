@@ -13,7 +13,7 @@ namespace LibMMD.Writer
 {
     public class PMXWriter
     {
-        public void Write(BinaryWriter writer, RawMMDModel model, ModelConfig config)
+        public static void Write(BinaryWriter writer, RawMMDModel model, ModelConfig config)
         {
             var pmxHeader = new PmxMeta
             {
@@ -22,18 +22,31 @@ namespace LibMMD.Writer
                 FileFlagSize = 8
             };
 
+            PmxConfig PmxConfig = new PmxConfig()
+            {
+                Utf8Encoding = true,
+                Encoding = Encoding.UTF8,
+                ExtraUvNumber = 3, //include uv2 and color
+                VertexIndexSize = 2,
+                TextureIndexSize = 1,
+                MaterialIndexSize = 1,
+                BoneIndexSize = 2,
+                MorphIndexSize = 2,
+                RigidBodyIndexSize = 2
+            };
+
             WriteMeta(writer, pmxHeader);
-            WritePmxConfig(writer, model.PmxConfig);
-            WriteModelNameAndDescription(writer, model, model.PmxConfig);
-            WriteVertices(writer, model, model.PmxConfig);
-            WriteTriangles(writer, model, model.PmxConfig);
-            WriteTextureList(writer, model.TextureList, model.PmxConfig);
-            WriteParts(writer, config, model, model.PmxConfig);
-            WriteBones(writer, model, model.PmxConfig);
-            WriteMorphs(writer, model, model.PmxConfig);
-            WriteEntries(writer, model.Entrys, model.PmxConfig);
-            WriteRigidBodies(writer, model.Rigidbodies, model.PmxConfig);
-            WriteJoints(writer, model, model.PmxConfig);
+            WritePmxConfig(writer, PmxConfig);
+            WriteModelNameAndDescription(writer, model, PmxConfig);
+            WriteVertices(writer, model, PmxConfig);
+            WriteTriangles(writer, model, PmxConfig);
+            WriteTextureList(writer, model.TextureList, PmxConfig);
+            WriteParts(writer, config, model, PmxConfig);
+            WriteBones(writer, model, PmxConfig);
+            WriteMorphs(writer, model, PmxConfig);
+            WriteEntries(writer, model.Entrys, PmxConfig);
+            WriteRigidBodies(writer, model.Rigidbodies, PmxConfig);
+            WriteJoints(writer, model, PmxConfig);
         }
 
         private static void WriteJoints(BinaryWriter writer, RawMMDModel model, PmxConfig pmxConfig)
@@ -401,32 +414,11 @@ namespace LibMMD.Writer
             return -1;
         }
 
-        private static void WriteParts(BinaryWriter writer, RawMMDModel model, ModelConfig config, PmxConfig pmxConfig, MMDTexture[] textureList)
-        {
-            var partNum = model.Parts.Length;
-            writer.Write(partNum);
-            var partBaseShift = 0;
-            for (var i = 0; i < partNum; i++)
-            {
-                var part = model.Parts[i];
-                var material = part.Material;
-                WriteMaterial(writer, material, config, pmxConfig.Encoding, pmxConfig.TextureIndexSize, new List<MMDTexture>(textureList));
-                var partTriangleIndexNum = part.TriangleIndexNum;
-                writer.Write(partTriangleIndexNum);
-                if (partTriangleIndexNum % 3 != 0)
-                {
-                    throw new MMDFileParseException("part" + i + " triangle index count " + partTriangleIndexNum + " is not a multiple of 3");
-                }
-                part.BaseShift = partBaseShift;
-                partBaseShift += partTriangleIndexNum;
-            }
-        }
-
         private static void WriteTextureList(BinaryWriter writer, List<MMDTexture> textureList, PmxConfig pmxConfig)
         {
             var textureNum = textureList.Count;
             writer.Write(textureNum);
-            for (var i = 0; i < textureNum; ++i)
+            for (var i = 0; i < textureNum; i++)
             {
                 var texturePathEncoding = pmxConfig.Utf8Encoding ? Encoding.UTF8 : Encoding.Unicode;
                 var texturePath = textureList[i].TexturePath;
@@ -526,11 +518,6 @@ namespace LibMMD.Writer
             MMDReaderWriteUtil.WriteVector3(writer, coordinate);
             MMDReaderWriteUtil.WriteVector3(writer, normal);
             MMDReaderWriteUtil.WriteVector2(writer, uvCoordinate);
-        }
-
-        private void WritePmxConfig(object reader, object model)
-        {
-            throw new NotImplementedException();
         }
 
         private static void WriteMeta(BinaryWriter writer, PmxMeta meta)

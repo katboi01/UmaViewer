@@ -11,6 +11,7 @@ using Random = UnityEngine.Random;
 
 public class UmaContainer : MonoBehaviour
 {
+    public CharaEntry CharaEntry;
     public DataRow CharaData;
     public GameObject Body;
     public GameObject Tail;
@@ -81,7 +82,7 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Other")]
     public CharaShaderEffectData ShaderEffectData;
-    private List<MaterialHelper> Materials = new List<MaterialHelper>();
+    public List<MaterialHelper> Materials = new List<MaterialHelper>();
 
 
     public void Initialize(bool smile)
@@ -490,7 +491,7 @@ public class UmaContainer : MonoBehaviour
     }
 
 
-    class MaterialHelper
+    public class MaterialHelper
     {
         public Material Mat;
         public UmaUIContainer Toggle;
@@ -509,6 +510,7 @@ public class UmaContainer : MonoBehaviour
                     //if material slot in list and toggle is off - assign invisible
                     mat[i] = rend.Value.Contains(i) ? (value? Mat : UmaViewerBuilder.Instance.TransMaterialCharas ): rend.Key.materials[i];
                 }
+
                 rend.Key.materials = mat;
             }
         }
