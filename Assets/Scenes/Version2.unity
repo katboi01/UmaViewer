@@ -42445,6 +42445,8 @@ MonoBehaviour:
   EnableEyeTracking: 1
   EnableFaceOverride: 1
   LiveTime: 0
+  LiveDropdown: {fileID: 515484818}
+  LiveMode: 0
   currentFaceDrivenKeyTarget: {fileID: 0}
 --- !u!114 &1564959568
 MonoBehaviour:
