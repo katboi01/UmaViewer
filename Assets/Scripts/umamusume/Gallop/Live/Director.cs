@@ -13,6 +13,7 @@ using System.Data;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using CriWare;
 using static UmaViewerAudio;
+using UnityEngine.SceneManagement;
 
 namespace Gallop.Live
 {
@@ -504,6 +505,21 @@ namespace Gallop.Live
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                UmaSceneController.instance.LoadScene("Version2",
+                    delegate ()
+                    {
+                        AssetBundle.UnloadAllAssetBundles(true);
+                    },
+                    delegate ()
+                    {
+
+                    });
+                
+                return;
+            }
+
             if (_isLiveSetup)
             {
                 if(_syncTime == false)
