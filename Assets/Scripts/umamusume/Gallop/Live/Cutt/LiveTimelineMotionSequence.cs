@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static RootMotion.Demos.CharacterMeleeDemo.Action;
 
 namespace Gallop.Live.Cutt
 {
@@ -28,8 +29,22 @@ namespace Gallop.Live.Cutt
         private bool _needChange;
         private LiveTimelineKeyCharaMotionData _prevKey;
 
-        public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl)
+        private AnimationClip _targetAnim = null;
+
+        public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl, List<AnimationClip> animclips = null)
         {
+            if(animclips != null)
+            {
+                if (targetIndex < Director.instance.charaAnims.Count)
+                {
+                    _targetAnim = animclips[targetIndex];
+
+                    _tempAnim = Director.instance.charaAnims[targetIndex];
+                    _tempAnim.AddClip(_targetAnim, _targetAnim.name);
+                }
+                return;
+            }
+
             _tempTarget = target;
             _targetIndex = targetIndex;
 
@@ -56,6 +71,16 @@ namespace Gallop.Live.Cutt
 
         public void AlterUpdate(float currentTime)
         {
+            if(Director.instance.liveMode == 0)
+            {
+                if(_targetAnim != null)
+                {
+                    _tempAnim[_targetAnim.name].time = currentTime;
+                    _tempAnim.Play(_targetAnim.name);
+                }
+                return;
+            }
+
             if (_currentKey != null && _tempAnim != null)
             {
                 LiveTimelineKeyIndex curKey = LiveTimelineControl.AlterUpdate_Key(_currentKey, currentTime);

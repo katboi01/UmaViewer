@@ -149,7 +149,7 @@ public class UmaViewerMain : MonoBehaviour
             string filePath = asset.FilePath;
             if (File.Exists(filePath))
             {
-                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                AssetBundle bundle = UmaViewerBuilder.LoadOrGet(asset);
                 foreach (var item in UmaDatabaseController.Instance.LiveData)
                 {
                     var musicId = Convert.ToInt32(item["music_id"]);

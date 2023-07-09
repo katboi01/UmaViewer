@@ -13,6 +13,7 @@ using System.Data;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using CriWare;
 using static UmaViewerAudio;
+using UnityEngine.SceneManagement;
 
 namespace Gallop.Live
 {
@@ -342,6 +343,8 @@ namespace Gallop.Live
         public int characterCount = 0;
         public int allowCount = 0;
 
+        public int liveMode = 0;
+
         private void Awake()
         {
             if (live != null)
@@ -379,9 +382,23 @@ namespace Gallop.Live
             }
         }
 
-        public void InitializeTimeline(int count)
+        public void InitializeTimeline(List<LiveCharacterSelect> characters, int mode)
         {
-            allowCount = count;
+            liveMode = mode;
+
+            allowCount = characters.Count;
+
+            for (int i = 0; i < characters.Count; i++)
+            {
+                if (characters[i].CharaEntry.Name != "")
+                {
+                    characterCount += 1;
+                }
+            }
+            if (characterCount == 1)
+            {
+                _soloMode = true;
+            }
 
             _liveTimelineControl.InitCharaMotionSequence(_liveTimelineControl.data.characterSettings.motionSequenceIndices);
 
@@ -409,19 +426,6 @@ namespace Gallop.Live
         public void Play(int songid, List<LiveCharacterSelect> characters)
         {
             Debug.Log(songid);
-
-            for (int i = 0; i < characters.Count; i++)
-            {
-                if (characters[i].CharaEntry.Name != "")
-                {
-                    characterCount += 1;
-                }
-            }
-            if(characterCount == 1)
-            {
-                _soloMode = true;
-            }
-
 
             if (!_soloMode)
             {
@@ -501,6 +505,12 @@ namespace Gallop.Live
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene("Version2");
+                AssetBundle.UnloadAllAssetBundles(true);
+            }
+
             if (_isLiveSetup)
             {
                 if(_syncTime == false)

@@ -13,7 +13,7 @@ public class UmaSceneController:MonoBehaviour
     {
         if (instance)
         {
-            Destroy(this.gameObject);
+            Destroy(instance.gameObject);
         }
         instance = this;
         DontDestroyOnLoad(this);
@@ -26,9 +26,10 @@ public class UmaSceneController:MonoBehaviour
 
     IEnumerator LoadLiveSceneAsync(string sceneName, Action OnSceneloaded, Action OnLastSceneUnloaded)
     {
+
         if (CavansInstance)
         {
-            Destroy(CavansInstance);
+            //Destroy(CavansInstance);
         }
         CavansInstance = Instantiate(CavansPrefab, transform);
         var animation = CavansInstance.GetComponent<Animation>();

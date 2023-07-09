@@ -90,10 +90,21 @@ public class UmaViewerBuilder : MonoBehaviour
             if (characters[i].CharaEntry.Name != "")
             {
                 CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainer>();
-                CurrentUMAContainer.IsLive = true;
-                CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+
+                if (characters[i].CharaEntry.IsMob)
+                {
+                    CurrentUMAContainer.IsLive = true;
+                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    LoadMobUma(characters[i].CharaEntry, characters[i].CostumeId);
+                }
+                else
+                {
+                    CurrentUMAContainer.IsLive = true;
+                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+                }
             }
         }
     }
@@ -697,7 +708,7 @@ public class UmaViewerBuilder : MonoBehaviour
             },
             delegate ()
             {
-                Gallop.Live.Director.instance.InitializeTimeline(characters.Count);
+                Gallop.Live.Director.instance.InitializeTimeline(characters, UI.LiveMode);
                 Gallop.Live.Director.instance.Play(live.MusicId, characters);
             }
         );

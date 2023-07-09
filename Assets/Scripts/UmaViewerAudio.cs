@@ -66,6 +66,8 @@ public class UmaViewerAudio
 
         float _999_count = 0;
 
+        bool _no999 = false;
+
         for (int i = 0; i < liveVocal.Count; i++)
         {
             string partName = ((PartForm)i).ToString();
@@ -97,11 +99,15 @@ public class UmaViewerAudio
                     {
                         _999_count += 1;
                     }
-                }  
+                }
+                else
+                {
+                    _no999 = true;
+                }
             }
         }
 
-        if (_999_count == liveVocal.Count)
+        if ((_999_count == liveVocal.Count && liveVocal.Count != 0) || _no999)
         {
             useMixer = true;
         }

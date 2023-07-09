@@ -1065,7 +1065,7 @@ namespace Gallop
 
                         if (partR != 0)
                         {
-                            leftEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
+                            rightEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
                         }
                     }
                     else
@@ -1081,7 +1081,7 @@ namespace Gallop
 
                         if (partR != 0)
                         {
-                            leftEarMorph[partR - 1].weight = 0;
+                            rightEarMorph[partR - 1].weight = 0;
                         }
                     }
                 }
@@ -1097,7 +1097,7 @@ namespace Gallop
 
                 if (curPartR != 0)
                 {
-                    leftEarMorph[curPartR - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
+                    rightEarMorph[curPartR - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
                 }
 
                 ChangeMorphEar();
