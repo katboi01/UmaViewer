@@ -507,17 +507,8 @@ namespace Gallop.Live
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                UmaSceneController.instance.LoadScene("Version2",
-                    delegate ()
-                    {
-                        AssetBundle.UnloadAllAssetBundles(true);
-                    },
-                    delegate ()
-                    {
-
-                    });
-                
-                return;
+                SceneManager.LoadScene("Version2");
+                AssetBundle.UnloadAllAssetBundles(true);
             }
 
             if (_isLiveSetup)
