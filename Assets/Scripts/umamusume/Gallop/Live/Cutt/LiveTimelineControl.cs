@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static RootMotion.FinalIK.IKSolverVR;
+using System.Linq;
+using System.IO;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 namespace Gallop.Live.Cutt
 {
@@ -78,18 +81,45 @@ namespace Gallop.Live.Cutt
                 _keyArray[i] = data.worksheetList[0].charaMotSeqList[i].keys;
             }
 
-            //Set Motion
-            int CharaPositionMax = Director.instance.allowCount;
-
-            _motionSequenceArray = new LiveTimelineMotionSequence[CharaPositionMax];
-
-            
-            for (int i = 0; i < CharaPositionMax; i++)
+            if (Director.instance.liveMode == 1)
             {
-                _motionSequenceArray[i] = new LiveTimelineMotionSequence();
-                _motionSequenceArray[i].Initialize(Director.instance.charaObjs[i], i, motionSequence[i], this);
+                //Set Motion
+                int CharaPositionMax = Director.instance.allowCount;
+
+                _motionSequenceArray = new LiveTimelineMotionSequence[CharaPositionMax];
+
+
+                for (int i = 0; i < CharaPositionMax; i++)
+                {
+                    Debug.Log(i);
+                    _motionSequenceArray[i] = new LiveTimelineMotionSequence();
+                    _motionSequenceArray[i].Initialize(Director.instance.charaObjs[i], i, motionSequence[i], this);
+                }
             }
-            
+            else if(Director.instance.liveMode == 0)
+            {
+                List<AnimationClip> Anims = new List<AnimationClip>();
+                //Get MotionList
+                foreach (var motion in UmaViewerMain.Instance.AbMotions.Where(a => a.Name.StartsWith($"3d/motion/live/body/son{Director.instance.live.MusicId}") && Path.GetFileName(a.Name).Split('_').Length == 4))
+                {
+                    AssetBundle motionAB = UmaViewerBuilder.LoadOrGet(motion);
+                    AnimationClip motionAnim = motionAB.LoadAsset<AnimationClip>(Path.GetFileName(motion.Name).Split('.')[0]);
+                    Anims.Add(motionAnim);
+                }
+
+                //Set Motion
+                int CharaPositionMax = Director.instance.allowCount;
+
+                _motionSequenceArray = new LiveTimelineMotionSequence[CharaPositionMax];
+
+
+                for (int i = 0; i < CharaPositionMax; i++)
+                {
+                    _motionSequenceArray[i] = new LiveTimelineMotionSequence();
+                    _motionSequenceArray[i].Initialize(Director.instance.charaObjs[i], i, motionSequence[i], this, Anims);
+                }
+            }
+  
         }
 
         public void AlterUpdate(float liveTime)
@@ -97,6 +127,7 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CharaMotionSequence(liveTime);
             AlterUpdate_FacialData(liveTime);
             AlterUpdate_LipSync(liveTime);
+            //AlterLateUpdate_FormationOffset(liveTime);
         }
 
         public void AlterUpdate_CharaMotionSequence(float liveTime)
@@ -207,6 +238,32 @@ namespace Gallop.Live.Cutt
                 this.OnUpdateLipSync(arg, liveTime);
             }
         }
+
+        private void AlterLateUpdate_FormationOffset(float liveTime)
+        {
+
+            var formationList = data.worksheetList[0].formationOffsetSet.Init();
+
+            for (int i = 0; i < Director.instance.characterCount; i++)
+            {
+                LiveTimelineKeyIndex curKey = AlterUpdate_Key(formationList[i], liveTime);
+
+                if (curKey != null && curKey.index != -1)
+                {
+                    LateUpdateFormationOffset_Transform(i, curKey, liveTime);
+                }
+            }
+        }
+
+        public void LateUpdateFormationOffset_Transform(int targetIndex, LiveTimelineKeyIndex curKeyIndex, float time)
+        {
+            LiveTimelineKeyFormationOffsetData curKey = curKeyIndex.key as LiveTimelineKeyFormationOffsetData;
+            LiveTimelineKeyFormationOffsetData nextKey = curKeyIndex.nextKey as LiveTimelineKeyFormationOffsetData;
+
+            Director.instance.charaObjs[targetIndex].position = curKey.Position;
+        }
+
+
 
         public static void FindTimelineKeyCurrent(out LiveTimelineKeyIndex curKey, ILiveTimelineKeyDataList keys, float curTime)
         {

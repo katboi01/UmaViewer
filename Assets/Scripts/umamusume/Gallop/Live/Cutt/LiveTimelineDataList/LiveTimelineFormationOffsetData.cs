@@ -111,6 +111,7 @@ namespace Gallop.Live.Cutt
 	[System.Serializable]
 	public class LiveTimelineFormationOffsetData
     {
+
         private const int DATA_LIST_SIZE = 20;
         public LiveTimelineKeyFormationOffsetDataList centerKeys; // 0x10
         public LiveTimelineKeyFormationOffsetDataList left1Keys; // 0x18
@@ -133,5 +134,10 @@ namespace Gallop.Live.Cutt
         public LiveTimelineKeyFormationOffsetDataList place19Keys; // 0xA0
         public LiveTimelineKeyFormationOffsetDataList place20Keys; // 0xA8
         private readonly ILiveTimelineKeyDataList[] _cacheDataList; // 0xB0
+
+        public List<LiveTimelineKeyFormationOffsetDataList> Init()
+        {
+            return new List<LiveTimelineKeyFormationOffsetDataList> { centerKeys, left1Keys , right1Keys, left2Keys, right2Keys, place06Keys, place07Keys, place08Keys, place09Keys, place10Keys, place11Keys, place12Keys, place13Keys, place14Keys, place15Keys, place16Keys, place17Keys, place18Keys, place19Keys, place20Keys };
+        }
     }
 }
