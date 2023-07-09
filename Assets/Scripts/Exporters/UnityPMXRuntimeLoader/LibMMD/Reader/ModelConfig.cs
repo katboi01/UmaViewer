@@ -1,6 +1,6 @@
 namespace LibMMD.Reader
 {
-    public class ModelReadConfig
+    public class ModelConfig
     {
         public string GlobalToonPath { get; set; }
     }

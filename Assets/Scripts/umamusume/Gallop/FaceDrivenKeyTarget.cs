@@ -789,7 +789,7 @@ namespace Gallop
                                 srcmorph.weight = 0;
                             }
                         }
-                        targetMorph.ForEach(a => a.Invoke());
+                        targetMorph.ForEach(a => a());
                     }
                 }
             };

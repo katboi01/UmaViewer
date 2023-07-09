@@ -11,7 +11,7 @@ namespace LibMMD.Reader
 {
     public class PMDReader : ModelReader
     {
-        public override RawMMDModel Read(BinaryReader reader, ModelReadConfig config)
+        public override RawMMDModel Read(BinaryReader reader, ModelConfig config)
         {
             var model = new RawMMDModel();
             var context = new PmdReadContext();
@@ -30,17 +30,17 @@ namespace LibMMD.Reader
             ReadFacdDisplayListNames(reader);
             ReadBoneNameList(reader, context);
             ReadBoneDisp(reader);
-            if (MMDReaderUtil.Eof(reader))
+            if (MMDReaderWriteUtil.Eof(reader))
             {
                 goto PMD_READER_READ_LEGACY_30;
             }
             ReadInfoEn(reader, model, context);
-            if (MMDReaderUtil.Eof(reader))
+            if (MMDReaderWriteUtil.Eof(reader))
             {
                 goto PMD_READER_READ_LEGACY_30;
             }
             ReadCustomTextures(reader, config, model, toonTextureIds);
-            if (MMDReaderUtil.Eof(reader))
+            if (MMDReaderWriteUtil.Eof(reader))
             {
                 goto PMD_READER_READ_LEGACY_50;
             }
@@ -53,7 +53,7 @@ namespace LibMMD.Reader
             for (var i = 0; i < model.Parts.Length; ++i)
             {
                 var material = model.Parts[i].Material;
-                material.Toon = MMDTextureUtil.GetGlobalToon(toonTextureIds[i], config.GlobalToonPath);
+                material.Toon = MMDTextureUtil.GetGlobalToon(toonTextureIds[i]);
             }
             PMD_READER_READ_LEGACY_50:
             PMD_READER_READ_SUCCEED:
@@ -64,21 +64,21 @@ namespace LibMMD.Reader
         private static void ReadConstraints(BinaryReader reader, RawMMDModel model)
         {
             var constraintNum = reader.ReadUInt32();
-            model.Joints = new Model.Joint[constraintNum];
+            model.Joints = new Model.MMDJoint[constraintNum];
             for (var i = 0; i < constraintNum; ++i)
             {
-                var constraint = new Model.Joint();
-                constraint.Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+                var constraint = new Model.MMDJoint();
+                constraint.Name = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
                 constraint.AssociatedRigidBodyIndex[0] = reader.ReadInt32();
                 constraint.AssociatedRigidBodyIndex[1] = reader.ReadInt32();
-                constraint.Position = MMDReaderUtil.ReadVector3(reader);
-                constraint.Rotation = MMDReaderUtil.ReadAmpVector3(reader, Mathf.Rad2Deg);
-                constraint.PositionLowLimit = MMDReaderUtil.ReadVector3(reader);
-                constraint.PositionHiLimit = MMDReaderUtil.ReadVector3(reader);
-                constraint.RotationLowLimit = MMDReaderUtil.ReadVector3(reader);
-                constraint.RotationHiLimit = MMDReaderUtil.ReadVector3(reader);
-                constraint.SpringTranslate = MMDReaderUtil.ReadVector3(reader);
-                constraint.SpringRotate = MMDReaderUtil.ReadVector3(reader);
+                constraint.Position = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.Rotation = MMDReaderWriteUtil.ReadAmpVector3(reader, Mathf.Rad2Deg);
+                constraint.PositionLowLimit = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.PositionHiLimit = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.RotationLowLimit = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.RotationHiLimit = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.SpringTranslate = MMDReaderWriteUtil.ReadVector3(reader);
+                constraint.SpringRotate = MMDReaderWriteUtil.ReadVector3(reader);
                 model.Joints[i] = constraint;
             }
         }
@@ -91,7 +91,7 @@ namespace LibMMD.Reader
             {
                 var rigidBody = new MMDRigidBody();
 
-                rigidBody.Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding).Trim();
+                rigidBody.Name = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding).Trim();
                 var boneIndex = reader.ReadUInt16();
                 if (boneIndex < context.BoneNum)
                 {
@@ -111,10 +111,10 @@ namespace LibMMD.Reader
                 rigidBody.CollisionGroup = reader.ReadSByte();
                 rigidBody.CollisionMask = reader.ReadUInt16();
                 rigidBody.Shape = (MMDRigidBody.RigidBodyShape) reader.ReadByte();
-                rigidBody.Dimemsions = MMDReaderUtil.ReadVector3(reader);
-                var rbPosition = MMDReaderUtil.ReadVector3(reader);
+                rigidBody.Dimemsions = MMDReaderWriteUtil.ReadVector3(reader);
+                var rbPosition = MMDReaderWriteUtil.ReadVector3(reader);
                 rigidBody.Position = model.Bones[rigidBody.AssociatedBoneIndex].Position + rbPosition;
-                rigidBody.Rotation = MMDReaderUtil.ReadVector3(reader);
+                rigidBody.Rotation = MMDReaderWriteUtil.ReadVector3(reader);
                 rigidBody.Mass = reader.ReadSingle();
                 rigidBody.TranslateDamp = reader.ReadSingle();
                 rigidBody.RotateDamp = reader.ReadSingle();
@@ -134,14 +134,14 @@ namespace LibMMD.Reader
             }
         }
 
-        private static void ReadCustomTextures(BinaryReader reader, ModelReadConfig config, RawMMDModel model,
+        private static void ReadCustomTextures(BinaryReader reader, ModelConfig config, RawMMDModel model,
             List<int> toonTextureIds)
         {
             var customTextures = new MMDTexture[10];
             for (var i = 0; i < 10; ++i)
             {
                 customTextures[i] =
-                    new MMDTexture(MMDReaderUtil.ReadStringFixedLength(reader, 100, Tools.JapaneseEncoding));
+                    new MMDTexture(MMDReaderWriteUtil.ReadStringFixedLength(reader, 100, Tools.JapaneseEncoding));
             }
 
             for (var i = 0; i < model.Parts.Length; ++i)
@@ -153,7 +153,7 @@ namespace LibMMD.Reader
                 }
                 else
                 {
-                    material.Toon = MMDTextureUtil.GetGlobalToon(0, config.GlobalToonPath);
+                    material.Toon = MMDTextureUtil.GetGlobalToon(0);
                 }
             }
         }
@@ -162,13 +162,13 @@ namespace LibMMD.Reader
         {
             var hasInfoEn = reader.ReadSByte() == 1;
             if (!hasInfoEn) return;
-            model.NameEn = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
-            model.DescriptionEn = MMDReaderUtil.ReadStringFixedLength(reader, 256, Tools.JapaneseEncoding);
+            model.NameEn = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+            model.DescriptionEn = MMDReaderWriteUtil.ReadStringFixedLength(reader, 256, Tools.JapaneseEncoding);
 
             for (var i = 0; i < context.BoneNum; ++i)
             {
                 var bone = model.Bones[i];
-                bone.NameEn = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+                bone.NameEn = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
             }
 
             if (model.Morphs.Length > 0)
@@ -178,13 +178,13 @@ namespace LibMMD.Reader
             for (var i = 1; i < model.Morphs.Length; ++i)
             {
                 var morph = model.Morphs[i];
-                morph.NameEn = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+                morph.NameEn = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
             }
 
             // UNDONE
             for (var i = 0; i < context.BoneNameListNum; ++i)
             {
-                MMDReaderUtil.ReadStringFixedLength(reader, 50, Tools.JapaneseEncoding);
+                MMDReaderWriteUtil.ReadStringFixedLength(reader, 50, Tools.JapaneseEncoding);
             }
         }
 
@@ -204,7 +204,7 @@ namespace LibMMD.Reader
             context.BoneNameListNum = boneNameListNum;
             for (var i = 0; i < boneNameListNum; ++i)
             {
-                MMDReaderUtil.ReadStringFixedLength(reader, 50, Tools.JapaneseEncoding);
+                MMDReaderWriteUtil.ReadStringFixedLength(reader, 50, Tools.JapaneseEncoding);
             }
         }
 
@@ -238,7 +238,7 @@ namespace LibMMD.Reader
                 {
                     var vertexMorphData = new Morph.VertexMorphData();
                     vertexMorphData.VertexIndex = reader.ReadInt32();
-                    vertexMorphData.Offset = MMDReaderUtil.ReadVector3(reader);
+                    vertexMorphData.Offset = MMDReaderWriteUtil.ReadVector3(reader);
                     morph.MorphDatas[j] = vertexMorphData;
                 }
                 model.Morphs[i] = morph;
@@ -269,7 +269,7 @@ namespace LibMMD.Reader
         {
             return new PmdFacePreamble
             {
-                Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding),
+                Name = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding),
                 VertexNum = reader.ReadInt32(),
                 FaceType = reader.ReadSByte()
             };
@@ -507,14 +507,14 @@ namespace LibMMD.Reader
             for (var i = 0; i < partNum; ++i)
             {
                 var material = new MMDMaterial();
-                material.DiffuseColor = MMDReaderUtil.ReadColor(reader, true);
+                material.DiffuseColor = MMDReaderWriteUtil.ReadColor(reader, true);
                 material.Shiness = reader.ReadSingle();
-                material.SpecularColor = MMDReaderUtil.ReadColor(reader, false);
-                material.AmbientColor = MMDReaderUtil.ReadColor(reader, false);
+                material.SpecularColor = MMDReaderWriteUtil.ReadColor(reader, false);
+                material.AmbientColor = MMDReaderWriteUtil.ReadColor(reader, false);
                 var toonId = reader.ReadByte();
                 var edgeFlag = reader.ReadSByte();
                 var vertexNum = reader.ReadInt32();
-                var textureName = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+                var textureName = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
                 material.DrawDoubleFace = material.DiffuseColor.a < 0.9999f;
                 material.DrawGroundShadow = edgeFlag != 0;
                 material.CastSelfShadow = true;
@@ -608,9 +608,9 @@ namespace LibMMD.Reader
             {
                 var vertex = new Vertex
                 {
-                    Coordinate = MMDReaderUtil.ReadVector3(reader),
-                    Normal = MMDReaderUtil.ReadVector3(reader),
-                    UvCoordinate = MMDReaderUtil.ReadVector2(reader)
+                    Coordinate = MMDReaderWriteUtil.ReadVector3(reader),
+                    Normal = MMDReaderWriteUtil.ReadVector3(reader),
+                    UvCoordinate = MMDReaderWriteUtil.ReadVector2(reader)
                 };
                 var skinningOperator = new SkinningOperator();
                 var bdef2 = new SkinningOperator.Bdef2();
@@ -630,14 +630,14 @@ namespace LibMMD.Reader
 
         private static void ReadDescription(BinaryReader reader, RawMMDModel model)
         {
-            model.Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
-            model.Description = MMDReaderUtil.ReadStringFixedLength(reader, 256, Tools.JapaneseEncoding);
+            model.Name = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding);
+            model.Description = MMDReaderWriteUtil.ReadStringFixedLength(reader, 256, Tools.JapaneseEncoding);
         }
 
         private static PmdMeta ReadMeta(BinaryReader reader)
         {
             PmdMeta ret;
-            ret.Magic = MMDReaderUtil.ReadStringFixedLength(reader, 3, Encoding.ASCII);
+            ret.Magic = MMDReaderWriteUtil.ReadStringFixedLength(reader, 3, Encoding.ASCII);
             ret.Version = reader.ReadSingle();
             return ret;
         }
@@ -652,12 +652,12 @@ namespace LibMMD.Reader
         {
             return new PmdBone
             {
-                Name = MMDReaderUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding),
+                Name = MMDReaderWriteUtil.ReadStringFixedLength(reader, 20, Tools.JapaneseEncoding),
                 ParentId = reader.ReadUInt16(),
                 ChildId = reader.ReadUInt16(),
                 Type = reader.ReadSByte(),
                 IkNumber = reader.ReadUInt16(),
-                Position = MMDReaderUtil.ReadVector3(reader)
+                Position = MMDReaderWriteUtil.ReadVector3(reader)
             };
         }
 

@@ -44,13 +44,13 @@ public class UmaSceneController:MonoBehaviour
         // Wait until the last operation fully loads to return anything
         yield return new WaitUntil(()=> asyncLoad.isDone);
 
-        OnSceneloaded.Invoke();
+        OnSceneloaded();
 
         // Unload the previous Scene
         AsyncOperation asyncUnLoad = SceneManager.UnloadSceneAsync(currentScene);
         yield return new WaitUntil(() => asyncUnLoad.isDone);
 
-        OnLastSceneUnloaded.Invoke();
+        OnLastSceneUnloaded();
 
         animation.Play("SceneTransition_e");
         yield return new WaitUntil(() => !animation.isPlaying);

@@ -138,7 +138,7 @@ namespace LibMMD.Unity3D
         private const string ColliderNameTail = "Collider";
         private const float HalfPIDeg = Mathf.PI * Mathf.Rad2Deg / 2;
         private const int MaxTextureSize = 1024;
-        private readonly ModelReadConfig modelReadConfig = new ModelReadConfig { GlobalToonPath = "" };
+        private readonly ModelConfig modelReadConfig = new ModelConfig { GlobalToonPath = "" };
 
         public static async Task<MMDModel> ImportModel(string filePath, bool autoShowModel = true)
         {
@@ -350,7 +350,7 @@ namespace LibMMD.Unity3D
             int jointCount = model.RawMMDModel.Joints.Length;
             for (int i = 0; i < jointCount; i++)
             {
-                LibMMD.Model.Joint mmdJoint = model.RawMMDModel.Joints[i];
+                LibMMD.Model.MMDJoint mmdJoint = model.RawMMDModel.Joints[i];
                 int jointFromBoneIndex = model.RawMMDModel.Rigidbodies[mmdJoint.AssociatedRigidBodyIndex[0]].AssociatedBoneIndex;
                 int jointToBoneIndex = model.RawMMDModel.Rigidbodies[mmdJoint.AssociatedRigidBodyIndex[1]].AssociatedBoneIndex;
                 if (bonesCount <= jointFromBoneIndex || bonesCount <= jointToBoneIndex) { continue; }
@@ -508,7 +508,7 @@ namespace LibMMD.Unity3D
             switch (op.Type)
             {
                 case SkinningOperator.SkinningType.SkinningBdef1:
-                    var bdef1 = (SkinningOperator.Bdef1)op.Param;
+                    var b def1 = (SkinningOperator.Bdef1)op.Param;
                     ret.boneIndex0 = bdef1.BoneId;
                     ret.weight0 = 1.0f;
                     break;
