@@ -2,7 +2,7 @@ name: Build Windows Player
 
 on:
     release:
-        types: [published]
+        types: [created]
 
 jobs:
   buildWindowsPlayer:
