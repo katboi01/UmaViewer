@@ -1,18 +1,10 @@
 using System;
 using Gallop.ImageEffect;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using System.Linq;
 using Gallop.Live.Cutt;
-using static Director;
-using UnityEditor.SceneManagement;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
-using System.Data;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using CriWare;
-using static UmaViewerAudio;
 using UnityEngine.SceneManagement;
 
 namespace Gallop.Live

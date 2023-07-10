@@ -10,7 +10,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static UnityEditor.SceneView;
 using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
