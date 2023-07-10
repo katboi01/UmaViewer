@@ -1,0 +1,55 @@
+name: Build Windows Player
+
+on: [push]
+
+jobs:
+  buildWindowsPlayer:
+    name: build Windows Player
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        buildName:
+          - UmaViewer
+        projectPath:
+          - ./
+        unityVersion:
+          - 2020.3.24f1
+        targetPlatform:
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+    
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+          
+      - uses: game-ci/unity-builder@v2
+        env:
+            UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+            UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+            UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          buildName: ${{ matrix.buildName }}
+          projectPath: ${{ matrix.projectPath }}
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+          
+      - uses: actions/upload-artifact@v2
+        with:
+            name: Build
+            path: build
+
+      - name: Zip Binary
+        run: zip -r UmaViewer_${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}/*
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./UnityBuild_${{ matrix.targetPlatform }}.zip
+          asset_name: UmaViewer.zip
+          asset_content_type: application/zip 
