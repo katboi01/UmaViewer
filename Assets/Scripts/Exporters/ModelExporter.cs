@@ -58,7 +58,7 @@ public class ModelExporter
         List<int> triangles = new List<int>();
         model.Vertices = ReadVerticesAndTriangles(renderers, bones, ref triangles);
         model.TriangleIndexes = triangles.ToArray();
-        Debug.LogError($"{model.Vertices.Length} {model.TriangleIndexes.Length}");
+
         //Read Texture reference
         foreach (var texture in textures)
         {
@@ -274,12 +274,12 @@ public class ModelExporter
                     }
                     vertex.EdgeScale = 1;
                     verticesList.Add(vertex);
+                }
 
-                    int vertexOffset = verticesList.Count;
-                    foreach (var triangle in mesh.triangles)
-                    {
-                        triangleList.Add(triangle + vertexOffset);
-                    }
+                int vertexOffset = verticesList.Count;
+                foreach (var triangle in mesh.triangles)
+                {
+                    triangleList.Add(triangle + vertexOffset);
                 }
             }
         }
