@@ -71,10 +71,10 @@ namespace LibMMD.Util
 
         public static void WriteVector4(BinaryWriter writer, Vector4 vector)
         {
-            writer.Write(MathUtil.ZeroToNaN(vector.x));
-            writer.Write(MathUtil.ZeroToNaN(vector.y));
-            writer.Write(MathUtil.ZeroToNaN(vector.z));
-            writer.Write(MathUtil.ZeroToNaN(vector.w));
+            writer.Write(vector.x);
+            writer.Write(vector.y);
+            writer.Write(vector.z);
+            writer.Write(vector.w);
         }
 
 
@@ -89,10 +89,10 @@ namespace LibMMD.Util
         }
         public static void WriteQuaternion(BinaryWriter writer, Quaternion quaternion)
         {
-            writer.Write(-MathUtil.ZeroToNaN(quaternion.x));
-            writer.Write(MathUtil.ZeroToNaN(quaternion.y));
-            writer.Write(-MathUtil.ZeroToNaN(quaternion.z));
-            writer.Write(MathUtil.ZeroToNaN(quaternion.w));
+            writer.Write(-quaternion.x);
+            writer.Write(quaternion.y);
+            writer.Write(-quaternion.z);
+            writer.Write(quaternion.w);
         }
 
         public static Vector3 ReadVector3(BinaryReader reader)
@@ -116,9 +116,9 @@ namespace LibMMD.Util
 
         public static void WriteAmpVector3(BinaryWriter writer, Vector3 vector, float amp)
         {
-            writer.Write(MathUtil.ZeroToNaN(-vector.x / amp));
-            writer.Write(MathUtil.ZeroToNaN(vector.y / amp));
-            writer.Write(MathUtil.ZeroToNaN(-vector.z / amp));
+            writer.Write(-vector.x / amp);
+            writer.Write(vector.y / amp);
+            writer.Write(-vector.z / amp);
         }
 
 
@@ -133,9 +133,9 @@ namespace LibMMD.Util
 
         public static void WriteRawCoordinateVector3(BinaryWriter writer, Vector3 vector)
         {
-            writer.Write(MathUtil.ZeroToNaN(vector.x / WorldSizeAmplifier)); // x
-            writer.Write(MathUtil.ZeroToNaN(vector.y / WorldSizeAmplifier)); // y
-            writer.Write(MathUtil.ZeroToNaN(vector.z / WorldSizeAmplifier)); // z
+            writer.Write(vector.x / WorldSizeAmplifier); // x
+            writer.Write(vector.y / WorldSizeAmplifier); // y
+            writer.Write(vector.z / WorldSizeAmplifier); // z
         }
 
 
@@ -149,8 +149,8 @@ namespace LibMMD.Util
 
         public static void WriteVector2(BinaryWriter writer, Vector2 vector)
         {
-            writer.Write(MathUtil.ZeroToNaN(vector.x));
-            writer.Write(MathUtil.ZeroToNaN(vector.y));
+            writer.Write(vector.x);
+            writer.Write(vector.y);
         }
 
 

@@ -1,6 +1,7 @@
 using LibMMD.Material;
 using LibMMD.Model;
 using LibMMD.Reader;
+using LibMMD.Unity3D;
 using LibMMD.Writer;
 using System.Collections.Generic;
 using System.IO;
@@ -32,13 +33,7 @@ public class ModelExporter
         writer.Close();
         fileStream.Close();
 
-        fileStream = new FileStream(path, FileMode.Open);
-        BinaryReader reader = new BinaryReader(fileStream);
-
-        new PMXReader().Read(reader, config);
-
-        reader.Close();
-        fileStream.Close();
+        UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
     }
 
     public static RawMMDModel ReadPMXModel(CharaEntry entry, UmaContainer container, string[] textures)
@@ -102,6 +97,7 @@ public class ModelExporter
     {
         List<Part> parts = new List<Part>();
         int baseShift = 0;
+
         foreach (Renderer renderer in renderers)
         {
             Mesh mesh;
@@ -115,8 +111,10 @@ public class ModelExporter
                 mesh = ((SkinnedMeshRenderer)renderer).sharedMesh;
             }
 
-            foreach (var material in renderer.sharedMaterials)
+            var materials = new List<Material>(renderer.sharedMaterials);
+            for (int i = 0; i < mesh.subMeshCount; i++) 
             {
+                var material = (i < materials.Count ? materials[i] : materials[materials.Count - 1]);
                 var part = new Part();
                 var mat = new MMDMaterial();
                 part.Material = mat;
@@ -133,29 +131,20 @@ public class ModelExporter
                 var tex = model.TextureList.Find(t => t.TexturePath.Contains($"/{material.mainTexture.name}.png"));
                 mat.Texture = (tex ?? model.TextureList[0]);
                 mat.MetaInfo = "";
-                if (mesh.subMeshCount > 0) 
-                {
-                    var index = new List<Material>(renderer.sharedMaterials).IndexOf(material);
-                    part.BaseShift = baseShift + (int)mesh.GetIndexStart(index);
-                    part.TriangleIndexNum = (int)mesh.GetIndexCount(index);
-                }
-                else
-                {
-                    part.BaseShift = baseShift;
-                    part.TriangleIndexNum = mesh.triangles.Length;
-                }
+                part.BaseShift = baseShift + mesh.GetSubMesh(i).indexStart;
+                part.TriangleIndexNum = mesh.GetSubMesh(i).indexCount;
                 parts.Add(part);
             }
             baseShift += mesh.triangles.Length;
         }
-
         return parts.ToArray();
     }
 
     private static Vertex[] ReadVerticesAndTriangles(List<Renderer> renderers, List<Transform> bones, ref List<int> triangleList)
     {
         List<Vertex> verticesList = new List<Vertex>();
-        
+        int vertexOffset = 0;
+
         foreach (Renderer renderer in renderers)
         {
             if (renderer is MeshRenderer mr)
@@ -191,11 +180,12 @@ public class ModelExporter
                     verticesList.Add(vertex);
                 }
 
-                int vertexOffset = verticesList.Count;
+                
                 foreach (var triangle in mesh.triangles)
                 {
                     triangleList.Add(triangle + vertexOffset);
                 }
+                vertexOffset += vertices.Length;
             }
             else if (renderer is SkinnedMeshRenderer smr)
             {
@@ -207,16 +197,17 @@ public class ModelExporter
                 var uv2 = mesh.uv3;
                 var colors = mesh.colors;
                 var weights = mesh.boneWeights;
+                var bindpose = mesh.bindposes;
                 var boneCounts = mesh.GetBonesPerVertex();
                 var skinbone = smr.bones;
-
+                var isBody = smr.name.Equals("M_Body")|| smr.name.Equals("M_Mayu");
                 for (int i = 0; i < vertices.Length; i++)
                 {
                     Vertex vertex = new Vertex();
-                    vertex.Coordinate = smr.transform.TransformPoint(vertices[i]);
+                    var rootbone = isBody ? smr.rootBone.parent : smr.rootBone;
+                    vertex.Coordinate = rootbone.TransformPoint(vertices[i]);
                     vertex.Normal = normals[i];
-                    vertex.UvCoordinate = uv[i];
-
+                    vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
                     vertex.ExtraUvCoordinate = new Vector4[3]
                     {
                         uv1.Length > 0 ? uv1[i] : Vector2.zero,
@@ -276,11 +267,11 @@ public class ModelExporter
                     verticesList.Add(vertex);
                 }
 
-                int vertexOffset = verticesList.Count;
                 foreach (var triangle in mesh.triangles)
                 {
                     triangleList.Add(triangle + vertexOffset);
                 }
+                vertexOffset += vertices.Length;
             }
         }
         return verticesList.ToArray();

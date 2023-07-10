@@ -24,8 +24,8 @@ namespace LibMMD.Writer
 
             PmxConfig PmxConfig = new PmxConfig()
             {
-                Utf8Encoding = true,
-                Encoding = Encoding.UTF8,
+                Utf8Encoding = false,
+                Encoding = Encoding.Unicode,
                 ExtraUvNumber = 3, //include uv2 and color
                 VertexIndexSize = 2,
                 TextureIndexSize = 1,
@@ -71,7 +71,6 @@ namespace LibMMD.Writer
                 MMDReaderWriteUtil.WriteVector3(writer, joint.SpringRotate);
             }
         }
-
 
         private static void WriteRigidBodies(BinaryWriter writer, MMDRigidBody[] rigidBodies, PmxConfig pmxConfig)
         {
@@ -336,11 +335,9 @@ namespace LibMMD.Writer
                 {
                     throw new MMDFileParseException($"part{i} triangle index count {part.TriangleIndexNum} is not a multiple of 3");
                 }
-                part.BaseShift = partBaseShift;
                 partBaseShift += part.TriangleIndexNum;
             }
         }
-
 
         private static void WriteMaterial(BinaryWriter writer, MMDMaterial material, ModelConfig config, Encoding encoding,
         int textureIndexSize, List<MMDTexture> textureList)
@@ -378,6 +375,7 @@ namespace LibMMD.Writer
 
             bool useGlobalToon = false;
             int globalToonIndex = 0;
+
             if (material.Toon != null)
             {
                 if (material.Toon.IsGlobalToon)
@@ -385,17 +383,19 @@ namespace LibMMD.Writer
                     useGlobalToon = true;
                     globalToonIndex = MMDTextureUtil.GetGlobalToonIndex(material.Toon.TexturePath, config.GlobalToonPath);
                 }
-                else
-                {
-                    int toonIndex = GetTextureIndex(material.Toon, textureList);
-                    MMDReaderWriteUtil.WriteIndex(writer, toonIndex, textureIndexSize);
-                }
             }
-
             writer.Write((byte)(useGlobalToon ? 1 : 0));
+
+
+
             if (useGlobalToon)
             {
                 writer.Write((byte)globalToonIndex);
+            }
+            else
+            {
+                int toonIndex = GetTextureIndex(material.Toon, textureList);
+                MMDReaderWriteUtil.WriteIndex(writer, toonIndex, textureIndexSize);
             }
 
             MMDReaderWriteUtil.WriteSizedString(writer, material.MetaInfo, encoding);

@@ -272,11 +272,5 @@ namespace LibMMD.Util
         {
             return float.IsNaN(f) ? 0.0f : f;
         }
-
-        public static float ZeroToNaN(float f)
-        {
-            return Math.Abs(f) < float.Epsilon ? float.NaN : f;
-        }
-
     }
 }
