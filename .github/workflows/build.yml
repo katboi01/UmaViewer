@@ -1,7 +1,8 @@
 name: Build Windows Player
 
 on:
-  workflow_dispatch: {}
+  release:
+     types: [created]
 
 jobs:
   buildWindowsPlayer:
