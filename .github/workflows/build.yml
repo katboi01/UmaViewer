@@ -1,6 +1,7 @@
 name: Build Windows Player
 
-on: [push]
+on:
+  workflow_dispatch: {}
 
 jobs:
   buildWindowsPlayer:
