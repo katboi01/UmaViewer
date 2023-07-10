@@ -49,10 +49,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          tag_name: Test
-          release_name: UmaViewer_Beta
+          tag_name: Beta_${{ github.ref }}
+          release_name: UmaViewer_${{ github.ref }}
           draft: false
-          prerelease: true
+          prerelease: false
 
       - name: Upload Release Asset
         id: upload-release-asset 
