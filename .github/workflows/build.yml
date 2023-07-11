@@ -52,8 +52,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          tag_name: AutoBuild_${{ github.event.commits.id }}
-          release_name: UmaViewer_${{ github.event.commits.id }}
+          tag_name: AutoBuild_${{ github.event.head_commit.id }}
+          release_name: UmaViewer_${{ github.event.head_commit.id }}
           draft: false
           prerelease: false
 
