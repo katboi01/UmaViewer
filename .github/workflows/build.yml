@@ -1,6 +1,9 @@
 name: Build Windows Player
 
-on: [push]
+on: 
+  push:
+    branches:
+      - master
 
 jobs:
   buildWindowsPlayer:
@@ -49,8 +52,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          tag_name: Beta_${{ github.ref }}
-          release_name: UmaViewer_${{ github.ref }}
+          tag_name: Beta_${{ github.event_push.commits.id }}
+          release_name: UmaViewer_${{ github.event_push.commits.id }}
           draft: false
           prerelease: false
 
