@@ -13,7 +13,7 @@ public class UmaSceneController:MonoBehaviour
     {
         if (instance)
         {
-            Destroy(instance.gameObject);
+            Destroy(gameObject);
         }
         instance = this;
         DontDestroyOnLoad(this);

@@ -1,11 +1,14 @@
+using Gallop;
 using LibMMD.Material;
 using LibMMD.Model;
 using LibMMD.Reader;
 using LibMMD.Unity3D;
 using LibMMD.Writer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static LibMMD.Model.Morph;
 using static LibMMD.Model.SkinningOperator;
 //using UnityGLTF;
 
@@ -21,6 +24,7 @@ public class ModelExporter
         container.UmaAnimator?.Rebind();
         container.EnableEyeTracking = false;
         container.FaceDrivenKeyTarget?.FacialResetAll();
+        AddBlendShape(container);
 
         var textures = TextureExporter.ExportAllTexture(Path.GetDirectoryName(path), container.gameObject);
         var model = ReadPMXModel(container.CharaEntry, container, textures);
@@ -51,7 +55,7 @@ public class ModelExporter
         //Read vertices And triangles
         List<Renderer> renderers = new List<Renderer>(container.GetComponentsInChildren<Renderer>());
         List<int> triangles = new List<int>();
-        model.Vertices = ReadVerticesAndTriangles(renderers, bones, ref triangles);
+        model.Vertices = ReadVerticesAndTriangles(renderers, bones, ref triangles, container.transform);
         model.TriangleIndexes = triangles.ToArray();
 
         //Read Texture reference
@@ -62,17 +66,144 @@ public class ModelExporter
 
         model.Parts = ReadPartMaterials(renderers, model);
         model.Bones = ReadBones(bones);
-        model.Morphs = new Morph[0];
+        model.Morphs = ReadMorph(renderers);
         model.Rigidbodies = new MMDRigidBody[0];
         model.Joints = new MMDJoint[0];
 
         return model;
     }
 
+    public static Vector3[] Vec4ToVec3(Vector4[] vector4s)
+    {
+        Vector3[] tmp = new Vector3[vector4s.Length];
+        for (int i = 0; i < vector4s.Length; i++)
+        {
+            tmp[i] = new Vector3(vector4s[i].x, vector4s[i].y, vector4s[i].z);
+        }
+        return tmp;
+    }
+
+    public static Vector3[] CalDelta(Vector3[] ori, Vector3[] end)
+    {
+        Vector3[] tmp = new Vector3[ori.Length];
+        for (int i = 0; i < ori.Length; i++)
+        {
+            tmp[i] = end[i] - ori[i];
+        }
+        return tmp;
+    }
+
+    private static void AddBlendShape(UmaContainer container)
+    {
+        if (!container.FaceDrivenKeyTarget) return;
+        SkinnedMeshRenderer faceMesh = null;
+        SkinnedMeshRenderer eyebrowMesh = null;
+        foreach (SkinnedMeshRenderer s in container.GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
+            if (s.name.Contains("Face")) faceMesh = s;
+            else if (s.name.Contains("Mayu")) eyebrowMesh = s;
+        }
+
+        var facial = container.FaceDrivenKeyTarget;
+        Action<SkinnedMeshRenderer, List<FacialMorph>, Mesh> addBlendShapePart = delegate (SkinnedMeshRenderer skin, List<FacialMorph> morphs, Mesh baseMesh)
+        {
+            container.FaceOverrideData = null;
+            foreach (var morph in morphs)
+            {
+                facial.ClearAllWeights();
+                morph.weight = 1;
+                facial.ChangeMorph();
+
+                Mesh deltaMesh = new Mesh();
+                skin.BakeMesh(deltaMesh);
+                skin.sharedMesh.AddBlendShapeFrame( $"{morph.name}({morph.tag})[{skin.name}]", 1,
+                        CalDelta(baseMesh.vertices, deltaMesh.vertices),
+                        CalDelta(baseMesh.normals, deltaMesh.normals),
+                        CalDelta(Vec4ToVec3(baseMesh.tangents), Vec4ToVec3(deltaMesh.tangents)));
+            }
+        };
+
+        Mesh basefaceMesh = new Mesh();
+        faceMesh.BakeMesh(basefaceMesh);
+
+        Mesh baseEyeBrowMesh = new Mesh();
+        eyebrowMesh.BakeMesh(baseEyeBrowMesh);
+
+        addBlendShapePart(faceMesh, facial.EyeBrowMorphs, basefaceMesh);
+        addBlendShapePart(faceMesh, facial.EyeMorphs, basefaceMesh);
+        addBlendShapePart(faceMesh, facial.MouthMorphs, basefaceMesh);
+        addBlendShapePart(eyebrowMesh, facial.EyeBrowMorphs, baseEyeBrowMesh);
+        facial.ClearAllWeights();
+        facial.ChangeMorph();
+    }
+
+    private static Morph[] ReadMorph(List<Renderer> renderers)
+    {
+        List<Morph> morphs = new List<Morph>();
+        int vertexOffset = 0;
+        foreach (Renderer renderer in renderers)
+        {
+            Mesh mesh;
+            if (renderer is MeshRenderer mr)
+            {
+                var meshfilter = mr.GetComponent<MeshFilter>();
+                mesh = meshfilter.mesh;
+            }
+            else
+            {
+                mesh = ((SkinnedMeshRenderer)renderer).sharedMesh;
+            }
+            var vertexCount = mesh.vertexCount;
+
+            for (int i = 0; i < mesh.blendShapeCount; i++) 
+            {
+                var deltaVertices = new Vector3[vertexCount];
+                var deltaNormals = new Vector3[vertexCount];
+                var deltaTangents= new Vector3[vertexCount];
+                mesh.GetBlendShapeFrameVertices(i, 0, deltaVertices, deltaNormals, deltaTangents);
+
+                Morph morph = new Morph();
+                morph.Name = morph.NameEn = mesh.GetBlendShapeName(i);
+                morph.Type = MorphType.MorphTypeVertex;
+                var datas = new VertexMorphData[vertexCount];
+                for (int j = 0; j < vertexCount; j++) 
+                {
+                    var data = new VertexMorphData();
+                    data.VertexIndex = vertexOffset + j;
+                    data.Offset = deltaVertices[j];
+                    datas[j] = data;
+                }
+                morph.MorphDatas = datas;
+
+                if (morph.Name.Contains("Mouth_"))
+                {
+                    morph.Category = MorphCategory.MorphCatMouth;
+                }
+                else if(morph.Name.Contains("EyeBrow_"))
+                {
+                    morph.Category = MorphCategory.MorphCatEyebrow;
+                }
+                else if(morph.Name.Contains("Eye_"))
+                {
+                    morph.Category = MorphCategory.MorphCatEye;
+                }
+                else 
+                {
+                    morph.Category = MorphCategory.MorphCatOther;
+                }
+
+                morphs.Add(morph);
+            }
+
+            vertexOffset += mesh.vertexCount;
+        }
+        return morphs.ToArray();
+    }
+
     private static Bone[] ReadBones(List<Transform> bonelist)
     {
         List<Bone> pmxbones = new List<Bone>();
-        foreach(var bone in bonelist)
+        foreach (var bone in bonelist)
         {
             Bone pmxbone = new Bone();
             pmxbone.Name = pmxbone.NameEn = bone.name;
@@ -112,13 +243,13 @@ public class ModelExporter
             }
 
             var materials = new List<Material>(renderer.sharedMaterials);
-            for (int i = 0; i < mesh.subMeshCount; i++) 
+            for (int i = 0; i < mesh.subMeshCount; i++)
             {
                 var material = (i < materials.Count ? materials[i] : materials[materials.Count - 1]);
                 var part = new Part();
                 var mat = new MMDMaterial();
                 part.Material = mat;
-                mat.Name = mat.NameEn = material.name;
+                mat.Name = mat.NameEn = material.name.Replace(" (Instance)","");
                 mat.DiffuseColor = Color.white;
                 mat.SpecularColor = Color.clear;
                 mat.AmbientColor = Color.white * 0.5f;
@@ -140,7 +271,7 @@ public class ModelExporter
         return parts.ToArray();
     }
 
-    private static Vertex[] ReadVerticesAndTriangles(List<Renderer> renderers, List<Transform> bones, ref List<int> triangleList)
+    private static Vertex[] ReadVerticesAndTriangles(List<Renderer> renderers, List<Transform> bones, ref List<int> triangleList, Transform root)
     {
         List<Vertex> verticesList = new List<Vertex>();
         int vertexOffset = 0;
@@ -180,7 +311,7 @@ public class ModelExporter
                     verticesList.Add(vertex);
                 }
 
-                
+
                 foreach (var triangle in mesh.triangles)
                 {
                     triangleList.Add(triangle + vertexOffset);
@@ -200,26 +331,19 @@ public class ModelExporter
                 var skinbone = smr.bones;
                 var skinbones = smr.bones;
                 var weights = mesh.boneWeights;
-                var bindpose = mesh.bindposes;
-
-                //Calculate the world coordinates of vertices
-                Matrix4x4[] boneMatrices = new Matrix4x4[skinbones.Length];
-                for (int i = 0; i < skinbones.Length; i++)
-                {
-                    boneMatrices[i] = bones[i].localToWorldMatrix * bindpose[i];
-                }
+                var bakemesh = new Mesh();
+                smr.BakeMesh(bakemesh,true);
 
                 for (int i = 0; i < vertices.Length; i++)
                 {
                     Vertex vertex = new Vertex();
-                    var rootbone = smr.rootBone;
-                    vertex.Coordinate = rootbone.TransformPoint(vertices[i]);
+                    vertex.Coordinate = root.InverseTransformPoint(smr.transform.TransformPoint(bakemesh.vertices[i])); 
                     vertex.Normal = normals[i];
                     vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
                     vertex.ExtraUvCoordinate = new Vector4[3]
                     {
-                        uv1.Length > 0 ? uv1[i] : Vector2.zero,
-                        uv2.Length > 0 ? uv2[i] : Vector2.zero,
+                        uv1.Length > 0 ? new Vector2(uv1[i].x, 1 - uv1[i].y) : Vector2.zero,
+                        uv2.Length > 0 ? new Vector2(uv2[i].x, 1 - uv2[i].y) : Vector2.zero,
                         colors.Length > 0 ? colors[i] : Color.clear
                     };
 
@@ -230,7 +354,7 @@ public class ModelExporter
                     {
                         case 0:
                             vertex.SkinningOperator = new SkinningOperator() { Type = SkinningType.SkinningBdef1 };
-                            vertex.SkinningOperator.Param = new Bdef1() { BoneId = GetBoneIndex(bones,renderer.transform) };
+                            vertex.SkinningOperator.Param = new Bdef1() { BoneId = GetBoneIndex(bones, renderer.transform) };
                             break;
 
                         default:
@@ -241,8 +365,9 @@ public class ModelExporter
 
                         case 2:
                             vertex.SkinningOperator = new SkinningOperator() { Type = SkinningType.SkinningBdef2 };
-                            vertex.SkinningOperator.Param = new Bdef2() { 
-                                BoneId = new int []{
+                            vertex.SkinningOperator.Param = new Bdef2()
+                            {
+                                BoneId = new int[]{
                                     GetBoneIndex(bones, skinbone[boneWeight.boneIndex0]),
                                     GetBoneIndex(bones, skinbone[boneWeight.boneIndex1]),
                                 },
