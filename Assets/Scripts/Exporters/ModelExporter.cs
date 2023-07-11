@@ -196,15 +196,23 @@ public class ModelExporter
                 var uv1 = mesh.uv2;
                 var uv2 = mesh.uv3;
                 var colors = mesh.colors;
-                var weights = mesh.boneWeights;
-                var bindpose = mesh.bindposes;
                 var boneCounts = mesh.GetBonesPerVertex();
                 var skinbone = smr.bones;
-                var isBody = smr.name.Equals("M_Body")|| smr.name.Equals("M_Mayu");
+                var skinbones = smr.bones;
+                var weights = mesh.boneWeights;
+                var bindpose = mesh.bindposes;
+
+                //Calculate the world coordinates of vertices
+                Matrix4x4[] boneMatrices = new Matrix4x4[skinbones.Length];
+                for (int i = 0; i < skinbones.Length; i++)
+                {
+                    boneMatrices[i] = bones[i].localToWorldMatrix * bindpose[i];
+                }
+
                 for (int i = 0; i < vertices.Length; i++)
                 {
                     Vertex vertex = new Vertex();
-                    var rootbone = isBody ? smr.rootBone.parent : smr.rootBone;
+                    var rootbone = smr.rootBone;
                     vertex.Coordinate = rootbone.TransformPoint(vertices[i]);
                     vertex.Normal = normals[i];
                     vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
