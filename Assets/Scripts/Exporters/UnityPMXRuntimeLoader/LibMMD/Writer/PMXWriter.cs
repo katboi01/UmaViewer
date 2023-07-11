@@ -35,6 +35,19 @@ namespace LibMMD.Writer
                 RigidBodyIndexSize = 2
             };
 
+            PMXEntryItem.Element baseElement = new PMXEntryItem.Element();
+            baseElement.IsMorph = false;
+            baseElement.MorphIndex = 0;
+            baseElement.BoneIndex = 0;
+
+            PMXEntryItem baseEntry = new PMXEntryItem();
+            baseEntry.EntryItemName = "Root";
+            baseEntry.EntryItemNameEn = "Root";
+            baseEntry.IsSpecial = true;
+            baseEntry.Elements = new List<PMXEntryItem.Element>{ baseElement };
+
+            model.Entrys.Insert(0, baseEntry);
+
             WriteMeta(writer, pmxHeader);
             WritePmxConfig(writer, PmxConfig);
             WriteModelNameAndDescription(writer, model, PmxConfig);
