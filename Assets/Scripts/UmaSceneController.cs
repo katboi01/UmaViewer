@@ -19,7 +19,7 @@ public class UmaSceneController:MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    public void LoadScene(string name, Action OnSceneloaded, Action OnLastSceneUnloaded)
+    public void LoadScene(string name, Action OnSceneloaded = null, Action OnLastSceneUnloaded = null)
     {
         StartCoroutine(LoadLiveSceneAsync(name, OnSceneloaded, OnLastSceneUnloaded));
     }
@@ -45,13 +45,13 @@ public class UmaSceneController:MonoBehaviour
         // Wait until the last operation fully loads to return anything
         yield return new WaitUntil(()=> asyncLoad.isDone);
 
-        OnSceneloaded();
+        OnSceneloaded?.Invoke();
 
         // Unload the previous Scene
         AsyncOperation asyncUnLoad = SceneManager.UnloadSceneAsync(currentScene);
         yield return new WaitUntil(() => asyncUnLoad.isDone);
 
-        OnLastSceneUnloaded();
+        OnLastSceneUnloaded?.Invoke();
 
         animation.Play("SceneTransition_e");
         yield return new WaitUntil(() => !animation.isPlaying);

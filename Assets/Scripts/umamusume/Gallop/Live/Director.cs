@@ -495,11 +495,14 @@ namespace Gallop.Live
             }
         }
 
+        bool isExit;
         void Update()
         {
+            if (isExit) return;
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                SceneManager.LoadScene("Version2");
+                isExit = true;
+                UmaSceneController.instance.LoadScene("Version2");
                 AssetBundle.UnloadAllAssetBundles(true);
             }
 

@@ -32722,7 +32722,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1882365343}
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -33090,7 +33090,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1564959567}
         m_TargetAssemblyTypeName: UmaViewerUI, umamusume
-        m_MethodName: ChangeMainPath
+        m_MethodName: ChangeDataPath
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

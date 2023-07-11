@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Mono.Data.Sqlite;
 using System.Data;
 using Assets.Scripts;
+using System.IO;
 
 public class UmaDatabaseController
 {
@@ -60,11 +61,13 @@ public class UmaDatabaseController
         {
             if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
+                if(!File.Exists($@"{Config.Instance.MainPath}\meta_umaviewer")) throw new Exception();
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master_umaviewer.mdb;");
             }
             else
             {
+                if (!File.Exists($@"{Config.Instance.MainPath}\meta")) throw new Exception();
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
             }
@@ -214,10 +217,10 @@ public class UmaDatabaseController
 
     public void CloseAllConnection()
     {
-        masterDb.Close();
-        metaDb.Close();
-        masterDb.Dispose();
-        metaDb.Dispose();
+        masterDb?.Close();
+        metaDb?.Close();
+        masterDb?.Dispose();
+        metaDb?.Dispose();
         SqliteConnection.ClearAllPools();
         GC.Collect();
         GC.WaitForPendingFinalizers();
