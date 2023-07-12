@@ -806,23 +806,15 @@ namespace Gallop
             return morphs.Find(m => m.index == (int)Type);
         }
 
-        private LiveTimelineKeyLipSyncData _prevLipKeyData;
-        private LiveTimelineKeyLipSyncData _lastLipKeyData;
-
-        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
+        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData _prevLipKeyData, LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
         {
             //|| lockMouth
+            
             if (_switch == 0 || lockMouth)
             {
-                _prevLipKeyData = null;
-                _lastLipKeyData = null;
                 return;
             }
-
-            if(_lastLipKeyData != keyData_)
-            {
-                _prevLipKeyData = _lastLipKeyData;
-            }
+            
 
             float weightRatio = CalcMorphWeight(liveTime_, keyData_.time, keyData_.interpolateType, keyData_, null);
 
@@ -855,21 +847,7 @@ namespace Gallop
             }
 
             ChangeMorphMouth();
-
-            _lastLipKeyData = keyData_;
         }
-
-        private LiveTimelineKeyFacialMouthData _prevMouthKeyData;
-        private LiveTimelineKeyFacialMouthData _lastMouthKeyData;
-
-        private LiveTimelineKeyFacialEyeData _prevEyesKeyData;
-        private LiveTimelineKeyFacialEyeData _lastEyesKeyData;
-
-        private LiveTimelineKeyFacialEyebrowData _prevEyebrowsKeyData;
-        private LiveTimelineKeyFacialEyebrowData _lastEyebrowsKeyData;
-
-        private LiveTimelineKeyFacialEarData _prevEarsKeyData;
-        private LiveTimelineKeyFacialEarData _lastEarsKeyData;
 
         public bool lockMouth = false;
 
@@ -886,28 +864,24 @@ namespace Gallop
                     lockMouth = false;
                 }
 
-                if (_lastMouthKeyData != updateInfo_.mouthCur)
-                {
-                    _prevMouthKeyData = _lastMouthKeyData;
-                }
 
                 float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.mouthCur.time, updateInfo_.mouthCur.interpolateType, updateInfo_.mouthCur, updateInfo_.mouthNext);
 
                 MouthMorphs.ForEach(morph => morph.weight = 0);
 
-                if (_prevMouthKeyData != null)
+                if (updateInfo_.mouthPrev != null)
                 {
                     if (weightRatio != 1)
                     {
-                        foreach (var part in _prevMouthKeyData.facialPartsDataArray)
+                        foreach (var part in updateInfo_.mouthPrev.facialPartsDataArray)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevMouthKeyData.weight / 100);
+                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.mouthPrev.weight / 100);
                         }
                     }
                     else
                     {
-                        foreach (var part in _prevMouthKeyData.facialPartsDataArray)
+                        foreach (var part in updateInfo_.mouthPrev.facialPartsDataArray)
                         {
                             if (part.FacialPartsId == 0) { continue; }
                             MouthMorphs[part.FacialPartsId - 1].weight = 0;
@@ -923,42 +897,37 @@ namespace Gallop
 
                 ChangeMorphMouth();
 
-                _lastMouthKeyData = updateInfo_.mouthCur;
             }
             if (updateInfo_.eyeCur != null)
             {
-                if (_lastEyesKeyData != updateInfo_.eyeCur)
-                {
-                    _prevEyesKeyData = _lastEyesKeyData;
-                }
 
                 float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeCur.time, updateInfo_.eyeCur.interpolateType, updateInfo_.eyeCur, updateInfo_.eyeNext);
 
                 EyeMorphs.ForEach(morph => morph.weight = 0);
 
-                if (_prevEyesKeyData != null)
+                if (updateInfo_.eyePrev != null)
                 {
                     if (weightRatio != 1)
                     {
-                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyesKeyData.weight / 100);
+                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
                         }
-                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyesKeyData.weight / 100);
+                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
                         }
                     }
                     else
                     {
-                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
                             leftEyeMorph[part.FacialPartsId - 1].weight = 0;
                         }
-                        foreach (var part in _prevEyesKeyData.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
                             rightEyeMorph[part.FacialPartsId - 1].weight = 0;
@@ -979,43 +948,38 @@ namespace Gallop
 
                 ChangeMorphEye();
 
-                _lastEyesKeyData = updateInfo_.eyeCur;
             }
 
             if (updateInfo_.eyebrowCur != null)
             {
-                if (_lastEyebrowsKeyData != updateInfo_.eyebrowCur)
-                {
-                    _prevEyebrowsKeyData = _lastEyebrowsKeyData;
-                }
 
                 float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyebrowCur.time, updateInfo_.eyebrowCur.interpolateType, updateInfo_.eyebrowCur, updateInfo_.eyebrowNext);
 
                 EyeBrowMorphs.ForEach(morph => morph.weight = 0);
 
-                if (_prevEyebrowsKeyData != null)
+                if (updateInfo_.eyebrowPrev != null)
                 {
                     if (weightRatio != 1)
                     {
-                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyebrowsKeyData.weight / 100);
+                            leftEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyebrowPrev.weight / 100);
                         }
-                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevEyebrowsKeyData.weight / 100);
+                            rightEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyebrowPrev.weight / 100);
                         }
                     }
                     else
                     {
-                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
                             leftEyebrowMorph[part.FacialPartsId - 1].weight = 0;
                         }
-                        foreach (var part in _prevEyebrowsKeyData.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
                             rightEyebrowMorph[part.FacialPartsId - 1].weight = 0;
@@ -1036,48 +1000,43 @@ namespace Gallop
 
                 ChangeMorphEyebrow();
 
-                _lastEyebrowsKeyData = updateInfo_.eyebrowCur;
             }
 
             if (updateInfo_.earCur != null)
             {
-                if (_lastEarsKeyData != updateInfo_.earCur)
-                {
-                    _prevEarsKeyData = _lastEarsKeyData;
-                }
 
                 float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.earCur.time, updateInfo_.earCur.interpolateType, updateInfo_.earCur, updateInfo_.earNext);
 
                 EarMorphs.ForEach(morph => morph.weight = 0);
 
-                if (_prevEarsKeyData != null)
+                if (updateInfo_.earPrev != null)
                 {
                     if (weightRatio != 1)
                     {
-                        var partL = _prevEarsKeyData.facialEarIdL;
+                        var partL = updateInfo_.earPrev.facialEarIdL;
 
                         if (partL != 0)
                         {
-                            leftEarMorph[partL - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
+                            leftEarMorph[partL - 1].weight = (((1 - weightRatio)) * ((float)updateInfo_.earPrev.weight / 100));
                         }
 
-                        var partR = _prevEarsKeyData.facialEarIdR;
+                        var partR = updateInfo_.earPrev.facialEarIdR;
 
                         if (partR != 0)
                         {
-                            rightEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)_prevEarsKeyData.weight / 100));
+                            rightEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)updateInfo_.earPrev.weight / 100));
                         }
                     }
                     else
                     {
-                        var partL = _prevEarsKeyData.facialEarIdL;
+                        var partL = updateInfo_.earPrev.facialEarIdL;
 
                         if (partL != 0)
                         {
                             leftEarMorph[partL - 1].weight = 0;
                         }
 
-                        var partR = _prevEarsKeyData.facialEarIdR;
+                        var partR = updateInfo_.earPrev.facialEarIdR;
 
                         if (partR != 0)
                         {
@@ -1102,7 +1061,6 @@ namespace Gallop
 
                 ChangeMorphEar();
 
-                _lastEarsKeyData = updateInfo_.earCur;
             }
         }
 

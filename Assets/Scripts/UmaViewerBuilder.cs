@@ -708,6 +708,7 @@ public class UmaViewerBuilder : MonoBehaviour
             },
             delegate ()
             {
+                Gallop.Live.Director.instance.InitializeUI();
                 Gallop.Live.Director.instance.InitializeTimeline(characters, UI.LiveMode);
                 Gallop.Live.Director.instance.Play(live.MusicId, characters);
             }

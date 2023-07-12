@@ -161,6 +161,14 @@ namespace Gallop.Live.Cutt
 					{
                         thisTimeKeyIndex.nextKey = null;
                     }
+					if(i-1 >= 0)
+					{
+                        thisTimeKeyIndex.prevKey = thisList[i - 1];
+					}
+					else
+					{
+						thisTimeKeyIndex.prevKey = null;
+                    }
 					return thisTimeKeyIndex;
                 }
             }
@@ -183,6 +191,14 @@ namespace Gallop.Live.Cutt
                     {
                         thisTimeKeyIndex.nextKey = null;
                     }
+					if(thisTimeKeyIndex.index - 1 >= 0)
+					{
+                        thisTimeKeyIndex.prevKey = thisList[thisTimeKeyIndex.index - 1];
+					}
+					else
+					{
+                        thisTimeKeyIndex.prevKey = null;
+                    }
                 }
             }
                 
@@ -195,6 +211,7 @@ namespace Gallop.Live.Cutt
     public class LiveTimelineKeyIndex
     {
 		public int index = -1;
+        public LiveTimelineKey prevKey = null;
         public LiveTimelineKey key = null;
 		public LiveTimelineKey nextKey = null;
     }

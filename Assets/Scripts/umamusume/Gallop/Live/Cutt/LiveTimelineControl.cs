@@ -28,7 +28,7 @@ namespace Gallop.Live.Cutt
 
         public LiveTimelineKeyCharaMotionSeqDataList[] _keyArray;
 
-        public event Action<LiveTimelineKeyLipSyncData, float> OnUpdateLipSync;
+        public event Action<LiveTimelineKeyIndex, float> OnUpdateLipSync;
 
         public event Action<FacialDataUpdateInfo, float, int> OnUpdateFacial;
 
@@ -166,14 +166,18 @@ namespace Gallop.Live.Cutt
         {
             LiveTimelineKey liveTimelineKey = null;
             LiveTimelineKey liveTimelineKey2 = null;
+            LiveTimelineKey liveTimelineKey3 = null;
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
             if (curKey != null)
             {
-                liveTimelineKey = curKey.key;
-                liveTimelineKey2 = curKey.nextKey;
-                updateInfo.mouthCur = liveTimelineKey as LiveTimelineKeyFacialMouthData;
-                updateInfo.mouthNext = liveTimelineKey2 as LiveTimelineKeyFacialMouthData;
+                liveTimelineKey = curKey.prevKey;
+                liveTimelineKey2 = curKey.key;
+                liveTimelineKey3 = curKey.nextKey;
+
+                updateInfo.mouthPrev = liveTimelineKey as LiveTimelineKeyFacialMouthData;
+                updateInfo.mouthCur = liveTimelineKey2 as LiveTimelineKeyFacialMouthData;
+                updateInfo.mouthNext = liveTimelineKey3 as LiveTimelineKeyFacialMouthData;
                 updateInfo.mouthKeyIndex = curKey.index;
             }
         }
@@ -182,14 +186,18 @@ namespace Gallop.Live.Cutt
         {
             LiveTimelineKey liveTimelineKey = null;
             LiveTimelineKey liveTimelineKey2 = null;
+            LiveTimelineKey liveTimelineKey3 = null;
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
             if (curKey != null)
             {
-                liveTimelineKey = curKey.key;
-                liveTimelineKey2 = curKey.nextKey;
-                updateInfo.eyeCur = liveTimelineKey as LiveTimelineKeyFacialEyeData;
-                updateInfo.eyeNext = liveTimelineKey2 as LiveTimelineKeyFacialEyeData;
+                liveTimelineKey = curKey.prevKey;
+                liveTimelineKey2 = curKey.key;
+                liveTimelineKey3 = curKey.nextKey;
+
+                updateInfo.eyePrev = liveTimelineKey as LiveTimelineKeyFacialEyeData;
+                updateInfo.eyeCur = liveTimelineKey2 as LiveTimelineKeyFacialEyeData;
+                updateInfo.eyeNext = liveTimelineKey3 as LiveTimelineKeyFacialEyeData;
                 updateInfo.eyeKeyIndex = curKey.index;
             }
         }
@@ -198,14 +206,18 @@ namespace Gallop.Live.Cutt
         {
             LiveTimelineKey liveTimelineKey = null;
             LiveTimelineKey liveTimelineKey2 = null;
+            LiveTimelineKey liveTimelineKey3 = null;
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
             if (curKey != null)
             {
-                liveTimelineKey = curKey.key;
-                liveTimelineKey2 = curKey.nextKey;
-                updateInfo.eyebrowCur = liveTimelineKey as LiveTimelineKeyFacialEyebrowData;
-                updateInfo.eyebrowNext = liveTimelineKey2 as LiveTimelineKeyFacialEyebrowData;
+                liveTimelineKey = curKey.prevKey;
+                liveTimelineKey2 = curKey.key;
+                liveTimelineKey3 = curKey.nextKey;
+
+                updateInfo.eyebrowPrev = liveTimelineKey as LiveTimelineKeyFacialEyebrowData;
+                updateInfo.eyebrowCur = liveTimelineKey2 as LiveTimelineKeyFacialEyebrowData;
+                updateInfo.eyebrowNext = liveTimelineKey3 as LiveTimelineKeyFacialEyebrowData;
                 updateInfo.eyebrowKeyIndex = curKey.index;
             }
         }
@@ -214,14 +226,18 @@ namespace Gallop.Live.Cutt
         {
             LiveTimelineKey liveTimelineKey = null;
             LiveTimelineKey liveTimelineKey2 = null;
+            LiveTimelineKey liveTimelineKey3 = null;
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
             if (curKey != null)
             {
-                liveTimelineKey = curKey.key;
-                liveTimelineKey2 = curKey.nextKey;
-                updateInfo.earCur = liveTimelineKey as LiveTimelineKeyFacialEarData;
-                updateInfo.earNext = liveTimelineKey2 as LiveTimelineKeyFacialEarData;
+                liveTimelineKey = curKey.prevKey;
+                liveTimelineKey2 = curKey.key;
+                liveTimelineKey3 = curKey.nextKey;
+
+                updateInfo.earPrev = liveTimelineKey as LiveTimelineKeyFacialEarData;
+                updateInfo.earCur = liveTimelineKey2 as LiveTimelineKeyFacialEarData;
+                updateInfo.earNext = liveTimelineKey3 as LiveTimelineKeyFacialEarData;
                 updateInfo.earKeyIndex = curKey.index;
             }
         }
@@ -234,8 +250,7 @@ namespace Gallop.Live.Cutt
 
             if (curKey != null && curKey.index != -1)
             {
-                LiveTimelineKeyLipSyncData arg = curKey.key as LiveTimelineKeyLipSyncData;
-                this.OnUpdateLipSync(arg, liveTime);
+                this.OnUpdateLipSync(curKey, liveTime);
             }
         }
 
@@ -279,7 +294,7 @@ namespace Gallop.Live.Cutt
         {
             LiveTimelineKeyIndex curKey = keys.TimeKeyIndex;
 
-            if (curKey.index == -1)
+            if (curKey.index == -1 || Director.instance.sliderControl.is_Touched)
             {
                 FindTimelineKeyCurrent(out curKey, keys, curTime);
             }

@@ -6,6 +6,8 @@ using System.Linq;
 using Gallop.Live.Cutt;
 using CriWare;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
+using UnityEngine.SocialPlatforms;
 
 namespace Gallop.Live
 {
@@ -322,7 +324,7 @@ namespace Gallop.Live
 
         public bool _isLiveScene;
 
-        public AudioSource liveSong;
+        public AudioSource[] liveSong;
 
         public List<CriAtomSource> liveVocal;
         public CriAtomSource liveMusic;
@@ -336,6 +338,12 @@ namespace Gallop.Live
         public int allowCount = 0;
 
         public int liveMode = 0;
+
+        public LiveViewerUI UI;
+
+        public float totalTime;
+
+        public SliderControl sliderControl;
 
         private void Awake()
         {
@@ -374,8 +382,18 @@ namespace Gallop.Live
             }
         }
 
+
+        public void InitializeUI()
+        {
+            UI = GameObject.Find("LiveUI").GetComponent<LiveViewerUI>();
+            
+            sliderControl = UI.ProgressBar.GetComponent<SliderControl>();
+        }
+
         public void InitializeTimeline(List<LiveCharacterSelect> characters, int mode)
         {
+            totalTime = _liveTimelineControl.data.timeLength;
+
             liveMode = mode;
 
             allowCount = characters.Count;
@@ -394,14 +412,17 @@ namespace Gallop.Live
 
             _liveTimelineControl.InitCharaMotionSequence(_liveTimelineControl.data.characterSettings.motionSequenceIndices);
 
-            _liveTimelineControl.OnUpdateLipSync += delegate (LiveTimelineKeyLipSyncData keyData_, float liveTime_)
+            _liveTimelineControl.OnUpdateLipSync += delegate (LiveTimelineKeyIndex keyData_, float liveTime_)
             {
+                var prevKey = keyData_.prevKey as LiveTimelineKeyLipSyncData;
+                var curKey = keyData_.key as LiveTimelineKeyLipSyncData;
+                var nextKey = keyData_.nextKey as LiveTimelineKeyLipSyncData;
                 for (int k = 0; k < charaObjs.Count; k++)
                 {
                     var container = charaObjs[k].GetComponentInChildren<UmaContainer>();
                     if(container != null)
                     {
-                        container.FaceDrivenKeyTarget.AlterUpdateAutoLip(keyData_, liveTime_, ((int)keyData_.character >> k) % 2);
+                        container.FaceDrivenKeyTarget.AlterUpdateAutoLip(prevKey, curKey, liveTime_, ((int)curKey.character >> k) % 2);
                     }
                 }
             };
@@ -479,7 +500,7 @@ namespace Gallop.Live
                 }
 
                 UmaViewerBuilder.Instance.LoadLiveSound(songid, entry, false);
-                liveSong = GameObject.Find("SoundController").GetComponent<AudioSource>();
+                liveSong = GameObject.Find("SoundController").GetComponents<AudioSource>();
             }
 
             _isLiveSetup = true;
@@ -530,19 +551,82 @@ namespace Gallop.Live
                     }
                     else
                     {
-                        if(liveSong.time > 0.1)
+                        if (liveSong[0].time > 0.1)
                         {
-                            _liveCurrentTime = liveSong.time;
+                            _liveCurrentTime = liveSong[0].time;
                             _syncTime = true;
                         }
                     }
                 }
                 else
                 {
-                    _liveCurrentTime += Time.deltaTime;
-                    //Debug.Log((float)liveMusic.time / 1000);
-                    //Debug.Log(_liveCurrentTime);
-                    OnTimelineUpdate(_liveCurrentTime);
+                    if (sliderControl.is_Outed)
+                    {
+                        _liveCurrentTime = UI.ProgressBar.value * totalTime;
+
+                        if (liveMusic)
+                        {
+                            int CriTime = Convert.ToInt32(_liveCurrentTime * 1000);
+
+                            liveMusic.startTime = CriTime;
+                            
+                            foreach (var vocal in liveVocal)
+                            {
+                                vocal.startTime = CriTime;
+                            }
+                            
+                            liveMusic.Play(0);
+
+                            foreach (var vocal in liveVocal)
+                            {
+                                vocal.Play(0);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var song in liveSong)
+                            {
+                                song.time = _liveCurrentTime;
+                            }
+                        }
+
+                        OnTimelineUpdate(_liveCurrentTime);
+
+                        sliderControl.is_Outed = false;
+                        sliderControl.is_Touched = false;
+                        _syncTime = false;
+                    }
+                    else if (sliderControl.is_Touched)
+                    {
+                        _liveCurrentTime = UI.ProgressBar.value * totalTime;
+
+                        if (liveMusic)
+                        {
+                            liveMusic.Stop();
+                            foreach (var vocal in liveVocal)
+                            {
+                                vocal.Stop();
+                            }
+                        }
+                        else
+                        {
+                            foreach(var song in liveSong)
+                            {
+                                song.Stop();
+                            }
+                        }
+
+                        OnTimelineUpdate(_liveCurrentTime);
+                    }
+                    else
+                    {
+                        _liveCurrentTime += Time.deltaTime;
+
+                        UI.ProgressBar.value = _liveCurrentTime / totalTime;
+                        //Debug.Log((float)liveMusic.time / 1000);
+                        //Debug.Log(_liveCurrentTime);
+                        OnTimelineUpdate(_liveCurrentTime);
+                    }  
                 }
             }
         }

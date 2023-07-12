@@ -7,15 +7,20 @@ namespace Gallop.Live.Cutt
     public struct FacialDataUpdateInfo // TypeDefIndex: 29410
     {
         // Fields
+        public LiveTimelineKeyFacialFaceData facePrev; // 0x0
         public LiveTimelineKeyFacialFaceData faceCur; // 0x0
         public LiveTimelineKeyFacialFaceData faceNext; // 0x8
+        public LiveTimelineKeyFacialMouthData mouthPrev; // 0x10
         public LiveTimelineKeyFacialMouthData mouthCur; // 0x10
         public LiveTimelineKeyFacialMouthData mouthNext; // 0x10
+        public LiveTimelineKeyFacialEyeData eyePrev; // 0x18
         public LiveTimelineKeyFacialEyeData eyeCur; // 0x18
         public LiveTimelineKeyFacialEyeData eyeNext; // 0x20
+        public LiveTimelineKeyFacialEyebrowData eyebrowPrev; // 0x28
         public LiveTimelineKeyFacialEyebrowData eyebrowCur; // 0x28
         public LiveTimelineKeyFacialEyebrowData eyebrowNext; // 0x28
         public LiveTimelineKeyFacialEyeTrackData eyeTrack; // 0x30
+        public LiveTimelineKeyFacialEarData earPrev; // 0x38
         public LiveTimelineKeyFacialEarData earCur; // 0x38
         public LiveTimelineKeyFacialEarData earNext; // 0x38
         public LiveTimelineKeyFacialEffectData effect; // 0x40

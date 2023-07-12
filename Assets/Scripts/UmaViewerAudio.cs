@@ -1,4 +1,5 @@
 using CriWare;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,7 @@ public class UmaViewerAudio
 
     static public void AlterUpdate(float _liveCurrentTime, PartEntry partInfo, List<CriAtomSource> liveVocal)
     {
+
         var timeLineData = partInfo.PartSettings["time"];
 
         //need to improve
