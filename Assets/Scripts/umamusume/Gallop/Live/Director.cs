@@ -502,7 +502,17 @@ namespace Gallop.Live
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 isExit = true;
-                UmaSceneController.LoadScene("Version2");
+
+                List<GameObject> transferObjs = new List<GameObject>() {
+                    GameObject.Find("CriWare"),
+                };
+
+                UmaSceneController.LoadScene("Version2",
+                    delegate ()
+                    {
+                        transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("Version2")));
+                    });
+
                 AssetBundle.UnloadAllAssetBundles(true);
             }
 
