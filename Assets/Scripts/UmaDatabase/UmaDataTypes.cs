@@ -29,6 +29,7 @@ public class UmaDatabaseEntry
     public static void DownloadAsset(UmaDatabaseEntry entry)
     {
         var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
+        Debug.Log("Downloading:" + entry.Name);
         UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg, UIMessageType type) 
         {
             Instance.ShowMessage(msg, type);

@@ -512,15 +512,15 @@ namespace Gallop.Live
                 {
                     if (!_soloMode)
                     {
-                        if(liveMusic.time > 0)
+                        if(liveMusic.time > 0.1)
                         {
-                            _liveCurrentTime = liveMusic.time / 1000;
+                            _liveCurrentTime = (float)liveMusic.time / 1000;
                             _syncTime = true;
                         }
                     }
                     else
                     {
-                        if(liveSong.time > 0)
+                        if(liveSong.time > 0.1)
                         {
                             _liveCurrentTime = liveSong.time;
                             _syncTime = true;
@@ -530,7 +530,8 @@ namespace Gallop.Live
                 else
                 {
                     _liveCurrentTime += Time.deltaTime;
-                    //Debug.Log(_liveCurrentTime * 60);
+                    //Debug.Log((float)liveMusic.time / 1000);
+                    //Debug.Log(_liveCurrentTime);
                     OnTimelineUpdate(_liveCurrentTime);
                 }
             }
