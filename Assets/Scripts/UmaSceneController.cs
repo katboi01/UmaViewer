@@ -14,14 +14,15 @@ public class UmaSceneController:MonoBehaviour
         if (instance)
         {
             Destroy(gameObject);
+            return;
         }
         instance = this;
         DontDestroyOnLoad(this);
     }
 
-    public void LoadScene(string name, Action OnSceneloaded = null, Action OnLastSceneUnloaded = null)
+    public static void LoadScene(string name, Action OnSceneloaded = null, Action OnLastSceneUnloaded = null)
     {
-        StartCoroutine(LoadLiveSceneAsync(name, OnSceneloaded, OnLastSceneUnloaded));
+        instance.StartCoroutine(instance.LoadLiveSceneAsync(name, OnSceneloaded, OnLastSceneUnloaded));
     }
 
     IEnumerator LoadLiveSceneAsync(string sceneName, Action OnSceneloaded, Action OnLastSceneUnloaded)

@@ -682,7 +682,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     GameObject.Find("AudioManager")
                 };
 
-        UmaSceneController.instance.LoadScene("LiveScene",
+        UmaSceneController.LoadScene("LiveScene",
             delegate ()
             {
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
