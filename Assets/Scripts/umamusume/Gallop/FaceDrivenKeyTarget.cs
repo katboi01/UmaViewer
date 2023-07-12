@@ -810,10 +810,12 @@ namespace Gallop
         {
             //|| lockMouth
             
+            
             if (_switch == 0 || lockMouth)
             {
                 return;
             }
+            
             
 
             float weightRatio = CalcMorphWeight(liveTime_, keyData_.time, keyData_.interpolateType, keyData_, null);
@@ -855,7 +857,7 @@ namespace Gallop
         {
             if (updateInfo_.mouthCur != null)
             {
-                if((int)updateInfo_.mouthCur.attribute == 131072)
+                if((int)updateInfo_.mouthCur.attribute == 131072 || (int)updateInfo_.mouthCur.attribute == 0)
                 {
                     lockMouth = true;
                 }

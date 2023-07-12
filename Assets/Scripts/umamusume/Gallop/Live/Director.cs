@@ -587,6 +587,7 @@ namespace Gallop.Live
                             foreach (var song in liveSong)
                             {
                                 song.time = _liveCurrentTime;
+                                song.Play();
                             }
                         }
 
@@ -624,7 +625,7 @@ namespace Gallop.Live
 
                         UI.ProgressBar.value = _liveCurrentTime / totalTime;
                         //Debug.Log((float)liveMusic.time / 1000);
-                        //Debug.Log(_liveCurrentTime);
+                        Debug.Log(_liveCurrentTime * 60);
                         OnTimelineUpdate(_liveCurrentTime);
                     }  
                 }

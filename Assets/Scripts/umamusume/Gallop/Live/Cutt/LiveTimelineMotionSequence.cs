@@ -31,6 +31,8 @@ namespace Gallop.Live.Cutt
 
         private AnimationClip _targetAnim = null;
 
+        private bool _motionSetup = false;
+
         public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl, List<AnimationClip> animclips = null)
         {
             if(animclips != null)
@@ -73,10 +75,23 @@ namespace Gallop.Live.Cutt
         {
             if(Director.instance.liveMode == 0)
             {
+                
                 if(_targetAnim != null)
                 {
-                    _tempAnim[_targetAnim.name].time = currentTime;
-                    _tempAnim.Play(_targetAnim.name);
+                    //_tempAnim[_targetAnim.name].time = currentTime;
+                    if (Director.instance.sliderControl.is_Touched)
+                    {
+                        _tempAnim[_targetAnim.name].time = currentTime;
+                        _tempAnim.Play(_targetAnim.name);
+                        _motionSetup = false;
+                    }
+                    else if (!_motionSetup)
+                    {
+                        _tempAnim[_targetAnim.name].time = currentTime;
+                        _tempAnim.Play(_targetAnim.name);
+                        _motionSetup = true;
+                    }
+                    
                 }
                 return;
             }

@@ -220,7 +220,7 @@ namespace Gallop.Live.Cutt
 	public abstract class LiveTimelineKey
 	{
 		public int frame;
-		public LiveTimelineKeyAttribute attribute;
+		public int attribute;
 	}
 
 	[System.Serializable]
