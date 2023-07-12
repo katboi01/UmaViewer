@@ -102,7 +102,7 @@ namespace Gallop.Live.Cutt
                 //Get MotionList
                 foreach (var motion in UmaViewerMain.Instance.AbMotions.Where(a => a.Name.StartsWith($"3d/motion/live/body/son{Director.instance.live.MusicId}") && Path.GetFileName(a.Name).Split('_').Length == 4))
                 {
-                    AssetBundle motionAB = UmaViewerBuilder.LoadOrGet(motion);
+                    AssetBundle motionAB = UmaAssetManager.LoadAssetBundle(motion);
                     AnimationClip motionAnim = motionAB.LoadAsset<AnimationClip>(Path.GetFileName(motion.Name).Split('.')[0]);
                     Anims.Add(motionAnim);
                 }

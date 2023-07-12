@@ -1,23 +1,35 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class UmaSceneController:MonoBehaviour
 {
     public static UmaSceneController instance;
     public GameObject CavansPrefab;
     public GameObject CavansInstance;
+
+    public GameObject LoadingProgressPanel;
+    public Slider LoadingProgressSlider;
+    public TextMeshProUGUI LoadingProgressText;
+
     private void Awake()
     {
         if (instance)
         {
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
             return;
         }
         instance = this;
         DontDestroyOnLoad(this);
+    }
+
+    private void Start()
+    {
+        UmaAssetManager.OnLoadProgressChange += LoadingProgressChange;
     }
 
     public static void LoadScene(string name, Action OnSceneloaded = null, Action OnLastSceneUnloaded = null)
@@ -57,6 +69,20 @@ public class UmaSceneController:MonoBehaviour
         animation.Play("SceneTransition_e");
         yield return new WaitUntil(() => !animation.isPlaying);
         Destroy(CavansInstance);
+    }
+
+    public void LoadingProgressChange(int curren, int target)
+    {
+        if(curren == -1)
+        {
+            LoadingProgressPanel.SetActive(false);
+        }
+        else
+        {
+            LoadingProgressPanel.SetActive(true);
+            LoadingProgressText.text = $"Loading...({curren}/{target})";
+            LoadingProgressSlider.value = (float)curren / target;
+        }
     }
 }
 

@@ -157,6 +157,14 @@ public class UmaViewerUI : MonoBehaviour
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
+        UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
+    }
+
+    private void OnDestroy()
+    {
+        UmaAssetManager.OnLoadedBundleUpdate -= LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear -= LoadedAssetsClear;
     }
 
     private void Update()
@@ -267,7 +275,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             if (ui.Name == Path.GetFileName(entry.Name)) return;
         }
-
+        
         LoadedAssetCount++;
         string filePath = entry.FilePath;
         var container = Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
@@ -278,6 +286,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadedAssetsClear()
     {
+        if (!LoadedAssetsPanel) return;
         LoadedAssetCount = 0;
         foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
         {
@@ -429,7 +438,6 @@ public class UmaViewerUI : MonoBehaviour
                     foreach (var prop in extraMorph.BindProperties)
                     {
                         var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
-                        Debug.Log(morph.name);
                         container.Name = $"{morph.locator.name}({prop.Type})";
                         container.Slider.value = prop.Value;
                         switch (prop.Type)
@@ -585,7 +593,6 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-
     public void LoadNormalSoundPanels()
     {
         NormalSoundCtrl.Clear();
@@ -737,7 +744,10 @@ public class UmaViewerUI : MonoBehaviour
                     else
                     {
                         HighlightChildImage(costumeList.content, container);
-                        StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
+                        var list = new List<UmaDatabaseEntry>();
+                        list.AddRange(Main.AbChara.FindAll(a => a.Name.Contains($"{achara.Id}")));
+                        UmaAssetManager.PreLoadAndRun(list , delegate { StartCoroutine(Builder.LoadUma(achara, costumeId, mini)); });
+                        //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                     }
                 });
             }
