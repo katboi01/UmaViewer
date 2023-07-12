@@ -502,7 +502,7 @@ namespace Gallop.Live
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 isExit = true;
-                UmaSceneController.instance.LoadScene("Version2");
+                UmaSceneController.LoadScene("Version2");
                 AssetBundle.UnloadAllAssetBundles(true);
             }
 
