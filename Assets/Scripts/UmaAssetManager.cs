@@ -15,7 +15,7 @@ public class UmaAssetManager : MonoBehaviour
 
     public static event Action <UmaDatabaseEntry> OnLoadedBundleUpdate;
     public static event Action OnLoadedBundleClear;
-    public static event Action<int, int> OnLoadProgressChange;
+    public static event Action<int, int, string> OnLoadProgressChange;
 
     public static Coroutine LoadCoroutine;
 
@@ -48,11 +48,11 @@ public class UmaAssetManager : MonoBehaviour
         for(int i = 0; i < result.Count; i++)
         {
             LoadAB(result[i]);
-            OnLoadProgressChange?.Invoke(i, result.Count);
+            OnLoadProgressChange?.Invoke(i, result.Count, null);
             yield return null;
         }
 
-        OnLoadProgressChange?.Invoke(-1, result.Count);
+        OnLoadProgressChange?.Invoke(-1, result.Count, null);
         LoadCoroutine = null;
         OnDone?.Invoke();
     }
@@ -65,7 +65,7 @@ public class UmaAssetManager : MonoBehaviour
         SearchAB(Main, entry, ref result);
         foreach(var e in result)
         {
-            LoadAB(e, entry.Name.EndsWith("shader") || neverUnload);
+            LoadAB(e, neverUnload);
         }
         return Get(entry.Name);
     }
@@ -181,8 +181,10 @@ public class UmaAssetManager : MonoBehaviour
             var builder = UmaViewerBuilder.Instance;
             if (builder)
             {
-                if (builder.CurrentUMAContainer) Destroy(builder.CurrentUMAContainer);
-                if (builder.CurrentOtherContainer) Destroy(builder.CurrentOtherContainer);
+                if (builder.CurrentUMAContainer)
+                    builder.UnloadUma();
+                if (builder.CurrentOtherContainer) 
+                    Destroy(builder.CurrentOtherContainer.gameObject);
             }
         }
 

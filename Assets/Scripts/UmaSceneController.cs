@@ -71,7 +71,7 @@ public class UmaSceneController:MonoBehaviour
         Destroy(CavansInstance);
     }
 
-    public void LoadingProgressChange(int curren, int target)
+    public void LoadingProgressChange(int curren, int target, string message = null)
     {
         if(curren == -1)
         {
@@ -80,8 +80,15 @@ public class UmaSceneController:MonoBehaviour
         else
         {
             LoadingProgressPanel.SetActive(true);
-            LoadingProgressText.text = $"Loading...({curren}/{target})";
             LoadingProgressSlider.value = (float)curren / target;
+            if (string.IsNullOrEmpty(message))
+            {
+                LoadingProgressText.text = $"Loading...({curren}/{target})";
+            }
+            else
+            {
+                LoadingProgressText.text = $"{message}({curren}/{target})";
+            }
         }
     }
 }
