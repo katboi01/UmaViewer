@@ -746,7 +746,11 @@ public class UmaViewerUI : MonoBehaviour
                         HighlightChildImage(costumeList.content, container);
                         var list = new List<UmaDatabaseEntry>();
                         list.AddRange(Main.AbChara.FindAll(a => a.Name.Contains($"{achara.Id}")));
-                        UmaAssetManager.PreLoadAndRun(list , delegate { StartCoroutine(Builder.LoadUma(achara, costumeId, mini)); });
+                        Builder.UnloadUma();
+                        UmaAssetManager.UnloadAllBundle(true);
+                        UmaAssetManager.PreLoadAndRun(list , delegate {
+                            StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
+                        });
                         //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                     }
                 });

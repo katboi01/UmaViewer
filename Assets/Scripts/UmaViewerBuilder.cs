@@ -53,8 +53,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
     {
-        UnloadUma();
-        UmaAssetManager.UnloadAllBundle(true);
         int id = chara.Id;
         CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainer>();
         CurrentUMAContainer.CharaEntry = chara;
