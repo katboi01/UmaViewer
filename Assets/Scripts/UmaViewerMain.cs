@@ -23,10 +23,6 @@ public class UmaViewerMain : MonoBehaviour
     public List<UmaDatabaseEntry> AbEffect = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> CostumeList = new List<UmaDatabaseEntry>();
 
-    [Header("Asset Memory")]
-    public bool ShadersLoaded = false;
-    public Dictionary<string, AssetBundle> LoadedBundles = new Dictionary<string, AssetBundle>();
-
     private void Awake()
     {
         Instance = this;
@@ -149,7 +145,7 @@ public class UmaViewerMain : MonoBehaviour
             string filePath = asset.FilePath;
             if (File.Exists(filePath))
             {
-                AssetBundle bundle = UmaViewerBuilder.LoadOrGet(asset);
+                AssetBundle bundle = UmaAssetManager.LoadAssetBundle(asset, true);
                 foreach (var item in UmaDatabaseController.Instance.LiveData)
                 {
                     var musicId = Convert.ToInt32(item["music_id"]);

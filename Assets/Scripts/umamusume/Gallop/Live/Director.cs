@@ -375,7 +375,7 @@ namespace Gallop.Live
 
                 Debug.Log(partAsset.Name);
 
-                AssetBundle bundle = UmaViewerBuilder.LoadOrGet(partAsset);
+                AssetBundle bundle = UmaAssetManager.LoadAssetBundle(partAsset);
                 TextAsset partData = bundle.LoadAsset<TextAsset>($"m{live.MusicId}_part");
                 partInfo = new PartEntry(partData.text);
 
@@ -534,7 +534,7 @@ namespace Gallop.Live
                         transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("Version2")));
                     });
 
-                AssetBundle.UnloadAllAssetBundles(true);
+                UmaAssetManager.UnloadAllBundle(true);
             }
 
             if (_isLiveSetup)
