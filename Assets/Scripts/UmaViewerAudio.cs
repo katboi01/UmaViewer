@@ -1,9 +1,11 @@
 using CriWare;
+using CriWareFormats;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking.Types;
 using static CriWare.CriAtomExCategory.ReactDuckerParameter;
 
 public class UmaViewerAudio
@@ -12,20 +14,21 @@ public class UmaViewerAudio
     static UmaViewerMain Main => UmaViewerMain.Instance;
     public struct UmaSoundInfo
     {
-        public string acbPath;
-        public string awbPath;
+        public UmaDatabaseEntry acb;
+        public UmaDatabaseEntry awb;
     }
 
     static public UmaSoundInfo getSoundPath(string name)
     {
         Debug.Log(name);
         UmaSoundInfo info;
-        info.acbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("acb")).FilePath;
-        info.awbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb")).FilePath;
+        info.acb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("acb"));
+        info.awb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb"));
         return info;
     }
 
-    static public CriAtomSource ApplyCueSheet(string cueName)
+    /*
+    static public CriAtomSource Apply(string cueName)
     {
         UmaSoundInfo soundInfo = getSoundPath(cueName);
         CriAtom.AddCueSheet(cueName, soundInfo.acbPath, soundInfo.awbPath);
@@ -38,6 +41,35 @@ public class UmaViewerAudio
         source.use3dPositioning = false;
 
         return source;
+    }
+    */
+
+    static public List<AudioSource> ApplySound(string cueName)
+    {
+        UmaSoundInfo soundInfo = getSoundPath(cueName);
+
+        GameObject sourceRoot = new GameObject("CuteAudioSource");
+        sourceRoot.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
+
+        List<AudioSource> sourceList = new List<AudioSource>();
+
+        List<AudioClip> sounds = UmaViewerBuilder.LoadAudio(soundInfo.awb);
+        foreach(var clip in sounds)
+        {
+            AudioSource source = sourceRoot.AddComponent<AudioSource>();
+            source.clip = clip;
+            sourceList.Add(source);
+        }
+
+        return sourceList;
+    }
+
+    public static void Play(List<AudioSource> sourceList)
+    {
+        foreach(var source in sourceList)
+        {
+            source.Play();
+        }
     }
 
     public enum PartForm

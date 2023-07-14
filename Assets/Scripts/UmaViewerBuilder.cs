@@ -869,7 +869,7 @@ public class UmaViewerBuilder : MonoBehaviour
         source.Play();
     }
 
-    public List<AudioClip> LoadAudio(UmaDatabaseEntry awb)
+    public static List<AudioClip> LoadAudio(UmaDatabaseEntry awb)
     {
         List<AudioClip> clips = new List<AudioClip>();
         string awbPath = awb.FilePath;

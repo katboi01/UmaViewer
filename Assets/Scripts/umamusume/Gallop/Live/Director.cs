@@ -326,8 +326,8 @@ namespace Gallop.Live
 
         public AudioSource[] liveSong;
 
-        public List<CriAtomSource> liveVocal;
-        public CriAtomSource liveMusic;
+        public List<List<AudioSource>> liveVocal;
+        public List<AudioSource> liveMusic;
 
         public PartEntry partInfo;
 
@@ -465,19 +465,19 @@ namespace Gallop.Live
                         if (entry != null)
                         {
                             Debug.Log(entry.Name);
-                            liveVocal.Add(UmaViewerAudio.ApplyCueSheet(entry.Name.Split('.')[0]));
+                            liveVocal.Add(UmaViewerAudio.ApplySound(entry.Name.Split('.')[0]));
                         }
                     }
                 }
 
 
-                liveMusic = UmaViewerAudio.ApplyCueSheet(string.Format(SONG_PATH, songid));
+                liveMusic = UmaViewerAudio.ApplySound(string.Format(SONG_PATH, songid));
 
                 foreach (var vocal in liveVocal)
                 {
-                    vocal.Play(0);
+                    UmaViewerAudio.Play(vocal);
                 }
-                liveMusic.Play(0);
+                UmaViewerAudio.Play(liveMusic);
             }
             else
             {
@@ -512,7 +512,7 @@ namespace Gallop.Live
             _liveTimelineControl.AlterUpdate(_liveCurrentTime);
             if (!_soloMode)
             {
-                UmaViewerAudio.AlterUpdate(_liveCurrentTime, partInfo, liveVocal);
+                //UmaViewerAudio.AlterUpdate(_liveCurrentTime, partInfo, liveVocal);
             }
         }
 
@@ -543,9 +543,9 @@ namespace Gallop.Live
                 {
                     if (!_soloMode)
                     {
-                        if(liveMusic.time > 0.1)
+                        if (liveMusic[0].time > 0.1)
                         {
-                            _liveCurrentTime = (float)liveMusic.time / 1000;
+                            _liveCurrentTime = (float)liveMusic[0].time / 1000;
                             _syncTime = true;
                         }
                     }
@@ -562,9 +562,10 @@ namespace Gallop.Live
                 {
                     if (sliderControl.is_Outed)
                     {
+                        /*
                         _liveCurrentTime = UI.ProgressBar.value * totalTime;
 
-                        if (liveMusic)
+                        if (liveMusic.Count > 0)
                         {
                             int CriTime = Convert.ToInt32(_liveCurrentTime * 1000);
 
@@ -590,6 +591,7 @@ namespace Gallop.Live
                                 song.Play();
                             }
                         }
+                        */
 
                         OnTimelineUpdate(_liveCurrentTime);
 
@@ -600,7 +602,7 @@ namespace Gallop.Live
                     else if (sliderControl.is_Touched)
                     {
                         _liveCurrentTime = UI.ProgressBar.value * totalTime;
-
+                        /*
                         if (liveMusic)
                         {
                             liveMusic.Stop();
@@ -616,7 +618,7 @@ namespace Gallop.Live
                                 song.Stop();
                             }
                         }
-
+                        */
                         OnTimelineUpdate(_liveCurrentTime);
                     }
                     else
