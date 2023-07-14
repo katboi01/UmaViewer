@@ -16,7 +16,7 @@ public class UmaViewerMain : MonoBehaviour
     public List<CharaEntry> MobCharacters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
     public List<CostumeEntry> Costumes = new List<CostumeEntry>();
-    public List<UmaDatabaseEntry> AbList = new List<UmaDatabaseEntry>();
+    public Dictionary<string,UmaDatabaseEntry> AbList = new Dictionary<string, UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbMotions = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbSounds = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbChara = new List<UmaDatabaseEntry>();
@@ -28,12 +28,12 @@ public class UmaViewerMain : MonoBehaviour
         Instance = this;
         new Config();
         Application.targetFrameRate = 120;
-        AbList = UmaDatabaseController.Instance.MetaEntries.ToList();
-        AbChara = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath)).ToList();
-        AbMotions = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath)).ToList();
-        AbEffect = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.EffectPath)).ToList();
-        AbSounds = AbList.Where(ab => ab.Name.EndsWith(".awb") || ab.Name.EndsWith(".acb")).ToList();
-        CostumeList = AbList.Where(ab => ab.Name.StartsWith(UmaDatabaseController.CostumePath)).ToList();
+        AbList = UmaDatabaseController.Instance.MetaEntries;
+        AbChara = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.CharaPath)).Select(ab=>ab.Value).ToList();
+        AbMotions = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.MotionPath)).Select(ab => ab.Value).ToList();
+        AbEffect = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.EffectPath)).Select(ab => ab.Value).ToList();
+        AbSounds = AbList.Where(ab => ab.Key.EndsWith(".awb") || ab.Key.EndsWith(".acb")).Select(ab => ab.Value).ToList();
+        CostumeList = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.CostumePath)).Select(ab => ab.Value).ToList();
     }
 
     private IEnumerator Start()
@@ -142,7 +142,7 @@ public class UmaViewerMain : MonoBehaviour
 
         loadingUI.LoadingProgressChange(5, 11, "Loading Live Data");
         yield return null;
-        var asset = AbList.FirstOrDefault(a => a.Name.Equals("livesettings"));
+        var asset = AbList["livesettings"];
         if (asset != null)
         {
             string filePath = asset.FilePath;
@@ -193,7 +193,7 @@ public class UmaViewerMain : MonoBehaviour
         UI.LoadLivePanels();
         loadingUI.LoadingProgressChange(-1, -1);
 
-        UmaAssetManager.LoadAssetBundle(AbList.FirstOrDefault(e => e.Name.Equals("shader")), true); //Load Shader First
+        UmaAssetManager.LoadAssetBundle(AbList["shader"], true); //Load Shader First
     }
 
     public void OpenUrl(string url)

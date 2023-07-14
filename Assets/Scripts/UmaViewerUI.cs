@@ -614,14 +614,14 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadPropPanel()
     {
         var pageentrys = new List<PageManager.Entry>();
-        foreach (var prop in Main.AbList.Where(a => a.Name.Contains("pfb_chr_prop") && !a.Name.Contains("clothes")))
+        foreach (var prop in Main.AbList.Where(a => a.Key.Contains("pfb_chr_prop") && !a.Key.Contains("clothes")))
         {
             var pageentry = new PageManager.Entry();
-            pageentry.Name = Path.GetFileName(prop.Name);
+            pageentry.Name = Path.GetFileName(prop.Key);
             pageentry.OnClick = (container) =>
             {
                 HighlightChildImage(PropList.content, container);
-                Builder.LoadProp(prop);
+                Builder.LoadProp(prop.Value);
             };
             pageentrys.Add(pageentry);
         }
@@ -631,15 +631,15 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadMapPanel()
     {
         var pageentrys = new List<PageManager.Entry>();
-        foreach (var scene in Main.AbList.Where(a => ((a.Name.StartsWith("3d/env") && Path.GetFileName(a.Name).StartsWith("pfb_")) || a.Name.StartsWith("cutt/cutt_son") && Path.GetFileName(a.Name).StartsWith("cutt_son"))))
+        foreach (var scene in Main.AbList.Where(a => ((a.Key.StartsWith("3d/env") && Path.GetFileName(a.Key).StartsWith("pfb_")) || a.Key.StartsWith("cutt/cutt_son") && Path.GetFileName(a.Key).StartsWith("cutt_son"))))
         {
             var pageentry = new PageManager.Entry();
-            pageentry.Name = Path.GetFileName(scene.Name);
+            pageentry.Name = Path.GetFileName(scene.Key);
             pageentry.FontSize = 19;
             pageentry.OnClick = (container) =>
             {
                 HighlightChildImage(SceneList.content, container);
-                Builder.LoadProp(scene);
+                Builder.LoadProp(scene.Value);
             };
             pageentrys.Add(pageentry);
         }
@@ -726,10 +726,10 @@ public class UmaViewerUI : MonoBehaviour
         Action<CharaEntry> action = delegate (CharaEntry achara)
         {
             string nameVar = mini ? $"pfb_mbdy{achara.Id}" : $"pfb_bdy{achara.Id}";
-            foreach (var entry in Main.AbList.Where(a => !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
+            foreach (var entry in Main.AbList.Where(a => !a.Key.Contains("clothes") && a.Key.Contains(nameVar)))
             {
                 var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
-                string[] split = entry.Name.Split('_');
+                string[] split = entry.Key.Split('_');
                 string costumeId = split[split.Length - 1];
                 var dressdata = Main.Costumes.FirstOrDefault(a => (a.CharaId == achara.Id && a.BodyTypeSub == int.Parse(costumeId)));
                 container.Name = container.name = GetCostumeName(costumeId, (dressdata == null ? costumeId : dressdata.DressName));
@@ -745,9 +745,15 @@ public class UmaViewerUI : MonoBehaviour
                     {
                         HighlightChildImage(costumeList.content, container);
                         var list = new List<UmaDatabaseEntry>();
-                        list.AddRange(Main.AbChara.FindAll(a => a.Name.Contains($"{achara.Id}")));
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath) && a.Name.Contains(chara.Id.ToString())));
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.HeadPath) && a.Name.Contains(chara.Id.ToString())));
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
+                        list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
+                        list.Add(Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{chara.Id}_00_idle01_loop")));
+
+
                         Builder.UnloadUma();
-                        UmaAssetManager.UnloadAllBundle(true);
+                        //UmaAssetManager.UnloadAllBundle(true);
                         UmaAssetManager.PreLoadAndRun(list , delegate {
                             StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                         });
@@ -791,7 +797,20 @@ public class UmaViewerUI : MonoBehaviour
                     else
                     {
                         HighlightChildImage(costumeList.content, container);
-                        StartCoroutine(Builder.LoadUma(chara, costumeId, mini));
+                        var list = new List<UmaDatabaseEntry>();
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath) && a.Name.Contains(chara.Id.ToString())));
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.HeadPath) && a.Name.Contains(chara.Id.ToString())));
+                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
+                        list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
+                        list.Add(Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"anm_eve_chr{chara.Id}_00_idle01_loop")));
+
+
+                        Builder.UnloadUma();
+                        //UmaAssetManager.UnloadAllBundle(true);
+                        UmaAssetManager.PreLoadAndRun(list, delegate {
+                            StartCoroutine(Builder.LoadUma(chara, costumeId, mini));
+                        });
+                        //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                     }
                 });
             }
@@ -962,13 +981,12 @@ public class UmaViewerUI : MonoBehaviour
 
     void ListBackgrounds()
     {
-        var bglist = Main.AbList.Where(a => a.Name.StartsWith("bg/bg"));
         var pageentrys = new List<PageManager.Entry>();
-        foreach (var entry in bglist)
+        foreach (var entry in Main.AbList.Where(a => a.Key.StartsWith("bg/bg")))
         {
             var pageentry = new PageManager.Entry();
-            pageentry.Name = Path.GetFileName(entry.Name);
-            pageentry.Sprite = Builder.LoadSprite(entry);
+            pageentry.Name = Path.GetFileName(entry.Key);
+            pageentry.Sprite = Builder.LoadSprite(entry.Value);
             if (pageentry.Sprite == null) continue;
             pageentry.OnClick = (container) =>
             {

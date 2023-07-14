@@ -371,7 +371,7 @@ namespace Gallop.Live
                 };
 
                 //Get live parts info
-                UmaDatabaseEntry partAsset = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Contains(string.Format(LIVE_PART_PATH, live.MusicId)));
+                UmaDatabaseEntry partAsset = UmaViewerMain.Instance.AbList[string.Format(LIVE_PART_PATH, live.MusicId)];
 
                 Debug.Log(partAsset.Name);
 

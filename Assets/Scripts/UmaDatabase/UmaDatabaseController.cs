@@ -43,7 +43,7 @@ public class UmaDatabaseController
     /// <summary> outgame/dress/ </summary>
     public static string CostumePath = "outgame/dress/";
 
-    public List<UmaDatabaseEntry> MetaEntries;
+    public Dictionary<string, UmaDatabaseEntry> MetaEntries;
     public List<DataRow> CharaData;
     public List<DataRow> MobCharaData;
     public List<FaceTypeData> FaceTypeData;
@@ -99,12 +99,12 @@ public class UmaDatabaseController
         }
     }
 
-    static List<UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
+    static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = "SELECT m,n,h,c,d FROM a";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        List<UmaDatabaseEntry> meta = new List<UmaDatabaseEntry>();
+        Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
         {
             UmaDatabaseEntry entry = null;
@@ -112,17 +112,16 @@ public class UmaDatabaseController
             {
                 entry = new UmaDatabaseEntry()
                 {
-                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as String),
-                    Name = sqlite_datareader["n"] as String,
-                    Url = sqlite_datareader["h"] as String,
+                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as string),
+                    Name = sqlite_datareader["n"] as string,
+                    Url = sqlite_datareader["h"] as string,
                     Checksum = sqlite_datareader["c"].ToString(),
-                    Prerequisites = sqlite_datareader["d"] as String
+                    Prerequisites = sqlite_datareader["d"] as string
                 };
             }
             catch(Exception e) { Debug.LogError("Error caught: " + e); }
 
-            if (entry != null)
-                meta.Add(entry);
+            if (entry != null) meta.Add(entry.Name, entry);
         }
         return meta;
     }

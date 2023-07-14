@@ -812,7 +812,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         //load BG
         string nameVar = $"snd_bgm_live_{songid}_oke";
-        UmaDatabaseEntry BGawb = Main.AbList.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
+        UmaDatabaseEntry BGawb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
         if (BGawb != null)
         {
             var BGclip = LoadAudio(BGawb);
@@ -905,7 +905,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentLyrics.Count > 0) CurrentLyrics.Clear();
 
         string lyricsVar = $"live/musicscores/m{songid}/m{songid}_lyrics";
-        UmaDatabaseEntry lyricsAsset = Main.AbList.FirstOrDefault(a => a.Name.Contains(lyricsVar));
+        UmaDatabaseEntry lyricsAsset = Main.AbList[lyricsVar];
         AssetBundle bundle = UmaAssetManager.LoadAssetBundle(lyricsAsset);
         TextAsset asset = bundle.LoadAsset<TextAsset>(Path.GetFileNameWithoutExtension(lyricsVar));
         string[] lines = asset.text.Split("\n"[0]);
@@ -935,16 +935,7 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             foreach (string prerequisite in entry.Prerequisites.Split(';'))
             {
-                if (prerequisite.StartsWith(UmaDatabaseController.CharaPath))
-                {
-                    RecursiveLoadAsset(Main.AbChara.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
-                }
-                else if (prerequisite.StartsWith(UmaDatabaseController.MotionPath))
-                {
-                    RecursiveLoadAsset(Main.AbMotions.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
-                }
-                else
-                    RecursiveLoadAsset(Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), true, SetParent);
+               RecursiveLoadAsset(Main.AbList[prerequisite], true, SetParent);
             }
         }
         LoadAsset(entry, IsSubAsset, SetParent);
@@ -953,7 +944,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
     {
         Debug.Log("Loading " + entry.Name);
-        var bundle = UmaAssetManager.LoadAssetBundle(entry);
+        var bundle = UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
         LoadBundle(bundle, IsSubAsset, SetParent);
     }
 
@@ -1443,10 +1434,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadAssetPath(string path, Transform SetParent)
     {
-        foreach (var asset in UmaViewerMain.Instance.AbList.Where(a => a.Name == path))
-        {
-            RecursiveLoadAsset(asset, false, SetParent);
-        }
+        RecursiveLoadAsset(UmaViewerMain.Instance.AbList[path], false, SetParent);
     }
 
     private void LoadTear(GameObject go)
@@ -1468,7 +1456,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadFaceMorph(int id, string costumeId)
     {
         if (!CurrentUMAContainer.Head) return;
-        var locatorEntry = Main.AbList.FirstOrDefault(a => a.Name == "3d/animator/drivenkeylocator");
+        var locatorEntry = Main.AbList["3d/animator/drivenkeylocator"];
         var bundle = UmaAssetManager.LoadAssetBundle(locatorEntry);
         var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), CurrentUMAContainer.transform) as GameObject;
         locator.name = "DrivenKeyLocator";
@@ -1668,8 +1656,17 @@ public class UmaViewerBuilder : MonoBehaviour
                     string[] param = clip.name.Split('_');
                     if (param.Length > 4)
                     {
-                        int index = int.Parse(param[4]) + 1;
-                        var nextMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_0{index}"));
+                        int index = int.Parse(param[4]);
+                        if(index == 1)
+                        {
+                            foreach(var entry in Main.AbMotions.Where(a => a.Name.Contains($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_")))
+                            {
+                                UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
+                            }
+                        }
+                        index++; 
+                        var nextMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_0{index}"));   
+                     
                         var aevent = new AnimationEvent
                         {
                             time = clip.length * 0.99f,
@@ -1821,8 +1818,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public Sprite LoadCharaIcon(string id)
     {
         string value = $"chara/chr{id}/chr_icon_{id}";
-        var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
-        if (entry != null)
+        if (UmaViewerMain.Instance.AbList.TryGetValue(value,out UmaDatabaseEntry entry))
         {
             AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
             if (assetBundle.Contains($"chr_icon_{id}"))
@@ -1839,16 +1835,16 @@ public class UmaViewerBuilder : MonoBehaviour
     public Sprite LoadMobCharaIcon(string id)
     {
         string value = $"mob/mob_chr_icon_{id}_000001_01";
-        var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
-        if (entry == null) { return null; }
-        string path = entry.FilePath;
-        AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
-        if (assetBundle.Contains($"mob_chr_icon_{id}_000001_01"))
-        {
-            Texture2D texture = (Texture2D)assetBundle.LoadAsset($"mob_chr_icon_{id}_000001_01");
-            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-            assetBundle.Unload(false);
-            return sprite;
+        if (UmaViewerMain.Instance.AbList.TryGetValue(value,out UmaDatabaseEntry entry)) {
+            string path = entry.FilePath;
+            AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
+            if (assetBundle.Contains($"mob_chr_icon_{id}_000001_01"))
+            {
+                Texture2D texture = (Texture2D)assetBundle.LoadAsset($"mob_chr_icon_{id}_000001_01");
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                assetBundle.Unload(false);
+                return sprite;
+            }
         }
         return null;
     }
@@ -1865,15 +1861,17 @@ public class UmaViewerBuilder : MonoBehaviour
     public Sprite LoadLiveIcon(int musicid)
     {
         string value = $"live/jacket/jacket_icon_l_{musicid}";
-        var entry = UmaViewerMain.Instance.AbList.FirstOrDefault(a => a.Name.Equals(value));
-        if (entry == null) return null;
-        AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
-        if (assetBundle.Contains($"jacket_icon_l_{musicid}"))
+
+        if (UmaViewerMain.Instance.AbList.TryGetValue(value, out UmaDatabaseEntry entry)) 
         {
-            Texture2D texture = (Texture2D)assetBundle.LoadAsset($"jacket_icon_l_{musicid}");
-            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-            assetBundle.Unload(false);
-            return sprite;
+            AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
+            if (assetBundle.Contains($"jacket_icon_l_{musicid}"))
+            {
+                Texture2D texture = (Texture2D)assetBundle.LoadAsset($"jacket_icon_l_{musicid}");
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+                assetBundle.Unload(false);
+                return sprite;
+            }
         }
         return null;
     }
