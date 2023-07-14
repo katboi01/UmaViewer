@@ -43,12 +43,12 @@ public class UmaDatabaseController
     /// <summary> outgame/dress/ </summary>
     public static string CostumePath = "outgame/dress/";
 
-    public IEnumerable<UmaDatabaseEntry> MetaEntries;
-    public IEnumerable<DataRow> CharaData;
-    public IEnumerable<DataRow> MobCharaData;
-    public IEnumerable<FaceTypeData> FaceTypeData;
-    public IEnumerable<DataRow> LiveData;
-    public IEnumerable<DataRow> DressData;
+    public Dictionary<string, UmaDatabaseEntry> MetaEntries;
+    public List<DataRow> CharaData;
+    public List<DataRow> MobCharaData;
+    public List<FaceTypeData> FaceTypeData;
+    public List<DataRow> LiveData;
+    public List<DataRow> DressData;
 
     /// <summary> Meta Database Connection </summary>
     private SqliteConnection metaDb;
@@ -99,11 +99,12 @@ public class UmaDatabaseController
         }
     }
 
-    static IEnumerable<UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
+    static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = "SELECT m,n,h,c,d FROM a";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
         {
             UmaDatabaseEntry entry = null;
@@ -111,32 +112,33 @@ public class UmaDatabaseController
             {
                 entry = new UmaDatabaseEntry()
                 {
-                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as String),
-                    Name = sqlite_datareader["n"] as String,
-                    Url = sqlite_datareader["h"] as String,
+                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as string),
+                    Name = sqlite_datareader["n"] as string,
+                    Url = sqlite_datareader["h"] as string,
                     Checksum = sqlite_datareader["c"].ToString(),
-                    Prerequisites = sqlite_datareader["d"] as String
+                    Prerequisites = sqlite_datareader["d"] as string
                 };
             }
             catch(Exception e) { Debug.LogError("Error caught: " + e); }
 
-            if (entry != null)
-                yield return entry;
+            if (entry != null) meta.Add(entry.Name, entry);
         }
+        return meta;
     }
 
-    static IEnumerable<DataRow> ReadCharaMaster(SqliteConnection conn)
+    static List<DataRow> ReadCharaMaster(SqliteConnection conn)
     {
         return ReadMaster(conn, "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid");
     }
 
-    static IEnumerable<DataRow> ReadMobCharaMaster(SqliteConnection conn)
+    static List<DataRow> ReadMobCharaMaster(SqliteConnection conn)
     {
         return ReadMaster(conn, "SELECT * FROM mob_data");
     }
 
-    static IEnumerable<DataRow> ReadMaster(SqliteConnection conn,string sql)
+    static List<DataRow> ReadMaster(SqliteConnection conn,string sql)
     {
+        List<DataRow> dr = new List<DataRow>();
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = sql;
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
@@ -145,13 +147,15 @@ public class UmaDatabaseController
         var temp = result.Rows.GetEnumerator();
         while (temp.MoveNext())
         {
-            yield return (DataRow)temp.Current;
+            dr.Add((DataRow)temp.Current);
         }
         sqlite_cmd.Dispose();
+        return dr;
     }
 
-    static IEnumerable<FaceTypeData> ReadFaceTypeData(SqliteConnection conn)
+    static List<FaceTypeData> ReadFaceTypeData(SqliteConnection conn)
     {
+        List<FaceTypeData> data = new List<FaceTypeData>();
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = "SELECT * FROM face_type_data";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
@@ -169,30 +173,28 @@ public class UmaDatabaseController
                 inverce_face_type = sqlite_datareader.GetString(7),
                 set_face_group = sqlite_datareader.GetInt32(8),
             };
-            yield return entry;
+            data.Add(entry);
         }
+        return data;
     }
 
-    static IEnumerable<DataRow> ReadAllLiveData(SqliteConnection conn)
+    static List<DataRow> ReadAllLiveData(SqliteConnection conn)
     {
         return ReadMaster(conn, $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid");
     }
 
-    static IEnumerable<DataRow> ReadAllDressData(SqliteConnection conn)
+    static List<DataRow> ReadAllDressData(SqliteConnection conn)
     {
         return ReadMaster(conn, $"SELECT * FROM dress_data C,(SELECT D.'index' dressid,D.'text' dressname FROM text_data D WHERE id like 14) T WHERE C.id like T.dressid");
     }
 
     public static DataRow ReadCharaData(CharaEntry chara)
     {
-        foreach (var charaentry in chara.IsMob ? instance.MobCharaData : instance.CharaData) 
+        if (chara.IsMob)
         {
-            if (Convert.ToInt32(charaentry[chara.IsMob ? "mob_id" : "id"]) == chara.Id) 
-            {
-                return charaentry;
-            }
+            return instance.MobCharaData.Find(e => { return Convert.ToInt32(e["mob_id"]) == chara.Id; });
         }
-        return null;
+        return instance.CharaData.Find(e => { return Convert.ToInt32(e["id"]) == chara.Id; });
     }
 
     public static DataRow ReadMobDressColor(string mobid)

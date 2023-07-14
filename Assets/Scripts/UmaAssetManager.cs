@@ -15,7 +15,7 @@ public class UmaAssetManager : MonoBehaviour
 
     public static event Action <UmaDatabaseEntry> OnLoadedBundleUpdate;
     public static event Action OnLoadedBundleClear;
-    public static event Action<int, int> OnLoadProgressChange;
+    public static event Action<int, int, string> OnLoadProgressChange;
 
     public static Coroutine LoadCoroutine;
 
@@ -47,45 +47,52 @@ public class UmaAssetManager : MonoBehaviour
         
         for(int i = 0; i < result.Count; i++)
         {
-            LoadAB(result[i]);
-            OnLoadProgressChange?.Invoke(i, result.Count);
-            yield return null;
+            var exist = LoadAB(result[i]);
+            if (!exist)
+            {
+                OnLoadProgressChange?.Invoke(i, result.Count, null);
+                yield return null;
+            }
         }
 
-        OnLoadProgressChange?.Invoke(-1, result.Count);
+        OnLoadProgressChange?.Invoke(-1, result.Count, null);
         LoadCoroutine = null;
         OnDone?.Invoke();
     }
 
-    public static AssetBundle LoadAssetBundle(UmaDatabaseEntry entry, bool neverUnload = false)
+    public static AssetBundle LoadAssetBundle(UmaDatabaseEntry entry, bool neverUnload = false, bool isRecursive = true)
     {
-        if (Exist(entry))  return Get(entry); 
-        var Main = UmaViewerMain.Instance;
-        List<UmaDatabaseEntry> result = new List<UmaDatabaseEntry>();
-        SearchAB(Main, entry, ref result);
-        foreach(var e in result)
+        if (Exist(entry))  return Get(entry);
+        if (isRecursive)
         {
-            LoadAB(e, entry.Name.EndsWith("shader") || neverUnload);
+            var Main = UmaViewerMain.Instance;
+            List<UmaDatabaseEntry> result = new List<UmaDatabaseEntry>();
+            SearchAB(Main, entry, ref result);
+            foreach (var e in result)
+            {
+                LoadAB(e, neverUnload);
+            }
+            return Get(entry.Name);
         }
-        return Get(entry.Name);
+
+        LoadAB(entry, neverUnload);
+        return Get(entry);
     }
 
-    private static void LoadAB(UmaDatabaseEntry entry, bool neverUnload = false)
+    private static bool LoadAB(UmaDatabaseEntry entry, bool neverUnload = false)
     {
         string filePath = entry.FilePath;
         if (Exist(entry.Name))
         {
-            return;
+            return true;
         }
         else if (File.Exists(filePath))
         {
-
             AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
             if (!bundle)
             {
                 Debug.Log(filePath + " exists and doesn't work");
                 UmaViewerUI.Instance?.ShowMessage(filePath + " exists and doesn't work", UIMessageType.Error);
-                return;
             }
             AddOrUpdate(entry.Name, bundle, neverUnload);
             if (!neverUnload)
@@ -98,6 +105,7 @@ public class UmaAssetManager : MonoBehaviour
             Debug.LogError($"{entry.Name} - {filePath} does not exist");
             UmaViewerUI.Instance?.ShowMessage($"{entry.Name} - {filePath} does not exist", UIMessageType.Error);
         }
+        return false;
     }
 
     private static void SearchAB(UmaViewerMain Main, UmaDatabaseEntry entry,ref List<UmaDatabaseEntry> result)
@@ -106,16 +114,7 @@ public class UmaAssetManager : MonoBehaviour
         {
             foreach (string prerequisite in entry.Prerequisites.Split(';'))
             {
-                if (prerequisite.StartsWith(UmaDatabaseController.CharaPath))
-                {
-                    SearchAB(Main , Main.AbChara.FirstOrDefault(ab => ab.Name == prerequisite),ref result);
-                }
-                else if (prerequisite.StartsWith(UmaDatabaseController.MotionPath))
-                {
-                    SearchAB(Main, Main.AbMotions.FirstOrDefault(ab => ab.Name == prerequisite), ref result);
-                }
-                else
-                    SearchAB(Main, Main.AbList.FirstOrDefault(ab => ab.Name == prerequisite), ref result);
+                SearchAB(Main, Main.AbList[prerequisite], ref result);
             }
         }
         result.Add(entry);
@@ -181,8 +180,10 @@ public class UmaAssetManager : MonoBehaviour
             var builder = UmaViewerBuilder.Instance;
             if (builder)
             {
-                if (builder.CurrentUMAContainer) Destroy(builder.CurrentUMAContainer);
-                if (builder.CurrentOtherContainer) Destroy(builder.CurrentOtherContainer);
+                if (builder.CurrentUMAContainer)
+                    builder.UnloadUma();
+                if (builder.CurrentOtherContainer) 
+                    Destroy(builder.CurrentOtherContainer.gameObject);
             }
         }
 

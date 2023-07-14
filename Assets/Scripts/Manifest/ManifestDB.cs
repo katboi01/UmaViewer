@@ -56,6 +56,7 @@ public class ManifestDB
         isError = false;
         this.callback = callback;
         callback?.Invoke("Checking Resource Version", UIMessageType.Default);
+        yield return null;
         yield return UpdateMetaDB();
         yield return UpdateMasterDB();
         callback?.Invoke(isError ? "Update aborted." : $"Done. Please restart the application.\n", isError ? UIMessageType.Error : UIMessageType.Success);
@@ -70,6 +71,7 @@ public class ManifestDB
     {
         string rootHash = null;
         callback?.Invoke("Getting resource version", UIMessageType.Default);
+        yield return null;
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/MetaC/root", txt =>
         {
             if (string.IsNullOrEmpty(txt)) return;
@@ -116,6 +118,7 @@ public class ManifestDB
 
         //Insert platform
         callback?.Invoke("Reading Platform Manifest", UIMessageType.Default);
+        yield return null;
         ManifestEntry[] platformEntrys = null;
         yield return GetManifest(rootEntry.hname, Kind.PlatformManifest, entrys => { platformEntrys = entrys; });
         if (platformEntrys == null)
@@ -131,6 +134,7 @@ public class ManifestDB
 
         //Insert AssetManifest
         callback?.Invoke($"Reading Assets Manifest", UIMessageType.Default);
+        yield return null;
         ManifestEntry[] assetEntrys = null;
         yield return GetManifest(platformEntry.hname, Kind.AssetManifest, entrys => { assetEntrys = entrys; });
         if (assetEntrys == null)
@@ -162,6 +166,7 @@ public class ManifestDB
                 continue;
             }
             callback?.Invoke($"Reading AssetBundles Manifest : {assetEntry.tname}", UIMessageType.Default);
+            yield return null;
             using SqliteTransaction tran = MetaDB.BeginTransaction();
             for (int i = 0; i < assets.Length; i++)
             {
@@ -185,16 +190,19 @@ public class ManifestDB
         var masterDir = Path.GetDirectoryName(masterPath);
 
         callback?.Invoke($"Checking master.mdb", UIMessageType.Default);
+        yield return null;
         SqliteCommand command = new SqliteCommand("SELECT h FROM a WHERE n LIKE 'master.mdb.lz4'", MetaDB);
         var reader = command.ExecuteReader();
 
         if (reader.Read())
         {
+            yield return null;
             var hash = reader.GetString(0);
             var path = GetManifestPath(hash);
             if (!File.Exists(path))
             {
                 callback?.Invoke($"Downloading master.mdb", UIMessageType.Default);
+                yield return null;
                 UnityWebRequest www = UnityWebRequest.Get(UmaViewerDownload.GetGenericRequestUrl(hash));
                 yield return www.SendWebRequest();
                 if (www.result == UnityWebRequest.Result.Success)
@@ -211,6 +219,7 @@ public class ManifestDB
             }
 
             callback?.Invoke($"Decompress master.mdb", UIMessageType.Default);
+            yield return null;
             try
             {
                 Directory.CreateDirectory(masterDir);
@@ -283,10 +292,12 @@ public class ManifestDB
         if (!File.Exists(path))
         {
             this.callback?.Invoke($"Downloading Manifest :{hash}", UIMessageType.Default);
+            yield return null;
             yield return DownloadManifest(hash);
         }
         if (File.Exists(path))
         {
+            yield return null;
             callback.Invoke(GetManifest(path, true, kind));
         }
     }

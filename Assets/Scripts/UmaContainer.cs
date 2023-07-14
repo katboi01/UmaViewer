@@ -487,6 +487,7 @@ public class UmaContainer : MonoBehaviour
 
         BipedRagdollCreator.Create(r, options);
         PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
+        PuppetMaster.solverIterationCount = 3;
         PuppetMaster.FlattenHierarchy();
     }
 
