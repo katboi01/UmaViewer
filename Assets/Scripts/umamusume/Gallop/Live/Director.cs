@@ -326,8 +326,8 @@ namespace Gallop.Live
 
         public AudioSource[] liveSong;
 
-        public List<List<AudioSource>> liveVocal;
-        public List<AudioSource> liveMusic;
+        public List<List<AudioSource>> liveVocal = new List<List<AudioSource>>();
+        public List<AudioSource> liveMusic = new List<AudioSource>();
 
         public PartEntry partInfo;
 

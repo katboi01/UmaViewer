@@ -61,6 +61,8 @@ public class UmaViewerAudio
             sourceList.Add(source);
         }
 
+        Debug.Log(sourceList);
+
         return sourceList;
     }
 
