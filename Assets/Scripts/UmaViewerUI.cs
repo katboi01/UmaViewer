@@ -862,7 +862,7 @@ public class UmaViewerUI : MonoBehaviour
             Destroy(NormalSubSoundList.content.GetChild(i).gameObject);
         }
 
-        var subSounds = Builder.LoadAudio(awb);
+        var subSounds = UmaViewerBuilder.LoadAudio(awb);
 
         foreach (var sound in subSounds)
         {
