@@ -27,14 +27,13 @@ namespace Gallop
 
         public List<DynamicBone> DynamicBones = new List<DynamicBone>();
 
-        public List<GameObject> InitiallizeCollider(List<Transform> bones)
+        public Dictionary<string, Transform> InitiallizeCollider(Dictionary<string, Transform> bones)
         {
-            var colliders = new List<GameObject>();
+            var colliders = new Dictionary<string, Transform>();
             foreach (CySpringCollisionData collider in collisionParam)
             {
                 if (collider._isInner) continue;
-                var bone = bones.Find(a => { return a.name == collider._targetObjectName; });
-                if (bone)
+                if (bones.TryGetValue(collider._targetObjectName, out Transform bone))
                 {
 
                     var child = new GameObject(collider._collisionName);
@@ -42,7 +41,7 @@ namespace Gallop
                     child.transform.localPosition = Vector3.zero;
                     child.transform.localRotation = Quaternion.identity;
                     child.transform.localScale = Vector3.one;
-                    colliders.Add(child);
+                    colliders.Add(child.name, child.transform);
 
                     switch (collider._type)
                     {
@@ -78,13 +77,12 @@ namespace Gallop
             return colliders;
         }
 
-        public void InitializePhysics(List<Transform> bones, List<GameObject> colliders)
+        public void InitializePhysics(Dictionary<string, Transform> bones, Dictionary<string, Transform> colliders)
         {
             DynamicBones.Clear();
             foreach (CySpringParamDataElement spring in springParam)
             {
-                var bone = bones.Find(a => { return a.name == spring._boneName; });
-                if (bone)
+                if (bones.TryGetValue(spring._boneName,out Transform bone))
                 {
                     bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
                     var dynamic = bone.gameObject.AddComponent<DynamicBone>();
@@ -113,15 +111,14 @@ namespace Gallop
 
                     foreach (string collisionName in spring._collisionNameList)
                     {
-                        var tmp = colliders.Find(a => { return a.gameObject.name == collisionName; });
-                        if (tmp)
+                        if (colliders.TryGetValue(collisionName,out Transform tmp))
                         {
                             dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                         }
                     }
+
                     foreach (CySpringParamDataChildElement Childcollision in spring._childElements)
                     {
-
                         var tempParticle = dynamic.Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
                         if (tempParticle != null)
                         {
@@ -143,8 +140,7 @@ namespace Gallop
                             tempParticle.m_LimitAngel_Max = Childcollision._limitAngleMax;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
-                                var tmp = colliders.Find(a => { return a.gameObject.name == collisionName; });
-                                if (tmp)
+                                if (colliders.TryGetValue(collisionName,out Transform tmp))
                                 {
                                     tempParticle.m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                                 }

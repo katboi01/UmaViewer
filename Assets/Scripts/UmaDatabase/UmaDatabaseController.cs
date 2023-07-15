@@ -5,6 +5,8 @@ using Mono.Data.Sqlite;
 using System.Data;
 using Assets.Scripts;
 using System.IO;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class UmaDatabaseController
 {
@@ -51,7 +53,7 @@ public class UmaDatabaseController
     public List<DataRow> DressData;
 
     /// <summary> Meta Database Connection </summary>
-    private SqliteConnection metaDb;
+    public SqliteConnection metaDb;
     /// <summary> Master Database Connection </summary>
     private SqliteConnection masterDb;
     /// <summary> Loads the file database </summary>
@@ -72,7 +74,6 @@ public class UmaDatabaseController
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
             }
 
-
             metaDb.Open();
             MetaEntries = ReadMeta(metaDb);
 
@@ -82,8 +83,9 @@ public class UmaDatabaseController
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
+                    
         }
-        catch 
+        catch
         {
             CloseAllConnection();
             var msg = $"Database not found at: {Config.Instance.MainPath}";
@@ -102,7 +104,7 @@ public class UmaDatabaseController
     static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT m,n,h,c,d FROM a";
+        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
         Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
@@ -110,18 +112,19 @@ public class UmaDatabaseController
             UmaDatabaseEntry entry = null;
             try
             {
-                entry = new UmaDatabaseEntry()
+                entry = new UmaDatabaseEntry
                 {
-                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader["m"] as string),
-                    Name = sqlite_datareader["n"] as string,
-                    Url = sqlite_datareader["h"] as string,
-                    Checksum = sqlite_datareader["c"].ToString(),
-                    Prerequisites = sqlite_datareader["d"] as string
+                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader.GetString(0)),
+                    Name = sqlite_datareader.GetString(1),
+                    Url = sqlite_datareader.GetString(2),
+                    Prerequisites = sqlite_datareader.GetString(3)
                 };
             }
-            catch(Exception e) { Debug.LogError("Error caught: " + e); }
+            catch(Exception e) { Debug.LogError("Error caught: " + e + entry.Name); }
+            if (entry != null) {
 
-            if (entry != null) meta.Add(entry.Name, entry);
+                meta.Add(entry.Name, entry);
+            }
         }
         return meta;
     }
@@ -136,20 +139,21 @@ public class UmaDatabaseController
         return ReadMaster(conn, "SELECT * FROM mob_data");
     }
 
-    static List<DataRow> ReadMaster(SqliteConnection conn,string sql)
+    static List<DataRow> ReadMaster(SqliteConnection conn, string sql)
     {
         List<DataRow> dr = new List<DataRow>();
-        SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = sql;
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        var result = new DataTable();
-        result.Load(sqlite_datareader);
-        var temp = result.Rows.GetEnumerator();
-        while (temp.MoveNext())
+
+        using (var sqlite_cmd = conn.CreateCommand())
         {
-            dr.Add((DataRow)temp.Current);
+            sqlite_cmd.CommandText = sql;
+            using var sqlite_datareader = sqlite_cmd.ExecuteReader();
+            var result = new DataTable();
+            result.Load(sqlite_datareader);
+            foreach (DataRow row in result.Rows)
+            {
+                dr.Add(row);
+            }
         }
-        sqlite_cmd.Dispose();
         return dr;
     }
 
@@ -200,11 +204,8 @@ public class UmaDatabaseController
     public static DataRow ReadMobDressColor(string mobid)
     {
         var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
-        foreach(var data in results)
-        {
-            return data;
-        }
-        return null;
+
+        return results.Count > 0 ? results[0] : null;
     }
 
     public static DataRow ReadMobHairColor(string colorid)

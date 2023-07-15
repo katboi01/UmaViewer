@@ -20,7 +20,7 @@ public class UmaViewerAudio
     {
         Debug.Log(name);
         UmaSoundInfo info;
-        info.acbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("acb")).FilePath;
+        info.acbPath = null;
         info.awbPath = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb")).FilePath;
         return info;
     }

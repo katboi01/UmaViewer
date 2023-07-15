@@ -104,17 +104,14 @@ public class UmaContainer : MonoBehaviour
     public void MergeModel()
     {
         if (!Body) return;
-
-        List<Transform> bodybones = new List<Transform>(Body.GetComponentInChildren<SkinnedMeshRenderer>().bones);
+        var bodyBones = Body.GetComponentInChildren<SkinnedMeshRenderer>().bones.ToDictionary(bone => bone.name, bone => bone.transform);
         List<Transform> emptyBones = new List<Transform>();
-        emptyBones.Add(Body.GetComponentInChildren<SkinnedMeshRenderer>().rootBone.Find("Tail_Ctrl"));
+        emptyBones.Add(Body.transform.Find("Position/Hip/Tail_Ctrl"));
         while (Body.transform.childCount > 0)
         {
-            var child = Body.transform.GetChild(0);
-            child.SetParent(transform);
+            Body.transform.GetChild(0).SetParent(transform);
         }
         Body.SetActive(false); //for debugging
-
 
         //MergeHead
         if (Head)
@@ -122,7 +119,7 @@ public class UmaContainer : MonoBehaviour
             var headskins = Head.GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (SkinnedMeshRenderer headskin in headskins)
             {
-                emptyBones.AddRange(MergeBone(headskin, bodybones));
+                MergeBone(headskin, bodyBones,ref emptyBones);
             }
             var eyes = new GameObject("Eyes");
             eyes.transform.SetParent(transform);
@@ -139,7 +136,7 @@ public class UmaContainer : MonoBehaviour
         if (Tail)
         {
             var tailskin = Tail.GetComponentInChildren<SkinnedMeshRenderer>();
-            emptyBones.AddRange(MergeBone(tailskin, bodybones));
+            MergeBone(tailskin, bodyBones, ref emptyBones);
             while (Tail.transform.childCount > 0)
             {
                 var child = Tail.transform.GetChild(0);
@@ -194,7 +191,7 @@ public class UmaContainer : MonoBehaviour
     {
         if (!Head || !Hair) return;
 
-        List<Transform> bodybones = new List<Transform>(Head.GetComponentsInChildren<Transform>());
+        var bodyBones = Head.GetComponentInChildren<SkinnedMeshRenderer>().bones.ToDictionary(bone => bone.name, bone => bone.transform);
         List<Transform> emptyBones = new List<Transform>();
 
         var headHolder = Head.GetComponent<AssetHolder>();
@@ -208,7 +205,7 @@ public class UmaContainer : MonoBehaviour
         foreach (SkinnedMeshRenderer hairskin in hairskins)
         {
             hairskin.gameObject.transform.SetParent(Head.transform);
-            emptyBones.AddRange(MergeBone(hairskin, bodybones));
+            MergeBone(hairskin, bodyBones ,ref emptyBones);
         }
         Hair.gameObject.SetActive(false);
 
@@ -232,17 +229,15 @@ public class UmaContainer : MonoBehaviour
         transform.Find("Position").localScale = new Vector3(BodyScale, BodyScale, BodyScale);
     }
 
-    public Transform[] MergeBone(SkinnedMeshRenderer from, List<Transform> targetBones)
+    public void MergeBone(SkinnedMeshRenderer from, Dictionary<string, Transform> targetBones,ref List<Transform> emptyBones)
     {
-        var rootbone = targetBones.FindLast(a => a.name.Equals(from.rootBone.name));
+        var rootbone = targetBones[from.rootBone.name];
         if (rootbone) from.rootBone = rootbone;
 
-        List<Transform> emptyBones = new List<Transform>();
         Transform[] tmpBone = new Transform[from.bones.Length];
         for (int i = 0; i < tmpBone.Length; i++)
         {
-            var targetbone = targetBones.FindLast(a => a.name.Equals(from.bones[i].name));
-            if (targetbone)
+            if (targetBones.TryGetValue(from.bones[i].name, out Transform targetbone))
             {
                 tmpBone[i] = targetbone;
                 from.bones[i].position = targetbone.position;
@@ -258,22 +253,28 @@ public class UmaContainer : MonoBehaviour
             }
         }
         from.bones = tmpBone;
-        return emptyBones.ToArray();
     }
 
     public void LoadPhysics()
     {
         cySpringDataContainers = new List<CySpringDataContainer>(PhysicsContainer.GetComponentsInChildren<CySpringDataContainer>());
-        var bones = new List<Transform>(GetComponentsInChildren<Transform>());
-        var colliders = new List<GameObject>();
-
-        foreach (CySpringDataContainer spring in cySpringDataContainers)
+        var bones = new Dictionary<string,Transform>();
+        foreach (var bone in GetComponentsInChildren<Transform>()) 
         {
-            colliders.AddRange(spring.InitiallizeCollider(bones));
+            if (!bones.ContainsKey(bone.name))
+                bones.Add(bone.name, bone);
         }
-        foreach (CySpringDataContainer spring in cySpringDataContainers)
+
+        var colliders = new Dictionary<string, Transform>();
+
+        for (int i = 0; i < cySpringDataContainers.Count; i++) 
         {
-            spring.InitializePhysics(bones, colliders);
+            colliders =  UmaUtility.MergeDictionaries(colliders,cySpringDataContainers[i].InitiallizeCollider(bones));
+        }
+
+        for (int i = 0; i < cySpringDataContainers.Count; i++)
+        {
+            cySpringDataContainers[i].InitializePhysics(bones, colliders);
         }
     }
 
@@ -397,35 +398,6 @@ public class UmaContainer : MonoBehaviour
 
         }
     }
-    public MeshRenderer debug;
-    private void Update()
-    {
-        //if (Input.GetMouseButtonDown(1))
-        //{
-        //    var cam = Camera.main;
-        //    var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
-        //    var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
-        //    var worldPos = cam.ScreenToWorldPoint(mousePos);
-        //    if (Physics.Raycast(Camera.main.ScreenPointToRay(mousePos), out RaycastHit hit))
-        //    {
-        //        hit.rigidbody.AddForce(Camera.main.transform.forward * 50, ForceMode.Impulse);
-
-        //        FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[0], 2, FaceDrivenKeyTarget.OtherMorphs[2]);
-        //        FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[1], 1, FaceDrivenKeyTarget.OtherMorphs[2]);
-        //        Invoke(nameof(Test), 0.3f);
-        //    }
-        //}
-    }
-
-    //public void Test()
-    //{
-    //    FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[0], 0, FaceDrivenKeyTarget.OtherMorphs[2]);
-    //    FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.OtherMorphs[2].BindProperties[1], 0, FaceDrivenKeyTarget.OtherMorphs[2]);
-    //    FaceEmotionKeyTarget.FaceEmotionKey.ForEach(e => { if (e.target) e.Weight = 0; });
-    //    var tmp = FaceEmotionKeyTarget.FaceEmotionKey[Random.Range(22, 26)];
-    //    tmp.Weight = 1;
-    //    FaceDrivenKeyTarget.ChangeMorph();
-    //}
 
     public void SetNextAnimationCut(string cutName)
     {
@@ -490,7 +462,6 @@ public class UmaContainer : MonoBehaviour
         PuppetMaster.solverIterationCount = 3;
         PuppetMaster.FlattenHierarchy();
     }
-
 
     public class MaterialHelper
     {

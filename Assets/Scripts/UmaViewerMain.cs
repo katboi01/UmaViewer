@@ -5,6 +5,8 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -28,12 +30,15 @@ public class UmaViewerMain : MonoBehaviour
         Instance = this;
         new Config();
         Application.targetFrameRate = 120;
+
         AbList = UmaDatabaseController.Instance.MetaEntries;
-        AbChara = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.CharaPath)).Select(ab=>ab.Value).ToList();
-        AbMotions = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.MotionPath)).Select(ab => ab.Value).ToList();
-        AbEffect = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.EffectPath)).Select(ab => ab.Value).ToList();
-        AbSounds = AbList.Where(ab => ab.Key.EndsWith(".awb") || ab.Key.EndsWith(".acb")).Select(ab => ab.Value).ToList();
-        CostumeList = AbList.Where(ab => ab.Key.StartsWith(UmaDatabaseController.CostumePath)).Select(ab => ab.Value).ToList();
+        var chara_3d = AbList.Where(ab => ab.Value.Type == UmaFileType._3d_cutt).Select(ab => ab.Value).ToList();
+        AbChara = chara_3d.FindAll(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath));
+        AbMotions = chara_3d.FindAll(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath));
+        AbEffect = chara_3d.FindAll(ab => ab.Name.StartsWith(UmaDatabaseController.EffectPath));
+        AbSounds = AbList.Where(ab => ab.Value.Type == UmaFileType.sound).Select(ab => ab.Value).ToList();
+        var outgame = AbList.Where(ab => ab.Value.Type == UmaFileType.outgame).Select(ab => ab.Value).ToList();
+        CostumeList = outgame.FindAll(e => e.Name.StartsWith(UmaDatabaseController.CostumePath));
     }
 
     private IEnumerator Start()
@@ -46,7 +51,6 @@ public class UmaViewerMain : MonoBehaviour
         if (Config.Instance.Language == Language.En)
         {
             loadingUI.LoadingProgressChange(0, 11, "Downloading Character Data");
-            yield return null;
             yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
             {
                 if (string.IsNullOrEmpty(txt)) return;
@@ -62,7 +66,6 @@ public class UmaViewerMain : MonoBehaviour
 
         //Mob names (EN & JP)
         loadingUI.LoadingProgressChange(1, 11, "Downloading Mob Data");
-        yield return null;
         yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
         {
             if (string.IsNullOrEmpty(txt)) return;

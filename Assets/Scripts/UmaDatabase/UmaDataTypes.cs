@@ -10,7 +10,6 @@ public class UmaDatabaseEntry
     public UmaFileType Type;
     public string Name;
     public string Url;
-    public string Checksum;
     public string Prerequisites;
     public string FilePath 
     {

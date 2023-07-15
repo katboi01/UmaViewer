@@ -17,7 +17,7 @@ namespace Gallop
         public List<MouthTarget> _mouthTarget;
         public List<TargetInfomation> _earTarget;
 
-        public List<Transform> Objs;
+        public Dictionary<string, Transform> Objs;
         private FacialMorph BaseLEarMorph, BaseREarMorph;
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
@@ -45,16 +45,20 @@ namespace Gallop
 
         List<FacialMorph> leftEarMorph = new List<FacialMorph>();
         List<FacialMorph> rightEarMorph = new List<FacialMorph>();
-        public void Initialize(List<Transform> objs)
+        public void Initialize(Dictionary<string, Transform> objs)
         {
             Objs = objs;
 
-            List<Particle> particles = new List<Particle>();
+            Dictionary<string, Particle> particles = new Dictionary<string, Particle>();
             foreach (CySpringDataContainer spring in Container.cySpringDataContainers)
             {
                 foreach (DynamicBone dynamicbone in spring.DynamicBones)
                 {
-                    particles.AddRange(dynamicbone.Particles);
+                    foreach(var particle in dynamicbone.Particles)
+                    {
+                        if (!particles.ContainsKey(particle.m_Transform.name)) 
+                            particles.Add(particle.m_Transform.name,particle);
+                    }
                 }
             }
 
@@ -70,13 +74,12 @@ namespace Gallop
                     morph.trsArray = _earTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        var physicsParticle = particles.Find(a => a.m_Transform.name.Equals(trs._path));
-                        if (physicsParticle != null)
+                        if (particles.TryGetValue(trs._path, out Particle physicsParticle))
                         {
                             trs.isPhysics = true;
                             trs.physicsParticle = physicsParticle;
                         }
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path,out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -105,7 +108,7 @@ namespace Gallop
                     morph.trsArray = _eyebrowTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path, out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -134,7 +137,7 @@ namespace Gallop
                     morph.trsArray = _eyeTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                         Objs.TryGetValue(trs._path,out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -174,7 +177,7 @@ namespace Gallop
                     morph.trsArray = _mouthTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path, out trs.transform);
                     }
                     if (i == 0)
                     {
