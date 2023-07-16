@@ -15,8 +15,17 @@ namespace Gallop
         public string tag = "";
         public bool direction;
         public float weight;
+        public OverrideType OverrideType;
+        public float overrideWeight;
         public List<TrsArray> trsArray;
         public Transform locator;
+    }
+
+    public enum OverrideType
+    {
+        None,
+        Override,
+        Ignore
     }
 
     [System.Serializable]

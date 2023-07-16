@@ -267,7 +267,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             else
             {
-                var asset1 = Main.AbList[UmaDatabaseController.HeadPath + $"chr{id}_{costumeId}/clothes/pfb_chr{id}_{costumeId}_cloth00"];
+                var asset1 = Main.AbList[UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/clothes/pfb_chr{head_id}_{head_costumeId}_cloth00"];
                 RecursiveLoadAsset(asset1);
             }
         }

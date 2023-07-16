@@ -369,6 +369,10 @@ namespace Gallop
         public void ChangeMorph()
         {
             FacialResetAll();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
             EarMorphs.ForEach(morph => ProcessMorph(morph));
             EyeBrowMorphs.ForEach(morph => ProcessMorph(morph));
             EyeMorphs.ForEach(morph => ProcessMorph(morph));
@@ -380,6 +384,10 @@ namespace Gallop
         public void ChangeMorphEye()
         {
             FacialResetEye();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
             EyeMorphs.ForEach(morph => ProcessMorph(morph));
             ApplyRotationEye();
         }
@@ -423,22 +431,24 @@ namespace Gallop
 
         private void ProcessMorph(FacialMorph morph)
         {
-            if (morph.weight == 0)
-            {
-                return;
-            }
+            var isOverride = Container.FaceOverrideData && Container.FaceOverrideData.Enable;
+            if (isOverride && morph.OverrideType == OverrideType.Ignore) return;
+            if (morph.weight == 0 && (!isOverride || morph.OverrideType == OverrideType.None))return;
+
+            var weight = (isOverride && morph.OverrideType == OverrideType.Override ? morph.overrideWeight : morph.weight);
+
             foreach (TrsArray trs in morph.trsArray)
             {
                 if (trs.isPhysics && Container.EnablePhysics)
                 {
-                    trs.physicsParticle.m_InitLocalPosition += trs._position * morph.weight;
-                    ParticleRecorder[trs.physicsParticle] += trs._rotation * morph.weight;
+                    trs.physicsParticle.m_InitLocalPosition += trs._position * weight;
+                    ParticleRecorder[trs.physicsParticle] += trs._rotation * weight;
                 }
                 else if (trs.transform)
                 {
-                    trs.transform.localScale += trs._scale * morph.weight;
-                    trs.transform.localPosition += trs._position * morph.weight;
-                    RotationRecorder[trs.transform] += trs._rotation * morph.weight;
+                    trs.transform.localScale += trs._scale * weight;
+                    trs.transform.localPosition += trs._position * weight;
+                    RotationRecorder[trs.transform] += trs._rotation * weight;
                 }
             }
         }
@@ -501,10 +511,6 @@ namespace Gallop
 
         public void FacialResetAll()
         {
-            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
@@ -517,39 +523,23 @@ namespace Gallop
 
         public void FacialResetEye()
         {
-            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseLEyeMorph.trsArray);
             FacialReset(BaseREyeMorph.trsArray);
         }
 
         public void FacialResetMouth()
         {
-            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseMouthMorph.trsArray);
         }
 
         public void FacialResetEyebrow()
         {
-            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseLEyeBrowMorph.trsArray);
             FacialReset(BaseREyeBrowMorph.trsArray);
         }
 
         public void FacialResetEar()
         {
-            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
         }
@@ -754,47 +744,45 @@ namespace Gallop
 
             Action<List<FacialMorph>, FaceOverrideReplaceDataSet[]> action = delegate (List<FacialMorph> morphs, FaceOverrideReplaceDataSet[] datalist)
             {
+                Dictionary<LiveTimelineDefine.FacialEyeId, FacialMorph> morphDic = new Dictionary<LiveTimelineDefine.FacialEyeId, FacialMorph>();
+                morphs.ForEach(m => {
+                    m.OverrideType = OverrideType.Ignore;
+                    m.overrideWeight = 0; 
+                    morphDic.Add((LiveTimelineDefine.FacialEyeId)m.index, m); 
+                });
+
                 foreach (var data in datalist)
                 {
-                    if (data.IsOnlyBaseReplace)
-                    {
-                        var replacemorph = GetMorphByType(morphs, data.BaseReplaceFaceType);
-                        var morph = morphs.Find(m => (m.weight > 0 && m != replacemorph));
-                        if (morph == null)
-                        {
-                            replacemorph.weight = 1;
-                            break;
-                        }
-                        replacemorph.weight = 0;
-                    }
-
+                    bool changed = false;
                     foreach (var arr in data.DataArray)
                     {
-                        List<Action> targetMorph = new List<Action>();
-                        bool changed = false;
                         foreach (var src in arr.SrcArray)
                         {
                             if (src == LiveTimelineDefine.FacialEyeId.Base) continue;
-                            var srcmorph = GetMorphByType(morphs, src);
-                            if (srcmorph.weight > 0 && !changed)
+                            if (morphDic[src].weight > 0 )
                             {
                                 foreach (var dst in arr.DstArray)
                                 {
-                                    var dm = GetMorphByType(morphs, dst.Index);
-                                    var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, srcmorph.weight));
-                                    targetMorph.Add(delegate () { dm.weight = weight; });
+                                    var dm = morphDic[dst.Index];
+                                    var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, morphDic[src].weight));
+                                    dm.overrideWeight += weight;
+                                    dm.OverrideType =  OverrideType.Override;
                                 }
+                                morphDic[src].OverrideType = OverrideType.Override;
                                 changed = true;
-                            }
-
-                            if (new List<FaceOverrideElement>(arr.DstArray).Find(f => f.Index == src) == null)
-                            {
-                                srcmorph.weight = 0;
+                                break;
                             }
                         }
-                        targetMorph.ForEach(a => a());
+                    }
+
+                    if (!changed && data.IsOnlyBaseReplace) 
+                    {
+                        var replacemorph = morphDic[data.BaseReplaceFaceType];
+                        replacemorph.overrideWeight += 1;
+                        replacemorph.OverrideType = OverrideType.Override;
                     }
                 }
+                morphs.ForEach(m=> { m.overrideWeight = Mathf.Clamp01(m.overrideWeight); });
             };
 
             if (overrideData.IsBothEyesSetting)
@@ -802,11 +790,6 @@ namespace Gallop
                 action.Invoke(leftEyeMorph, overrideData.FaceOverrideArray);
                 action.Invoke(rightEyeMorph, overrideData.FaceOverrideArray);
             }
-        }
-
-        public FacialMorph GetMorphByType(List<FacialMorph> morphs, LiveTimelineDefine.FacialEyeId Type)
-        {
-            return morphs.Find(m => m.index == (int)Type);
         }
 
         public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData _prevLipKeyData, LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
