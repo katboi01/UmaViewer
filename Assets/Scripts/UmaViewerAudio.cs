@@ -1,12 +1,9 @@
-using CriWare;
-using CriWareFormats;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking.Types;
-using static CriWare.CriAtomExCategory.ReactDuckerParameter;
 
 public class UmaViewerAudio
 {
@@ -14,37 +11,24 @@ public class UmaViewerAudio
     static UmaViewerMain Main => UmaViewerMain.Instance;
     public struct UmaSoundInfo
     {
-        public UmaDatabaseEntry acb;
         public UmaDatabaseEntry awb;
+    }
+
+    public class CuteAudioSource
+    {
+        public float volume;
+        public List<AudioSource> sourceList;
     }
 
     static public UmaSoundInfo getSoundPath(string name)
     {
         Debug.Log(name);
         UmaSoundInfo info;
-        info.acb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("acb"));
         info.awb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb"));
         return info;
     }
 
-    /*
-    static public CriAtomSource Apply(string cueName)
-    {
-        UmaSoundInfo soundInfo = getSoundPath(cueName);
-        CriAtom.AddCueSheet(cueName, soundInfo.acbPath, soundInfo.awbPath);
-
-        //´´½¨²¥·ÅÆ÷
-        CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
-        source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
-        source.cueSheet = cueName;
-
-        source.use3dPositioning = false;
-
-        return source;
-    }
-    */
-
-    static public List<AudioSource> ApplySound(string cueName)
+    static public CuteAudioSource ApplySound(string cueName)
     {
         UmaSoundInfo soundInfo = getSoundPath(cueName);
 
@@ -63,14 +47,36 @@ public class UmaViewerAudio
 
         Debug.Log(sourceList);
 
-        return sourceList;
+        CuteAudioSource cute = new CuteAudioSource
+        {
+            volume = 1,
+            sourceList = sourceList
+        };
+
+        return cute;
     }
 
-    public static void Play(List<AudioSource> sourceList)
+    public static void Play(CuteAudioSource sourceList)
     {
-        foreach(var source in sourceList)
+        foreach(var source in sourceList.sourceList)
         {
             source.Play();
+        }
+    }
+
+    public static void Stop(CuteAudioSource sourceList)
+    {
+        foreach (var source in sourceList.sourceList)
+        {
+            source.Stop();
+        }
+    }
+
+    public static void SetTime(CuteAudioSource sourceList, float time)
+    {
+        foreach (var source in sourceList.sourceList)
+        {
+            source.time = time;
         }
     }
 
@@ -81,7 +87,30 @@ public class UmaViewerAudio
         right = 2
     }
 
-    static public void AlterUpdate(float _liveCurrentTime, PartEntry partInfo, List<CriAtomSource> liveVocal)
+    public static void SetSelectorLabel(CuteAudioSource sourceList, int index)
+    {
+        for(int i = 0; i < sourceList.sourceList.Count; i++)
+        {
+            if(i != index)
+            {
+                sourceList.sourceList[i].volume = 0;
+            }
+            else
+            {
+                sourceList.sourceList[i].volume = 1;
+            }
+        }
+    }
+
+    public static void ApplyMainVolume(CuteAudioSource sourceList)
+    {
+        foreach (var source in sourceList.sourceList)
+        {
+            source.volume *= sourceList.volume;
+        }
+    }
+
+    static public void AlterUpdate(float _liveCurrentTime, PartEntry partInfo, List<CuteAudioSource> liveVocal)
     {
 
         var timeLineData = partInfo.PartSettings["time"];
@@ -101,7 +130,6 @@ public class UmaViewerAudio
         var useMixer = false;
 
         float _999_count = 0;
-
         bool _no999 = false;
 
         for (int i = 0; i < liveVocal.Count; i++)
@@ -119,7 +147,7 @@ public class UmaViewerAudio
                 else
                 {
                     liveVocal[i].volume = 1;
-                    liveVocal[i].player.SetSelectorLabel("BGM_Selector", $"SelectorLabel_{value-1}");
+                    SetSelectorLabel(liveVocal[i], Convert.ToInt32(value - 1));
                 }
 
                 
@@ -189,6 +217,11 @@ public class UmaViewerAudio
                     }
                     break;
             }
+        }
+
+        foreach(var cute in liveVocal)
+        {
+            ApplyMainVolume(cute);
         }
     }
 }

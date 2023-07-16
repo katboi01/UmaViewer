@@ -127,7 +127,6 @@ public class UmaViewerUI : MonoBehaviour
 
     public Color UIColor1, UIColor2;
 
-    public bool isCriware = false;
     public bool isHeadFix = false;
     public bool isTPose = false;
     public bool DynamicBoneEnable = true;
@@ -842,14 +841,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(LiveCharaSoundList.content, container);
-                if (isCriware)
-                {
-                    //Builder.LoadLiveSoundCri(songid, entry);
-                }
-                else
-                {
-                    Builder.LoadLiveSound(songid, entry);
-                }
+                Builder.LoadLiveSound(songid, entry);
             });
         }
 
@@ -1004,11 +996,6 @@ public class UmaViewerUI : MonoBehaviour
             pageentrys.Add(pageentry);
         }
         BackGroundPageCtrl.Initialize(pageentrys, BackGroundList);
-    }
-
-    public void SetCriWare(bool value)
-    {
-        isCriware = value;
     }
 
     public void SetHeadFix(bool value)

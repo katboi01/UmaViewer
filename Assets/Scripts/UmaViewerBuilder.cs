@@ -656,8 +656,6 @@ public class UmaViewerBuilder : MonoBehaviour
         GameObject Director = new GameObject("Director");
         List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
-                    GameObject.Find("CriWare"),
-                    GameObject.Find("CriWareLibraryInitializer"),
                     GameObject.Find("ViewerMain"),
                     GameObject.Find("Directional Light"),
                     GameObject.Find("GlobalShaderController"),
@@ -692,97 +690,11 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 Gallop.Live.Director.instance.InitializeUI();
                 Gallop.Live.Director.instance.InitializeTimeline(characters, UI.LiveMode);
-                Gallop.Live.Director.instance.Play(live.MusicId, characters);
+                Gallop.Live.Director.instance.InitializeMusic(live.MusicId, characters);
+                Gallop.Live.Director.instance.Play();
             }
         );
     }
-
-
-
-    //Use CriWare Library
-    /*
-    public CriAtomSource LoadLiveSoundCri(int songid, UmaDatabaseEntry SongAwb)
-    {
-        //清理
-        if (CurrentAudioSources.Count > 0)
-        {
-            var tmp = CurrentAudioSources[0];
-            CurrentAudioSources.Clear();
-            Destroy(tmp.gameObject);
-            UI.ResetAudioPlayer();
-        }
-
-        Debug.Log(SongAwb.Name);
-
-        //获取总线数
-
-        Debug.Log(CriAtomExAcf.GetNumDspSettings());
-
-        string busName = CriAtomExAcf.GetDspSettingNameByIndex(0);
-
-        var dspSetInfo = new CriAtomExAcf.AcfDspSettingInfo();
-
-
-
-        Debug.Log(CriAtomExAcf.GetDspSettingInformation(busName, out dspSetInfo));
-
-        Debug.Log(dspSetInfo.name);
-        Debug.Log(dspSetInfo.numExtendBuses);
-        Debug.Log(dspSetInfo.numBuses);
-        Debug.Log(dspSetInfo.numSnapshots);
-        Debug.Log(dspSetInfo.snapshotStartIndex);
-
-        var busInfo = new CriAtomExAcf.AcfDspBusInfo();
-
-        for(ushort i = 0; i < dspSetInfo.numExtendBuses; i++)
-        {
-            Debug.Log(i);
-            Debug.Log(CriAtomExAcf.GetDspBusInformation(i, out busInfo));
-
-            Debug.Log(busInfo.name);
-            Debug.Log(busInfo.volume);
-            Debug.Log(busInfo.numFxes);
-            Debug.Log(busInfo.numBusLinks);
-        }
-
-        //获取Acb文件和Awb文件的路径
-        string nameVar = SongAwb.Name.Split('.')[0].Split('/').Last();
-
-        //使用Live的Bgm
-        //nameVar = $"snd_bgm_live_{songid}_oke";
-
-        LoadSound Loader = (LoadSound)ScriptableObject.CreateInstance("LoadSound");
-        LoadSound.UmaSoundInfo soundInfo = Loader.getSoundPath(nameVar);
-
-        //音频组件添加路径，载入音频
-        CriAtom.AddCueSheet(nameVar, soundInfo.acbPath, soundInfo.awbPath);
-
-        //获得当前音频信息
-        CriAtomEx.CueInfo[] cueInfoList;
-        List<string> cueNameList = new List<string>();
-        cueInfoList = CriAtom.GetAcb(nameVar).GetCueInfoList();
-        foreach (CriAtomEx.CueInfo cueInfo in cueInfoList)
-        {
-            cueNameList.Add(cueInfo.name);
-            Debug.Log(cueInfo.type);
-            Debug.Log(cueInfo.userData);
-        }
-
-        //创建播放器
-        CriAtomSource source = new GameObject("CuteAudioSource").AddComponent<CriAtomSource>();
-        source.transform.SetParent(GameObject.Find("AudioManager/AudioControllerBgm").transform);
-        source.cueSheet = nameVar;
-
-        //播放
-        source.Play(cueNameList[0]);
-
-        return source;
-
-        //source.SetBusSendLevelOffset(1, 1);
-
-
-    }
-    */
 
     //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
@@ -1498,12 +1410,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         var firsehead = CurrentUMAContainer.Head;
-        var origin_faceDriven = firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"] as FaceDrivenKeyTarget;
-        var faceDriven = ScriptableObject.CreateInstance<FaceDrivenKeyTarget>();
-        faceDriven._eyebrowTarget = origin_faceDriven._eyebrowTarget;
-        faceDriven._eyeTarget = origin_faceDriven._eyeTarget;
-        faceDriven._mouthTarget = origin_faceDriven._mouthTarget;
-        faceDriven.name = $"char{id}_{costumeId}_face_target";
+        var faceDriven = Instantiate(firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"]) as FaceDrivenKeyTarget;
 
         var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
         var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
