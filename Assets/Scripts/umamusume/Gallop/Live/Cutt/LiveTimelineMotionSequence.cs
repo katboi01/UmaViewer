@@ -33,6 +33,9 @@ namespace Gallop.Live.Cutt
 
         private bool _motionSetup = false;
 
+        private int _curIndex = -1;
+        private int _prevIndex = -1;
+
         public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl, List<AnimationClip> animclips = null)
         {
             if(animclips != null)
@@ -91,7 +94,6 @@ namespace Gallop.Live.Cutt
                         _tempAnim.Play(_targetAnim.name);
                         _motionSetup = true;
                     }
-                    
                 }
                 return;
             }
@@ -100,7 +102,9 @@ namespace Gallop.Live.Cutt
             {
                 LiveTimelineKeyIndex curKey = LiveTimelineControl.AlterUpdate_Key(_currentKey, currentTime);
 
-                if (curKey != null && curKey.index != -1)
+                _curIndex = curKey.index;
+
+                if ((curKey != null && _curIndex != -1 && _curIndex != _prevIndex) || Director.instance.sliderControl.is_Touched || Director.instance._syncTime == false)
                 {
                     LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
 
@@ -111,6 +115,8 @@ namespace Gallop.Live.Cutt
                     _tempAnim[anim.name].time = (float)(start + interval);
                     _tempAnim.Play(anim.name);
                 }
+
+                _prevIndex = _curIndex;            
             }
         }
     }
