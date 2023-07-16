@@ -401,7 +401,7 @@ public class UmaContainer : MonoBehaviour
 
     public void SetNextAnimationCut(string cutName)
     {
-        var asset = UmaViewerMain.Instance.AbMotions.FirstOrDefault(a => a.Name.Equals(cutName));
+        UmaViewerMain.Instance.AbList.TryGetValue(cutName, out UmaDatabaseEntry asset);
         UmaViewerBuilder.Instance.RecursiveLoadAsset(asset);
     }
 

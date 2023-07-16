@@ -840,10 +840,10 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         Debug.Log("Loading " + entry.Name);
         var bundle = UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
-        LoadBundle(bundle, IsSubAsset, SetParent);
+        LoadBundle(entry, bundle, IsSubAsset, SetParent);
     }
 
-    private void LoadBundle(AssetBundle bundle, bool IsSubAsset = false, Transform SetParent = null)
+    private void LoadBundle(UmaDatabaseEntry entry, AssetBundle bundle, bool IsSubAsset = false, Transform SetParent = null)
     {
         if (bundle.name == "shader.a")
         {
@@ -870,7 +870,8 @@ public class UmaViewerBuilder : MonoBehaviour
             object asset = bundle.LoadAsset(name);
 
             if (asset == null) { continue; }
-            Debug.Log("Bundle:" + bundle.name + "/" + name + $" ({asset.GetType()})");
+            //Debug.Log("Bundle:" + bundle.name + "/" + name + $" ({asset.GetType()})");
+
             switch (asset)
             {
                 case AnimationClip aClip:
@@ -880,10 +881,11 @@ public class UmaViewerBuilder : MonoBehaviour
                             break;
                         }
 
-                        if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator && CurrentUMAContainer.UmaAnimator.runtimeAnimatorController)
+                        if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator)
                         {
                             Debug.Log("LiveTime" + UI.LiveTime.ToString());
-                            LoadAnimation(aClip);
+                            aClip.name = entry.Name; // Need a complete path to find dependencies
+                            LoadAnimation(aClip); 
                             break;
                         }
 
@@ -891,9 +893,11 @@ public class UmaViewerBuilder : MonoBehaviour
                         {
                             break;
                         }
-                        UmaAssetManager.UnloadAllBundle();
+
+                        //UmaAssetManager.UnloadAllBundle();
                         break;
                     }
+
                 case GameObject go:
                     {
                         if (bundle.name.Contains("cloth"))
@@ -937,12 +941,14 @@ public class UmaViewerBuilder : MonoBehaviour
                         }
                         break;
                     }
+
                 case Shader sha:
                     if (!ShaderList.Contains(sha))
                     {
                         ShaderList.Add(sha);
                     }
                     break;
+
                 case Texture2D tex2D:
 
                     if (bundle.name.Contains("/mini/head"))
@@ -1432,11 +1438,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     private void LoadAnimation(AnimationClip clip)
     {
-        if (clip.name.EndsWith("_S"))
+        if (clip.name.EndsWith("_s"))
         {
             CurrentUMAContainer.OverrideController["clip_s"] = clip;
         }
-        else if (clip.name.EndsWith("_E"))
+        else if (clip.name.EndsWith("_e"))
         {
             CurrentUMAContainer.OverrideController["clip_e"] = clip;
         }
@@ -1447,23 +1453,23 @@ public class UmaViewerBuilder : MonoBehaviour
             CurrentUMAContainer.OverrideController["clip_t"] = clip;
             CurrentUMAContainer.UmaAnimator.Play("motion_t", 1, 0);
         }
-        else if (clip.name.Contains("face"))
+        else if (clip.name.EndsWith("_face"))
         {
             if (CurrentUMAContainer.IsMini) return;
             LoadFaceAnimation(clip);
         }
-        else if (clip.name.Contains("ear"))
+        else if (clip.name.EndsWith("_ear"))
         {
             if (CurrentUMAContainer.IsMini) return;
             LoadEarAnimation(clip);
         }
-        else if (clip.name.Contains("pos"))
+        else if (clip.name.EndsWith("_pos"))
         {
             if (CurrentUMAContainer.IsMini) return;
             CurrentUMAContainer.OverrideController["clip_p"] = clip;
             CurrentUMAContainer.UmaAnimator.Play("motion_1", 2, 0);
         }
-        else if (clip.name.Contains("cam"))
+        else if (clip.name.EndsWith("_cam"))
         {
             SetPreviewCamera(clip);
         }
@@ -1476,40 +1482,36 @@ public class UmaViewerBuilder : MonoBehaviour
                 CurrentUMAContainer.isAnimatorControl = false;
             }
 
-            var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
-            if (facialMotion != null)
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry entry))
             {
-                RecursiveLoadAsset(facialMotion);
+                RecursiveLoadAsset(entry);
             }
-            var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
-            if (earMotion != null)
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out entry))
             {
-                RecursiveLoadAsset(earMotion);
+                RecursiveLoadAsset(entry);
             }
 
             UmaDatabaseEntry motion_e = null, motion_s = null;
-            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            if (motion_s != null)
+            if (Main.AbList.TryGetValue(clip.name.Replace("_loop", "_s"), out motion_s))
             {
                 RecursiveLoadAsset(motion_s);
             }
 
             if (CurrentUMAContainer.OverrideController["clip_2"].name.Contains("_loop"))
             {
-                motion_e = Main.AbMotions.FirstOrDefault(a =>
-                a.Name.EndsWith(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e"))
-                && !a.Name.Contains("hom_")); //home end animation not for interpolation
-
-                if (motion_e != null)
+                if (!CurrentUMAContainer.OverrideController["clip_2"].name.Contains("hom_"))//home end animation not for interpolation
                 {
-                    RecursiveLoadAsset(motion_e);
+                    if (Main.AbList.TryGetValue(CurrentUMAContainer.OverrideController["clip_2"].name.Replace("_loop", "_e"), out motion_e))
+                    {
+                        RecursiveLoadAsset(motion_e);
+                    }
                 }
             }
 
             SetPreviewCamera(null);
             CurrentUMAContainer.OverrideController["clip_1"] = CurrentUMAContainer.OverrideController["clip_2"];
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
-
             CurrentUMAContainer.UmaAnimator.Play("motion_1", -1, 0);
             CurrentUMAContainer.UmaAnimator.SetTrigger((motion_s != null && motion_e != null) ? "next_e" : ((motion_s != null) ? "next_s" : "next"));
         }
@@ -1526,27 +1528,22 @@ public class UmaViewerBuilder : MonoBehaviour
             // If Cut-in, play immediately without state interpolation
             if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
             {
-                var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
-                var cameraMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_cam"));
-                var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
-                var posMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_pos"));
-
-                if (facialMotion != null)
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
 
-                if (earMotion != null)
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
                 {
                     RecursiveLoadAsset(earMotion);
                 }
 
-                if (cameraMotion != null)
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/camera")}_cam", out UmaDatabaseEntry cameraMotion))
                 {
                     RecursiveLoadAsset(cameraMotion);
                 }
 
-                if (posMotion != null)
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
                 {
                     RecursiveLoadAsset(posMotion);
                 }
@@ -1556,29 +1553,40 @@ public class UmaViewerBuilder : MonoBehaviour
                     SetPreviewCamera(null);
                 }
 
-                if (clip.name.Contains("cti_crd"))
+                if (clip.name.Contains("_cti_crd"))
                 {
-                    string[] param = clip.name.Split('_');
+                    var dir = Path.GetDirectoryName(clip.name).Replace("\\","/");
+                    string[] param = Path.GetFileName(clip.name).Split('_');
                     if (param.Length > 4)
                     {
                         int index = int.Parse(param[4]);
                         if (index == 1)
                         {
-                            foreach (var entry in Main.AbMotions.Where(a => a.Name.Contains($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_")))
+                            var cur = index + 1;
+                            while (true)
                             {
-                                UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
+                                var nextSearch = $"{dir}/{param[0]}_{param[1]}_{param[2]}_{param[3]}_{ cur.ToString().PadLeft(2, '0')}";
+                                if (Main.AbList.TryGetValue(nextSearch, out UmaDatabaseEntry result))
+                                {
+                                    UmaAssetManager.LoadAssetBundle(result);
+                                    cur++;
+                                }
+                                else break;
                             }
                         }
-                        index++;
-                        var nextMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith($"{param[0]}_{param[1]}_{param[2]}_{param[3]}_0{index}"));
 
-                        var aevent = new AnimationEvent
+                        index++;
+                        var next = $"{dir}/{param[0]}_{param[1]}_{param[2]}_{param[3]}_{ index.ToString().PadLeft(2, '0')}";
+                        if (Main.AbList.TryGetValue(next, out UmaDatabaseEntry nextMotion))
                         {
-                            time = clip.length * 0.99f,
-                            stringParameter = (nextMotion != null ? nextMotion.Name : null),
-                            functionName = (nextMotion != null ? "SetNextAnimationCut" : "SetEndAnimationCut")
-                        };
-                        clip.AddEvent(aevent);
+                            var aevent = new AnimationEvent
+                            {
+                                time = clip.length * 0.99f,
+                                stringParameter = (nextMotion != null ? nextMotion.Name : null),
+                                functionName = (nextMotion != null ? "SetNextAnimationCut" : "SetEndAnimationCut")
+                            };
+                            clip.AddEvent(aevent);
+                        }
                     }
                 }
 
@@ -1589,13 +1597,12 @@ public class UmaViewerBuilder : MonoBehaviour
                 SetPreviewCamera(null);
 
                 //Some animations have facial animation
-                var facialMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_face"));
-                if (facialMotion != null)
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
                 {
                     RecursiveLoadAsset(facialMotion);
                 }
-                var earMotion = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name + "_ear"));
-                if (earMotion != null)
+
+                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
                 {
                     RecursiveLoadAsset(earMotion);
                 }
@@ -1607,11 +1614,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadFaceAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_S"))
+        if (clip.name.Contains("_s"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_s"] = clip;
         }
-        else if (clip.name.Contains("_E"))
+        else if (clip.name.Contains("_e"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_e"] = clip;
         }
@@ -1619,22 +1626,21 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             CurrentUMAContainer.isAnimatorControl = true;
             CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
-            UmaDatabaseEntry motion_e = null, motion_s = null;
-            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            if (motion_s != null)
+            UmaDatabaseEntry motion_e = null;
+            UmaDatabaseEntry motion_s = null;
+            if (Main.AbList.TryGetValue(clip.name.Replace("_loop", "_s"), out motion_s))
             {
                 RecursiveLoadAsset(motion_s);
             }
 
             if (CurrentUMAContainer.FaceOverrideController["clip_2"].name.Contains("_loop"))
             {
-                motion_e = Main.AbMotions.FirstOrDefault(a =>
-                a.Name.EndsWith(CurrentUMAContainer.FaceOverrideController["clip_2"].name.Replace("_loop", "_e"))
-                && !a.Name.Contains("hom_"));
-
-                if (motion_e != null)
+                if (!CurrentUMAContainer.FaceOverrideController["clip_2"].name.Contains("hom_"))//home end animation not for interpolation
                 {
-                    RecursiveLoadAsset(motion_e);
+                    if (Main.AbList.TryGetValue(CurrentUMAContainer.FaceOverrideController["clip_2"].name.Replace("_loop", "_e"), out motion_e))
+                    {
+                        RecursiveLoadAsset(motion_e);
+                    }
                 }
             }
 
@@ -1654,32 +1660,31 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadEarAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_S"))
+        if (clip.name.Contains("_s"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_s_ear"] = clip;
         }
-        else if (clip.name.Contains("_E"))
+        else if (clip.name.Contains("_e"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_e_ear"] = clip;
         }
         else if (clip.name.Contains("_loop"))
         {
-            UmaDatabaseEntry motion_e = null, motion_s = null;
-            motion_s = Main.AbMotions.FirstOrDefault(a => a.Name.EndsWith(clip.name.Replace("_loop", "_s")));
-            if (motion_s != null)
+            UmaDatabaseEntry motion_e = null;
+            UmaDatabaseEntry motion_s = null;
+            if (Main.AbList.TryGetValue(clip.name.Replace("_loop", "_s"), out motion_s))
             {
                 RecursiveLoadAsset(motion_s);
             }
 
             if (CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Contains("_loop"))
             {
-                motion_e = Main.AbMotions.FirstOrDefault(a =>
-                a.Name.EndsWith(CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Replace("_loop", "_e"))
-                && !a.Name.Contains("hom_"));
-
-                if (motion_e != null)
+                if (!CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Contains("hom_"))//home end animation not for interpolation
                 {
-                    RecursiveLoadAsset(motion_e);
+                    if (Main.AbList.TryGetValue(CurrentUMAContainer.FaceOverrideController["clip_2_ear"].name.Replace("_loop", "_e"), out motion_e))
+                    {
+                        RecursiveLoadAsset(motion_e);
+                    }
                 }
             }
 
