@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Viking Shield and Axe
   m_Shader: {fileID: 6, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: 
@@ -28,6 +29,7 @@ Material:
     - _Color: {r: 0.6911765, g: 0.6911765, b: 0.6911765, a: 1}
     - _Emission: {r: 0.1397059, g: 0.1397059, b: 0.1397059, a: 0}
     - _SpecColor: {r: 0.30980393, g: 0.30980393, b: 0.30980393, a: 1}
+  m_BuildTextureStacks: []
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6

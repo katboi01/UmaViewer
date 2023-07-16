@@ -68,6 +68,7 @@ MonoBehaviour:
   Text: {fileID: 1349694594143736175}
   Button: {fileID: 4701344421301256321}
   Slider: {fileID: 0}
+  Toggle: {fileID: 0}
   Image: {fileID: 2042513854733717578}
   ToggleImage: {fileID: 711352666123214694}
 --- !u!114 &6355100493817770452
@@ -90,7 +91,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 9a444f34ba8719a4083a94891d66b364, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -99,7 +100,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!1 &2491819406042194125
 GameObject:
   m_ObjectHideFlags: 0

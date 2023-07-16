@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: PalletteSkeletons
   m_Shader: {fileID: 6, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: 
@@ -28,3 +29,4 @@ Material:
     - _Color: {r: 0.91791046, g: 0.91791046, b: 0.91791046, a: 1}
     - _Emission: {r: 0.12686568, g: 0.12686568, b: 0.12686568, a: 0}
     - _SpecColor: {r: 0.47761196, g: 0.47761196, b: 0.47761196, a: 1}
+  m_BuildTextureStacks: []

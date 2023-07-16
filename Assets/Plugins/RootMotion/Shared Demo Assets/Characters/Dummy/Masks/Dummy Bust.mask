@@ -3,8 +3,9 @@
 --- !u!319 &101100000
 AvatarMask:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Dummy Bust
   m_Mask: 00000000000000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
   m_Elements:

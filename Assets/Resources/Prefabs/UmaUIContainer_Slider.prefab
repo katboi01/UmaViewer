@@ -158,8 +158,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 41ee5478b51c9274b960c151ad9c4a40, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -185,7 +185,9 @@ MonoBehaviour:
   Text: {fileID: 0}
   Button: {fileID: 0}
   Slider: {fileID: 9166705304021389345}
+  Toggle: {fileID: 0}
   Image: {fileID: 0}
+  ToggleImage: {fileID: 0}
 --- !u!1 &694429400078501214
 GameObject:
   m_ObjectHideFlags: 0

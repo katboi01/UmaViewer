@@ -251,6 +251,8 @@ MonoBehaviour:
   m_EndOffset: {x: -0.1, y: -0.1, z: 0.3}
   m_Gravity: {x: 0, y: 0, z: 0}
   m_Force: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Min: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Max: {x: 0, y: 0, z: 0}
   m_Exclusions: []
   m_FreezeAxis: 0
   m_DistantDisable: 0
@@ -326,6 +328,8 @@ MonoBehaviour:
   m_EndOffset: {x: 0.1, y: -0.1, z: 0.3}
   m_Gravity: {x: 0, y: 0, z: 0}
   m_Force: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Min: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Max: {x: 0, y: 0, z: 0}
   m_Exclusions: []
   m_FreezeAxis: 0
   m_DistantDisable: 0
@@ -410,6 +414,8 @@ MonoBehaviour:
   m_EndOffset: {x: 0, y: 0, z: 0}
   m_Gravity: {x: 0, y: -0.002, z: 0}
   m_Force: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Min: {x: 0, y: 0, z: 0}
+  m_LimitAngel_Max: {x: 0, y: 0, z: 0}
   m_Exclusions: []
   m_FreezeAxis: 0
   m_DistantDisable: 0

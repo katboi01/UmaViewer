@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Mech Spider
   m_Shader: {fileID: 12, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: 
@@ -42,3 +43,4 @@ Material:
     - _Color: {r: 0.52205884, g: 0.52205884, b: 0.52205884, a: 1}
     - _Emission: {r: 0.09534419, g: 0.1077942, b: 0.119403005, a: 0}
     - _SpecColor: {r: 0.7164179, g: 0.7164179, b: 0.7164179, a: 1}
+  m_BuildTextureStacks: []
