@@ -176,6 +176,7 @@ namespace Gallop.Live
         [SerializeField] 
         private GameObject[] _cameraNodes; 
         private Camera[] _cameraObjects; 
+        private Transform[] _cameraTransforms;
         private CameraEventCallback[] _cameraEventCallbackArray; 
         private GameObject _transparentCameraObject; 
         private Camera _transparentCamera; 
@@ -194,7 +195,7 @@ namespace Gallop.Live
         private HandShakeCamera _handShakeCamera; 
         private int _activeCameraIndex; 
         private readonly int kMotionCameraIndex; 
-        private readonly int[] kTimelineCameraIndices; 
+        private readonly int[] kTimelineCameraIndices = new int[3] { 1, 2, 3 }; 
         //private GallopFrameBuffer _frameBuffer; 
         //private LowResolutionCameraFrameBuffer[] _lowResolutionCameraArray; 
         private Camera _mainCameraObject; 
@@ -317,6 +318,8 @@ namespace Gallop.Live
 
         public List<Transform> charaObjs;
 
+        public List<UmaContainer> CharaContainerScript = new List<UmaContainer>(); 
+
         public List<Animation> charaAnims;
 
         public List<LiveTimelineCharaMotSeqData> seqData;
@@ -344,7 +347,32 @@ namespace Gallop.Live
 
         public SliderControl sliderControl;
 
-        private void Awake()
+        public bool isTimelineControlled
+        {
+            get
+            {
+                if (_liveTimelineControl != null)
+                {
+                    return _liveTimelineControl.data != null;
+                }
+                return false;
+            }
+        }
+
+        public float CalcFrameJustifiedMusicTime()
+        {
+            if (isTimelineControlled)
+            {
+                return (float)Mathf.RoundToInt(musicScoreTime * 60f) / 60f;
+            }
+            return musicScoreTime;
+        }
+
+        public float musicScoreTime => Mathf.Clamp(smoothMusicScoreTime, 0f, 99999f);
+
+        private float smoothMusicScoreTime => _liveCurrentTime;//temp to liveCurrentTime
+
+        public void Initialize()
         {
             if (live != null)
             {
@@ -380,7 +408,6 @@ namespace Gallop.Live
 
             }
         }
-
 
         public void InitializeUI()
         {
@@ -418,9 +445,9 @@ namespace Gallop.Live
                 var nextKey = keyData_.nextKey as LiveTimelineKeyLipSyncData;
                 for (int k = 0; k < charaObjs.Count; k++)
                 {
-                    var container = charaObjs[k].GetComponentInChildren<UmaContainer>();
-                    if(container != null)
+                    if(k < CharaContainerScript.Count)
                     {
+                        var container = CharaContainerScript[k];
                         container.FaceDrivenKeyTarget.AlterUpdateAutoLip(prevKey, curKey, liveTime_, ((int)curKey.character >> k) % 2);
                     }
                 }
@@ -429,10 +456,83 @@ namespace Gallop.Live
             {
                 if( position < charaObjs.Count)
                 {
-                    var container = charaObjs[position].GetComponentInChildren<UmaContainer>();
+                    var container = CharaContainerScript[position];
                     container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
                 }
             };
+            SetupCharacterLocator();
+            InitializeCamera();
+            UpdateMainCamera();
+            for (int i = 0; i < kTimelineCameraIndices.Length; i++)
+            {
+                int num = kTimelineCameraIndices[i];
+                if (num < _cameraObjects.Length)
+                {
+                    _liveTimelineControl.SetTimelineCamera(_cameraObjects[num], i);
+                }
+            }
+            
+            _liveTimelineControl.OnUpdateCameraSwitcher += delegate (int cameraIndex_)
+            {
+                if (cameraIndex_ < 0)
+                {
+                    _activeCameraIndex = 0;
+                }
+                else if (cameraIndex_ < kTimelineCameraIndices.Length)
+                {
+                    _activeCameraIndex = kTimelineCameraIndices[cameraIndex_];
+                }
+            };
+        }
+
+        public void InitializeCamera()
+        {
+            if (_cameraObjects == null)
+            {
+                _cameraObjects = new Camera[_cameraNodes.Length + 1];
+                _cameraTransforms = new Transform[_cameraNodes.Length + 1];
+                for (int i = 0; i < _cameraNodes.Length; i++)
+                {
+                    GameObject gameObject = _cameraNodes[i];
+                    Camera camera = gameObject.GetComponent<Camera>();
+                    if (camera == null)
+                    {
+                        camera = gameObject.GetComponentInChildren<Camera>();
+                    }
+                    //camera.cullingMask = num;
+                    _cameraObjects[i] = camera;
+                    _cameraTransforms[i] = camera.transform;
+                }
+            }
+        }
+
+        private void UpdateMainCamera()
+        {
+            if (_cameraObjects == null) return;
+            for (int i = 0; i < _cameraNodes.Length; i++)
+            {
+                bool activeSelf = _cameraNodes[i].activeSelf;
+                bool flag = i == _activeCameraIndex;
+                _cameraNodes[i].SetActive(flag);
+                if (i == 0 && activeSelf != flag && flag && _cameraLookAt != null)
+                {
+                    _cameraLookAt.ActivationUpdate();
+                }
+            }
+            _mainCameraObject = _cameraObjects[_activeCameraIndex];
+            _mainCameraTransform = _cameraTransforms[_activeCameraIndex];
+        }
+
+        private void SetupCharacterLocator()
+        {
+            if (!_liveTimelineControl) return;
+            for (int i = 0; i < CharaContainerScript.Count; i++) 
+            {
+                var container = CharaContainerScript[i];
+                container.LiveLocator = new LiveTimelineCharaLocator(container);
+                _liveTimelineControl.liveCharactorLocators[i] = container.LiveLocator;
+                container.LiveLocator.liveCharaInitialPosition = container.transform.position;
+            }
         }
 
         public void InitializeMusic(int songid, List<LiveCharacterSelect> characters)
@@ -445,7 +545,6 @@ namespace Gallop.Live
             {
                 singer = 1;
             }
-
 
             for (int i = 0; i < characters.Count; i++)
             {
@@ -478,8 +577,6 @@ namespace Gallop.Live
 
             liveMusic = UmaViewerAudio.ApplySound(string.Format(SONG_PATH, songid));
         }
-
-
 
         public void Play()
         {
@@ -582,6 +679,12 @@ namespace Gallop.Live
                     }  
                 }
             }
+            UpdateMainCamera();
+        }
+
+        private void LateUpdate()
+        {
+            _liveTimelineControl.AlterLateUpdate();
         }
     }
 

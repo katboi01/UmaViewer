@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Gallop.Cutt.Util;
-using Cutt;
+using Gallop.Live.Cutt;
 
 namespace Gallop.Live.Cutt
 {

@@ -10,7 +10,6 @@ namespace Gallop.Live.Cutt
         public bool enable;
         public float fov;
         public float roll;
-        public LiveCameraCullingLayer cullingMask;
     }
 
     [System.Serializable]

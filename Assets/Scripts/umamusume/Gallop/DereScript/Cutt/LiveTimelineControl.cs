@@ -5211,7 +5211,7 @@ namespace Cutt
             int count = sheet.monitorCameraPosKeys.Count;
             for (int i = 0; i < count; i++)
             {
-                LiveTimelineKeyMonitorCameraPositionDataList keys = sheet.monitorCameraPosKeys[i].keys;
+                DereLiveTimelineKeyMonitorCameraPositionDataList keys = sheet.monitorCameraPosKeys[i].keys;
                 if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode) || _arrMonitorCameraCache.Length <= i)
                 {
                     continue;

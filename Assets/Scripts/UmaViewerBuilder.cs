@@ -12,6 +12,7 @@ using UmaMusumeAudio;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 public class UmaViewerBuilder : MonoBehaviour
 {
@@ -45,6 +46,8 @@ public class UmaViewerBuilder : MonoBehaviour
     public AnimatorOverrideController CameraOverrideController;
     public Animator AnimationCameraAnimator;
     public Camera AnimationCamera;
+
+    public GameObject LiveControllerPrefab;
 
     private bool ShadersLoaded = false;
 
@@ -106,6 +109,8 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
                     LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
                 }
+
+                Gallop.Live.Director.instance.CharaContainerScript.Add(CurrentUMAContainer);
             }
         }
     }
@@ -652,15 +657,18 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(LiveEntry live, List<LiveCharacterSelect> characters)
     {
-        GameObject MainLive = new GameObject("Live");
-        GameObject Director = new GameObject("Director");
+        GameObject MainLive = Instantiate(LiveControllerPrefab);
+        Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
+        mController.live = live;
+        mController.Initialize();
+
         List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
                     GameObject.Find("ViewerMain"),
                     GameObject.Find("Directional Light"),
                     GameObject.Find("GlobalShaderController"),
                     GameObject.Find("AudioManager")
-                };
+        };
 
         UmaSceneController.LoadScene("LiveScene",
             delegate ()
@@ -672,16 +680,10 @@ public class UmaViewerBuilder : MonoBehaviour
                 {
                     if (a.CharaEntry == null || a.CostumeId == "")
                     {
-                        //a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count)];
-                        //a.CostumeId = "00";
+                        a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count/2)];
+                        a.CostumeId = "00";
                     }
                 });//fill empty
-
-                Gallop.Live.Director mController = Director.AddComponent<Gallop.Live.Director>();
-                mController.live = live;
-                Instantiate(mController, MainLive.transform);
-
-                Destroy(Director);
 
                 LoadLiveUma(characters);
 

@@ -1,4 +1,5 @@
 using Gallop;
+using Gallop.Live.Cutt;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
 using System;
@@ -79,6 +80,7 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Live")]
     public bool IsLive = false;
+    public LiveTimelineCharaLocator LiveLocator;
 
     [Header("Other")]
     public CharaShaderEffectData ShaderEffectData;
