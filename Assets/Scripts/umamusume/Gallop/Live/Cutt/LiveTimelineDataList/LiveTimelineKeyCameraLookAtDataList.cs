@@ -87,16 +87,16 @@ namespace Gallop.Live.Cutt
 
         protected virtual Vector3 GetValue(LiveTimelineControl timelineControl, LiveCameraLookAtType type, Vector3 camPos, bool containOffset)
         {
-            Vector3 vector = Vector3.zero;
+            Vector3 vector = position;
             switch (type)
             {
                 case LiveCameraLookAtType.Character:
-                    vector += timelineControl.GetPositionWithCharacters(lookAtCharaPos, lookAtCharaParts);
+                    vector += timelineControl.GetPositionWithCharacters(lookAtCharaPos, lookAtCharaParts, charaPos);
                     break;
                 case LiveCameraLookAtType.Direct:
                     {
-                        Vector3 vector2 = Quaternion.Euler(rotation) * Vector3.forward * eyeLength;
-                        vector = camPos + vector2;
+                        //Vector3 vector2 = Quaternion.Euler(rotation) * Vector3.forward * eyeLength;
+                        //vector = camPos + vector2;
                         break;
                     }
             }

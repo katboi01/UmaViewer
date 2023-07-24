@@ -676,14 +676,16 @@ public class UmaViewerBuilder : MonoBehaviour
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
 
+                
                 characters.ForEach(a =>
                 {
                     if (a.CharaEntry == null || a.CostumeId == "")
                     {
                         a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count/2)];
-                        a.CostumeId = "00";
+                        a.CostumeId = "0002_00_00";
                     }
                 });//fill empty
+                
 
                 LoadLiveUma(characters);
 

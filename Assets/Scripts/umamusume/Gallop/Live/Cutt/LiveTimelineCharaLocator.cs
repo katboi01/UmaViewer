@@ -24,9 +24,10 @@ namespace Gallop.Live.Cutt
                     Bones.Add(bone.name, bone);
                 }
             }
-            HeadHeght = Bones["Position"].InverseTransformPoint(Bones["Head"].position).y;
-            WaistHeght = Bones["Position"].InverseTransformPoint(Bones["Waist"].position).y;
-            ChestHeght = Bones["Position"].InverseTransformPoint(Bones["Chest"].position).y;
+            HeadHeght = (Bones["Position"].InverseTransformPoint(Bones["Head"].position).y + UmaContainer.EyeHeight) * UmaContainer.BodyScale;
+            WaistHeght = Bones["Position"].InverseTransformPoint(Bones["Waist"].position).y * UmaContainer.BodyScale;
+            ChestHeght = Bones["Position"].InverseTransformPoint(Bones["Chest"].position).y * UmaContainer.BodyScale;
+            Debug.Log($"InfoChara {UmaContainer.CharaEntry.Name}: {HeadHeght}, {WaistHeght}, {ChestHeght}");
         }
 
         float HeadHeght;
@@ -59,19 +60,19 @@ namespace Gallop.Live.Cutt
 
         public Vector3 liveCharaChestPosition => Bones["Chest"].position;
 
-        public Vector3 liveCharaFootPosition => new Vector3(liveCharaChestPosition.x, 0, liveCharaChestPosition.y);
+        public Vector3 liveCharaFootPosition => new Vector3(liveCharaChestPosition.x, 0, liveCharaChestPosition.z);
 
-        public Vector3 liveCharaConstHeightHeadPosition => new Vector3(liveCharaInitialPosition.x, HeadHeght, liveCharaInitialPosition.y);
+        public Vector3 liveCharaConstHeightHeadPosition => new Vector3(liveCharaInitialPosition.x, HeadHeght, liveCharaInitialPosition.z);
 
-        public Vector3 liveCharaConstHeightWaistPosition => new Vector3(liveCharaInitialPosition.x, WaistHeght, liveCharaInitialPosition.y);
+        public Vector3 liveCharaConstHeightWaistPosition => new Vector3(liveCharaInitialPosition.x, WaistHeght, liveCharaInitialPosition.z);
 
-        public Vector3 liveCharaConstHeightChestPosition => new Vector3(liveCharaInitialPosition.x, ChestHeght, liveCharaInitialPosition.y);
+        public Vector3 liveCharaConstHeightChestPosition => new Vector3(liveCharaInitialPosition.x, ChestHeght, liveCharaInitialPosition.z);
 
-        public Vector3 liveCharaInitialHeightHeadPosition => throw new NotImplementedException();
+        public Vector3 liveCharaInitialHeightHeadPosition => new Vector3(liveCharaInitialPosition.x, HeadHeght, liveCharaInitialPosition.z);
 
-        public Vector3 liveCharaInitialHeightWaistPosition => throw new NotImplementedException();
+        public Vector3 liveCharaInitialHeightWaistPosition => new Vector3(liveCharaInitialPosition.x, WaistHeght, liveCharaInitialPosition.z);
 
-        public Vector3 liveCharaInitialHeightChestPosition => throw new NotImplementedException();
+        public Vector3 liveCharaInitialHeightChestPosition => new Vector3(liveCharaInitialPosition.x, ChestHeght, liveCharaInitialPosition.z);
 
         public Vector3 liveCharaScale => Bones["Position"].localScale;
 

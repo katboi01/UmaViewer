@@ -560,6 +560,8 @@ namespace Gallop.Live.Cutt
             return curKey;
         }
 
+        //**************************************//
+
         public MultiCameraManager GetMultiCameraManager()
         {
             return _multiCameraManager;
@@ -588,7 +590,7 @@ namespace Gallop.Live.Cutt
             return liveCharactorLocators[(int)position].liveCharaHeightValue;
         }
 
-        public Vector3 GetPositionWithCharacters(LiveCharaPositionFlag posFlags, LiveCameraCharaParts parts, Vector3 cameraOffset)
+        public Vector3 GetPositionWithCharacters(LiveCharaPositionFlag posFlags, LiveCameraCharaParts parts, Vector3 charaPos, Vector3 cameraOffset)
         {
             Vector3 retPos = Vector3.zero;
             Vector3 tmpPos = Vector3.zero;
@@ -714,6 +716,7 @@ namespace Gallop.Live.Cutt
                                 {
                                     retPos += liveCharactorLocators[i].liveCharaConstHeightHeadPosition;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
+                                    retPos += charaPos;
                                     num++;
                                 }
                             }
@@ -727,6 +730,7 @@ namespace Gallop.Live.Cutt
                                 {
                                     retPos += liveCharactorLocators[i].liveCharaConstHeightWaistPosition;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
+                                    retPos += charaPos;
                                     num++;
                                 }
                             }
@@ -740,6 +744,21 @@ namespace Gallop.Live.Cutt
                                 {
                                     retPos += liveCharactorLocators[i].liveCharaConstHeightChestPosition;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
+                                    retPos += charaPos;
+                                    num++;
+                                }
+                            }
+                            break;
+                        }
+                    case LiveCameraCharaParts.ConstFootHeight:
+                        {
+                            for (int i = 0; i < liveCharaPositionMax; i++)
+                            {
+                                if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
+                                {
+                                    retPos += liveCharactorLocators[i].liveCharaFootPosition;
+                                    retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
+                                    retPos += charaPos;
                                     num++;
                                 }
                             }
@@ -751,11 +770,17 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
+                                    /*
                                     retPos += liveCharactorLocators[i].liveCharaHeadPosition;
                                     tmpPos += liveCharactorLocators[i].liveCharaConstHeightHeadPosition;
                                     Vector3 vector3 = cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += vector3;
                                     tmpPos += vector3;
+                                    num++;
+                                    */
+
+                                    retPos += liveCharactorLocators[i].liveCharaInitialHeightHeadPosition;
+                                    retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     num++;
                                 }
                             }
@@ -767,11 +792,17 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
+                                    /*
                                     retPos += liveCharactorLocators[i].liveCharaChestPosition;
                                     tmpPos += liveCharactorLocators[i].liveCharaConstHeightChestPosition;
                                     Vector3 vector2 = cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += vector2;
                                     tmpPos += vector2;
+                                    num++;
+                                    */
+
+                                    retPos += liveCharactorLocators[i].liveCharaInitialHeightChestPosition;
+                                    retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     num++;
                                 }
                             }
@@ -783,11 +814,17 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
+                                    /*
                                     retPos += liveCharactorLocators[i].liveCharaWaistPosition;
                                     tmpPos += liveCharactorLocators[i].liveCharaConstHeightWaistPosition;
                                     Vector3 vector = cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += vector;
                                     tmpPos += vector;
+                                    num++;
+                                    */
+
+                                    retPos += liveCharactorLocators[i].liveCharaInitialHeightWaistPosition;
+                                    retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     num++;
                                 }
                             }
@@ -799,6 +836,7 @@ namespace Gallop.Live.Cutt
                 {
                     retPos /= (float)num;
                 }
+                /*
                 if ((uint)(parts - 11) <= 2u)
                 {
                     if (flag)
@@ -807,13 +845,14 @@ namespace Gallop.Live.Cutt
                     }
                     retPos.y = tmpPos.y;
                 }
+                */
             }
             return retPos;
         }
 
-        public Vector3 GetPositionWithCharacters(LiveCharaPositionFlag posFlags, LiveCameraCharaParts parts)
+        public Vector3 GetPositionWithCharacters(LiveCharaPositionFlag posFlags, LiveCameraCharaParts parts, Vector3 charaPos)
         {
-            return GetPositionWithCharacters(posFlags, parts, _cameraLayerOffset);
+            return GetPositionWithCharacters(posFlags, parts, charaPos, _cameraLayerOffset);
         }
 
         public static float CalculateInterpolationValue(LiveTimelineKey curKey, LiveTimelineKeyWithInterpolate nextKey, int frame)
@@ -931,6 +970,10 @@ namespace Gallop.Live.Cutt
             if (CalculateCameraPos(out var pos, sheet, curKey, nextKey, currentFrame))
             {
                 camera.cacheTransform.position = pos;
+
+
+                //
+                /*
                 int num = liveTimelineKeyCameraPositionData.GetCullingMask();
                 if (num == 0)
                 {
@@ -944,6 +987,7 @@ namespace Gallop.Live.Cutt
                     updateInfo.characterLODMask = (int)liveTimelineKeyCameraPositionData.characterLODMask;
                     OnUpdateCameraPos(ref updateInfo);
                 }
+                */
             }
         }
 
@@ -1448,8 +1492,11 @@ namespace Gallop.Live.Cutt
         {
             return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
         }
+
+
+        //**************************************//
     }
 
-    
+
 }
 

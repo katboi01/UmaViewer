@@ -380,7 +380,7 @@ namespace Gallop.Live
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
                 Debug.Log(live.BackGroundId);
                 Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), this.gameObject.transform);
-                //Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
+                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
 
                 //Make CharacterObject
                 
@@ -674,7 +674,7 @@ namespace Gallop.Live
 
                         UI.ProgressBar.value = _liveCurrentTime / totalTime;
                         //Debug.Log((float)liveMusic.time / 1000);
-                        //Debug.Log(_liveCurrentTime * 60);
+                        Debug.Log(_liveCurrentTime * 60);
                         OnTimelineUpdate(_liveCurrentTime);
                     }  
                 }

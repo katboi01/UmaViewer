@@ -711,7 +711,7 @@ namespace Gallop.Live.Cutt
                     vector += posDirect;
                     break;
                 case LiveCameraPositionType.Character:
-                    vector += timelineControl.GetPositionWithCharacters(charaRelativeBase, charaRelativeParts);
+                    vector += timelineControl.GetPositionWithCharacters(charaRelativeBase, charaRelativeParts, charaPos);
                     break;
             }
             if (!containOffset)
