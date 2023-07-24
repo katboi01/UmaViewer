@@ -312,6 +312,9 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.SetHeight(-1);
         CurrentUMAContainer.Initialize(!UI.isTPose);
+
+        CurrentUMAContainer.Position = CurrentUMAContainer.transform.Find("Position");
+
         if (!UI.isTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/chara/chr{id}_00/anm_eve_chr{id}_00_idle01_loop", out UmaDatabaseEntry entry))
@@ -529,6 +532,8 @@ public class UmaViewerBuilder : MonoBehaviour
         CurrentUMAContainer.MergeModel();
         CurrentUMAContainer.SetHeight(-1);
         CurrentUMAContainer.Initialize(!UI.isTPose);
+
+        CurrentUMAContainer.Position = CurrentUMAContainer.transform.Find("Position");
 
         if (!UI.isTPose && loadMotion)
         {

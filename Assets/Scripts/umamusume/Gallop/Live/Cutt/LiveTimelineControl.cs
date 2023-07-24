@@ -524,8 +524,26 @@ namespace Gallop.Live.Cutt
             LiveTimelineKeyFormationOffsetData curKey = curKeyIndex.key as LiveTimelineKeyFormationOffsetData;
             LiveTimelineKeyFormationOffsetData nextKey = curKeyIndex.nextKey as LiveTimelineKeyFormationOffsetData;
 
-            Director.instance.charaObjs[targetIndex].position = curKey.Position;
-            Director.instance.charaObjs[targetIndex].localScale = (curKey.visible ? Vector3.one : Vector3.zero);
+            Director.instance.CharaContainerScript[targetIndex].transform.localScale = (curKey.visible ? Vector3.one : Vector3.zero);
+
+            if (curKey.visible)
+            {
+                if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
+                {
+                    float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
+                    Director.instance.CharaContainerScript[targetIndex].transform.position = Vector3.Slerp(curKey.Position, nextKey.Position, ratio);
+                    var x = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.x;
+                    var z = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.z;
+                    Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles = Vector3.Slerp(new Vector3(x, curKey.LocalRotationY, z), new Vector3(x, nextKey.LocalRotationY, z), ratio);
+                }
+                else
+                {
+                    Director.instance.CharaContainerScript[targetIndex].transform.position = curKey.Position;
+                    var x = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.x;
+                    var z = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.z;
+                    Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles = new Vector3(x, curKey.LocalRotationY, z);
+                }
+            }
         }
 
         public static void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, int curFrame)
@@ -855,7 +873,7 @@ namespace Gallop.Live.Cutt
             return GetPositionWithCharacters(posFlags, parts, charaPos, _cameraLayerOffset);
         }
 
-        public static float CalculateInterpolationValue(LiveTimelineKey curKey, LiveTimelineKeyWithInterpolate nextKey, int frame)
+        public static float CalculateInterpolationValue(LiveTimelineKey curKey, LiveTimelineKeyWithInterpolate nextKey, float frame)
         {
             float result = 0f;
             switch (nextKey.interpolateType)

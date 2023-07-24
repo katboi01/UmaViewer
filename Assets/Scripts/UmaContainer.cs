@@ -19,6 +19,8 @@ public class UmaContainer : MonoBehaviour
     public GameObject Head;
     public GameObject Hair;
 
+    public Transform Position;
+
     public List<Texture2D> TailTextures = new List<Texture2D>();
 
     [Header("Animator")]
