@@ -195,7 +195,60 @@ namespace Gallop.Live.Cutt
 
         public int depthCounter => 0;
 
+        //TO DO -> binary search algorithm
         public LiveTimelineKeyIndex FindCurrentKey(float currentTime)
+        {
+            if(thisList.Count > 0)
+            {
+                int ret = BinarySearchKey(0, thisList.Count - 1, currentTime);
+                thisTimeKeyIndex.index = ret;
+                thisTimeKeyIndex.key = thisList[ret];
+
+                if (ret + 1 != thisList.Count)
+                {
+                    thisTimeKeyIndex.nextKey = thisList[ret + 1];
+                }
+                else
+                {
+                    thisTimeKeyIndex.nextKey = null;
+                }
+                if (ret - 1 >= 0)
+                {
+                    thisTimeKeyIndex.prevKey = thisList[ret - 1];
+                }
+                else
+                {
+                    thisTimeKeyIndex.prevKey = null;
+                }
+                return thisTimeKeyIndex;
+            }
+
+            return null;
+        }
+
+        public int BinarySearchKey(int low, int high, float time)
+        {
+            float frame = time * 60;
+            int mid = (low + high) / 2;
+
+            if (low == high || (frame >= thisList[mid].frame && frame < thisList[mid + 1].frame))
+            {
+                return mid;
+            }
+            else
+            {
+                if(frame >= thisList[mid].frame)
+                {
+                    return BinarySearchKey(mid + 1, high, time);
+                }
+                else
+                {
+                    return BinarySearchKey(low, mid - 1, time);
+                }
+            } 
+        }
+
+        public LiveTimelineKeyIndex FindCurrentKeyLinear(float currentTime)
         {
             for (int i = thisList.Count - 1; i >= 0; i--)
             {
@@ -222,6 +275,7 @@ namespace Gallop.Live.Cutt
                     return thisTimeKeyIndex;
                 }
             }
+
             return null;
         }
 
