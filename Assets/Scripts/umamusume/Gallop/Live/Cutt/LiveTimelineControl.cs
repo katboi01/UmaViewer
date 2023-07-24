@@ -524,24 +524,34 @@ namespace Gallop.Live.Cutt
             LiveTimelineKeyFormationOffsetData curKey = curKeyIndex.key as LiveTimelineKeyFormationOffsetData;
             LiveTimelineKeyFormationOffsetData nextKey = curKeyIndex.nextKey as LiveTimelineKeyFormationOffsetData;
 
-            Director.instance.CharaContainerScript[targetIndex].transform.localScale = (curKey.visible ? Vector3.one : Vector3.zero);
+            var chara = Director.instance.CharaContainerScript[targetIndex];
+            if (!chara) return;
+
+            chara.Materials.ForEach(m=> 
+                { 
+                    foreach(var key in m.Renderers.Keys)
+                    {
+                        key.gameObject.SetActive(curKey.visible);
+                    }
+                }
+            );
 
             if (curKey.visible)
             {
                 if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
-                    Director.instance.CharaContainerScript[targetIndex].transform.position = Vector3.Slerp(curKey.Position, nextKey.Position, ratio);
-                    var x = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.x;
-                    var z = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.z;
-                    Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles = Vector3.Slerp(new Vector3(x, curKey.LocalRotationY, z), new Vector3(x, nextKey.LocalRotationY, z), ratio);
+                    chara.transform.position = Vector3.Slerp(curKey.Position, nextKey.Position, ratio);
+                    var x = chara.Position.localEulerAngles.x;
+                    var z = chara.Position.localEulerAngles.z;
+                    chara.Position.localEulerAngles = Vector3.Slerp(new Vector3(x, curKey.LocalRotationY, z), new Vector3(x, nextKey.LocalRotationY, z), ratio);
                 }
                 else
                 {
-                    Director.instance.CharaContainerScript[targetIndex].transform.position = curKey.Position;
-                    var x = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.x;
-                    var z = Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles.z;
-                    Director.instance.CharaContainerScript[targetIndex].Position.localEulerAngles = new Vector3(x, curKey.LocalRotationY, z);
+                    chara.transform.position = curKey.Position;
+                    var x = chara.Position.localEulerAngles.x;
+                    var z = chara.Position.localEulerAngles.z;
+                    chara.Position.localEulerAngles = new Vector3(x, curKey.LocalRotationY, z);
                 }
             }
         }
@@ -989,15 +999,14 @@ namespace Gallop.Live.Cutt
             {
                 camera.cacheTransform.position = pos;
 
-
-                //
+                // TODO 这里用的还是CGSS的layer枚举，要进行替换
                 /*
                 int num = liveTimelineKeyCameraPositionData.GetCullingMask();
                 if (num == 0)
                 {
                     num = LiveTimelineKeyCameraPositionData.GetDefaultCullingMask();
                 }
-                //camera.camera.cullingMask = num;
+                camera.camera.cullingMask = num;
                 if (OnUpdateCameraPos != null)
                 {
                     CameraPosUpdateInfo updateInfo = default(CameraPosUpdateInfo);
