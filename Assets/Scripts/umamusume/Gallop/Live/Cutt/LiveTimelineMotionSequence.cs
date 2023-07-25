@@ -36,6 +36,8 @@ namespace Gallop.Live.Cutt
         private int _curIndex = -1;
         private int _prevIndex = -1;
 
+        public int charaIndex = -1;
+
         public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl, List<AnimationClip> animclips = null)
         {
             if(animclips != null)
@@ -52,6 +54,8 @@ namespace Gallop.Live.Cutt
 
             _tempTarget = target;
             _targetIndex = targetIndex;
+
+            charaIndex = targetIndex;
 
             _keyArray = timelineControl._keyArray;
 
@@ -109,7 +113,15 @@ namespace Gallop.Live.Cutt
                     LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
 
                     AnimationClip anim = arg.clip;
-                    double start = (double)arg.motionHeadFrame / 60;
+                    double start;
+                    if(arg.isMotionHeadFrameAll)
+                    {
+                        start = (double)arg.motionHeadFrame / 60;
+                    }
+                    else
+                    {
+                        start = (double)arg.motionHeadFrameSeparetes[charaIndex] / 60;
+                    }
                     double interval = currentTime - (double)arg.frame / 60;
 
                     _tempAnim[anim.name].time = (float)(start + interval);

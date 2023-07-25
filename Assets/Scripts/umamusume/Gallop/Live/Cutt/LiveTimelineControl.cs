@@ -541,10 +541,10 @@ namespace Gallop.Live.Cutt
                 if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
-                    chara.transform.position = Vector3.Slerp(curKey.Position, nextKey.Position, ratio);
+                    chara.transform.position = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
                     var x = chara.Position.localEulerAngles.x;
                     var z = chara.Position.localEulerAngles.z;
-                    chara.Position.localEulerAngles = Vector3.Slerp(new Vector3(x, curKey.LocalRotationY, z), new Vector3(x, nextKey.LocalRotationY, z), ratio);
+                    chara.Position.localEulerAngles = new Vector3(x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), z);
                 }
                 else
                 {
