@@ -12,6 +12,8 @@ public class LiveViewerUI : MonoBehaviour
 
     public RectTransform BottonUITransform;
 
+    public Dropdown FrameRateDropDown;
+
     float targetHeight = 0;
     float height;
     private void Awake()
@@ -44,5 +46,10 @@ public class LiveViewerUI : MonoBehaviour
     private void HideSlider()
     {
         targetHeight = -height;
+    }
+
+    public void SetFrameRate(int fps)
+    {
+        Application.targetFrameRate = int.Parse(FrameRateDropDown.options[fps].text);
     }
 }
