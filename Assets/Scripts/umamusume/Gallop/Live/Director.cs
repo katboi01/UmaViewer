@@ -193,7 +193,7 @@ namespace Gallop.Live
         private MonitorCamera[] _monitorCameraArray; 
         [SerializeField] 
         private HandShakeCamera _handShakeCamera; 
-        private int _activeCameraIndex; 
+        private int _activeCameraIndex = 1; 
         private readonly int kMotionCameraIndex; 
         private readonly int[] kTimelineCameraIndices = new int[3] { 1, 2, 3 }; 
         //private GallopFrameBuffer _frameBuffer; 
