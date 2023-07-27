@@ -52,11 +52,11 @@ namespace Gallop.Live.Cutt
 
         bool EnablePlayModeTimeline(TimelinePlayerMode playerMode);
 
-        FindKeyResult FindKeyCached(int frame, bool ignoreCache);
+        FindKeyResult FindKeyCached(float frame, bool ignoreCache);
 
         FindKeyResult FindCurrentKey(int frame);
 
-        FindKeyResult FindCurrentKeyNeighbor(int frame, int baseIndex);
+        FindKeyResult FindCurrentKeyNeighbor(float frame, int baseIndex);
 
         List<LiveTimelineKey> GetRange(int index, int count);
     }
