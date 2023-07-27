@@ -393,13 +393,13 @@ namespace Gallop.Live.Cutt
             return ret.index;
         }
 
-        public FindKeyResult FindKeyCached(int frame, bool forceRefind)
+        public FindKeyResult FindKeyCached(float frame, bool forceRefind)
         {
             FindKeyCached(frame, forceRefind, out var current, out var _);
             return current;
         }
 
-        public void FindKeyCached(int frame, bool forceRefind, out FindKeyResult current, out FindKeyResult next)
+        public void FindKeyCached(float frame, bool forceRefind, out FindKeyResult current, out FindKeyResult next)
         {
             if (forceRefind || _lastFindIndex < 0)
             {
@@ -418,7 +418,7 @@ namespace Gallop.Live.Cutt
             return ret;
         }
 
-        public void FindKey(out FindKeyResult ret, out FindKeyResult next, int frame)
+        public void FindKey(out FindKeyResult ret, out FindKeyResult next, float frame)
         {
             int count = thisList.Count;
             if (count == 0)
@@ -434,7 +434,7 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        private void BinSearch(out FindKeyResult ret, out FindKeyResult next, int frame, int indexS, int indexE, int listSize)
+        private void BinSearch(out FindKeyResult ret, out FindKeyResult next, float frame, int indexS, int indexE, int listSize)
         {
             int num = (indexE - indexS >> 1) + indexS;
             T val = thisList[num];
@@ -498,13 +498,13 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        public FindKeyResult FindCurrentKeyNeighbor(int frame, int baseIndex)
+        public FindKeyResult FindCurrentKeyNeighbor(float frame, int baseIndex)
         {
             FindCurrentKeyNeighbor(frame, baseIndex, out var ret, out var _);
             return ret;
         }
 
-        public void FindCurrentKeyNeighbor(int frame, int baseIndex, out FindKeyResult ret, out FindKeyResult next)
+        public void FindCurrentKeyNeighbor(float frame, int baseIndex, out FindKeyResult ret, out FindKeyResult next)
         {
             ret.key = null;
             ret.index = -1;

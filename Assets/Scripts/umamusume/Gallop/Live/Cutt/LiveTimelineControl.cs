@@ -79,7 +79,7 @@ namespace Gallop.Live.Cutt
         
         private bool _isNowAlterUpdate;
 
-        private int _oldFrame;
+        private float _oldFrame;
 
         private float _oldLiveTime;
 
@@ -93,7 +93,7 @@ namespace Gallop.Live.Cutt
 
         public bool _limitFovForWidth = false;
 
-        private int _currentFrame;
+        private float _currentFrame;
 
         private bool _isExtraCameraLayer;
 
@@ -301,10 +301,10 @@ namespace Gallop.Live.Cutt
             _isNowAlterUpdate = true;
             _oldLiveTime = currentLiveTime;
             currentLiveTime = liveTime;
-            _oldFrame = Mathf.RoundToInt(_oldLiveTime * 60f);
+            _oldFrame = _oldLiveTime * 60f;
             _deltaTime = currentLiveTime - _oldLiveTime;
             _deltaTimeRatio = _deltaTime / 0.0166666675f;
-            _currentFrame = Mathf.RoundToInt(currentLiveTime * 60f);
+            _currentFrame = currentLiveTime * 60f;
             AlterUpdate_CharaMotionSequence(liveTime);
             AlterUpdate_FacialData(liveTime);
             AlterUpdate_LipSync(liveTime);
@@ -449,7 +449,7 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        public static void FindTimelineKey(out LiveTimelineKey curKey, out LiveTimelineKey nextKey, ILiveTimelineKeyDataList keys, int curFrame)
+        public static void FindTimelineKey(out LiveTimelineKey curKey, out LiveTimelineKey nextKey, ILiveTimelineKeyDataList keys, float curFrame)
         {
             FindKeyResult findKeyResult = keys.FindKeyCached(curFrame, availableFindKeyCache);
             curKey = findKeyResult.key;
@@ -556,7 +556,7 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        public static void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, int curFrame)
+        public static void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, float curFrame)
         {
             LiveTimelineKey nextKey;
             FindTimelineKey(out curKey, out nextKey, keys, curFrame);
@@ -926,7 +926,7 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        private void AlterUpdate_CameraSwitcher(LiveTimelineWorkSheet sheet, int currentFrame)
+        private void AlterUpdate_CameraSwitcher(LiveTimelineWorkSheet sheet, float currentFrame)
         {
             if (sheet.cameraSwitcherKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !sheet.cameraSwitcherKeys.EnablePlayModeTimeline(_playMode))
             {
@@ -972,7 +972,7 @@ namespace Gallop.Live.Cutt
             }
         }
 
-        private void AlterUpdate_CameraPos(LiveTimelineWorkSheet sheet, int currentFrame)
+        private void AlterUpdate_CameraPos(LiveTimelineWorkSheet sheet, float currentFrame)
         {
             if (sheet.cameraPosKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !sheet.cameraPosKeys.EnablePlayModeTimeline(_playMode))
             {
@@ -1023,7 +1023,7 @@ namespace Gallop.Live.Cutt
             return keyData.GetValue(timelineControl);
         }
 
-        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, int currentFrame)
+        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, float currentFrame)
         {
             FindTimelineConfig config = default(FindTimelineConfig);
             config.curKey = null;
@@ -1036,7 +1036,7 @@ namespace Gallop.Live.Cutt
             return CalculateCameraPos(out pos, sheet, currentFrame, camera, ref config, ref fnGetCameraPosValue);
         }
 
-        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, int currentFrame)
+        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, float currentFrame)
         {
             FindTimelineConfig config = default(FindTimelineConfig);
             config.curKey = curKey;
@@ -1049,7 +1049,7 @@ namespace Gallop.Live.Cutt
             return CalculateCameraPos(out pos, sheet, currentFrame, camera, ref config, ref fnGetCameraPosValue);
         }
 
-        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, int currentFrame, CacheCamera targetCamera, ref FindTimelineConfig config, ref Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> getFunc)
+        public bool CalculateCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, float currentFrame, CacheCamera targetCamera, ref FindTimelineConfig config, ref Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> getFunc)
         {
             pos = Vector3.zero;
             LiveTimelineKey curKey = null;
@@ -1135,7 +1135,7 @@ namespace Gallop.Live.Cutt
             return true;
         }
 
-        private void AlterUpdate_CameraLookAt(LiveTimelineWorkSheet sheet, int currentFrame, ref Vector3 outLookAt)
+        private void AlterUpdate_CameraLookAt(LiveTimelineWorkSheet sheet, float currentFrame, ref Vector3 outLookAt)
         {
             if (!sheet.cameraLookAtKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) && sheet.cameraLookAtKeys.EnablePlayModeTimeline(_playMode))
             {
@@ -1153,7 +1153,7 @@ namespace Gallop.Live.Cutt
             return keyData.GetValue(timelineControl, camPos);
         }
 
-        public bool CalculateCameraLookAt(out Vector3 lookAtPos, LiveTimelineWorkSheet sheet, int currentFrame)
+        public bool CalculateCameraLookAt(out Vector3 lookAtPos, LiveTimelineWorkSheet sheet, float currentFrame)
         {
             CacheCamera camera = GetCamera(sheet.targetCameraIndex);
             FindTimelineConfig config = default(FindTimelineConfig);
@@ -1166,7 +1166,7 @@ namespace Gallop.Live.Cutt
             return CalculateCameraLookAt(out lookAtPos, sheet, currentFrame, camera, ref config, ref fnGetCameraLookAtValue, ref fnGetCameraPosValue);
         }
 
-        private bool CalculateCameraLookAt(out Vector3 lookAtPos, LiveTimelineWorkSheet sheet, int currentFrame, CacheCamera targetCamera, ref FindTimelineConfig config, ref Func<LiveTimelineKeyCameraLookAtData, LiveTimelineControl, Vector3, FindTimelineConfig, Vector3> getLookAtValueFunc, ref Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> getPosValueFunc)
+        private bool CalculateCameraLookAt(out Vector3 lookAtPos, LiveTimelineWorkSheet sheet, float currentFrame, CacheCamera targetCamera, ref FindTimelineConfig config, ref Func<LiveTimelineKeyCameraLookAtData, LiveTimelineControl, Vector3, FindTimelineConfig, Vector3> getLookAtValueFunc, ref Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> getPosValueFunc)
         {
             lookAtPos = Vector3.zero;
             CacheCamera camera = GetCamera(sheet.targetCameraIndex);
@@ -1250,7 +1250,7 @@ namespace Gallop.Live.Cutt
             return true;
         }
         
-        private void AlterUpdate_CameraFov(LiveTimelineWorkSheet sheet, int currentFrame)
+        private void AlterUpdate_CameraFov(LiveTimelineWorkSheet sheet, float currentFrame)
         {
             if (sheet.cameraFovKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !sheet.cameraFovKeys.EnablePlayModeTimeline(_playMode))
             {
@@ -1292,7 +1292,7 @@ namespace Gallop.Live.Cutt
             camera.camera.fieldOfView = num;
         }
 
-        private void AlterUpdate_CameraRoll(LiveTimelineWorkSheet sheet, int currentFrame)
+        private void AlterUpdate_CameraRoll(LiveTimelineWorkSheet sheet, float currentFrame)
         {
             if (sheet.cameraRollKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !sheet.cameraRollKeys.EnablePlayModeTimeline(_playMode))
             {
