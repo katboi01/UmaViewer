@@ -662,25 +662,25 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(LiveEntry live, List<LiveCharacterSelect> characters)
     {
-        GameObject MainLive = Instantiate(LiveControllerPrefab);
-        Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
-        mController.live = live;
-        mController.Initialize();
+        UmaSceneController.LoadScene("LiveScene",
+            delegate ()
+            {
+                GameObject MainLive = Instantiate(LiveControllerPrefab);
+                Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
+                mController.live = live;
 
-        List<GameObject> transferObjs = new List<GameObject>() {
+
+                List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
                     GameObject.Find("ViewerMain"),
                     GameObject.Find("Directional Light"),
                     GameObject.Find("GlobalShaderController"),
                     GameObject.Find("AudioManager")
-        };
+                };
 
-        UmaSceneController.LoadScene("LiveScene",
-            delegate ()
-            {
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
-
+                mController.Initialize();
                 
                 characters.ForEach(a =>
                 {
