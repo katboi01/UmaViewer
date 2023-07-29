@@ -19,6 +19,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     public int KeyReductionLevel = 2;
     public List<Vector3> LocalPositions { get; private set; } = new List<Vector3>();
     public List<Vector3> LocalRotations { get; private set; } = new List<Vector3>();
+
     public bool IsRecording { get; private set; } = false;
     public int FrameNumber { get; private set; } = 0;
 
@@ -136,12 +137,12 @@ public class UnityCameraVMDRecorder : MonoBehaviour
         LastRotation = vmdRotation;
     }
 
-    Vector3 DeltaVector(Vector3 val ,Vector3 lastVal)
+    public static Vector3 DeltaVector(Vector3 val ,Vector3 lastVal)
     {
         return new Vector3(DeltaDegree(val.x, lastVal.x), DeltaDegree(val.y, lastVal.y), DeltaDegree(val.z, lastVal.z));
     }
 
-    float DeltaDegree(float val,float lastVal)
+    public static float DeltaDegree(float val,float lastVal)
     {
         var deltaVal = val - lastVal;
         if (Mathf.Abs(deltaVal) < 180)
@@ -323,6 +324,206 @@ public class UnityCameraVMDRecorder : MonoBehaviour
         Destroy(this);
     }
 
+
+    public static void SaveLiveCameraVMD(List<LiveCameraFrame> frames)
+    {
+        string directory = $"{Application.dataPath}/../VMDRecords/";
+        Directory.CreateDirectory(directory);
+        var time = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        string fileName = $"{directory}LiveCamera_POS_{time}.vmd";
+        string fovFileName = $"{directory}LiveCamera_FOV_{time}.vmd";
+
+
+        const string modelName = "カメラ・照明";
+
+        Debug.Log("Live Camera VMDファイル作成開始");
+
+        //ファイルの書き込み
+        using (FileStream fileStream = new FileStream(fileName, FileMode.Create))
+        using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
+        {
+            try
+            {
+                const string ShiftJIS = "shift_jis";
+                const int intByteLength = 4;
+
+                //ファイルタイプの書き込み
+                const int fileTypeLength = 30;
+                const string RightFileType = "Vocaloid Motion Data 0002";
+                byte[] fileTypeBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(RightFileType);
+                binaryWriter.Write(fileTypeBytes, 0, fileTypeBytes.Length);
+                binaryWriter.Write(new byte[fileTypeLength - fileTypeBytes.Length], 0, fileTypeLength - fileTypeBytes.Length);
+
+                //モーション名の書き込み、Shift_JISで保存
+                const int motionNameLength = 20;
+                byte[] motionNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("CameraAttach to 全ての親");
+                binaryWriter.Write(motionNameBytes, 0, Mathf.Min(motionNameBytes.Length, 20));
+                if (motionNameLength - motionNameBytes.Length > 0)
+                {
+                    binaryWriter.Write(new byte[motionNameLength - motionNameBytes.Length], 0, motionNameLength - motionNameBytes.Length);
+                }
+
+                //全ボーンフレーム数の書き込み
+                byte[] allKeyFrameNumberByte = BitConverter.GetBytes((uint)frames.Count);
+                binaryWriter.Write(allKeyFrameNumberByte, 0, intByteLength);
+
+                foreach (var frame in frames)
+                {
+                    const int boneNameLength = 15;
+                    string boneNameString = "全ての親";
+
+                    byte[] boneNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(boneNameString);
+                    binaryWriter.Write(boneNameBytes, 0, boneNameBytes.Length);
+                    binaryWriter.Write(new byte[boneNameLength - boneNameBytes.Length], 0, boneNameLength - boneNameBytes.Length);
+
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)(frame.frameIndex/2));
+                    binaryWriter.Write(frameNumberByte, 0, intByteLength);
+
+                    Vector3 position = frame.Position * WorldScaleFix;
+                    byte[] positionX = BitConverter.GetBytes(position.x);
+                    binaryWriter.Write(positionX, 0, intByteLength);
+                    byte[] positionY = BitConverter.GetBytes(position.y);
+                    binaryWriter.Write(positionY, 0, intByteLength);
+                    byte[] positionZ = BitConverter.GetBytes(position.z);
+                    binaryWriter.Write(positionZ, 0, intByteLength);
+                    Quaternion rotation = frame.Rotation;
+                    byte[] rotationX = BitConverter.GetBytes(rotation.x);
+                    binaryWriter.Write(rotationX, 0, intByteLength);
+                    byte[] rotationY = BitConverter.GetBytes(rotation.y);
+                    binaryWriter.Write(rotationY, 0, intByteLength);
+                    byte[] rotationZ = BitConverter.GetBytes(rotation.z);
+                    binaryWriter.Write(rotationZ, 0, intByteLength);
+                    byte[] rotationW = BitConverter.GetBytes(rotation.w);
+                    binaryWriter.Write(rotationW, 0, intByteLength);
+
+                    byte[] interpolateBytes = new byte[64];
+                    binaryWriter.Write(interpolateBytes, 0, 64);
+                }
+
+                //全モーフフレーム数の書き込み
+                byte[] faceFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(faceFrameCount, 0, intByteLength);
+
+                //カメラの書き込み
+                byte[] cameraFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(cameraFrameCount, 0, intByteLength);
+
+                //照明の書き込み
+                byte[] lightFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(lightFrameCount, 0, intByteLength);
+
+                //セルフシャドウの書き込み
+                byte[] selfShadowCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(selfShadowCount, 0, intByteLength);
+
+                //IKの書き込み
+                byte[] ikCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(ikCount, 0, intByteLength);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("VMD書き込みエラー" + ex.Message);
+            }
+            finally
+            {
+                binaryWriter.Close();
+            }
+        }
+
+        using (FileStream fileStream = new FileStream(fovFileName, FileMode.Create))
+        using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
+        {
+            try
+            {
+                const string ShiftJIS = "shift_jis";
+                const int intByteLength = 4;
+
+                //ファイルタイプの書き込み
+                const int fileTypeLength = 30;
+                const string RightFileType = "Vocaloid Motion Data 0002";
+                byte[] fileTypeBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(RightFileType);
+                binaryWriter.Write(fileTypeBytes, 0, fileTypeBytes.Length);
+                binaryWriter.Write(new byte[fileTypeLength - fileTypeBytes.Length], 0, fileTypeLength - fileTypeBytes.Length);
+
+                //モーション名の書き込み、Shift_JISで保存
+                const int motionNameLength = 20;
+                byte[] motionNameBytes = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes(modelName);
+                binaryWriter.Write(motionNameBytes, 0, Mathf.Min(motionNameBytes.Length, 20));
+                if (motionNameLength - motionNameBytes.Length > 0)
+                {
+                    binaryWriter.Write(new byte[motionNameLength - motionNameBytes.Length], 0, motionNameLength - motionNameBytes.Length);
+                }
+
+                //全ボーンフレーム数の書き込み
+                byte[] allKeyFrameNumberByte = BitConverter.GetBytes(0);
+                binaryWriter.Write(allKeyFrameNumberByte, 0, intByteLength);
+
+                //全モーフフレーム数の書き込み
+                byte[] faceFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(faceFrameCount, 0, intByteLength);
+
+                var fovkeys = frames.FindAll(k => k.FovVaild);
+                //カメラの書き込み
+                byte[] cameraFrameCount = BitConverter.GetBytes((uint)fovkeys.Count);
+                binaryWriter.Write(cameraFrameCount, 0, intByteLength);
+
+                foreach (var frame in fovkeys)
+                {
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)frame.frameIndex/2);
+                    binaryWriter.Write(frameNumberByte, 0, intByteLength);
+
+                    byte[] cameraDistanceByte = BitConverter.GetBytes(0);
+                    binaryWriter.Write(cameraDistanceByte, 0, intByteLength);
+
+                    Vector3 position = Vector3.zero;
+                    byte[] positionX = BitConverter.GetBytes(position.x);
+                    binaryWriter.Write(positionX, 0, intByteLength);
+                    byte[] positionY = BitConverter.GetBytes(position.y);
+                    binaryWriter.Write(positionY, 0, intByteLength);
+                    byte[] positionZ = BitConverter.GetBytes(position.z);
+                    binaryWriter.Write(positionZ, 0, intByteLength);
+
+                    Vector3 rotation = new Vector3(0,180,0) * Mathf.Deg2Rad;
+                    byte[] rotationX = BitConverter.GetBytes(rotation.x);
+                    binaryWriter.Write(rotationX, 0, intByteLength);
+                    byte[] rotationY = BitConverter.GetBytes(rotation.y);
+                    binaryWriter.Write(rotationY, 0, intByteLength);
+                    byte[] rotationZ = BitConverter.GetBytes(rotation.z);
+                    binaryWriter.Write(rotationZ, 0, intByteLength);
+
+                    byte[] interpolateBytes = new byte[24];
+                    binaryWriter.Write(interpolateBytes, 0, 24);
+
+                    byte[] viewAngleByte = BitConverter.GetBytes((ulong)frame.Fov);
+                    binaryWriter.Write(viewAngleByte, 0, intByteLength);
+
+                    byte perspectiveByte = Convert.ToByte(frame.isOrthographic);
+                    byte[] perspectiveBytes = new byte[] { perspectiveByte };
+                    binaryWriter.Write(new byte[] { perspectiveByte }, 0, perspectiveBytes.Length);
+                }
+
+                //照明の書き込み
+                byte[] lightFrameCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(lightFrameCount, 0, intByteLength);
+
+                //セルフシャドウの書き込み
+                byte[] selfShadowCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(selfShadowCount, 0, intByteLength);
+
+                //IKの書き込み
+                byte[] ikCount = BitConverter.GetBytes(0);
+                binaryWriter.Write(ikCount, 0, intByteLength);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("FOV VMD書き込みエラー" + ex.Message);
+            }
+            finally
+            {
+                binaryWriter.Close();
+            }
+        }
+    }
     /// <summary>
     /// VMDを作成する
     /// 呼び出す際は先にStopRecordingを呼び出すこと
@@ -333,5 +534,46 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     {
         KeyReductionLevel = keyReductionLevel;
         SaveVMD();
+    }
+}
+
+public class LiveCameraFrame
+{
+    public int frameIndex;
+    public Vector3 Position;
+    public Quaternion Rotation;
+    public Vector3 CameraRotation;
+    public float Fov;
+    public bool FovVaild;
+    public bool isOrthographic;
+
+    public LiveCameraFrame(int frameIndex, Transform transform, float fov, LiveCameraFrame lastframe = null, bool isOrthographic = false)
+    {
+        this.frameIndex = frameIndex;
+
+        var fixedPosition = transform.position;
+        var vmdPosition = new Vector3(-fixedPosition.x, fixedPosition.y, -fixedPosition.z);
+        Position = vmdPosition;
+
+        var fixedQuatenion = transform.rotation;
+        var vmdQuatenion = new Quaternion(-fixedQuatenion.x, fixedQuatenion.y, -fixedQuatenion.z, fixedQuatenion.w);
+        Rotation = vmdQuatenion;
+
+        Vector3 vmdRotation = new Vector3(fixedQuatenion.eulerAngles.x, 180 - fixedQuatenion.eulerAngles.y, fixedQuatenion.eulerAngles.z);
+
+        var finalRotation = vmdRotation;
+        if (lastframe == null)
+        {
+            finalRotation = vmdRotation;
+        }
+        else
+        {
+            finalRotation = lastframe.CameraRotation + UnityCameraVMDRecorder.DeltaVector(vmdRotation, lastframe.CameraRotation);
+        }
+
+        CameraRotation = finalRotation;
+
+        Fov = fov;
+        this.isOrthographic = isOrthographic;
     }
 }

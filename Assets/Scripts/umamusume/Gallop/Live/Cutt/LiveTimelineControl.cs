@@ -97,6 +97,9 @@ namespace Gallop.Live.Cutt
 
         private bool _isExtraCameraLayer;
 
+        public bool IsRecordVMD;
+        public List<LiveCameraFrame> RecordFrames = new List<LiveCameraFrame>();
+
         public float currentLiveTime
         {
             get
@@ -216,6 +219,7 @@ namespace Gallop.Live.Cutt
             if (Director.instance)
             {
                 Director.instance._liveTimelineControl = this;
+                IsRecordVMD = Director.instance.IsRecordVMD;
             }
         }
 
@@ -323,6 +327,21 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CameraFov(workSheet, _currentFrame);
             AlterUpdate_CameraRoll(workSheet, _currentFrame);
             _isNowAlterUpdate = false;
+            
+            if (IsRecordVMD)
+            {
+                var currentFrame = Mathf.RoundToInt(_currentFrame);
+                var oldFrame = Mathf.RoundToInt(_oldFrame);
+                CacheCamera cacheCamera = GetCamera(workSheet.targetCameraIndex);
+                if ((oldFrame == currentFrame && currentFrame > 0)|| cacheCamera == null) return;
+
+                LiveCameraFrame lastframe = RecordFrames.Count > 0 ? RecordFrames[RecordFrames.Count - 1] : null;
+                
+                var transform = cacheCamera.cacheTransform;
+                var camera = cacheCamera.camera;
+                LiveCameraFrame frame = new LiveCameraFrame(currentFrame, transform, camera.fieldOfView, lastframe);
+                RecordFrames.Add(frame);
+            }
         }
 
         public void AlterUpdate_CharaMotionSequence(float liveTime)
@@ -527,16 +546,21 @@ namespace Gallop.Live.Cutt
             var chara = Director.instance.CharaContainerScript[targetIndex];
             if (!chara) return;
 
-            chara.Materials.ForEach(m=> 
-                { 
-                    foreach(var key in m.Renderers.Keys)
+            if(chara.LiveVisible != curKey.visible)
+            {
+                chara.Materials.ForEach(m =>
+                {
+                    foreach (var key in m.Renderers.Keys)
                     {
-                        key.gameObject.SetActive(curKey.visible);
+                        if (key.gameObject.activeSelf != curKey.visible)
+                            key.gameObject.SetActive(curKey.visible);
                     }
-                }
-            );
+                });
+                chara.LiveVisible = curKey.visible;
+            }
+            
 
-            if (curKey.visible)
+            if (curKey.visible || IsRecordVMD)
             {
                 if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {

@@ -82,6 +82,7 @@ public class UmaContainer : MonoBehaviour
 
     [Header("Live")]
     public bool IsLive = false;
+    public bool LiveVisible = true;
     public LiveTimelineCharaLocator LiveLocator;
 
     [Header("Other")]

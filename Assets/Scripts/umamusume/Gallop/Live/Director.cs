@@ -259,7 +259,6 @@ namespace Gallop.Live
 
         public static Director instance => _instance;
         public static bool HasInstance { get; }
-        public LiveTimelineControl LiveTimelineControl { get; }
         public Director.DisplayMode displayMode { get; set; }
         public bool IsStarted { get; }
         public bool IsFinished { get; set; }
@@ -346,6 +345,8 @@ namespace Gallop.Live
         public float totalTime;
 
         public SliderControl sliderControl;
+
+        public bool IsRecordVMD;
 
         public bool isTimelineControlled
         {
@@ -589,6 +590,22 @@ namespace Gallop.Live
 
             _isLiveSetup = true;
             _liveCurrentTime = 0;
+
+            if (IsRecordVMD)
+            {
+               foreach(var container in CharaContainerScript)
+               {
+                    var rootbone = container.transform.Find("Position");
+                    var newRecorder = rootbone.gameObject.AddComponent<UnityHumanoidVMDRecorder>();
+                    newRecorder.UseParentOfAll = true;
+                    newRecorder.UseAbsoluteCoordinateSystem = true;
+                    newRecorder.Initialize();
+                    if (!newRecorder.IsRecording)
+                    {
+                        newRecorder.StartRecording();
+                    }
+               }   
+            }
         }
 
         private void OnTimelineUpdate(float _liveCurrentTime)
@@ -604,18 +621,15 @@ namespace Gallop.Live
         void Update()
         {
             if (isExit) return;
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                isExit = true;
-
-                UmaSceneController.LoadScene("Version2");
-
-                UmaAssetManager.UnloadAllBundle(true);
-            }
 
             if (_isLiveSetup)
             {
-                if(_syncTime == false)
+                if (Input.GetKeyDown(KeyCode.Escape) || _liveCurrentTime >= totalTime)
+                {
+                    ExitLive();
+                }
+
+                if (_syncTime == false)
                 {
                     if (liveMusic.sourceList[0].time > 0.01)
                     {
@@ -672,9 +686,7 @@ namespace Gallop.Live
                     {
                         _liveCurrentTime += Time.deltaTime;
 
-                        UI.ProgressBar.value = _liveCurrentTime / totalTime;
-                        //Debug.Log((float)liveMusic.time / 1000);
-                        Debug.Log(_liveCurrentTime * 60);
+                        UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
                         OnTimelineUpdate(_liveCurrentTime);
                     }  
                 }
@@ -685,6 +697,43 @@ namespace Gallop.Live
         private void LateUpdate()
         {
             _liveTimelineControl.AlterLateUpdate();
+        }
+
+        private void ExitLive()
+        {
+            isExit = true;
+            if (_liveTimelineControl.IsRecordVMD)
+            {
+                var frames = _liveTimelineControl.RecordFrames;
+                frames[0].FovVaild = true;
+                var fov = _liveTimelineControl.data.worksheetList[0].cameraFovKeys.thisList;
+                fov.ForEach(k => {
+                    var index = k.frame;
+                    if (index < frames.Count)
+                    {
+                        frames[index].FovVaild = true;
+                        if(index - 1 > 0) frames[index - 1].FovVaild = true;
+                        if(index - 2 > 0) frames[index - 2].FovVaild = true;
+                    }
+                });
+
+                UnityCameraVMDRecorder.SaveLiveCameraVMD(frames);
+
+                foreach (var container in CharaContainerScript)
+                {
+                    var rootbone = container.transform.Find("Position");
+                    if (rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))
+                    {
+                        if (recorder.IsRecording)
+                        {
+                            recorder.StopRecording();
+                            recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}", 1);
+                        }
+                    }
+                }
+            }
+            UmaSceneController.LoadScene("Version2");
+            UmaAssetManager.UnloadAllBundle(true);
         }
     }
 

@@ -54,6 +54,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     Dictionary<BoneNames, List<Vector3>> positionDictionarySaved = new Dictionary<BoneNames, List<Vector3>>();
     Dictionary<BoneNames, List<Quaternion>> rotationDictionary = new Dictionary<BoneNames, List<Quaternion>>();
     Dictionary<BoneNames, List<Quaternion>> rotationDictionarySaved = new Dictionary<BoneNames, List<Quaternion>>();
+    Dictionary<int, bool> visitableDictionary = new Dictionary<int, bool>();
     //ボーン移動量の補正係数
     //この値は大体の値、正確ではない
     const float DefaultBoneAmplifier = 12.5f;
@@ -66,10 +67,12 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     public MorphRecorder morphRecorder;
     public MorphRecorder morphRecorderSaved;
 
+    private UmaContainer container;
     float aposeDegress = 38.5f;
     public void Initialize()
     {
         Time.fixedDeltaTime = FPSs;
+        container = GetComponentInParent<UmaContainer>();
         List<Transform> objs = GetComponentsInChildren<Transform>().ToList();
         BoneDictionary = new Dictionary<BoneNames, Transform>()
             {
@@ -167,8 +170,6 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         animator.Play(state.shortNameHash, 0, state.normalizedTime);
     }
 
-
-
     private void FixedUpdate()
     {
         if (IsRecording)
@@ -178,10 +179,23 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         }
     }
 
+    bool lastvisable;
     void SaveFrame()
     {
         if (boneGhost != null) { boneGhost.GhostAll(); }
         if (morphRecorder != null) { morphRecorder.RecrodAllMorph(); }
+
+        bool visable = container.LiveVisible;
+        if (visitableDictionary.Count == 0)
+        {
+            lastvisable = visable;
+            visitableDictionary.Add(0, visable);
+        }
+        else if(visable != lastvisable)
+        {
+            lastvisable = visable;
+            visitableDictionary.Add(FrameNumber, visable);
+        }
 
         foreach (BoneNames boneName in BoneDictionary.Keys)
         {
@@ -521,34 +535,40 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
 
                 //IKの書き込み
                 //0フレームにキーフレーム一つだけ置く
-                byte[] ikCount = BitConverter.GetBytes(1);
-                byte[] ikFrameNumber = BitConverter.GetBytes(0);
-                byte modelDisplay = Convert.ToByte(1);
-                //右足IKと左足IKと右足つま先IKと左足つま先IKの4つ
-                byte[] ikNumber = BitConverter.GetBytes(4);
-                const int IKNameLength = 20;
-                byte[] leftIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左足ＩＫ");
-                byte[] rightIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右足ＩＫ");
-                byte[] leftToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左つま先ＩＫ");
-                byte[] rightToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右つま先ＩＫ");
-                byte ikOn = Convert.ToByte(1);
-                byte ikOff = Convert.ToByte(0);
+                byte[] ikCount = BitConverter.GetBytes(visitableDictionary.Count);
                 binaryWriter.Write(ikCount, 0, intByteLength);
-                binaryWriter.Write(ikFrameNumber, 0, intByteLength);
-                binaryWriter.Write(modelDisplay);
-                binaryWriter.Write(ikNumber, 0, intByteLength);
-                binaryWriter.Write(leftIKName, 0, leftIKName.Length);
-                binaryWriter.Write(new byte[IKNameLength - leftIKName.Length], 0, IKNameLength - leftIKName.Length);
-                binaryWriter.Write(ikOff);
-                binaryWriter.Write(leftToeIKName, 0, leftToeIKName.Length);
-                binaryWriter.Write(new byte[IKNameLength - leftToeIKName.Length], 0, IKNameLength - leftToeIKName.Length);
-                binaryWriter.Write(ikOff);
-                binaryWriter.Write(rightIKName, 0, rightIKName.Length);
-                binaryWriter.Write(new byte[IKNameLength - rightIKName.Length], 0, IKNameLength - rightIKName.Length);
-                binaryWriter.Write(ikOff);
-                binaryWriter.Write(rightToeIKName, 0, rightToeIKName.Length);
-                binaryWriter.Write(new byte[IKNameLength - rightToeIKName.Length], 0, IKNameLength - rightToeIKName.Length);
-                binaryWriter.Write(ikOff);
+
+                foreach(var visable in visitableDictionary)
+                {
+                    byte[] ikFrameNumber = BitConverter.GetBytes(visable.Key);
+                    byte modelDisplay = Convert.ToByte(visable.Value ? 1 : 0);
+                    binaryWriter.Write(ikFrameNumber, 0, intByteLength);
+                    binaryWriter.Write(modelDisplay);
+
+                    //右足IKと左足IKと右足つま先IKと左足つま先IKの4つ
+                    byte[] ikNumber = BitConverter.GetBytes(4);
+                    const int IKNameLength = 20;
+                    byte[] leftIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左足ＩＫ");
+                    byte[] rightIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右足ＩＫ");
+                    byte[] leftToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("左つま先ＩＫ");
+                    byte[] rightToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右つま先ＩＫ");
+                    byte ikOn = Convert.ToByte(1);
+                    byte ikOff = Convert.ToByte(0);
+                        
+                    binaryWriter.Write(ikNumber, 0, intByteLength);
+                    binaryWriter.Write(leftIKName, 0, leftIKName.Length);
+                    binaryWriter.Write(new byte[IKNameLength - leftIKName.Length], 0, IKNameLength - leftIKName.Length);
+                    binaryWriter.Write(ikOff);
+                    binaryWriter.Write(leftToeIKName, 0, leftToeIKName.Length);
+                    binaryWriter.Write(new byte[IKNameLength - leftToeIKName.Length], 0, IKNameLength - leftToeIKName.Length);
+                    binaryWriter.Write(ikOff);
+                    binaryWriter.Write(rightIKName, 0, rightIKName.Length);
+                    binaryWriter.Write(new byte[IKNameLength - rightIKName.Length], 0, IKNameLength - rightIKName.Length);
+                    binaryWriter.Write(ikOff);
+                    binaryWriter.Write(rightToeIKName, 0, rightToeIKName.Length);
+                    binaryWriter.Write(new byte[IKNameLength - rightToeIKName.Length], 0, IKNameLength - rightToeIKName.Length);
+                    binaryWriter.Write(ikOff);
+                }
             }
             catch (Exception ex)
             {
@@ -572,6 +592,14 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     public void SaveVMD(string modelName, int keyReductionLevel = 3)
     {
         string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
+        KeyReductionLevel = keyReductionLevel;
+        SaveVMD(modelName, fileName);
+    }
+
+    public void SaveLiveVMD(string modelName, int keyReductionLevel = 3)
+    {
+        string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("{0}_{1}.vmd", modelName, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
         Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);

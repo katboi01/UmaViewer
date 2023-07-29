@@ -10,7 +10,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -135,8 +134,9 @@ public class UmaViewerUI : MonoBehaviour
 
     [Header("Live")]
     public bool LiveTime = false;
-    public Dropdown LiveDropdown;
-    public int LiveMode = 0;
+    public bool isRecordVMD;
+    public Dropdown LiveRecoedToggle;
+    public int LiveMode = 1;
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
@@ -168,65 +168,6 @@ public class UmaViewerUI : MonoBehaviour
 
     private void Update()
     {
-        if (LiveMode != LiveDropdown.value)
-        {
-            LiveMode = LiveDropdown.value;
-            if (LiveSelectPannel.activeSelf && currentLive != null)
-            {
-                foreach (var select in LiveSelectList.content.GetComponentsInChildren<Transform>())
-                {
-                    if(select != LiveSelectList.content.transform)
-                    {
-                        Destroy(select.gameObject);
-                    }
-                }
-
-                switch (LiveMode)
-                {
-                    case 0:
-                        LiveSelectImage.sprite = currentLive.Icon;
-
-                        int mainCount = 0;
-                        foreach (var motion in Main.AbMotions.Where(a => a.Name.StartsWith($"3d/motion/live/body/son{currentLive.MusicId}") && Path.GetFileName(a.Name).Split('_').Length == 4))
-                        {
-                            mainCount += 1;
-                        }
-
-                        LiveSelectInfoText.text = $"{currentLive.SongName}\nMain Members Count: {mainCount}";
-                        for (int i = 0; i < mainCount; i++)
-                        {
-                            var chara = Instantiate(LiveSelectPrefab, LiveSelectList.content).GetComponent<LiveCharacterSelect>();
-                            chara.IndexText.text = (i + 1).ToString();
-                            chara.GetComponent<Button>().onClick.AddListener(() =>
-                            {
-                                chara.SelectChara(this);
-                                foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
-                                {
-                                    t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
-                                }
-                            });
-                        }
-                        break;
-                     case 1:
-                        LiveSelectImage.sprite = currentLive.Icon;
-                        LiveSelectInfoText.text = $"{currentLive.SongName}\nMembers Count: {currentLive.MemberCount}";
-                        for (int i = 0; i < currentLive.MemberCount; i++)
-                        {
-                            var chara = Instantiate(LiveSelectPrefab, LiveSelectList.content).GetComponent<LiveCharacterSelect>();
-                            chara.IndexText.text = (i + 1).ToString();
-                            chara.GetComponent<Button>().onClick.AddListener(() =>
-                            {
-                                chara.SelectChara(this);
-                                foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
-                                {
-                                    t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
-                                }
-                            });
-                        }
-                        break;
-                }
-            }
-        }
 
         if (Builder.CurrentAudioSources.Count > 0)
         {
@@ -1366,6 +1307,66 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void UpdateLiveMode(int val)
+    {
+        LiveMode = val;
+        if (LiveSelectPannel.activeSelf && currentLive != null)
+        {
+            foreach (var select in LiveSelectList.content.GetComponentsInChildren<Transform>())
+            {
+                if (select != LiveSelectList.content.transform)
+                {
+                    Destroy(select.gameObject);
+                }
+            }
+
+            switch (LiveMode)
+            {
+                case 0:
+                    LiveSelectImage.sprite = currentLive.Icon;
+                    int mainCount = 0;
+                    foreach (var motion in Main.AbMotions.Where(a => a.Name.StartsWith($"3d/motion/live/body/son{currentLive.MusicId}") && Path.GetFileName(a.Name).Split('_').Length == 4))
+                    {
+                        mainCount += 1;
+                    }
+
+                    LiveSelectInfoText.text = $"{currentLive.SongName}\nMain Members Count: {mainCount}";
+                    for (int i = 0; i < mainCount; i++)
+                    {
+                        var chara = Instantiate(LiveSelectPrefab, LiveSelectList.content).GetComponent<LiveCharacterSelect>();
+                        chara.IndexText.text = (i + 1).ToString();
+                        chara.GetComponent<Button>().onClick.AddListener(() =>
+                        {
+                            chara.SelectChara(this);
+                            foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
+                            {
+                                t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
+                            }
+                        });
+                    }
+                    break;
+
+                case 1:
+                    LiveSelectImage.sprite = currentLive.Icon;
+                    LiveSelectInfoText.text = $"{currentLive.SongName}\nMembers Count: {currentLive.MemberCount}";
+                    for (int i = 0; i < currentLive.MemberCount; i++)
+                    {
+                        var chara = Instantiate(LiveSelectPrefab, LiveSelectList.content).GetComponent<LiveCharacterSelect>();
+                        chara.IndexText.text = (i + 1).ToString();
+                        chara.GetComponent<Button>().onClick.AddListener(() =>
+                        {
+                            chara.SelectChara(this);
+                            foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
+                            {
+                                t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
+                            }
+                        });
+                    }
+                    break;
+            }
+        }
+    }
+
     public void UpdateGameDB()
     {
         if (UpdateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
@@ -1410,6 +1411,8 @@ public class UmaViewerUI : MonoBehaviour
     {
         Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
     }
+
+    public void SetLiveRecordMode(bool val) { isRecordVMD = val; }
 
     public void ShowMessage(string msg, UIMessageType type)
     {
