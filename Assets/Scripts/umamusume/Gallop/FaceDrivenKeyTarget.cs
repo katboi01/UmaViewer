@@ -804,7 +804,7 @@ namespace Gallop
             
             
 
-            float weightRatio = CalcMorphWeight(liveTime_, keyData_.time, keyData_.interpolateType, keyData_, null);
+            float weightRatio = CalcMorphWeight(liveTime_, keyData_.speed, keyData_.time, keyData_.interpolateType, keyData_, null);
 
             MouthMorphs.ForEach(morph => morph.weight = 0);
 
@@ -853,7 +853,7 @@ namespace Gallop
                 }
 
 
-                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.mouthCur.time, updateInfo_.mouthCur.interpolateType, updateInfo_.mouthCur, updateInfo_.mouthNext);
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.mouthCur.speed, updateInfo_.mouthCur.time, updateInfo_.mouthCur.interpolateType, updateInfo_.mouthCur, updateInfo_.mouthNext);
 
                 MouthMorphs.ForEach(morph => morph.weight = 0);
 
@@ -889,7 +889,7 @@ namespace Gallop
             if (updateInfo_.eyeCur != null)
             {
 
-                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeCur.time, updateInfo_.eyeCur.interpolateType, updateInfo_.eyeCur, updateInfo_.eyeNext);
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeCur.speed, updateInfo_.eyeCur.time, updateInfo_.eyeCur.interpolateType, updateInfo_.eyeCur, updateInfo_.eyeNext);
 
                 EyeMorphs.ForEach(morph => morph.weight = 0);
 
@@ -941,7 +941,7 @@ namespace Gallop
             if (updateInfo_.eyebrowCur != null)
             {
 
-                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyebrowCur.time, updateInfo_.eyebrowCur.interpolateType, updateInfo_.eyebrowCur, updateInfo_.eyebrowNext);
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyebrowCur.speed, updateInfo_.eyebrowCur.time, updateInfo_.eyebrowCur.interpolateType, updateInfo_.eyebrowCur, updateInfo_.eyebrowNext);
 
                 EyeBrowMorphs.ForEach(morph => morph.weight = 0);
 
@@ -993,7 +993,7 @@ namespace Gallop
             if (updateInfo_.earCur != null)
             {
 
-                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.earCur.time, updateInfo_.earCur.interpolateType, updateInfo_.earCur, updateInfo_.earNext);
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.earCur.speed, updateInfo_.earCur.time, updateInfo_.earCur.interpolateType, updateInfo_.earCur, updateInfo_.earNext);
 
                 EarMorphs.ForEach(morph => morph.weight = 0);
 
@@ -1052,11 +1052,28 @@ namespace Gallop
             }
         }
 
-        public float CalcMorphWeight(float time, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
+        public float CalcMorphWeight(float time, int speed, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
         {
 
             float keyTime = (float)curKey.frame / 60;
 
+            switch (speed)
+            {
+                case 1:
+                    interFrame = 3;
+                    break;
+                case 10:
+                    interFrame = 2;
+                    break;
+                case 20:
+                    interFrame = 6;
+                    break;
+                case 21:
+                    interFrame = 9;
+                    break;
+                default:
+                    break;
+            }
 
             float duringTime;
             if (nextKey != null)

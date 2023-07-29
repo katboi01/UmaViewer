@@ -42738,7 +42738,7 @@ MonoBehaviour:
   LiveTime: 0
   isRecordVMD: 0
   LiveRecoedToggle: {fileID: 0}
-  LiveMode: 0
+  LiveMode: 1
   currentFaceDrivenKeyTarget: {fileID: 0}
 --- !u!114 &1564959568
 MonoBehaviour:

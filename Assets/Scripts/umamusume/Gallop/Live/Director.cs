@@ -338,7 +338,7 @@ namespace Gallop.Live
         public int characterCount = 0;
         public int allowCount = 0;
 
-        public int liveMode = 0;
+        public int liveMode = 1;
 
         public LiveViewerUI UI;
 
