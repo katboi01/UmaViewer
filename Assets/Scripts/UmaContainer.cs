@@ -225,11 +225,11 @@ public class UmaContainer : MonoBehaviour
         }
         else if (scale == -1)
         {
-            BodyScale = (Convert.ToInt32(CharaData[IsMob ? "chara_height" : "scale"]) / 160f);
+            BodyScale = (Convert.ToInt32(CharaData[IsMob ? "chara_height" : "scale"]) / 160.7529f);
         }
         else
         {
-            BodyScale = (scale / 160f);
+            BodyScale = (scale / 160.7529f);
         }
         transform.Find("Position").localScale = new Vector3(BodyScale, BodyScale, BodyScale);
     }
