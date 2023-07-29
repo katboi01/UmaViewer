@@ -146,6 +146,12 @@ namespace Gallop.Live.Cutt
         [SerializeField]
         private TimelineKeyPlayMode _playMode;
 
+        [SerializeField]
+        private Color _baseColor;
+
+        [SerializeField]
+        private string _description;
+
         public LiveTimelineKeyIndex thisTimeKeyIndex = new LiveTimelineKeyIndex();
 
         public LiveTimelineKeyIndex TimeKeyIndex => thisTimeKeyIndex;
