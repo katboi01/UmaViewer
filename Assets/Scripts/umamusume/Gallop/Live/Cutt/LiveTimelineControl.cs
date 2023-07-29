@@ -312,6 +312,7 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CharaMotionSequence(liveTime);
             AlterUpdate_FacialData(liveTime);
             AlterUpdate_LipSync(liveTime);
+            AlterUpdate_LipSync2(liveTime);
             _isNowAlterUpdate = false;
         }
 
@@ -459,6 +460,18 @@ namespace Gallop.Live.Cutt
         public void AlterUpdate_LipSync(float liveTime)
         {
             var lipDataList = data.worksheetList[0].ripSyncKeys;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(lipDataList, liveTime);
+
+            if (curKey != null && curKey.index != -1)
+            {
+                this.OnUpdateLipSync(curKey, liveTime);
+            }
+        }
+
+        public void AlterUpdate_LipSync2(float liveTime)
+        {
+            var lipDataList = data.worksheetList[0].ripSync2Keys;
 
             LiveTimelineKeyIndex curKey = AlterUpdate_Key(lipDataList, liveTime);
 
