@@ -668,6 +668,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 GameObject MainLive = Instantiate(LiveControllerPrefab);
                 Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
                 mController.live = live;
+                mController.IsRecordVMD = UI.isRecordVMD;
 
 
                 List<GameObject> transferObjs = new List<GameObject>() {
@@ -847,7 +848,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
     {
-        Debug.Log("Loading " + entry.Name);
+        //Debug.Log("Loading " + entry.Name);
         var bundle = UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
         LoadBundle(entry, bundle, IsSubAsset, SetParent);
     }
