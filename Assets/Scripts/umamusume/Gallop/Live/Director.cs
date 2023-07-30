@@ -714,8 +714,10 @@ namespace Gallop.Live
                     if (index < frames.Count)
                     {
                         frames[index].FovVaild = true;
-                        if(index - 1 > 0) frames[index - 1].FovVaild = true;
-                        if(index - 2 > 0) frames[index - 2].FovVaild = true;
+                        if (index - 1 > 0) frames[index - 1].FovVaild = true;
+                        if (index - 2 > 0) frames[index - 2].FovVaild = true;
+                        if (index + 1 < frames.Count) frames[index + 1].FovVaild = true;
+                        if (index + 2 < frames.Count) frames[index + 2].FovVaild = true;
                     }
                 });
 
