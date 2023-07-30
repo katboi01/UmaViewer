@@ -686,7 +686,7 @@ namespace Gallop.Live
                     {
                         _liveCurrentTime += Time.deltaTime;
 
-                        //Debug.Log(_liveCurrentTime * 60);
+                        Debug.Log(_liveCurrentTime * 60);
 
                         UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
                         OnTimelineUpdate(_liveCurrentTime);

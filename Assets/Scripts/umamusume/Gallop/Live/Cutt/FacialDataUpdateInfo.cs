@@ -19,7 +19,9 @@ namespace Gallop.Live.Cutt
         public LiveTimelineKeyFacialEyebrowData eyebrowPrev; // 0x28
         public LiveTimelineKeyFacialEyebrowData eyebrowCur; // 0x28
         public LiveTimelineKeyFacialEyebrowData eyebrowNext; // 0x28
-        public LiveTimelineKeyFacialEyeTrackData eyeTrack; // 0x30
+        public LiveTimelineKeyFacialEyeTrackData eyeTrackPrev; // 0x30
+        public LiveTimelineKeyFacialEyeTrackData eyeTrackCur; // 0x30
+        public LiveTimelineKeyFacialEyeTrackData eyeTrackNext; // 0x30
         public LiveTimelineKeyFacialEarData earPrev; // 0x38
         public LiveTimelineKeyFacialEarData earCur; // 0x38
         public LiveTimelineKeyFacialEarData earNext; // 0x38

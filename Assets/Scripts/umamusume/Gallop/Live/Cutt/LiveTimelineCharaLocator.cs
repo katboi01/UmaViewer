@@ -46,7 +46,7 @@ namespace Gallop.Live.Cutt
 
         public Quaternion liveCharaPositionLocalRotation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Vector3 liveCharaHeadPosition => UmaContainer.HeadBone.transform.position + new Vector3(0, UmaContainer.EyeHeight, 0);
+        public Vector3 liveCharaHeadPosition => UmaContainer.HeadBone.transform.position + new Vector3(0, 0.1f, 0);
 
         public Vector3 liveCharaWaistPosition => Bones["Waist"].position;
 

@@ -6,6 +6,7 @@ using static RootMotion.FinalIK.IKSolverVR;
 using System.Linq;
 using System.IO;
 using static UnityEngine.Rendering.VirtualTexturing.Debugging;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
 {
@@ -363,6 +364,7 @@ namespace Gallop.Live.Cutt
                 SetupFacialUpdateInfo_Eye(ref updateInfo, facialDataList.eyeKeys, liveTime);
                 SetupFacialUpdateInfo_Eyebrow(ref updateInfo, facialDataList.eyebrowKeys, liveTime);
                 SetupFacialUpdateInfo_Ear(ref updateInfo, facialDataList.earKeys, liveTime);
+                SetupFacialUpdateInfo_EyeTrack(ref updateInfo, facialDataList.eyeTrackKeys, liveTime);
                 this.OnUpdateFacial(updateInfo, liveTime, 0);
             }
 
@@ -373,6 +375,7 @@ namespace Gallop.Live.Cutt
                 SetupFacialUpdateInfo_Eye(ref updateInfo, otherFacialDataList[i].eyeKeys, liveTime);
                 SetupFacialUpdateInfo_Eyebrow(ref updateInfo, otherFacialDataList[i].eyebrowKeys, liveTime);
                 SetupFacialUpdateInfo_Ear(ref updateInfo, otherFacialDataList[i].earKeys, liveTime);
+                SetupFacialUpdateInfo_EyeTrack(ref updateInfo, otherFacialDataList[i].eyeTrackKeys, liveTime);
                 this.OnUpdateFacial(updateInfo, liveTime, i+1);
             }
         }
@@ -454,6 +457,26 @@ namespace Gallop.Live.Cutt
                 updateInfo.earCur = liveTimelineKey2 as LiveTimelineKeyFacialEarData;
                 updateInfo.earNext = liveTimelineKey3 as LiveTimelineKeyFacialEarData;
                 updateInfo.earKeyIndex = curKey.index;
+            }
+        }
+
+        private void SetupFacialUpdateInfo_EyeTrack(ref FacialDataUpdateInfo updateInfo, LiveTimelineKeyFacialEyeTrackDataList keys, float time)
+        {
+            LiveTimelineKey liveTimelineKey = null;
+            LiveTimelineKey liveTimelineKey2 = null;
+            LiveTimelineKey liveTimelineKey3 = null;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
+            if (curKey != null)
+            {
+                liveTimelineKey = curKey.prevKey;
+                liveTimelineKey2 = curKey.key;
+                liveTimelineKey3 = curKey.nextKey;
+
+                updateInfo.eyeTrackPrev = liveTimelineKey as LiveTimelineKeyFacialEyeTrackData;
+                updateInfo.eyeTrackCur = liveTimelineKey2 as LiveTimelineKeyFacialEyeTrackData;
+                updateInfo.eyeTrackNext = liveTimelineKey3 as LiveTimelineKeyFacialEyeTrackData;
+                updateInfo.eyeTrackKeyIndex = curKey.index;
             }
         }
 
@@ -578,14 +601,14 @@ namespace Gallop.Live.Cutt
                 if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
-                    chara.transform.position = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
+                    chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
                     var x = chara.Position.localEulerAngles.x;
                     var z = chara.Position.localEulerAngles.z;
                     chara.Position.localEulerAngles = new Vector3(x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), z);
                 }
                 else
                 {
-                    chara.transform.position = curKey.Position;
+                    chara.transform.localPosition = curKey.Position;
                     var x = chara.Position.localEulerAngles.x;
                     var z = chara.Position.localEulerAngles.z;
                     chara.Position.localEulerAngles = new Vector3(x, curKey.LocalRotationY, z);

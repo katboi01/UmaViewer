@@ -310,14 +310,10 @@ public class UmaContainer : MonoBehaviour
                         PuppetMaster.mode = PuppetMaster.Mode.Active;
                     }
                 }
-                var targetPosotion = TrackTarget.transform.position - HeadBone.transform.up * EyeHeight;
-                var deltaPos = HeadBone.transform.InverseTransformPoint(targetPosotion);
-                var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, HeadBone.transform.up).eulerAngles;
-                if (deltaRotation.x > 180) deltaRotation.x -= 360;
-                if (deltaRotation.y > 180) deltaRotation.y -= 360;
 
-                var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
-                FaceDrivenKeyTarget.SetEyeRange(finalRotation.x, finalRotation.y, finalRotation.x, -finalRotation.y);
+                var finalRotation = FaceDrivenKeyTarget.GetEyeTrackRotation(TrackTarget.transform.position);
+                FaceDrivenKeyTarget.SetEyeTrack(finalRotation);
+
                 var cam = Camera.main;
                 var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
                 var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);

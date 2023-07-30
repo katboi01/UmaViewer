@@ -5,6 +5,8 @@ using UnityEngine;
 using static DynamicBone;
 using static Gallop.DrivenKeyComponent;
 using static Gallop.FaceDrivenKeyTarget;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
+using static RootMotion.FinalIK.FBBIKHeadEffector;
 
 namespace Gallop
 {
@@ -1050,9 +1052,79 @@ namespace Gallop
                 ChangeMorphEar();
 
             }
+
+            if (updateInfo_.eyeTrackCur != null)
+            {
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeTrackCur.speed, updateInfo_.eyeTrackCur.time, updateInfo_.eyeTrackCur.interpolateType, updateInfo_.eyeTrackCur, updateInfo_.eyeTrackNext);
+
+                Vector2 finalRotation = new Vector2();
+
+                if (updateInfo_.eyeTrackPrev != null)
+                {
+                    finalRotation = Vector2.Lerp(GetTimelineEyeTrackRotation(updateInfo_.eyeTrackPrev), GetTimelineEyeTrackRotation(updateInfo_.eyeTrackCur), weightRatio);
+                }
+                else
+                {
+                    finalRotation = GetTimelineEyeTrackRotation(updateInfo_.eyeTrackCur);
+                }
+
+                SetEyeTrack(finalRotation);
+            }
+
+
         }
 
-        public float CalcMorphWeight(float time, int speed, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
+        public Vector2 GetTimelineEyeTrackRotation(LiveTimelineKeyFacialEyeTrackData key)
+        {
+            Vector3 target = new Vector3();
+            if(CalcTargetPosition(key, ref target))
+            {
+                return GetEyeTrackRotation(target) + new Vector2((float)key.horizontalRatePer / 100, (float)key.verticalRatePer / 100);
+            }
+            else
+            {
+                return new Vector2(0, 0) + new Vector2((float)key.horizontalRatePer / 100, (float)key.verticalRatePer / 100);
+            }
+        }
+
+        public bool CalcTargetPosition(LiveTimelineKeyFacialEyeTrackData key, ref Vector3 target)
+        {
+
+            switch (key.targetType)
+            {
+                case FacialEyeTrackTargetType.Arena:
+                    target = Container.HeadBone.transform.position + new Vector3(0, 1, 10);
+                    return true;
+                case FacialEyeTrackTargetType.DirectPosition:
+                    target = key.DirectPosition;
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        public Vector2 GetEyeTrackRotation(Vector3 target)
+        {
+            var targetPosotion = target - Container.HeadBone.transform.up * Container.EyeHeight;
+            var deltaPos = Container.HeadBone.transform.InverseTransformPoint(targetPosotion);
+            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, Container.HeadBone.transform.up).eulerAngles;
+            if (deltaRotation.x > 180) deltaRotation.x -= 360;
+            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
+
+            return finalRotation;
+            
+        }
+
+        public void SetEyeTrack(Vector2 rotation)
+        {
+            SetEyeRange(rotation.x, rotation.y, rotation.x, -rotation.y);
+        }
+
+        public static float CalcMorphWeight(float time, int speed, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
         {
 
             float keyTime = (float)curKey.frame / 60;

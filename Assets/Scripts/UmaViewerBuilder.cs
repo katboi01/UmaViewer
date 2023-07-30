@@ -100,6 +100,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.IsLive = true;
                     CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
                     CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    CurrentUMAContainer.transform.localPosition = new Vector3();
                     LoadMobUma(characters[i].CharaEntry, characters[i].CostumeId);
                 }
                 else
@@ -107,6 +108,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     CurrentUMAContainer.IsLive = true;
                     CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
                     CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    CurrentUMAContainer.transform.localPosition = new Vector3();
                     LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
                 }
 
