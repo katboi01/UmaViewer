@@ -729,7 +729,7 @@ namespace Gallop.Live
                         if (recorder.IsRecording)
                         {
                             recorder.StopRecording();
-                            recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}", 1);
+                            recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}");
                         }
                     }
                 }

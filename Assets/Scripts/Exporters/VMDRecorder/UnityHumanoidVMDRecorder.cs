@@ -417,10 +417,9 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 {
                     for (int i = 0; i < frameNumberSaved; i++)
                     {
-                        if ((i % KeyReductionLevel) != 0) { continue; }
-
                         foreach (BoneNames boneName in Enum.GetValues(typeof(BoneNames)))
                         {
+                            if ((i % KeyReductionLevel) != 0 && boneName != BoneNames.全ての親) { continue; }
                             if (!BoneDictionary.Keys.Contains(boneName)) { continue; }
                             if (BoneDictionary[boneName] == null) { continue; }
                             if (!UseParentOfAll && boneName == BoneNames.全ての親) { continue; }
@@ -817,60 +816,24 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             }
         }
 
+
         public string ConvertMorphName(string name)
         {
-            switch (name)
+            if (Config.Instance.MorphConvertSetting.Count > 0)
             {
-                case "EyeBrow_1_R": return "にこり右";
-                case "EyeBrow_1_L": return "にこり左";
-                case "EyeBrow_5_R": return "真面目右";
-                case "EyeBrow_5_L": return "真面目左";
-                case "EyeBrow_6_R": return "困る右";
-                case "EyeBrow_6_L": return "困る左";
-                case "EyeBrow_7_R": return "怒り右";
-                case "EyeBrow_7_L": return "怒り左";
-                case "EyeBrow_11_R": return "下右";
-                case "EyeBrow_11_L": return "下左";
-                case "EyeBrow_21_R": return "上右";
-                case "EyeBrow_21_L": return "上左";
-
-                case "Eye_2_R": return "ｳｨﾝｸ２右";
-                case "Eye_2_L": return "ウィンク２";
-                case "Eye_5_R": return "ウィンク右";
-                case "Eye_5_L": return "ウィンク";
-                case "Eye_8_R": return "ウィンク右";
-                case "Eye_8_L": return "ウィンク";
-                case "Eye_9_L":
-                case "Eye_10_L":
-                case "Eye_11_L":
-                case "Eye_18_L": return "ｷﾘｯ";
-                case "Eye_16_L": return "なごみ";
-                case "Eye_12_L": return "びっくり";
-                case "Eye_15_L": return "じと目";
-                case "Eye_14_L": return "瞳小";
-
-                case "Mouth_9_0": return "ん";
-                case "Mouth_12_0": return "にっこり";
-                case "Mouth_13_0": return "口角上げ";
-                case "Mouth_22_0": return "にやり";
-                case "Mouth_5_0":
-                case "Mouth_6_0":
-                case "Mouth_7_0":
-                case "Mouth_23_0": return "あ";
-                case "Mouth_25_0":
-                case "Mouth_8_0": return "い";
-                case "Mouth_28_0":
-                case "Mouth_16_0": return "う";
-                case "Mouth_31_0":
-                case "Mouth_10_0":
-                case "Mouth_14_0": return "お";
-                case "Mouth_33_0": return "え";
-                case "Mouth_41_0": return "口角下げ";
-                case "Mouth_45_0": return "ぺろっ";
-                case "Mouth_54_0": return "口横広げ";
-                case "Mouth_55_0": return "口横狭い";
-                default: return name;
+                var setting = Config.Instance.MorphConvertSetting;
+                foreach (var val in setting)
+                {
+                    foreach (var v in val.UMAMorph)
+                    {
+                        if(v.Equals(name))
+                        {
+                            return val.MMDMorph;
+                        }
+                    }
+                }
             }
+            return name;
         }
 
         public void RecrodAllMorph()

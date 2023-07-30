@@ -22,7 +22,6 @@ public class UmaViewerAudio
 
     static public UmaSoundInfo getSoundPath(string name)
     {
-        //Debug.Log(name);
         UmaSoundInfo info;
         info.awb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(name) && a.Name.EndsWith("awb"));
         return info;
