@@ -100,6 +100,7 @@ namespace Gallop.Live.Cutt
 
         public bool IsRecordVMD;
         public List<LiveCameraFrame> RecordFrames = new List<LiveCameraFrame>();
+        public List<List<LiveCameraFrame>> MultiRecordFrames = new List<List<LiveCameraFrame>>();
 
         public float currentLiveTime
         {
@@ -204,9 +205,9 @@ namespace Gallop.Live.Cutt
 
         private static bool availableFindKeyCache => true;
 
-        //private static Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> fnGetMultiCameraPositionValueFunc = GetMultiCameraPositionValue;
+        private static Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> fnGetMultiCameraPositionValueFunc = GetMultiCameraPositionValue;
 
-        //private static Func<LiveTimelineKeyCameraLookAtData, LiveTimelineControl, Vector3, FindTimelineConfig, Vector3> fnGetMultiCameraLookAtValueFunc = GetMultiCameraLookAtValue;
+        private static Func<LiveTimelineKeyCameraLookAtData, LiveTimelineControl, Vector3, FindTimelineConfig, Vector3> fnGetMultiCameraLookAtValueFunc = GetMultiCameraLookAtValue;
 
         public void CopyValues<T>(T from, T to)
         {
@@ -328,6 +329,7 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CameraLookAt(workSheet, _currentFrame, ref outLookAt);
             AlterUpdate_CameraFov(workSheet, _currentFrame);
             AlterUpdate_CameraRoll(workSheet, _currentFrame);
+            AlterUpdate_MultiCamera(workSheet, _currentFrame);
             _isNowAlterUpdate = false;
             
             if (IsRecordVMD)
@@ -343,6 +345,16 @@ namespace Gallop.Live.Cutt
                 var camera = cacheCamera.camera;
                 LiveCameraFrame frame = new LiveCameraFrame(currentFrame, transform, camera.fieldOfView, lastframe);
                 RecordFrames.Add(frame);
+
+                for (int i = 0; i < MultiRecordFrames.Count; i++) 
+                {
+                    var MulFrame = MultiRecordFrames[i];
+                    LiveCameraFrame lastMulframe = MulFrame.Count > 0 ? MulFrame[MulFrame.Count - 1] : null;
+                    MultiCamera MulCamera = _multiCamera[i];
+                    var cam = MulCamera.GetCamera();
+                    LiveCameraFrame mulframe = new LiveCameraFrame(currentFrame, MulCamera.transform, cam.fieldOfView, lastMulframe);
+                    MulFrame.Add(mulframe);
+                }
             }
         }
 
@@ -648,12 +660,6 @@ namespace Gallop.Live.Cutt
             return curKey;
         }
 
-        //**************************************//
-
-        public MultiCameraManager GetMultiCameraManager()
-        {
-            return _multiCameraManager;
-        }
 
         public Quaternion GetMultiCameraWorldRotation(int index)
         {
@@ -1385,175 +1391,172 @@ namespace Gallop.Live.Cutt
         }
 
         //public void SetMultiCamera(MultiCameraManager manager, MultiCamera[] multiCamera)
-        //{
-        //    _multiCamera = multiCamera;
-        //    _multiCameraManager = manager;
-        //    if (multiCamera != null)
-        //    {
-        //        _multiCameraCache = new CacheCamera[multiCamera.Length];
-        //        for (int i = 0; i < multiCamera.Length; i++)
-        //        {
-        //            _multiCameraCache[i] = new CacheCamera(multiCamera[i].GetCamera());
-        //        }
-        //    }
-        //}
+        public void SetMultiCamera(MultiCamera[] multiCamera)
+        {
+            _multiCamera = multiCamera;
+            //_multiCameraManager = manager;
+            if (multiCamera != null)
+            {
+                _multiCameraCache = new CacheCamera[multiCamera.Length];
+                for (int i = 0; i < multiCamera.Length; i++)
+                {
+                    _multiCameraCache[i] = new CacheCamera(multiCamera[i].GetCamera());
+                }
+            }
+        }
 
-        //private static Vector3 GetMultiCameraPositionValue(LiveTimelineKeyCameraPositionData keyData, LiveTimelineControl timelineControl, FindTimelineConfig config)
-        //{
-        //    return (keyData as LiveTimelineKeyMultiCameraPositionData).GetValue(timelineControl, config.extraCameraIndex);
-        //}
+        private static Vector3 GetMultiCameraPositionValue(LiveTimelineKeyCameraPositionData keyData, LiveTimelineControl timelineControl, FindTimelineConfig config)
+        {
+            return (keyData as LiveTimelineKeyMultiCameraPositionData).GetValue(timelineControl);
+        }
 
-        //public bool CalculateMultiCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, int currentFrame, int timelineIndex)
-        //{
-        //    if (sheet.multiCameraPositionKeys.Count <= timelineIndex)
-        //    {
-        //        pos = Vector3.zero;
-        //        return false;
-        //    }
-        //    FindTimelineConfig config = default(FindTimelineConfig);
-        //    config.curKey = curKey;
-        //    config.nextKey = nextKey;
-        //    config.keyType = FindTimelineConfig.KeyType.KeyDirect;
-        //    config.posKeys = sheet.multiCameraPositionKeys[timelineIndex].keys;
-        //    config.lookAtKeys = null;
-        //    config.extraCameraIndex = timelineIndex;
-        //    return CalculateCameraPos(out pos, sheet, currentFrame, _multiCameraCache[timelineIndex], ref config, ref fnGetMultiCameraPositionValueFunc);
-        //}
+        public bool CalculateMultiCameraPos(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, float currentFrame, int timelineIndex)
+        {
+            if (sheet.multiCameraPosKeys.Count <= timelineIndex)
+            {
+                pos = Vector3.zero;
+                return false;
+            }
+            FindTimelineConfig config = default(FindTimelineConfig);
+            config.curKey = curKey;
+            config.nextKey = nextKey;
+            config.keyType = FindTimelineConfig.KeyType.KeyDirect;
+            config.posKeys = sheet.multiCameraPosKeys[timelineIndex].keys;
+            config.lookAtKeys = null;
+            config.extraCameraIndex = timelineIndex;
+            return CalculateCameraPos(out pos, sheet, currentFrame, _multiCameraCache[timelineIndex], ref config, ref fnGetMultiCameraPositionValueFunc);
+        }
 
-        //private void AlterUpdate_MultiCameraPosition(LiveTimelineWorkSheet sheet, int currentFrame)
-        //{
-        //    int count = sheet.multiCameraPositionKeys.Count;
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        LiveTimelineKeyMultiCameraPositionDataList keys = sheet.multiCameraPositionKeys[i].keys;
-        //        if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode) || i >= _multiCameraCache.Length)
-        //        {
-        //            continue;
-        //        }
-        //        LiveTimelineKey curKey = null;
-        //        LiveTimelineKey nextKey = null;
-        //        FindTimelineKey(out curKey, out nextKey, keys, currentFrame);
-        //        if (!CalculateMultiCameraPos(out var pos, sheet, curKey, nextKey, currentFrame, i))
-        //        {
-        //            continue;
-        //        }
-        //        CacheCamera cacheCamera = _multiCameraCache[i];
-        //        Camera camera = cacheCamera.camera;
-        //        if (curKey == null)
-        //        {
-        //            continue;
-        //        }
-        //        LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData = curKey as LiveTimelineKeyMultiCameraPositionData;
-        //        LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData2 = nextKey as LiveTimelineKeyMultiCameraPositionData;
-        //        camera.enabled = liveTimelineKeyMultiCameraPositionData.enableMultiCamera;
-        //        if (liveTimelineKeyMultiCameraPositionData.enableMultiCamera)
-        //        {
-        //            _isMultiCameraEnable = true;
-        //            camera.cullingMask = 0x10000000 | liveTimelineKeyMultiCameraPositionData.GetCullingMask();
-        //            float fieldOfView;
-        //            Vector3 maskPosition;
-        //            Quaternion maskRotation;
-        //            Vector3 maskScale;
-        //            if (liveTimelineKeyMultiCameraPositionData2 != null && liveTimelineKeyMultiCameraPositionData2.interpolateType != 0)
-        //            {
-        //                float t = CalculateInterpolationValue(liveTimelineKeyMultiCameraPositionData, liveTimelineKeyMultiCameraPositionData2, currentFrame);
-        //                fieldOfView = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.fov, liveTimelineKeyMultiCameraPositionData2.fov, t);
-        //                maskPosition = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.maskPosition, liveTimelineKeyMultiCameraPositionData2.maskPosition, t);
-        //                maskRotation = Quaternion.Lerp(liveTimelineKeyMultiCameraPositionData.maskRotation, liveTimelineKeyMultiCameraPositionData2.maskRotation, t);
-        //                maskScale = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.maskScale, liveTimelineKeyMultiCameraPositionData2.maskScale, t);
-        //            }
-        //            else
-        //            {
-        //                fieldOfView = liveTimelineKeyMultiCameraPositionData.fov;
-        //                maskPosition = liveTimelineKeyMultiCameraPositionData.maskPosition;
-        //                maskRotation = liveTimelineKeyMultiCameraPositionData.maskRotation;
-        //                maskScale = liveTimelineKeyMultiCameraPositionData.maskScale;
-        //            }
-        //            camera.nearClipPlane = liveTimelineKeyMultiCameraPositionData.nearClip;
-        //            camera.farClipPlane = liveTimelineKeyMultiCameraPositionData.farClip;
-        //            camera.fieldOfView = fieldOfView;
-        //            cacheCamera.cacheTransform.localPosition = pos;
-        //            if (_multiCamera[i].maskIndex != liveTimelineKeyMultiCameraPositionData.maskIndex)
-        //            {
-        //                _multiCameraManager.AttachMask(i, liveTimelineKeyMultiCameraPositionData.maskIndex);
-        //            }
-        //            if (_multiCamera[i].maskIndex >= 0)
-        //            {
-        //                _multiCamera[i].maskPosition = maskPosition;
-        //                _multiCamera[i].maskRotation = maskRotation;
-        //                _multiCamera[i].maskScale = maskScale;
-        //            }
-        //        }
-        //    }
-        //}
+        private void AlterUpdate_MultiCameraPosition(LiveTimelineWorkSheet sheet, float currentFrame)
+        {
+            int count = sheet.multiCameraPosKeys.Count;
+            for (int i = 0; i < count; i++)
+            {
+                LiveTimelineKeyMultiCameraPositionDataList keys = sheet.multiCameraPosKeys[i].keys;
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode) || i >= _multiCameraCache.Length)
+                {
+                    continue;
+                }
+                LiveTimelineKey curKey = null;
+                LiveTimelineKey nextKey = null;
+                FindTimelineKey(out curKey, out nextKey, keys, currentFrame);
+                if (!CalculateMultiCameraPos(out var pos, sheet, curKey, nextKey, currentFrame, i))
+                {
+                    continue;
+                }
+                CacheCamera cacheCamera = _multiCameraCache[i];
+                Camera camera = cacheCamera.camera;
+                if (curKey == null)
+                {
+                    continue;
+                }
+                LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData = curKey as LiveTimelineKeyMultiCameraPositionData;
+                LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData2 = nextKey as LiveTimelineKeyMultiCameraPositionData;
+                camera.enabled = liveTimelineKeyMultiCameraPositionData.enableMultiCamera;
+                if (liveTimelineKeyMultiCameraPositionData.enableMultiCamera)
+                {
+                    
+                    _isMultiCameraEnable = true;
+                    //camera.cullingMask = 0x10000000 | liveTimelineKeyMultiCameraPositionData.GetCullingMask();
+                    
+                    float zAngle;
+                    float fieldOfView;
+                    Vector3 maskOffset;
+                    float maskRoll;
+                    if (liveTimelineKeyMultiCameraPositionData2 != null && liveTimelineKeyMultiCameraPositionData2.interpolateType != 0)
+                    {
+                        float t = CalculateInterpolationValue(liveTimelineKeyMultiCameraPositionData, liveTimelineKeyMultiCameraPositionData2, currentFrame);
+                        fieldOfView = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.fov, liveTimelineKeyMultiCameraPositionData2.fov, t);
+                        maskOffset = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.maskOffset, liveTimelineKeyMultiCameraPositionData2.maskOffset, t);
+                        maskRoll = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.maskRoll, liveTimelineKeyMultiCameraPositionData2.maskRoll, t);
+                        zAngle = LerpWithoutClamp(liveTimelineKeyMultiCameraPositionData.roll, liveTimelineKeyMultiCameraPositionData2.roll, t);
+                    }
+                    else
+                    {
+                        fieldOfView = liveTimelineKeyMultiCameraPositionData.fov;
+                        maskOffset = liveTimelineKeyMultiCameraPositionData.maskOffset;
+                        maskRoll = liveTimelineKeyMultiCameraPositionData.maskRoll;
+                        zAngle = liveTimelineKeyMultiCameraPositionData.roll;
+                    }
 
-        //private static Vector3 GetMultiCameraLookAtValue(LiveTimelineKeyCameraLookAtData keyData, LiveTimelineControl timelineControl, Vector3 camPos, FindTimelineConfig config)
-        //{
-        //    return (keyData as LiveTimelineKeyMultiCameraLookAtData).GetValue(timelineControl, camPos, config.extraCameraIndex);
-        //}
+                    
 
-        //public bool CalculateMultiCameraLookAt(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, int currentFrame, int timelineIndex = 0)
-        //{
-        //    if (sheet.multiCameraPositionKeys.Count <= timelineIndex || sheet.multiCameraLookAtKeys.Count <= timelineIndex)
-        //    {
-        //        pos = Vector3.zero;
-        //        return false;
-        //    }
-        //    FindTimelineConfig config = default(FindTimelineConfig);
-        //    config.curKey = curKey;
-        //    config.nextKey = nextKey;
-        //    config.keyType = FindTimelineConfig.KeyType.KeyDirect;
-        //    config.posKeys = sheet.multiCameraPositionKeys[timelineIndex].keys;
-        //    config.lookAtKeys = sheet.multiCameraLookAtKeys[timelineIndex].keys;
-        //    config.extraCameraIndex = timelineIndex;
-        //    return CalculateCameraLookAt(out pos, sheet, currentFrame, _multiCameraCache[timelineIndex], ref config, ref fnGetMultiCameraLookAtValueFunc, ref fnGetMultiCameraPositionValueFunc);
-        //}
+                    camera.nearClipPlane = liveTimelineKeyMultiCameraPositionData.nearClip;
+                    camera.farClipPlane = liveTimelineKeyMultiCameraPositionData.farClip;
+                    camera.fieldOfView = fieldOfView;
+                    cacheCamera.cacheTransform.localPosition = pos;
+                    cacheCamera.cacheTransform.Rotate(0f, 0f, zAngle);
+                    if (_multiCamera[i].maskIndex != (int)liveTimelineKeyMultiCameraPositionData.maskType)
+                    {
+                        //_multiCameraManager.AttachMask(i, (int)liveTimelineKeyMultiCameraPositionData.maskType);
+                    }
+
+                    if (_multiCamera[i].maskIndex >= 0)
+                    {
+                        _multiCamera[i].MaskOffset = maskOffset;
+                        _multiCamera[i].MaskRoll= maskRoll;
+                        //_multiCamera[i].maskScale = maskScale;
+                    }
+                }
+            }
+        }
+
+        private static Vector3 GetMultiCameraLookAtValue(LiveTimelineKeyCameraLookAtData keyData, LiveTimelineControl timelineControl, Vector3 camPos, FindTimelineConfig config)
+        {
+            return (keyData as LiveTimelineKeyMultiCameraLookAtData).GetValue(timelineControl, camPos);
+        }
+
+        public bool CalculateMultiCameraLookAt(out Vector3 pos, LiveTimelineWorkSheet sheet, LiveTimelineKey curKey, LiveTimelineKey nextKey, float currentFrame, int timelineIndex = 0)
+        {
+            if (sheet.multiCameraPosKeys.Count <= timelineIndex || sheet.multiCameraLookAtKeys.Count <= timelineIndex)
+            {
+                pos = Vector3.zero;
+                return false;
+            }
+            FindTimelineConfig config = default(FindTimelineConfig);
+            config.curKey = curKey;
+            config.nextKey = nextKey;
+            config.keyType = FindTimelineConfig.KeyType.KeyDirect;
+            config.posKeys = sheet.multiCameraPosKeys[timelineIndex].keys;
+            config.lookAtKeys = sheet.multiCameraLookAtKeys[timelineIndex].keys;
+            config.extraCameraIndex = timelineIndex;
+            return CalculateCameraLookAt(out pos, sheet, currentFrame, _multiCameraCache[timelineIndex], ref config, ref fnGetMultiCameraLookAtValueFunc, ref fnGetMultiCameraPositionValueFunc);
+        }
 
 
-        //private void AlterUpdate_MultiCameraLookAt(LiveTimelineWorkSheet sheet, int currentFrame)
-        //{
-        //    int count = sheet.multiCameraLookAtKeys.Count;
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        LiveTimelineKeyMultiCameraLookAtDataList keys = sheet.multiCameraLookAtKeys[i].keys;
-        //        if (i >= _multiCameraCache.Length)
-        //        {
-        //            break;
-        //        }
-        //        if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
-        //        {
-        //            continue;
-        //        }
-        //        FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
-        //        if (curKey != null && CalculateMultiCameraLookAt(out var pos, sheet, curKey, nextKey, currentFrame, i))
-        //        {
-        //            LiveTimelineKeyMultiCameraLookAtData liveTimelineKeyMultiCameraLookAtData = curKey as LiveTimelineKeyMultiCameraLookAtData;
-        //            LiveTimelineKeyMultiCameraLookAtData liveTimelineKeyMultiCameraLookAtData2 = nextKey as LiveTimelineKeyMultiCameraLookAtData;
-        //            float zAngle;
-        //            if (liveTimelineKeyMultiCameraLookAtData2 != null && liveTimelineKeyMultiCameraLookAtData2.interpolateType != 0)
-        //            {
-        //                float t = CalculateInterpolationValue(liveTimelineKeyMultiCameraLookAtData, liveTimelineKeyMultiCameraLookAtData2, currentFrame);
-        //                zAngle = LerpWithoutClamp(liveTimelineKeyMultiCameraLookAtData.roll, liveTimelineKeyMultiCameraLookAtData2.roll, t);
-        //            }
-        //            else
-        //            {
-        //                zAngle = liveTimelineKeyMultiCameraLookAtData.roll;
-        //            }
-        //            Transform cacheTransform = _multiCameraCache[i].cacheTransform;
-        //            cacheTransform.LookAt(pos);
-        //            cacheTransform.Rotate(0f, 0f, zAngle);
-        //        }
-        //    }
-        //}
+        private void AlterUpdate_MultiCameraLookAt(LiveTimelineWorkSheet sheet, float currentFrame)
+        {
+            int count = sheet.multiCameraLookAtKeys.Count;
+            for (int i = 0; i < count; i++)
+            {
+                LiveTimelineKeyMultiCameraLookAtDataList keys = sheet.multiCameraLookAtKeys[i].keys;
+                if (i >= _multiCameraCache.Length)
+                {
+                    break;
+                }
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
+                {
+                    continue;
+                }
+                FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
+                if (curKey != null && CalculateMultiCameraLookAt(out var pos, sheet, curKey, nextKey, currentFrame, i))
+                {
+                    Transform cacheTransform = _multiCameraCache[i].cacheTransform;
+                    cacheTransform.LookAt(pos);
+                }
+            }
+        }
 
-        //private void AlterUpdate_MultiCamera(LiveTimelineWorkSheet sheet, int currentFrame)
-        //{
-        //    if (_multiCameraCache != null && !(_multiCameraManager == null) && _multiCameraManager.isInitialize)
-        //    {
-        //        AlterUpdate_MultiCameraPosition(sheet, currentFrame);
-        //        AlterUpdate_MultiCameraLookAt(sheet, currentFrame);
-        //    }
-        //}
+        private void AlterUpdate_MultiCamera(LiveTimelineWorkSheet sheet, float currentFrame)
+        {
+            //if (_multiCameraCache != null && !(_multiCameraManager == null) && _multiCameraManager.isInitialize)
+            if (_multiCameraCache != null)
+            {
+                AlterUpdate_MultiCameraPosition(sheet, currentFrame);
+                if(_isMultiCameraEnable)
+                AlterUpdate_MultiCameraLookAt(sheet, currentFrame);
+            }
+        }
 
         private static float LerpWithoutClamp(float a, float b, float t)
         {
@@ -1580,8 +1583,6 @@ namespace Gallop.Live.Cutt
             return new Color(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
         }
 
-
-        //**************************************//
     }
 
 

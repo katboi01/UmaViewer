@@ -325,14 +325,18 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     }
 
 
-    public static void SaveLiveCameraVMD(List<LiveCameraFrame> frames)
+    public static void SaveLiveCameraVMD(List<LiveCameraFrame> frames, int MultiCameraIndex = -1)
     {
         string directory = $"{Application.dataPath}/../VMDRecords/";
         Directory.CreateDirectory(directory);
         var time = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         string fileName = $"{directory}LiveCamera_POS_{time}.vmd";
         string fovFileName = $"{directory}LiveCamera_FOV_{time}.vmd";
-
+        if(MultiCameraIndex >= 0)
+        {
+            fileName = $"{directory}LiveMultiCamera{MultiCameraIndex}_POS_{time}.vmd";
+            fovFileName = $"{directory}LiveMultiCamera{MultiCameraIndex}_FOV_{time}.vmd";
+        }
 
         const string modelName = "カメラ・照明";
 

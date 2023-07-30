@@ -464,6 +464,7 @@ namespace Gallop.Live
             SetupCharacterLocator();
             InitializeCamera();
             UpdateMainCamera();
+            InitializeMultiCamera(_liveTimelineControl);
             for (int i = 0; i < kTimelineCameraIndices.Length; i++)
             {
                 int num = kTimelineCameraIndices[i];
@@ -505,6 +506,25 @@ namespace Gallop.Live
                     _cameraTransforms[i] = camera.transform;
                 }
             }
+        }
+
+        public void InitializeMultiCamera(LiveTimelineControl control) 
+        {
+            var cameraCount = control.data.multiCameraSettings.cameraNum;
+            MultiCamera[] cameras = new MultiCamera[cameraCount];
+            var root = new GameObject("MultiCameras");
+            root.transform.SetParent(control.transform);
+            for (int i = 0; i < cameraCount; i++)
+            {
+                var camObj = new GameObject($"MultiCamera_{i}");
+                camObj.transform.SetParent(root.transform);
+
+                var cam = camObj.AddComponent<MultiCamera>();
+                cam.Initialize();
+                cameras[i] = cam;
+                control.MultiRecordFrames.Add(new List<LiveCameraFrame>());
+            }
+            control.SetMultiCamera(cameras);
         }
 
         private void UpdateMainCamera()
@@ -686,7 +706,7 @@ namespace Gallop.Live
                     {
                         _liveCurrentTime += Time.deltaTime;
 
-                        Debug.Log(_liveCurrentTime * 60);
+                        //Debug.Log(_liveCurrentTime * 60);
 
                         UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
                         OnTimelineUpdate(_liveCurrentTime);
@@ -706,9 +726,41 @@ namespace Gallop.Live
             isExit = true;
             if (_liveTimelineControl.IsRecordVMD)
             {
-                var frames = _liveTimelineControl.RecordFrames;
+                SaveCameraVMD();
+                SaveMultiCameraVMD();
+                SaveCharacterVMD();
+
+
+
+
+            }
+            UmaSceneController.LoadScene("Version2");
+            UmaAssetManager.UnloadAllBundle(true);
+        }
+
+        private void SaveCharacterVMD()
+        {
+            foreach (var container in CharaContainerScript)
+            {
+                var rootbone = container.transform.Find("Position");
+                if (rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))
+                {
+                    if (recorder.IsRecording)
+                    {
+                        recorder.StopRecording();
+                        recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}");
+                    }
+                }
+            }
+        }
+
+        private void SaveMultiCameraVMD()
+        {
+            for (int i = 0; i < _liveTimelineControl.MultiRecordFrames.Count; i++)
+            {
+                var frames = _liveTimelineControl.MultiRecordFrames[i];
                 frames[0].FovVaild = true;
-                var fov = _liveTimelineControl.data.worksheetList[0].cameraFovKeys.thisList;
+                var fov = _liveTimelineControl.data.worksheetList[0].multiCameraPosKeys[i].keys.thisList;
                 fov.ForEach(k => {
                     var index = k.frame;
                     if (index < frames.Count)
@@ -716,28 +768,31 @@ namespace Gallop.Live
                         frames[index].FovVaild = true;
                         if (index - 1 > 0) frames[index - 1].FovVaild = true;
                         if (index - 2 > 0) frames[index - 2].FovVaild = true;
-                        if (index + 1 < frames.Count) frames[index + 1].FovVaild = true;
-                        if (index + 2 < frames.Count) frames[index + 2].FovVaild = true;
+                        if (index - 3 > 0) frames[index - 3].FovVaild = true;
                     }
                 });
 
-                UnityCameraVMDRecorder.SaveLiveCameraVMD(frames);
-
-                foreach (var container in CharaContainerScript)
-                {
-                    var rootbone = container.transform.Find("Position");
-                    if (rootbone.gameObject.TryGetComponent(out UnityHumanoidVMDRecorder recorder))
-                    {
-                        if (recorder.IsRecording)
-                        {
-                            recorder.StopRecording();
-                            recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}");
-                        }
-                    }
-                }
+                UnityCameraVMDRecorder.SaveLiveCameraVMD(frames,i);
             }
-            UmaSceneController.LoadScene("Version2");
-            UmaAssetManager.UnloadAllBundle(true);
+        }
+
+        private void SaveCameraVMD()
+        {
+            var frames = _liveTimelineControl.RecordFrames;
+            frames[0].FovVaild = true;
+            var fov = _liveTimelineControl.data.worksheetList[0].cameraFovKeys.thisList;
+            fov.ForEach(k => {
+                var index = k.frame;
+                if (index < frames.Count)
+                {
+                    frames[index].FovVaild = true;
+                    if (index - 1 > 0) frames[index - 1].FovVaild = true;
+                    if (index - 2 > 0) frames[index - 2].FovVaild = true;
+                    if (index - 3 > 0) frames[index - 3].FovVaild = true;
+                }
+            });
+
+            UnityCameraVMDRecorder.SaveLiveCameraVMD(frames);
         }
     }
 
