@@ -151,85 +151,85 @@ namespace Gallop.Live
         private const float LiveTotalTimeMargin = 0;
         private const float MaxOutlineOffLength = 99999;
         private const int FINALIZE_CAMERA_DEPTH = 19;
-        private static Director _instance = null; 
-        [SerializeField] 
-        private Director.State _state; 
+        private static Director _instance = null;
+        [SerializeField]
+        private Director.State _state;
         private bool _isDestroyed;
         public LiveTimelineControl _liveTimelineControl; //Edited to public
-        private bool _isFinished; 
-        private readonly RandomTable<float> _randomTable; 
-        private RandomRatioTable _blinkLightRandomRatioTable; 
-        private float _sceneFrameRate; 
-        [SerializeField] 
+        private bool _isFinished;
+        private readonly RandomTable<float> _randomTable;
+        private RandomRatioTable _blinkLightRandomRatioTable;
+        private float _sceneFrameRate;
+        [SerializeField]
         public float _liveCurrentTime;  //Edited to public
-        private bool _isRequestFadeOut; 
+        private bool _isRequestFadeOut;
         public bool _isLiveSetup; //Edit to pulic
-        [SerializeField] 
-        private bool _isEnableBloom; 
-        private bool _isBloom; 
-        private bool _isDof; 
+        [SerializeField]
+        private bool _isEnableBloom;
+        private bool _isBloom;
+        private bool _isDof;
         public StageController _stageController; //Edited to public
-        private bool _isEnabledStageController; 
-        public RenderTexture[] MonitorTextureArray; 
-        [SerializeField] 
-        private Transform _globalLightTransform; 
-        [SerializeField] 
-        private GameObject[] _cameraNodes; 
-        private Camera[] _cameraObjects; 
+        private bool _isEnabledStageController;
+        public RenderTexture[] MonitorTextureArray;
+        [SerializeField]
+        private Transform _globalLightTransform;
+        [SerializeField]
+        private GameObject[] _cameraNodes;
+        private Camera[] _cameraObjects;
         private Transform[] _cameraTransforms;
-        private CameraEventCallback[] _cameraEventCallbackArray; 
-        private GameObject _transparentCameraObject; 
-        private Camera _transparentCamera; 
-        private Transform _transparentCameraTransform; 
-        private MultiCameraFinalComposite[] _multiCameraFinalCompositeArray; 
-        private MultiCameraComposite[] _multiCameraCompositionArray; 
-        private MultiCamera _multiCamera; 
-        [SerializeField] 
-        private CameraLookAt _cameraLookAt; 
-        [SerializeField] 
-        private Animator _cameraAnimator; 
-        private RuntimeAnimatorController _cameraRuntimeAnimator; 
-        private GameObject[] _monitorCameraObjectArray; 
-        private MonitorCamera[] _monitorCameraArray; 
-        [SerializeField] 
-        private HandShakeCamera _handShakeCamera; 
-        private int _activeCameraIndex = 1; 
-        private readonly int kMotionCameraIndex; 
-        private readonly int[] kTimelineCameraIndices = new int[3] { 1, 2, 3 }; 
+        private CameraEventCallback[] _cameraEventCallbackArray;
+        private GameObject _transparentCameraObject;
+        private Camera _transparentCamera;
+        private Transform _transparentCameraTransform;
+        private MultiCameraFinalComposite[] _multiCameraFinalCompositeArray;
+        private MultiCameraComposite[] _multiCameraCompositionArray;
+        private MultiCamera _multiCamera;
+        [SerializeField]
+        private CameraLookAt _cameraLookAt;
+        [SerializeField]
+        private Animator _cameraAnimator;
+        private RuntimeAnimatorController _cameraRuntimeAnimator;
+        private GameObject[] _monitorCameraObjectArray;
+        private MonitorCamera[] _monitorCameraArray;
+        [SerializeField]
+        private HandShakeCamera _handShakeCamera;
+        private int _activeCameraIndex = 1;
+        private readonly int kMotionCameraIndex;
+        private readonly int[] kTimelineCameraIndices = new int[3] { 1, 2, 3 };
         //private GallopFrameBuffer _frameBuffer; 
         //private LowResolutionCameraFrameBuffer[] _lowResolutionCameraArray; 
-        private Camera _mainCameraObject; 
-        private Transform _mainCameraTransform; 
-        public Action OnChangeOriantationLandscapeCallback; 
-        public Action OnChangeOriantationPortraitCallback; 
-        private readonly List<CharacterObject> _characterObjectList; 
-        private List<CharaEffectInfo> _listShadowEffectInfo; 
-        private List<CharaEffectInfo> _listSpotLightEffectInfo;  
-        private ModelController.ModelDepthInfo[] _depthOrderInfoArray; 
-        private readonly List<ModelController> _modelControllerList; 
-        private bool _isUpdateModelRenderQueue; 
+        private Camera _mainCameraObject;
+        private Transform _mainCameraTransform;
+        public Action OnChangeOriantationLandscapeCallback;
+        public Action OnChangeOriantationPortraitCallback;
+        private readonly List<CharacterObject> _characterObjectList;
+        private List<CharaEffectInfo> _listShadowEffectInfo;
+        private List<CharaEffectInfo> _listSpotLightEffectInfo;
+        private ModelController.ModelDepthInfo[] _depthOrderInfoArray;
+        private readonly List<ModelController> _modelControllerList;
+        private bool _isUpdateModelRenderQueue;
         //private PropsManager _propsManager; 
-        private SongPart _songPart; 
+        private SongPart _songPart;
         //public LiveChampionsTextController ChampionsTextController; 
-        public LiveTitleController TitleController; 
-        private LiveFadeController _fadeController; 
+        public LiveTitleController TitleController;
+        private LiveFadeController _fadeController;
         //private readonly List<LiveImageEffect> _imageEffectLive3dList; 
         //private IndirectLightShaftsParam[] _indirectLightShaftsParamArray; 
-        private Texture2D[] _indirectLightShaftsTexture; 
-        private ColorCorrectionParam _colorCorrectionParameter; 
-        [SerializeField] 
-        private float _outlineFovMin; 
-        [SerializeField] 
-        private float _outlineFovMinOffLength; 
-        [SerializeField] 
-        private float _outlineFovLessOffLength; 
-        [SerializeField] 
-        private float _outlineFovMax; 
-        [SerializeField] 
-        private float _outlineFovMaxOffLength; 
-        [SerializeField] 
-        private float _outlineFovGreaterOffLength; 
-        private List<Director.OutLineOffLengthItem> _outlineOffLengthItems; 
+        private Texture2D[] _indirectLightShaftsTexture;
+        private ColorCorrectionParam _colorCorrectionParameter;
+        [SerializeField]
+        private float _outlineFovMin;
+        [SerializeField]
+        private float _outlineFovMinOffLength;
+        [SerializeField]
+        private float _outlineFovLessOffLength;
+        [SerializeField]
+        private float _outlineFovMax;
+        [SerializeField]
+        private float _outlineFovMaxOffLength;
+        [SerializeField]
+        private float _outlineFovGreaterOffLength;
+        private List<Director.OutLineOffLengthItem> _outlineOffLengthItems;
         private const int VariationCallOn = 1;
         private const int VariationCallOff = 2;
         private const int CharaSongVariation = 1;
@@ -237,24 +237,24 @@ namespace Gallop.Live
         private const int PROPS_BLINKLIGHT_RENDERQUEUE_START = 100;
         private const string LIGHT_UVMOVIE_FILE_NAME = "gal_UVmovie_{0}_Light";
         private const string LIVE_IMAGE_SUFFIX_CHAMPIONS_LOGO = "champions_logo";
-        private const string LIVE_IMAGE_SUFFIX_CHAMPIONS_JACKET = "champions_jacket"; 
-        private Director.LoadAssetTask _loadAssetTask; 
-        private bool _isClothInitialized; 
-        private int _charaClothResetTimer; 
-        private GameObject _initializeCamera; 
-        private Transform _initializeCameraTransform; 
-        private float _clothInitTimer;  
+        private const string LIVE_IMAGE_SUFFIX_CHAMPIONS_JACKET = "champions_jacket";
+        private Director.LoadAssetTask _loadAssetTask;
+        private bool _isClothInitialized;
+        private int _charaClothResetTimer;
+        private GameObject _initializeCamera;
+        private Transform _initializeCameraTransform;
+        private float _clothInitTimer;
         //private List<PropsManager.PropsData> _propsDataList; 
-        private int _usualMultiTrainedCharaId; 
-        private bool _isInitializedMultiCamera; 
-        private bool _isInitialized; 
-        private static GameObject _cuttPrefab; 
-        private static bool _usingAssetBundleCuttPrefab; 
-        private static TextAsset _cyalumeChoreographyCsv; 
-        private static TextAsset _songPartCsv; 
-        private static TextAsset[] _uvMovieJsonArray; 
-        private bool _enableTimelineGlobalRimParam; 
-        private Vector3 _tempRateVector; 
+        private int _usualMultiTrainedCharaId;
+        private bool _isInitializedMultiCamera;
+        private bool _isInitialized;
+        private static GameObject _cuttPrefab;
+        private static bool _usingAssetBundleCuttPrefab;
+        private static TextAsset _cyalumeChoreographyCsv;
+        private static TextAsset _songPartCsv;
+        private static TextAsset[] _uvMovieJsonArray;
+        private bool _enableTimelineGlobalRimParam;
+        private Vector3 _tempRateVector;
         private Vector3 _tempAttachRateVector;
 
         public static Director instance => _instance;
@@ -317,7 +317,7 @@ namespace Gallop.Live
 
         public List<Transform> charaObjs;
 
-        public List<UmaContainer> CharaContainerScript = new List<UmaContainer>(); 
+        public List<UmaContainer> CharaContainerScript = new List<UmaContainer>();
 
         public List<Animation> charaAnims;
 
@@ -384,10 +384,11 @@ namespace Gallop.Live
                 Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
 
                 //Make CharacterObject
-                
+
                 var characterStandPos = this._liveTimelineControl.transform.Find("CharacterStandPos");
                 int counter = 0;
-                foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>()) {
+                foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>())
+                {
                     if (trans == characterStandPos)
                     {
                         continue;
@@ -413,7 +414,7 @@ namespace Gallop.Live
         public void InitializeUI()
         {
             UI = GameObject.Find("LiveUI").GetComponent<LiveViewerUI>();
-            
+
             sliderControl = UI.ProgressBar.GetComponent<SliderControl>();
         }
 
@@ -446,7 +447,7 @@ namespace Gallop.Live
                 var nextKey = keyData_.nextKey as LiveTimelineKeyLipSyncData;
                 for (int k = 0; k < charaObjs.Count; k++)
                 {
-                    if(k < CharaContainerScript.Count)
+                    if (k < CharaContainerScript.Count)
                     {
                         var container = CharaContainerScript[k];
                         container.FaceDrivenKeyTarget.AlterUpdateAutoLip(prevKey, curKey, liveTime_, ((int)curKey.character >> k) % 2);
@@ -455,7 +456,7 @@ namespace Gallop.Live
             };
             _liveTimelineControl.OnUpdateFacial += delegate (FacialDataUpdateInfo updateInfo_, float liveTime_, int position)
             {
-                if( position < charaObjs.Count)
+                if (position < charaObjs.Count)
                 {
                     var container = CharaContainerScript[position];
                     container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
@@ -473,7 +474,7 @@ namespace Gallop.Live
                     _liveTimelineControl.SetTimelineCamera(_cameraObjects[num], i);
                 }
             }
-            
+
             _liveTimelineControl.OnUpdateCameraSwitcher += delegate (int cameraIndex_)
             {
                 if (cameraIndex_ < 0)
@@ -508,7 +509,7 @@ namespace Gallop.Live
             }
         }
 
-        public void InitializeMultiCamera(LiveTimelineControl control) 
+        public void InitializeMultiCamera(LiveTimelineControl control)
         {
             var cameraCount = control.data.multiCameraSettings.cameraNum;
             MultiCamera[] cameras = new MultiCamera[cameraCount];
@@ -547,7 +548,7 @@ namespace Gallop.Live
         private void SetupCharacterLocator()
         {
             if (!_liveTimelineControl) return;
-            for (int i = 0; i < CharaContainerScript.Count; i++) 
+            for (int i = 0; i < CharaContainerScript.Count; i++)
             {
                 var container = CharaContainerScript[i];
                 container.LiveLocator = new LiveTimelineCharaLocator(container);
@@ -613,8 +614,8 @@ namespace Gallop.Live
 
             if (IsRecordVMD)
             {
-               foreach(var container in CharaContainerScript)
-               {
+                foreach (var container in CharaContainerScript)
+                {
                     var rootbone = container.transform.Find("Position");
                     var newRecorder = rootbone.gameObject.AddComponent<UnityHumanoidVMDRecorder>();
                     newRecorder.UseParentOfAll = true;
@@ -624,7 +625,7 @@ namespace Gallop.Live
                     {
                         newRecorder.StartRecording();
                     }
-               }   
+                }
             }
         }
 
@@ -667,7 +668,7 @@ namespace Gallop.Live
                         {
 
                             UmaViewerAudio.SetTime(liveMusic, _liveCurrentTime);
-                            
+
                             foreach (var vocal in liveVocal)
                             {
                                 UmaViewerAudio.SetTime(vocal, _liveCurrentTime);
@@ -690,7 +691,7 @@ namespace Gallop.Live
                     else if (sliderControl.is_Touched)
                     {
                         _liveCurrentTime = UI.ProgressBar.value * totalTime;
-                        
+
                         if (liveMusic != null)
                         {
                             UmaViewerAudio.Stop(liveMusic);
@@ -699,7 +700,7 @@ namespace Gallop.Live
                                 UmaViewerAudio.Stop(vocal);
                             }
                         }
-   
+
                         OnTimelineUpdate(_liveCurrentTime);
                     }
                     else
@@ -710,7 +711,7 @@ namespace Gallop.Live
 
                         UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
                         OnTimelineUpdate(_liveCurrentTime);
-                    }  
+                    }
                 }
             }
             UpdateMainCamera();
@@ -721,18 +722,16 @@ namespace Gallop.Live
             _liveTimelineControl.AlterLateUpdate();
         }
 
+        DateTime ExitTime;
         private void ExitLive()
         {
             isExit = true;
             if (_liveTimelineControl.IsRecordVMD)
             {
+                ExitTime = DateTime.Now;
                 SaveCameraVMD();
                 SaveMultiCameraVMD();
                 SaveCharacterVMD();
-
-
-
-
             }
             UmaSceneController.LoadScene("Version2");
             UmaAssetManager.UnloadAllBundle(true);
@@ -748,7 +747,7 @@ namespace Gallop.Live
                     if (recorder.IsRecording)
                     {
                         recorder.StopRecording();
-                        recorder.SaveLiveVMD($"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}");
+                        recorder.SaveLiveVMD(live, ExitTime, $"Live{live.MusicId}_Pos{CharaContainerScript.IndexOf(container)}");
                     }
                 }
             }
@@ -761,18 +760,21 @@ namespace Gallop.Live
                 var frames = _liveTimelineControl.MultiRecordFrames[i];
                 frames[0].FovVaild = true;
                 var fov = _liveTimelineControl.data.worksheetList[0].multiCameraPosKeys[i].keys.thisList;
-                fov.ForEach(k => {
-                    var index = k.frame;
-                    if (index < frames.Count)
+                fov.ForEach(k =>
+                {
+                    var keyframe = frames.Find(f => f.frameIndex == k.frame);
+                    if (keyframe != null)
                     {
-                        frames[index].FovVaild = true;
+                        var index = frames.IndexOf(keyframe);
+                        keyframe.FovVaild = true;
+                        if (index + 1 < frames.Count) frames[index + 1].FovVaild = true;
                         if (index - 1 > 0) frames[index - 1].FovVaild = true;
                         if (index - 2 > 0) frames[index - 2].FovVaild = true;
                         if (index - 3 > 0) frames[index - 3].FovVaild = true;
                     }
                 });
 
-                UnityCameraVMDRecorder.SaveLiveCameraVMD(frames,i);
+                UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames, i);
             }
         }
 
@@ -781,18 +783,22 @@ namespace Gallop.Live
             var frames = _liveTimelineControl.RecordFrames;
             frames[0].FovVaild = true;
             var fov = _liveTimelineControl.data.worksheetList[0].cameraFovKeys.thisList;
-            fov.ForEach(k => {
-                var index = k.frame;
-                if (index < frames.Count)
+            fov.ForEach(k =>
+            {
+
+                var keyframe = frames.Find(f => f.frameIndex == k.frame);
+                if (keyframe != null)
                 {
-                    frames[index].FovVaild = true;
+                    var index = frames.IndexOf(keyframe);
+                    keyframe.FovVaild = true;
+                    if (index + 1 < frames.Count) frames[index + 1].FovVaild = true;
                     if (index - 1 > 0) frames[index - 1].FovVaild = true;
                     if (index - 2 > 0) frames[index - 2].FovVaild = true;
                     if (index - 3 > 0) frames[index - 3].FovVaild = true;
                 }
             });
 
-            UnityCameraVMDRecorder.SaveLiveCameraVMD(frames);
+            UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames);
         }
     }
 

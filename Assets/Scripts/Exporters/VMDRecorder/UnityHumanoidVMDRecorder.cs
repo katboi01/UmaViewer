@@ -596,10 +596,10 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         SaveVMD(modelName, fileName);
     }
 
-    public void SaveLiveVMD(string modelName, int keyReductionLevel = 3)
+    public void SaveLiveVMD(LiveEntry liveEntry, DateTime time ,string modelName, int keyReductionLevel = 3)
     {
-        string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("{0}_{1}.vmd", modelName, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
+        string fileName = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
+        Directory.CreateDirectory(Path.GetDirectoryName(fileName));
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);
     }
