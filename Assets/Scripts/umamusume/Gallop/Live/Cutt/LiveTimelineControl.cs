@@ -617,6 +617,10 @@ namespace Gallop.Live.Cutt
                     var x = chara.transform.eulerAngles.x;
                     var z = chara.transform.eulerAngles.z;
                     chara.transform.eulerAngles = new Vector3(x, Mathf.Lerp(curKey.RotationY, nextKey.RotationY, ratio), z);
+
+                    var local_x = chara.Position.localEulerAngles.x;
+                    var local_z = chara.Position.localEulerAngles.z;
+                    chara.Position.localEulerAngles = new Vector3(local_x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), local_z);
                 }
                 else
                 {
@@ -624,6 +628,10 @@ namespace Gallop.Live.Cutt
                     var x = chara.transform.eulerAngles.x;
                     var z = chara.transform.eulerAngles.z;
                     chara.transform.eulerAngles = new Vector3(x, curKey.RotationY, z);
+
+                    var local_x = chara.Position.localEulerAngles.x;
+                    var local_z = chara.Position.localEulerAngles.z;
+                    chara.Position.localEulerAngles = new Vector3(local_x, curKey.LocalRotationY, local_z);
                 }
             }
         }
