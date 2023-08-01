@@ -323,8 +323,8 @@ namespace Gallop.Live.Cutt
             LiveTimelineWorkSheet workSheet = data.worksheetList[0];
             _isNowAlterUpdate = true;
             Vector3 outLookAt = Vector3.zero;
-            AlterUpdate_CameraSwitcher(workSheet, _currentFrame);
             AlterLateUpdate_FormationOffset(currentLiveTime);
+            AlterUpdate_CameraSwitcher(workSheet, _currentFrame);
             AlterUpdate_CameraPos(workSheet, _currentFrame);
             AlterUpdate_CameraLookAt(workSheet, _currentFrame, ref outLookAt);
             AlterUpdate_CameraFov(workSheet, _currentFrame);
@@ -614,16 +614,16 @@ namespace Gallop.Live.Cutt
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
                     chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
-                    var x = chara.Position.localEulerAngles.x;
-                    var z = chara.Position.localEulerAngles.z;
-                    chara.Position.localEulerAngles = new Vector3(x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), z);
+                    var x = chara.transform.eulerAngles.x;
+                    var z = chara.transform.eulerAngles.z;
+                    chara.transform.eulerAngles = new Vector3(x, Mathf.Lerp(curKey.RotationY, nextKey.RotationY, ratio), z);
                 }
                 else
                 {
                     chara.transform.localPosition = curKey.Position;
-                    var x = chara.Position.localEulerAngles.x;
-                    var z = chara.Position.localEulerAngles.z;
-                    chara.Position.localEulerAngles = new Vector3(x, curKey.LocalRotationY, z);
+                    var x = chara.transform.eulerAngles.x;
+                    var z = chara.transform.eulerAngles.z;
+                    chara.transform.eulerAngles = new Vector3(x, curKey.RotationY, z);
                 }
             }
         }
