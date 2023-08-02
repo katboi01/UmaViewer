@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using static Gallop.RaceDefine;
 
 public class UnityCameraVMDRecorder : MonoBehaviour
 {
