@@ -562,7 +562,7 @@ public class LiveCameraFrame
         var vmdQuatenion = new Quaternion(-fixedQuatenion.x, fixedQuatenion.y, -fixedQuatenion.z, fixedQuatenion.w);
         Rotation = vmdQuatenion;
 
-        Vector3 vmdRotation = new Vector3(fixedQuatenion.eulerAngles.x, 180 - fixedQuatenion.eulerAngles.y, fixedQuatenion.eulerAngles.z);
+        Vector3 vmdRotation = new Vector3(fixedQuatenion.eulerAngles.x, fixedQuatenion.eulerAngles.y - 180, fixedQuatenion.eulerAngles.z);
 
         Rotation = Quaternion.Euler(vmdRotation);
 

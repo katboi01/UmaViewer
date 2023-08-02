@@ -1213,6 +1213,7 @@ public class UmaViewerBuilder : MonoBehaviour
                     //Blush Setting
                     if (r.name.Contains("Cheek"))
                     {
+                        r.gameObject.SetActive(false);
                         if (isMob)
                         {
                             CurrentUMAContainer.CheekTex_0 = CurrentUMAContainer.MobHeadTextures.FindLast(a => a.name.Contains("cheek0"));
