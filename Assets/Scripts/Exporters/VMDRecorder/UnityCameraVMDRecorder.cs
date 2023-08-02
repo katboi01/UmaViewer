@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static Gallop.RaceDefine;
 
 public class UnityCameraVMDRecorder : MonoBehaviour
 {
@@ -563,6 +564,8 @@ public class LiveCameraFrame
         Rotation = vmdQuatenion;
 
         Vector3 vmdRotation = new Vector3(fixedQuatenion.eulerAngles.x, 180 - fixedQuatenion.eulerAngles.y, fixedQuatenion.eulerAngles.z);
+
+        Rotation = Quaternion.Euler(vmdRotation);
 
         var finalRotation = vmdRotation;
         if (lastframe == null)
