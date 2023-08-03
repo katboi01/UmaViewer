@@ -18,7 +18,11 @@ public class Config
     public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client(slow), Database needs to be updated manually";
     public WorkMode WorkMode = WorkMode.Default;
 
-    public List<MorphConvertConfig> MorphConvertSetting = new List<MorphConvertConfig>
+    public string VmdKeyReductionLevelTip = " Affects the recording quality: 1 = record every frame, 2 = record every two frames, and so on.";
+    public int VmdKeyReductionLevel = 2;
+
+    public string VmdMorphConvertSettingTip = "The mapping of MMD mprphs to UMA mprphs during VMD recording, multiple UMA expression weights will be combined (not exceeding 1)";
+    public List<MorphConvertConfig> VmdMorphConvertSetting = new List<MorphConvertConfig>
     {
         new MorphConvertConfig("にこり右", new string[] { "EyeBrow_1_R" }),
         new MorphConvertConfig("にこり左", new string[] { "EyeBrow_1_L" }),

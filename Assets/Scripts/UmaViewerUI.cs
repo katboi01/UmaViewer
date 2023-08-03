@@ -1285,7 +1285,7 @@ public class UmaViewerUI : MonoBehaviour
                 }
                 recorder.StopRecording();
                 buttonText.text = "Saving";
-                recorder.SaveVMD(container.name);
+                recorder.SaveVMD(container.name, Config.Instance.VmdKeyReductionLevel);
                 buttonText.text = "Record VMD";
             }
         }

@@ -819,9 +819,9 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
 
         public string ConvertMorphName(string name)
         {
-            if (Config.Instance.MorphConvertSetting.Count > 0)
+            if (Config.Instance.VmdMorphConvertSetting.Count > 0)
             {
-                var setting = Config.Instance.MorphConvertSetting;
+                var setting = Config.Instance.VmdMorphConvertSetting;
                 foreach (var val in setting)
                 {
                     foreach (var v in val.UMAMorph)
