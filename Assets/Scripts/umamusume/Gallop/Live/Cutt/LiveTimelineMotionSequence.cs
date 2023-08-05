@@ -80,13 +80,12 @@ namespace Gallop.Live.Cutt
 
         public void AlterUpdate(float currentTime)
         {
-            if(Director.instance.liveMode == 0)
+            var director = Director.instance;
+            if (Director.instance.liveMode == 0)
             {
-                
-                if(_targetAnim != null)
+                if (_targetAnim != null)
                 {
-                    //_tempAnim[_targetAnim.name].time = currentTime;
-                    if (Director.instance.sliderControl.is_Touched)
+                    if (director.sliderControl.is_Touched || director.IsRecordVMD)
                     {
                         _tempAnim[_targetAnim.name].time = currentTime;
                         _tempAnim.Play(_targetAnim.name);
@@ -108,7 +107,7 @@ namespace Gallop.Live.Cutt
 
                 _curIndex = curKey.index;
 
-                if ((curKey != null && _curIndex != -1 && _curIndex != _prevIndex) || Director.instance.sliderControl.is_Touched || Director.instance._syncTime == false)
+                if ((curKey != null && _curIndex != -1 && _curIndex != _prevIndex) || Director.instance.sliderControl.is_Touched || Director.instance._syncTime == false || director.IsRecordVMD)
                 {
                     LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
 

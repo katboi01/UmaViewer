@@ -101,6 +101,7 @@ namespace Gallop.Live.Cutt
         public bool IsRecordVMD;
         public List<LiveCameraFrame> RecordFrames = new List<LiveCameraFrame>();
         public List<List<LiveCameraFrame>> MultiRecordFrames = new List<List<LiveCameraFrame>>();
+        public event Action RecordUma;
 
         public float currentLiveTime
         {
@@ -307,10 +308,10 @@ namespace Gallop.Live.Cutt
             _isNowAlterUpdate = true;
             _oldLiveTime = currentLiveTime;
             currentLiveTime = liveTime;
+            _currentFrame = currentLiveTime * 60f;
             _oldFrame = _oldLiveTime * 60f;
             _deltaTime = currentLiveTime - _oldLiveTime;
             _deltaTimeRatio = _deltaTime / 0.0166666675f;
-            _currentFrame = currentLiveTime * 60f;
             AlterUpdate_CharaMotionSequence(liveTime);
             AlterUpdate_FacialData(liveTime);
             AlterUpdate_LipSync(liveTime);
@@ -355,6 +356,8 @@ namespace Gallop.Live.Cutt
                     LiveCameraFrame mulframe = new LiveCameraFrame(currentFrame, MulCamera.transform, cam.fieldOfView, lastMulframe);
                     MulFrame.Add(mulframe);
                 }
+
+                if (currentFrame % 2 == 0) RecordUma?.Invoke();
             }
         }
 

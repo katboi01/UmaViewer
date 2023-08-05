@@ -14,6 +14,7 @@ public class LiveViewerUI : MonoBehaviour
 
     public Dropdown FrameRateDropDown;
 
+    public GameObject RecordingUI;
     float targetHeight = 0;
     float height;
     private void Awake()

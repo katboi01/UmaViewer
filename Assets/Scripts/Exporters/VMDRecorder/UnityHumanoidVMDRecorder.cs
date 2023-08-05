@@ -69,6 +69,8 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
 
     private UmaContainer container;
     float aposeDegress = 38.5f;
+
+    public bool IsLive;
     public void Initialize()
     {
         Time.fixedDeltaTime = FPSs;
@@ -172,7 +174,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsRecording)
+        if (IsRecording && !IsLive)
         {
             SaveFrame();
             FrameNumber++;
@@ -315,6 +317,15 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         }
     }
 
+    void LiveSaveFrame()
+    {
+        if (IsRecording && IsLive)
+        {
+            SaveFrame();
+            FrameNumber++;
+        }
+    }
+
     void SetInitialPositionAndRotation()
     {
         if (UseAbsoluteCoordinateSystem)
@@ -337,10 +348,17 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     /// <summary>
     /// レコーディングを開始または再開
     /// </summary>
-    public void StartRecording()
+    public void StartRecording(bool islive = false)
     {
         SetInitialPositionAndRotation();
         IsRecording = true;
+        IsLive = islive;
+
+        if (islive)
+        {
+            var director = Gallop.Live.Director.instance;
+            director._liveTimelineControl.RecordUma += LiveSaveFrame;
+        }
     }
 
     /// <summary>
@@ -369,6 +387,12 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             rotationDictionary.Add(boneName, new List<Quaternion>());
         }
         morphRecorder = new MorphRecorder(transform);
+        
+        if (IsLive)
+        {
+            var director = Gallop.Live.Director.instance;
+            director._liveTimelineControl.RecordUma -= LiveSaveFrame;
+        }
     }
 
     /// <summary>

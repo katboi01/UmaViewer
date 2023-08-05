@@ -623,7 +623,7 @@ namespace Gallop.Live
                     newRecorder.Initialize();
                     if (!newRecorder.IsRecording)
                     {
-                        newRecorder.StartRecording();
+                        newRecorder.StartRecording(true);
                     }
                 }
             }
@@ -660,13 +660,28 @@ namespace Gallop.Live
                 }
                 else
                 {
-                    if (sliderControl.is_Outed)
+                    if (IsRecordVMD)
+                    {
+                        _liveCurrentTime += (1/60f);
+                        if (liveMusic != null)
+                        {
+                            UmaViewerAudio.Stop(liveMusic);
+                            foreach (var vocal in liveVocal)
+                            {
+                                UmaViewerAudio.Stop(vocal);
+                            }
+                        }
+
+                        UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
+                        OnTimelineUpdate(_liveCurrentTime);
+                        _liveTimelineControl.AlterLateUpdate();
+                    }
+                    else if (sliderControl.is_Outed)
                     {
                         _liveCurrentTime = UI.ProgressBar.value * totalTime;
 
                         if (liveMusic != null)
                         {
-
                             UmaViewerAudio.SetTime(liveMusic, _liveCurrentTime);
 
                             foreach (var vocal in liveVocal)
@@ -706,20 +721,20 @@ namespace Gallop.Live
                     else
                     {
                         _liveCurrentTime += Time.deltaTime;
-
-                        //Debug.Log(_liveCurrentTime * 60);
-
                         UI.ProgressBar.SetValueWithoutNotify(_liveCurrentTime / totalTime);
                         OnTimelineUpdate(_liveCurrentTime);
                     }
                 }
+                UpdateMainCamera();
             }
-            UpdateMainCamera();
         }
 
         private void LateUpdate()
         {
-            _liveTimelineControl.AlterLateUpdate();
+            if (_isLiveSetup && _syncTime && !IsRecordVMD)
+            {
+                _liveTimelineControl.AlterLateUpdate();
+            }
         }
 
         DateTime ExitTime;
