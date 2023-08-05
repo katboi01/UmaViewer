@@ -1460,7 +1460,7 @@ namespace Gallop.Live.Cutt
                 }
                 LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData = curKey as LiveTimelineKeyMultiCameraPositionData;
                 LiveTimelineKeyMultiCameraPositionData liveTimelineKeyMultiCameraPositionData2 = nextKey as LiveTimelineKeyMultiCameraPositionData;
-                camera.enabled = liveTimelineKeyMultiCameraPositionData.enableMultiCamera;
+                // camera.enabled = liveTimelineKeyMultiCameraPositionData.enableMultiCamera;
                 if (liveTimelineKeyMultiCameraPositionData.enableMultiCamera)
                 {
                     
