@@ -237,7 +237,11 @@ namespace Gallop.Live.Cutt
             float frame = time * 60;
             int mid = (low + high) / 2;
 
-            if (low == high || (frame >= thisList[mid].frame && frame < thisList[mid + 1].frame))
+            if (high <= 0)
+            {
+                return 0;
+            }
+            else if (low == high || (frame >= thisList[mid].frame && frame < thisList[mid + 1].frame))
             {
                 return mid;
             }
