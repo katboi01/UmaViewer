@@ -207,6 +207,10 @@ namespace Gallop.Live.Cutt
             if(thisList.Count > 0)
             {
                 int ret = BinarySearchKey(0, thisList.Count - 1, currentTime);
+                if (ret == -1)
+                {
+                    return null;
+                }
                 thisTimeKeyIndex.index = ret;
                 thisTimeKeyIndex.key = thisList[ret];
 
@@ -237,9 +241,9 @@ namespace Gallop.Live.Cutt
             float frame = time * 60;
             int mid = (low + high) / 2;
 
-            if (high <= 0)
+            if (high < 0)
             {
-                return 0;
+                return -1;
             }
             else if (low == high || (frame >= thisList[mid].frame && frame < thisList[mid + 1].frame))
             {
