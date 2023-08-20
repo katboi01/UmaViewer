@@ -94,6 +94,7 @@ public class UmaAssetManager : MonoBehaviour
                 Debug.Log(filePath + " exists and doesn't work");
                 UmaViewerUI.Instance?.ShowMessage(filePath + " exists and doesn't work", UIMessageType.Error);
             }
+            LoadEntryData(entry, bundle);
             AddOrUpdate(entry.Name, bundle, neverUnload);
             if (!neverUnload)
             {
@@ -154,6 +155,18 @@ public class UmaAssetManager : MonoBehaviour
 
     public static bool Exist(AssetBundle bundle) => instance.LoadedBundles.ContainsValue(bundle);
 
+    public static void UnloadBundle(UmaDatabaseEntry entry, bool unloadAllObjects)
+    {
+        if (instance.NeverUnload.ContainsValue(entry.LoadedBundle)) return;
+        var abEntry = instance.LoadedBundles.FirstOrDefault(b => b.Value == entry.LoadedBundle);
+        if (abEntry.Key != null)
+        {
+            instance.LoadedBundles.Remove(abEntry.Key);
+        }
+        UnloadEntryData(entry, abEntry.Value);
+        entry.Unload(unloadAllObjects);
+    }
+
     private static void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
     {
         if(instance.NeverUnload.ContainsValue(bundle)) return;
@@ -194,5 +207,40 @@ public class UmaAssetManager : MonoBehaviour
         }
         OnLoadedBundleClear?.Invoke();
     }
+
+    private static void LoadEntryData(UmaDatabaseEntry entry, AssetBundle bundle)
+    {
+        entry.LoadedBundle = bundle;
+        if (bundle.name == "shader.a")
+        {
+            var builder = UmaViewerBuilder.Instance;
+            builder.hairShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
+            builder.faceShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
+            builder.eyeShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
+            builder.cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
+            builder.eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+            builder.alphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
+            builder.bodyAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
+            builder.bodyBehindAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
+        }
+
+        foreach (var name in bundle.GetAllAssetNames())
+        {
+            var asset = bundle.LoadAsset(name);
+            if (asset != null)
+            {
+                entry.Assets.Add(asset);
+                entry.AssetNames[asset] = name;
+            }
+        }
+    }
+
+    private static void UnloadEntryData(UmaDatabaseEntry entry, AssetBundle bundle)
+    {
+        entry.LoadedBundle = null;
+        entry.Assets.Clear();
+        entry.AssetNames.Clear();
+    }
+
 }
 
