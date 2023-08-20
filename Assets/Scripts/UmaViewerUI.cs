@@ -837,7 +837,7 @@ public class UmaViewerUI : MonoBehaviour
                 pageentry.OnClick = (container) =>
                 {
                     HighlightChildImage(animationList.content, container);
-                    Builder.LoadAsset(entry);
+                    (Builder.CurrentUMAContainer as UmaContainerCharacter)?.LoadAnimation(entry);
                     LoadedAnimation();
                 };
                 pageentrys.Add(pageentry);
@@ -848,16 +848,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"/tail")))
             {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 20;
-                container.Button.onClick.AddListener(() =>
-                {
-                    HighlightChildImage(animationList.content, container);
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
+                CreateAnimationSelectionPanel(entry, animationList.content);
             }
             pageManager.ResetCtrl();
         }
@@ -865,16 +856,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             foreach (var entry in Main.AbMotions.Where(a => a.Name.Contains($"type00_ear") && !a.Name.EndsWith("driven") && !a.Name.Contains("touch")))
             {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 20;
-                container.Button.onClick.AddListener(() =>
-                {
-                    HighlightChildImage(animationList.content, container);
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
+                CreateAnimationSelectionPanel(entry, animationList.content);
             }
             pageManager.ResetCtrl();
         }
@@ -883,34 +865,29 @@ public class UmaViewerUI : MonoBehaviour
             //Common animations
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"chara/chr{umaId}") && !a.Name.Contains("pose")))
             {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 20;
-                container.Button.onClick.AddListener(() =>
-                {
-                    HighlightChildImage(animationList.content, container);
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
+                CreateAnimationSelectionPanel(entry, animationList.content);
             }
 
             //Skill animations
             foreach (var entry in filteredList.Where(a => a.Name.Contains($"card/body/crd{umaId}")))
             {
-                var entryInstance = entry;
-                var container = Instantiate(UmaContainerPrefab, animationList.content).GetComponent<UmaUIContainer>();
-                container.Name = container.name = Path.GetFileName(entry.Name);
-                container.FontSize = 20;
-                container.Button.onClick.AddListener(() =>
-                {
-                    HighlightChildImage(animationList.content, container);
-                    Builder.LoadAsset(entryInstance);
-                    LoadedAnimation();
-                });
+                CreateAnimationSelectionPanel(entry, animationList.content);
             }
             pageManager.ResetCtrl();
         }
+    }
+
+    void CreateAnimationSelectionPanel(UmaDatabaseEntry entry, Transform parent)
+    {
+        var container = Instantiate(UmaContainerPrefab, parent).GetComponent<UmaUIContainer>();
+        container.Name = container.name = Path.GetFileName(entry.Name);
+        container.FontSize = 20;
+        container.Button.onClick.AddListener(() =>
+        {
+            HighlightChildImage(parent, container);
+            (Builder.CurrentUMAContainer as UmaContainerCharacter)?.LoadAnimation(entry);
+            LoadedAnimation();
+        });
     }
 
     void ListBackgrounds()

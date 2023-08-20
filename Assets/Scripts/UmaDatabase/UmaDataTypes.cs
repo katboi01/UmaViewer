@@ -1,41 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
-using System.IO;
-using static UmaViewerUI;
 using System;
-
-public class UmaDatabaseEntry
-{
-    public UmaFileType Type;
-    public string Name;
-    public string Url;
-    public string Prerequisites;
-    public string FilePath 
-    {
-        get 
-        {
-            var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
-            if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
-            {
-                DownloadAsset(this);
-            }
-            return path;
-        }
-    } 
-
-    //TODO Make it async
-    public static void DownloadAsset(UmaDatabaseEntry entry)
-    {
-        var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-        Debug.Log("Downloading:" + entry.Name);
-        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg, UIMessageType type) 
-        {
-            Instance.ShowMessage(msg, type);
-        });
-    }
-
-}
 
 public class UmaCharaData
 {
