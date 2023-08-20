@@ -9,11 +9,11 @@ namespace Gallop.Live.Cutt
 {
     public class LiveTimelineCharaLocator : ILiveTimelineCharactorLocator
     {
-        public UmaContainer UmaContainer;
+        public UmaContainerCharacter UmaContainer;
 
         public Dictionary<string, Transform> Bones;
 
-        public LiveTimelineCharaLocator(UmaContainer umaContainer)
+        public LiveTimelineCharaLocator(UmaContainerCharacter umaContainer)
         {
             UmaContainer = umaContainer;
             Bones = new Dictionary<string, Transform>();

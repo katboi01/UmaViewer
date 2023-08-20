@@ -24,7 +24,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<Shader> ShaderList = new List<Shader>();
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
-    public UmaContainer CurrentUMAContainer;
+    public UmaContainerCharacter CurrentUMAContainer;
     public UmaContainer CurrentOtherContainer;
 
     public UmaHeadData CurrentHead;
@@ -50,28 +50,29 @@ public class UmaViewerBuilder : MonoBehaviour
     public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
     {
         int id = chara.Id;
-        CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
-        CurrentUMAContainer.CharaEntry = chara;
+        var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
+        umaContainer.CharaEntry = chara;
+        CurrentUMAContainer = umaContainer;
 
         if (mini)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMiniUma(chara, costumeId);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadMiniUma(umaContainer, chara, costumeId);
         }
         else if (chara.IsMob)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMobUma(chara, costumeId, loadMotion: true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadMobUma(umaContainer, chara, costumeId, loadMotion: true);
         }
         else if (UI.isHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
-            LoadMobUma(CurrentHead.chara, costumeId, chara.Id, true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
+            LoadMobUma(umaContainer, CurrentHead.chara, costumeId, chara.Id, true);
         }
         else
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadNormalUma(chara, costumeId, true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadNormalUma(umaContainer, chara, costumeId, true);
         }
 
         yield break;
@@ -84,33 +85,32 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             if (characters[i].CharaEntry.Name != "")
             {
-                CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainerCharacter>();
+                var umaContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainerCharacter>();
 
                 if (characters[i].CharaEntry.IsMob)
                 {
-                    CurrentUMAContainer.IsLive = true;
-                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    CurrentUMAContainer.transform.localPosition = new Vector3();
-                    LoadMobUma(characters[i].CharaEntry, characters[i].CostumeId);
+                    umaContainer.IsLive = true;
+                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    umaContainer.transform.localPosition = new Vector3();
+                    LoadMobUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
                 else
                 {
-                    CurrentUMAContainer.IsLive = true;
-                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    CurrentUMAContainer.transform.localPosition = new Vector3();
-                    LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+                    umaContainer.IsLive = true;
+                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    umaContainer.transform.localPosition = new Vector3();
+                    LoadNormalUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
 
-                Gallop.Live.Director.instance.CharaContainerScript.Add(CurrentUMAContainer);
+                Gallop.Live.Director.instance.CharaContainerScript.Add(umaContainer);
             }
         }
     }
 
-    private void LoadNormalUma(CharaEntry chara, string costumeId, bool loadMotion = false)
+    private void LoadNormalUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, bool loadMotion = false)
     {
-        var umaContainer = CurrentUMAContainer as UmaContainerCharacter;
         int id = chara.Id;
         DataRow charaData = umaContainer.CharaData;
         bool genericCostume = umaContainer.IsGeneric = costumeId.Length >= 4;
@@ -299,7 +299,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         umaContainer.LoadPhysics();
         umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
-        LoadFaceMorph(id, costumeId);
+        umaContainer.LoadFaceMorph(id, costumeId);
         umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
         umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
@@ -318,9 +318,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadMobUma(CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
+    private void LoadMobUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
     {
-        var umaContainer = CurrentUMAContainer as UmaContainerCharacter;
         int id = chara.Id;
         umaContainer.IsMob = chara.IsMob;
         umaContainer.MobDressColor = UmaDatabaseController.ReadMobDressColor(umaContainer.CharaData["dress_color_id"].ToString());
@@ -519,7 +518,7 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
 
         //Load FacialMorph
-        LoadFaceMorph(id, costumeId);
+        umaContainer.LoadFaceMorph(id, costumeId);
 
         umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
         umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
@@ -539,9 +538,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadMiniUma(CharaEntry chara, string costumeId)
+    private void LoadMiniUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId)
     {
-        var umaContainer = CurrentUMAContainer as UmaContainerCharacter;
         int id = chara.Id;
         DataRow charaData = umaContainer.CharaData;
         umaContainer.IsMini = true;
@@ -836,90 +834,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadAssetPath(string path, Transform SetParent)
     {
         Instantiate(UmaViewerMain.Instance.AbList[path].Get<GameObject>(), SetParent);
-    }
-
-    private void LoadFaceMorph(int id, string costumeId)
-    {
-        if (!CurrentUMAContainer.Head) return;
-        var umaContainer = CurrentUMAContainer as UmaContainerCharacter;
-        var locatorEntry = Main.AbList["3d/animator/drivenkeylocator"];
-        var bundle = UmaAssetManager.LoadAssetBundle(locatorEntry);
-        var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), umaContainer.transform) as GameObject;
-        locator.name = "DrivenKeyLocator";
-
-        var headBone = (GameObject)umaContainer.Head.GetComponent<AssetHolder>()._assetTable["head"];
-        var eyeLocator_L = headBone.transform.Find("Eye_target_locator_L");
-        var eyeLocator_R = headBone.transform.Find("Eye_target_locator_R");
-
-        var mangaEntry = new List<UmaDatabaseEntry>()
-        {
-            Main.AbList["3d/effect/charaemotion/pfb_eff_chr_emo_eye_000"],
-            Main.AbList["3d/effect/charaemotion/pfb_eff_chr_emo_eye_001"],
-            Main.AbList["3d/effect/charaemotion/pfb_eff_chr_emo_eye_002"],
-            Main.AbList["3d/effect/charaemotion/pfb_eff_chr_emo_eye_003"],
-        };
-        var mangaObjects = new List<GameObject>();
-        mangaEntry.ForEach(entry =>
-        {
-            AssetBundle ab = UmaAssetManager.LoadAssetBundle(entry);
-            var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
-            obj.SetActive(false);
-
-            var leftObj = Instantiate(obj, eyeLocator_L.transform);
-            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
-            umaContainer.LeftMangaObject.Add(leftObj);
-
-            var RightObj = Instantiate(obj, eyeLocator_R.transform);
-            if (RightObj.TryGetComponent<AssetHolder>(out var holder))
-            {
-                if (holder._assetTableValue["invert"] > 0)
-                    RightObj.transform.localScale = new Vector3(-1, 1, 1);
-            }
-            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
-            umaContainer.RightMangaObject.Add(RightObj);
-        });
-
-        var tearEntry = new List<UmaDatabaseEntry>() {
-            Main.AbList["3d/chara/common/tear/tear000/pfb_chr_tear000"],
-            Main.AbList["3d/chara/common/tear/tear001/pfb_chr_tear001"],
-        };
-
-        if (tearEntry.Count > 0)
-        {
-            tearEntry.ForEach(a => umaContainer.LoadTear(a));
-        }
-
-        if (umaContainer.TearPrefab_0 && umaContainer.TearPrefab_1)
-        {
-            var p0 = umaContainer.TearPrefab_0;
-            var p1 = umaContainer.TearPrefab_1;
-            var t = headBone.transform;
-            umaContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
-            umaContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
-            umaContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
-            umaContainer.TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
-        }
-
-        var firsehead = umaContainer.Head;
-        var faceDriven = Instantiate(firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"]) as FaceDrivenKeyTarget;
-
-        var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
-        var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
-        faceDriven._earTarget = earDriven._targetFaces;
-        umaContainer.FaceDrivenKeyTarget = faceDriven;
-        umaContainer.FaceDrivenKeyTarget.Container = umaContainer;
-        umaContainer.FaceOverrideData = faceOverride;
-        faceOverride?.SetEnable(UI.EnableFaceOverride);
-        faceDriven.DrivenKeyLocator = locator.transform;
-        faceDriven.Initialize(UmaUtility.ConvertArrayToDictionary(firsehead.GetComponentsInChildren<Transform>()));
-
-        var emotionDriven = ScriptableObject.CreateInstance<FaceEmotionKeyTarget>();
-        emotionDriven.name = $"char{id}_{costumeId}_emotion_target";
-        umaContainer.FaceEmotionKeyTarget = emotionDriven;
-        emotionDriven.FaceDrivenKeyTarget = faceDriven;
-        emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData;
-        emotionDriven.Initialize();
-    }
+    }    
 
     public void SetPreviewCamera(AnimationClip clip)
     {
@@ -932,12 +847,12 @@ public class UmaViewerBuilder : MonoBehaviour
             (AnimationCameraAnimator.runtimeAnimatorController as AnimatorOverrideController)["clip_1"] = clip;
             AnimationCamera.enabled = true;
             AnimationCameraAnimator.Play("motion_1", 0, 0);
-            CurrentUMAContainer.SetHeight(0);
+            CurrentUMAContainer?.SetHeight(0);
         }
         else
         {
             AnimationCamera.enabled = false;
-            CurrentUMAContainer.SetHeight(-1);
+            CurrentUMAContainer?.SetHeight(-1);
         }
     }
 
@@ -1038,7 +953,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void ClearMorphs()
     {
-        if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
+        var umaContainer = CurrentUMAContainer;
+        if (umaContainer != null && umaContainer.FaceDrivenKeyTarget != null)
         {
             foreach (var container in UI.EmotionList.GetComponentsInChildren<UmaUIContainer>())
             {
@@ -1050,10 +966,10 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (container.Slider != null)
                     container.Slider.SetValueWithoutNotify(0);
             }
-            if (CurrentUMAContainer.FaceDrivenKeyTarget)
+            if (umaContainer.FaceDrivenKeyTarget)
             {
-                CurrentUMAContainer.FaceDrivenKeyTarget.ClearAllWeights();
-                CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+                umaContainer.FaceDrivenKeyTarget.ClearAllWeights();
+                umaContainer.FaceDrivenKeyTarget.ChangeMorph();
             }
         }
     }

@@ -128,21 +128,15 @@ public class UmaViewerGlobalShader : MonoBehaviour
     {
         //Used to calculate the correct outline
         //Outline need more adjust in live
-        if (UmaViewerBuilder.Instance.AnimationCamera != null)
+        var umaContainer = UmaViewerBuilder.Instance.CurrentUMAContainer;
+        if (umaContainer != null && umaContainer.UpBodyBone)
         {
-            if (UmaViewerBuilder.Instance.CurrentUMAContainer)
-            {
-                if (UmaViewerBuilder.Instance.CurrentUMAContainer.UpBodyBone)
-                {
-                    var container = UmaViewerBuilder.Instance.CurrentUMAContainer;
-                    var upBone = container.UpBodyBone;
-                    var aniCamera = UmaViewerBuilder.Instance.AnimationCamera;
-                    var camera = aniCamera.enabled ? aniCamera : Camera.main;
-                    var distance = Vector3.Distance(camera.transform.position, upBone.transform.position);
-                    var outlineWidth = (container.IsMini ? 20f : 40.0f) * (distance * Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad));
-                    Shader.SetGlobalFloat("_GlobalCameraFov", outlineWidth);
-                }
-            }
+            var upBone = umaContainer.UpBodyBone;
+            var aniCamera = UmaViewerBuilder.Instance.AnimationCamera;
+            var camera = aniCamera.enabled ? aniCamera : Camera.main;
+            var distance = Vector3.Distance(camera.transform.position, upBone.transform.position);
+            var outlineWidth = (umaContainer.IsMini ? 20f : 40.0f) * (distance * Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad));
+            Shader.SetGlobalFloat("_GlobalCameraFov", outlineWidth);
         }
         else
         {

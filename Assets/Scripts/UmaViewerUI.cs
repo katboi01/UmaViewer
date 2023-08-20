@@ -181,14 +181,15 @@ public class UmaViewerUI : MonoBehaviour
             }
         }
 
-        if (Builder.CurrentUMAContainer != null && Builder.CurrentUMAContainer.OverrideController != null)
+        var umaContainer = Builder.CurrentUMAContainer;
+        if (umaContainer != null && umaContainer.OverrideController != null)
         {
-            if (Builder.CurrentUMAContainer.OverrideController["clip_2"].name != "clip_2")
+            if (umaContainer.OverrideController["clip_2"].name != "clip_2")
             {
-                bool isLoop = Builder.CurrentUMAContainer.OverrideController["clip_2"].name.Contains("_loop");
-                var AnimeState = Builder.CurrentUMAContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-                var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
-                if (AnimeClip && Builder.CurrentUMAContainer.UmaAnimator.speed != 0)
+                bool isLoop = umaContainer.OverrideController["clip_2"].name.Contains("_loop");
+                var AnimeState = umaContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
+                var AnimeClip = umaContainer.OverrideController["clip_2"];
+                if (AnimeClip && umaContainer.UmaAnimator.speed != 0)
                 {
                     var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
                     AnimationTitleText.text = AnimeClip.name;
@@ -837,7 +838,7 @@ public class UmaViewerUI : MonoBehaviour
                 pageentry.OnClick = (container) =>
                 {
                     HighlightChildImage(animationList.content, container);
-                    (Builder.CurrentUMAContainer as UmaContainerCharacter)?.LoadAnimation(entry);
+                    (Builder.CurrentUMAContainer)?.LoadAnimation(entry);
                     LoadedAnimation();
                 };
                 pageentrys.Add(pageentry);
@@ -885,7 +886,7 @@ public class UmaViewerUI : MonoBehaviour
         container.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(parent, container);
-            (Builder.CurrentUMAContainer as UmaContainerCharacter)?.LoadAnimation(entry);
+            (Builder.CurrentUMAContainer)?.LoadAnimation(entry);
             LoadedAnimation();
         });
     }
@@ -1048,29 +1049,19 @@ public class UmaViewerUI : MonoBehaviour
     public void SetDynamicBoneEnable(bool isOn)
     {
         DynamicBoneEnable = isOn;
-        if (Builder.CurrentUMAContainer)
-        {
-            Builder.CurrentUMAContainer.SetDynamicBoneEnable(isOn);
-        }
+        (Builder.CurrentUMAContainer)?.SetDynamicBoneEnable(isOn);
     }
 
     public void SetEyeTrackingEnable(bool isOn)
     {
         EnableEyeTracking = isOn;
-        if (Builder.CurrentUMAContainer)
-        {
-            Builder.CurrentUMAContainer.EnableEyeTracking = isOn;
-        }
+        (Builder.CurrentUMAContainer)?.SetEyeTracking(isOn);
     }
 
     public void SetFaceOverrideEnable(bool isOn)
     {
         EnableFaceOverride = isOn;
-        var container = Builder.CurrentUMAContainer;
-        if (container && container.FaceOverrideData)
-        {
-            container.FaceOverrideData.Enable = isOn;
-        }
+        (Builder.CurrentUMAContainer)?.SetFaceOverrideData(isOn);
     }
 
     public void AudioPause()
@@ -1162,7 +1153,7 @@ public class UmaViewerUI : MonoBehaviour
         var animator_cam = Builder.AnimationCameraAnimator;
         if (animator != null)
         {
-            var AnimeClip = Builder.CurrentUMAContainer.OverrideController["clip_2"];
+            var AnimeClip = container.OverrideController["clip_2"];
 
             // Pause and Seek;
             animator.speed = 0;
