@@ -89,9 +89,6 @@ public class UmaContainer : MonoBehaviour
     public CharaShaderEffectData ShaderEffectData;
     public List<MaterialHelper> Materials = new List<MaterialHelper>();
 
-    protected UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
-    protected UmaViewerMain Main => UmaViewerMain.Instance;
-    protected UmaViewerUI UI => UmaViewerUI.Instance;
 
     public void Initialize(bool smile)
     {
@@ -401,6 +398,17 @@ public class UmaContainer : MonoBehaviour
             TearControllers.ForEach(a => a.UpdateOffset());
 
         }
+    }
+
+    public void SetNextAnimationCut(string cutName)
+    {
+        UmaViewerMain.Instance.AbList.TryGetValue(cutName, out UmaDatabaseEntry asset);
+        UmaViewerBuilder.Instance.RecursiveLoadAsset(asset);
+    }
+
+    public void SetEndAnimationCut()
+    {
+        UmaViewerUI.Instance.AnimationPause();
     }
 
     public void UpBodyReset()
