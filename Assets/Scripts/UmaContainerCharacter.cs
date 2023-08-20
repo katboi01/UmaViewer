@@ -295,7 +295,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void SetFaceOverrideData(bool isOn)
     {
-        EnableEyeTracking = isOn;
+        FaceOverrideData.SetEnable(isOn);
     }
 
     private void FixedUpdate()
