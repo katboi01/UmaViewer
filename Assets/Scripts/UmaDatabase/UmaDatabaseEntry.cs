@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 public class UmaDatabaseEntry
 {
@@ -10,24 +11,6 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
-    public AssetBundle LoadedBundle;
-    public List<Object> Assets = new List<Object>();
-    public Dictionary<Object, string> AssetNames = new Dictionary<Object, string>();
-
-    public bool IsLoaded()
-    {
-        return UmaAssetManager.Exist(this);
-    }
-
-    public Object Get(string name)
-    {
-        return Assets.FirstOrDefault(a => a.name == name);
-    }
-
-    public T Get<T>()
-    {
-        return (T)System.Convert.ChangeType(Assets.FirstOrDefault(a => a.GetType() == typeof(T)), typeof(T));
-    }
 
     public string FilePath
     {
@@ -42,15 +25,18 @@ public class UmaDatabaseEntry
         }
     }
 
-    public UmaDatabaseEntry Load(bool withtDependencies = true)
+    public T Get<T>(bool withDependencies = true)
     {
-        UmaAssetManager.LoadAssetBundle(this, isRecursive: withtDependencies);
-        return this;
+        UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
+        Object asset = UmaAssetManager.Get(this).LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
+        return (T)System.Convert.ChangeType(asset, typeof(T));
     }
 
-    public void Unload(bool unloadAllObjects)
+    public IEnumerable<T> GetAll<T>(bool withDependencies = true)
     {
-        UmaAssetManager.UnloadBundle(this, unloadAllObjects);
+        UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
+        IEnumerable<Object> assets = UmaAssetManager.Get(this).LoadAllAssets().Where(a => a.GetType() == typeof(T));
+        return assets.Select(asset => (T)System.Convert.ChangeType(asset, typeof(T)));
     }
 
     //TODO Make it async

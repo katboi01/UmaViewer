@@ -29,15 +29,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public UmaHeadData CurrentHead;
 
-    public Shader hairShader;
-    public Shader faceShader;
-    public Shader eyeShader;
-    public Shader cheekShader;
-    public Shader eyebrowShader;
-    public Shader alphaShader;
-    public Shader bodyAlphaShader;
-    public Shader bodyBehindAlphaShader;
-
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
@@ -844,7 +835,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadAssetPath(string path, Transform SetParent)
     {
-        Instantiate(UmaViewerMain.Instance.AbList[path].Load().Get<GameObject>(), SetParent);
+        Instantiate(UmaViewerMain.Instance.AbList[path].Get<GameObject>(), SetParent);
     }
 
     private void LoadFaceMorph(int id, string costumeId)

@@ -15,8 +15,7 @@ public class UmaContainerCharacter : UmaContainer
 {
     public void LoadTextures(UmaDatabaseEntry entry)
     {
-        entry.Load();
-        foreach(Texture2D tex2D in entry.Assets)
+        foreach(Texture2D tex2D in entry.GetAll<Texture2D>())
         {
             if (entry.Name.Contains("/mini/head"))
             {
@@ -40,7 +39,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadBody(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         Body = Instantiate(go, transform);
         UmaAnimator = Body.GetComponent<Animator>();
 
@@ -90,7 +89,7 @@ public class UmaContainerCharacter : UmaContainer
                         {
                             if (m.name.Contains("Alpha"))
                             {
-                                m.shader = Builder.bodyAlphaShader;
+                                m.shader = UmaAssetManager.BodyAlphaShader;
                             }
                             else
                             {
@@ -179,7 +178,7 @@ public class UmaContainerCharacter : UmaContainer
                     //BodyAlapha's shader need to change manually.
                     if (m.name.Contains("bdy") && m.name.Contains("Alpha"))
                     {
-                        m.shader = Builder.bodyAlphaShader;
+                        m.shader = UmaAssetManager.BodyAlphaShader;
                     }
                 }
             }
@@ -188,7 +187,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadHead(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         var textures = MobHeadTextures;
         GameObject head = Instantiate(go, transform);
         Head = head;
@@ -261,7 +260,7 @@ public class UmaContainerCharacter : UmaContainer
                     //Glasses's shader need to change manually.
                     if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
                     {
-                        m.shader = Builder.alphaShader;
+                        m.shader = UmaAssetManager.AlphaShader;
                     }
 
                     //Blush Setting
@@ -283,23 +282,23 @@ public class UmaContainerCharacter : UmaContainer
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = Builder.cheekShader; ;
+                            m.shader = UmaAssetManager.CheekShader; ;
                             break;
                         case "Gallop/3D/Chara/ToonFace/TSER":
-                            m.shader = Builder.faceShader;
+                            m.shader = UmaAssetManager.FaceShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             m.SetColor("_RimColor", new Color(0, 0, 0, 0));
                             break;
                         case "Gallop/3D/Chara/ToonEye/T":
-                            m.shader = Builder.eyeShader;
+                            m.shader = UmaAssetManager.EyeShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
                         case "Gallop/3D/Chara/ToonHair/TSER":
-                            m.shader = Builder.hairShader;
+                            m.shader = UmaAssetManager.HairShader;
                             m.SetFloat("_CylinderBlend", 0.25f);
                             break;
                         case "Gallop/3D/Chara/ToonMayu":
-                            m.shader = Builder.eyebrowShader;
+                            m.shader = UmaAssetManager.EyebrowShader;
                             break;
                         default:
                             Debug.Log(m.shader.name);
@@ -324,7 +323,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadHair(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         GameObject hair = Instantiate(go, transform);
         Hair = hair;
         var textures = MobHeadTextures;
@@ -336,7 +335,7 @@ public class UmaContainerCharacter : UmaContainer
                 //Glasses's shader need to change manually.
                 if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
                 {
-                    m.shader = Builder.alphaShader;
+                    m.shader = UmaAssetManager.AlphaShader;
                 }
 
                 if (m.name.EndsWith("_hair"))
@@ -352,7 +351,7 @@ public class UmaContainerCharacter : UmaContainer
                 switch (m.shader.name)
                 {
                     case "Gallop/3D/Chara/ToonHair/TSER":
-                        m.shader = Builder.hairShader;
+                        m.shader = UmaAssetManager.HairShader;
                         m.SetFloat("_CylinderBlend", 0.25f);
                         break;
                     default:
@@ -366,7 +365,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadTail(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         Tail = Instantiate(go, transform);
         var textures = TailTextures;
         foreach (Renderer r in Tail.GetComponentsInChildren<Renderer>())
@@ -387,7 +386,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadTear(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         if (go.name.EndsWith("000"))
         {
             TearPrefab_0 = go;
@@ -483,7 +482,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadPhysics(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Load().Get<GameObject>();
+        GameObject go = entry.Get<GameObject>();
         if (!PhysicsContainer)
         {
             PhysicsContainer = new GameObject("PhysicsController");
@@ -499,7 +498,7 @@ public class UmaContainerCharacter : UmaContainer
             return;
         }
 
-        var aClip = entry.Load().Get<AnimationClip>();
+        var aClip = entry.Get<AnimationClip>();
 
         if (UmaAnimator)
         {

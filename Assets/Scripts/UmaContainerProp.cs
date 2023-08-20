@@ -8,7 +8,7 @@ public class UmaContainerProp : UmaContainer
 {
     public void LoadProp(UmaDatabaseEntry entry, Transform SetParent = null)
     {
-        var go = entry.Load().Get<GameObject>();
+        var go = entry.Get<GameObject>();
         var prop = Instantiate(go, SetParent ? SetParent : this.transform);
 
         /*
