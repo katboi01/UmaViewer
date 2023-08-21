@@ -1472,7 +1472,7 @@ public class UmaViewerBuilder : MonoBehaviour
             if (CurrentUMAContainer.IsMini) return;
             LoadFaceAnimation(clip);
         }
-        else if (clip.name.EndsWith("_ear"))
+        else if (clip.name.Contains("_ear"))
         {
             if (CurrentUMAContainer.IsMini) return;
             LoadEarAnimation(clip);
@@ -1536,37 +1536,43 @@ public class UmaViewerBuilder : MonoBehaviour
                 CurrentUMAContainer.FaceDrivenKeyTarget.ResetLocator();
                 CurrentUMAContainer.isAnimatorControl = false;
             }
+
             CurrentUMAContainer.UpBodyReset();
             CurrentUMAContainer.UmaAnimator.Rebind();
             CurrentUMAContainer.OverrideController["clip_2"] = clip;
             // If Cut-in, play immediately without state interpolation
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
+            {
+                RecursiveLoadAsset(facialMotion);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
+            {
+                RecursiveLoadAsset(earMotion);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/camera")}_cam", out UmaDatabaseEntry cameraMotion))
+            {
+                RecursiveLoadAsset(cameraMotion);
+            }
+            else
+            {
+                SetPreviewCamera(null);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
+            {
+                RecursiveLoadAsset(posMotion);
+            }
+
+            if (CurrentUMAContainer.IsMini)
+            {
+                SetPreviewCamera(null);
+            }
+
             if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
             {
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
-                {
-                    RecursiveLoadAsset(facialMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
-                {
-                    RecursiveLoadAsset(earMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/camera")}_cam", out UmaDatabaseEntry cameraMotion))
-                {
-                    RecursiveLoadAsset(cameraMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
-                {
-                    RecursiveLoadAsset(posMotion);
-                }
-
-                if (CurrentUMAContainer.IsMini)
-                {
-                    SetPreviewCamera(null);
-                }
-
                 if (clip.name.Contains("_cti_crd"))
                 {
                     var dir = Path.GetDirectoryName(clip.name).Replace("\\","/");
@@ -1603,36 +1609,19 @@ public class UmaViewerBuilder : MonoBehaviour
                         }
                     }
                 }
-
-                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
             }
-            else
-            {
-                SetPreviewCamera(null);
 
-                //Some animations have facial animation
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
-                {
-                    RecursiveLoadAsset(facialMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
-                {
-                    RecursiveLoadAsset(earMotion);
-                }
-
-                CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
-            }
+            CurrentUMAContainer.UmaAnimator.Play("motion_2", 0, 0);
         }
     }
 
     public void LoadFaceAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_s"))
+        if (clip.name.Contains("_s_"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_s"] = clip;
         }
-        else if (clip.name.Contains("_e"))
+        else if (clip.name.Contains("_e_"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_e"] = clip;
         }
@@ -1674,11 +1663,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadEarAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_s"))
+        if (clip.name.Contains("_s_"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_s_ear"] = clip;
         }
-        else if (clip.name.Contains("_e"))
+        else if (clip.name.Contains("_e_"))
         {
             CurrentUMAContainer.FaceOverrideController["clip_e_ear"] = clip;
         }
