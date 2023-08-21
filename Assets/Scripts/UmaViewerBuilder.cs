@@ -24,19 +24,10 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<Shader> ShaderList = new List<Shader>();
     public Material TransMaterialCharas;
     public Material TransMaterialProps;
-    public UmaContainer CurrentUMAContainer;
+    public UmaContainerCharacter CurrentUMAContainer;
     public UmaContainer CurrentOtherContainer;
 
     public UmaHeadData CurrentHead;
-
-    public Shader hairShader;
-    public Shader faceShader;
-    public Shader eyeShader;
-    public Shader cheekShader;
-    public Shader eyebrowShader;
-    public Shader alphaShader;
-    public Shader bodyAlphaShader;
-    public Shader bodyBehindAlphaShader;
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
@@ -59,28 +50,29 @@ public class UmaViewerBuilder : MonoBehaviour
     public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
     {
         int id = chara.Id;
-        CurrentUMAContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainer>();
-        CurrentUMAContainer.CharaEntry = chara;
+        var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
+        umaContainer.CharaEntry = chara;
+        CurrentUMAContainer = umaContainer;
 
         if (mini)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMiniUma(chara, costumeId);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadMiniUma(umaContainer, chara, costumeId);
         }
         else if (chara.IsMob)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMobUma(chara, costumeId, loadMotion: true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadMobUma(umaContainer, chara, costumeId, loadMotion: true);
         }
         else if (UI.isHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
-            LoadMobUma(CurrentHead.chara, costumeId, chara.Id, true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
+            LoadMobUma(umaContainer, CurrentHead.chara, costumeId, chara.Id, true);
         }
         else
         {
-            CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadNormalUma(chara, costumeId, true);
+            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+            LoadNormalUma(umaContainer, chara, costumeId, true);
         }
 
         yield break;
@@ -93,35 +85,35 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             if (characters[i].CharaEntry.Name != "")
             {
-                CurrentUMAContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainer>();
+                var umaContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainerCharacter>();
 
                 if (characters[i].CharaEntry.IsMob)
                 {
-                    CurrentUMAContainer.IsLive = true;
-                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    CurrentUMAContainer.transform.localPosition = new Vector3();
-                    LoadMobUma(characters[i].CharaEntry, characters[i].CostumeId);
+                    umaContainer.IsLive = true;
+                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    umaContainer.transform.localPosition = new Vector3();
+                    LoadMobUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
                 else
                 {
-                    CurrentUMAContainer.IsLive = true;
-                    CurrentUMAContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    CurrentUMAContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    CurrentUMAContainer.transform.localPosition = new Vector3();
-                    LoadNormalUma(characters[i].CharaEntry, characters[i].CostumeId);
+                    umaContainer.IsLive = true;
+                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
+                    umaContainer.transform.localPosition = new Vector3();
+                    LoadNormalUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
 
-                Gallop.Live.Director.instance.CharaContainerScript.Add(CurrentUMAContainer);
+                Gallop.Live.Director.instance.CharaContainerScript.Add(umaContainer);
             }
         }
     }
 
-    private void LoadNormalUma(CharaEntry chara, string costumeId, bool loadMotion = false)
+    private void LoadNormalUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, bool loadMotion = false)
     {
         int id = chara.Id;
-        DataRow charaData = CurrentUMAContainer.CharaData;
-        bool genericCostume = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
+        DataRow charaData = umaContainer.CharaData;
+        bool genericCostume = umaContainer.IsGeneric = costumeId.Length >= 4;
         string skin, height, socks, bust, sex, shape, costumeIdShort = "";
         skin = charaData["skin"].ToString();
         height = charaData["height"].ToString();
@@ -134,12 +126,12 @@ public class UmaViewerBuilder : MonoBehaviour
         if (genericCostume)
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
-            CurrentUMAContainer.VarCostumeIdShort = costumeIdShort;
-            CurrentUMAContainer.VarCostumeIdLong = costumeId;
-            CurrentUMAContainer.VarBust = bust;
-            CurrentUMAContainer.VarSkin = skin;
-            CurrentUMAContainer.VarSocks = socks;
-            CurrentUMAContainer.VarHeight = height;
+            umaContainer.VarCostumeIdShort = costumeIdShort;
+            umaContainer.VarCostumeIdLong = costumeId;
+            umaContainer.VarBust = bust;
+            umaContainer.VarSkin = skin;
+            umaContainer.VarSocks = socks;
+            umaContainer.VarHeight = height;
 
             // Pattern for generic body type is as follows:
             //
@@ -194,28 +186,28 @@ public class UmaViewerBuilder : MonoBehaviour
                 || (string.IsNullOrEmpty(texPattern4) ? false : a.Name.Contains(texPattern4))
                 || (string.IsNullOrEmpty(texPattern5) ? false : a.Name.Contains(texPattern5)))))
             {
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadTextures(asset1);
             }
             //Load Body
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
 
             //Load Physics
             if (Main.AbList.TryGetValue(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_cloth00", out _))
             {
                 var asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
                 asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_bust{bust}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
             }
         }
         else
         {
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
             //Load Physics
             var asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes/pfb_bdy{id}_{costumeId}_cloth00"];
-            RecursiveLoadAsset(asset1);
+            umaContainer.LoadPhysics(asset1);
             asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{id}_{costumeId}/clothes/pfb_bdy{id}_{costumeId}_bust_cloth00"];
-            RecursiveLoadAsset(asset1);
+            umaContainer.LoadPhysics(asset1);
         }
 
         // Record Head Data
@@ -260,22 +252,22 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Hair Textures
             foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{head_id}_{head_costumeId}/textures")))
             {
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadTextures(asset1);
             }
 
             //Load Head
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadHead(asset);
 
             //Load Physics
             if (isDefaultHead)
             {
                 var asset1 = Main.AbList[UmaDatabaseController.HeadPath + $"chr{id}_00/clothes/pfb_chr{id}_00_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
             }
             else
             {
                 var asset1 = Main.AbList[UmaDatabaseController.HeadPath + $"chr{head_id}_{head_costumeId}/clothes/pfb_chr{head_id}_{head_costumeId}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
             }
         }
 
@@ -290,14 +282,14 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 foreach (var asset2 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
                 {
-                    RecursiveLoadAsset(asset2);
+                    umaContainer.LoadTextures(asset2);
                 }
 
-                RecursiveLoadAsset(asset);
+                umaContainer.LoadTail(asset);
 
                 //Load Physics
                 var asset1 = Main.AbList[$"{tailPath}clothes/pfb_{tailName}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
             }
             else
             {
@@ -305,36 +297,36 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        CurrentUMAContainer.LoadPhysics();
-        CurrentUMAContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
-        LoadFaceMorph(id, costumeId);
-        CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
-        CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
-        CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
-        CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.SetHeight(-1);
-        CurrentUMAContainer.Initialize(!UI.isTPose);
+        umaContainer.LoadPhysics();
+        umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
+        umaContainer.LoadFaceMorph(id, costumeId);
+        umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
+        umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
+        umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        umaContainer.MergeModel();
+        umaContainer.SetHeight(-1);
+        umaContainer.Initialize(!UI.isTPose);
 
-        CurrentUMAContainer.Position = CurrentUMAContainer.transform.Find("Position");
+        umaContainer.Position = umaContainer.transform.Find("Position");
 
         if (!UI.isTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/chara/chr{id}_00/anm_eve_chr{id}_00_idle01_loop", out UmaDatabaseEntry entry))
             {
-                LoadAsset(entry);
+                umaContainer.LoadAnimation(entry);
             }
         }
     }
 
-    private void LoadMobUma(CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
+    private void LoadMobUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
     {
         int id = chara.Id;
-        CurrentUMAContainer.IsMob = chara.IsMob;
-        CurrentUMAContainer.MobDressColor = UmaDatabaseController.ReadMobDressColor(CurrentUMAContainer.CharaData["dress_color_id"].ToString());
-        CurrentUMAContainer.MobHeadColor = UmaDatabaseController.ReadMobHairColor(CurrentUMAContainer.CharaData["chara_hair_color"].ToString());
+        umaContainer.IsMob = chara.IsMob;
+        umaContainer.MobDressColor = UmaDatabaseController.ReadMobDressColor(umaContainer.CharaData["dress_color_id"].ToString());
+        umaContainer.MobHeadColor = UmaDatabaseController.ReadMobHairColor(umaContainer.CharaData["chara_hair_color"].ToString());
 
-        DataRow charaData = CurrentUMAContainer.CharaData;
-        bool genericCostume = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
+        DataRow charaData = umaContainer.CharaData;
+        bool genericCostume = umaContainer.IsGeneric = costumeId.Length >= 4;
         string skin, height, socks, bust, sex, shape, costumeIdShort = "";
         string faceid, hairid, personality;
 
@@ -352,12 +344,12 @@ public class UmaViewerBuilder : MonoBehaviour
         if (genericCostume)
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
-            CurrentUMAContainer.VarCostumeIdShort = costumeIdShort;
-            CurrentUMAContainer.VarCostumeIdLong = costumeId;
-            CurrentUMAContainer.VarBust = bust;
-            CurrentUMAContainer.VarSkin = skin;
-            CurrentUMAContainer.VarSocks = socks;
-            CurrentUMAContainer.VarHeight = height;
+            umaContainer.VarCostumeIdShort = costumeIdShort;
+            umaContainer.VarCostumeIdLong = costumeId;
+            umaContainer.VarBust = bust;
+            umaContainer.VarSkin = skin;
+            umaContainer.VarSocks = socks;
+            umaContainer.VarHeight = height;
 
             // Pattern for generic body type is as follows:
             //
@@ -415,29 +407,29 @@ public class UmaViewerBuilder : MonoBehaviour
                 || (string.IsNullOrEmpty(texPattern4) ? false : a.Name.Contains(texPattern4))
                 || (string.IsNullOrEmpty(texPattern5) ? false : a.Name.Contains(texPattern5)))))
             {
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadTextures(asset1);
             }
 
             //Load Body
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
 
             //Load Physics
             if (Main.AbList.TryGetValue(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_cloth00", out _))
             {
                 var asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
                 asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/clothes/pfb_bdy{costumeIdShort}_bust{bust}_cloth00"];
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadPhysics(asset1);
             }
         }
         else
         {
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
             //Load Physics
             var asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{bodyid}_{costumeId}/clothes/pfb_bdy{bodyid}_{costumeId}_cloth00"];
-            RecursiveLoadAsset(asset1);
+            umaContainer.LoadPhysics(asset1);
             asset1 = Main.AbList[UmaDatabaseController.BodyPath + $"bdy{bodyid}_{costumeId}/clothes/pfb_bdy{bodyid}_{costumeId}_bust_cloth00"];
-            RecursiveLoadAsset(asset1);
+            umaContainer.LoadPhysics(asset1);
         }
 
         // Record Head Data
@@ -469,28 +461,28 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (asset1.Name.Contains($"tex_chr{head_s}_{head_costumeId}_face{faceid.PadLeft(3, '0')}_0")
                     || asset1.Name.Contains($"tex_chr{head_s}_{head_costumeId}_face{faceid.PadLeft(3, '0')}_{skin}"))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadTextures(asset1);
                 }
 
                 if (asset1.Name.Contains($"tex_chr{head_s}_{head_costumeId}_hair{hairid.PadLeft(3, '0')}"))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadTextures(asset1);
                 }
             }
 
             //Load face
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadHead(asset);
             //Load hair
-            RecursiveLoadAsset(hairasset);
+            umaContainer.LoadHair(hairasset);
 
-            CurrentUMAContainer.MergeHairModel();
+            umaContainer.MergeHairModel();
 
             //Load Physics
             if (isDefaultHead)
             {
                 if (Main.AbList.TryGetValue($"{UmaDatabaseController.HeadPath}chr{head_s}_00/clothes/pfb_chr{head_s}_00_hair{hairid.PadLeft(3, '0')}_cloth00", out UmaDatabaseEntry asset1))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadPhysics(asset1);
                 }
             }
         }
@@ -505,15 +497,15 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_s}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadTextures(asset1);
                 }
-                RecursiveLoadAsset(asset);
+                umaContainer.LoadTail(asset);
 
 
                 //Load Physics
                 if (Main.AbList.TryGetValue($"{tailPath}clothes/pfb_{tailName}_cloth00", out UmaDatabaseEntry asset2))
                 {
-                    RecursiveLoadAsset(asset2);
+                    umaContainer.LoadPhysics(asset2);
                 }
             }
             else
@@ -522,36 +514,36 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        CurrentUMAContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
-        CurrentUMAContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
+        umaContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
+        umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
 
         //Load FacialMorph
-        LoadFaceMorph(id, costumeId);
+        umaContainer.LoadFaceMorph(id, costumeId);
 
-        CurrentUMAContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
-        CurrentUMAContainer.HeadBone = (GameObject)CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
-        CurrentUMAContainer.EyeHeight = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
-        CurrentUMAContainer.MergeModel();
-        CurrentUMAContainer.SetHeight(-1);
-        CurrentUMAContainer.Initialize(!UI.isTPose);
+        umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
+        umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
+        umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        umaContainer.MergeModel();
+        umaContainer.SetHeight(-1);
+        umaContainer.Initialize(!UI.isTPose);
 
-        CurrentUMAContainer.Position = CurrentUMAContainer.transform.Find("Position");
+        umaContainer.Position = umaContainer.transform.Find("Position");
 
         if (!UI.isTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/type00/anm_eve_type00_homestand{personality.PadLeft(2, '0')}_loop", out UmaDatabaseEntry entry))
             {
-                LoadAsset(entry);
+                umaContainer.LoadAnimation(entry);
             }
         }
     }
 
-    private void LoadMiniUma(CharaEntry chara, string costumeId)
+    private void LoadMiniUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId)
     {
         int id = chara.Id;
-        DataRow charaData = CurrentUMAContainer.CharaData;
-        CurrentUMAContainer.IsMini = true;
-        bool isGeneric = CurrentUMAContainer.IsGeneric = costumeId.Length >= 4;
+        DataRow charaData = umaContainer.CharaData;
+        umaContainer.IsMini = true;
+        bool isGeneric = umaContainer.IsGeneric = costumeId.Length >= 4;
         string skin = charaData["skin"].ToString(),
                height = charaData["height"].ToString(),
                socks = charaData["socks"].ToString(),
@@ -588,13 +580,13 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Body Textures
             foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith("3d/chara/mini/body/") && a.Name.Contains(texPattern1)))
             {
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadTextures(asset1);
             }
             //Load Body
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
         }
         else
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadBody(asset);
 
         string hair = $"3d/chara/mini/head/mchr{id}_{costumeId}/pfb_mchr{id}_{costumeId}_hair";
         Main.AbList.TryGetValue(hair, out asset);
@@ -611,19 +603,19 @@ public class UmaViewerBuilder : MonoBehaviour
             {
                 foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_{costumeId}/textures")))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadTextures(asset1);
                 }
             }
             else
             {
                 foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr{id}_00/textures")))
                 {
-                    RecursiveLoadAsset(asset1);
+                    umaContainer.LoadTextures(asset1);
                 }
             }
 
             //Load Hair
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadHead(asset);
         }
 
         string head = $"3d/chara/mini/head/mchr0001_00/pfb_mchr0001_00_face0";
@@ -633,14 +625,14 @@ public class UmaViewerBuilder : MonoBehaviour
             //Load Head Textures
             foreach (var asset1 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"3d/chara/mini/head/mchr0001_00/textures/tex_mchr0001_00_face0_{skin}")))
             {
-                RecursiveLoadAsset(asset1);
+                umaContainer.LoadTextures(asset1);
             }
             //Load Head
-            RecursiveLoadAsset(asset);
+            umaContainer.LoadHead(asset);
         }
 
-        CurrentUMAContainer.MergeModel();
-        var matList = new List<MeshRenderer>(CurrentUMAContainer.GetComponentsInChildren<MeshRenderer>());
+        umaContainer.MergeModel();
+        var matList = new List<MeshRenderer>(umaContainer.GetComponentsInChildren<MeshRenderer>());
         var eyemat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Eye"));
         var mouthmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mouth"));
         var eyebrowLmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mayu_L"));
@@ -649,7 +641,7 @@ public class UmaViewerBuilder : MonoBehaviour
 
         if(Main.AbList.TryGetValue($"3d/motion/mini/event/body/chara/chr{id}_00/anm_min_eve_chr{id}_00_idle01_loop",out asset))
         {
-            LoadAsset(asset);
+            umaContainer.LoadAnimation(asset);
         }
     }
 
@@ -658,8 +650,10 @@ public class UmaViewerBuilder : MonoBehaviour
         UnloadProp();
         UmaAssetManager.UnloadAllBundle();
 
-        CurrentOtherContainer = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainer>();
-        RecursiveLoadAsset(entry);
+        var prop = new GameObject(Path.GetFileName(entry.Name)).AddComponent<UmaContainerProp>();
+        prop.LoadProp(entry);
+
+        CurrentOtherContainer = prop;
     }
 
     public void LoadLive(LiveEntry live, List<LiveCharacterSelect> characters)
@@ -837,521 +831,11 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    public void RecursiveLoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
-    {
-        if (!string.IsNullOrEmpty(entry.Prerequisites))
-        {
-            foreach (string prerequisite in entry.Prerequisites.Split(';'))
-            {
-                RecursiveLoadAsset(Main.AbList[prerequisite], true, SetParent);
-            }
-        }
-        LoadAsset(entry, IsSubAsset, SetParent);
-    }
-
-    public void LoadAsset(UmaDatabaseEntry entry, bool IsSubAsset = false, Transform SetParent = null)
-    {
-        //Debug.Log("Loading " + entry.Name);
-        var bundle = UmaAssetManager.LoadAssetBundle(entry, isRecursive: false);
-        LoadBundle(entry, bundle, IsSubAsset, SetParent);
-    }
-
-    private void LoadBundle(UmaDatabaseEntry entry, AssetBundle bundle, bool IsSubAsset = false, Transform SetParent = null)
-    {
-        if (bundle.name == "shader.a")
-        {
-            if (ShadersLoaded)
-            {
-                return;
-            }
-            else
-            {
-                hairShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
-                faceShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
-                eyeShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
-                cheekShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
-                eyebrowShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
-                alphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
-                bodyAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
-                bodyBehindAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
-                ShadersLoaded = true;
-            }
-        }
-
-        foreach (string name in bundle.GetAllAssetNames())
-        {
-            object asset = bundle.LoadAsset(name);
-
-            if (asset == null) { continue; }
-            //Debug.Log("Bundle:" + bundle.name + "/" + name + $" ({asset.GetType()})");
-
-            switch (asset)
-            {
-                case AnimationClip aClip:
-                    {
-                        if (UI.LiveTime)
-                        {
-                            break;
-                        }
-
-                        if (CurrentUMAContainer && CurrentUMAContainer.UmaAnimator)
-                        {
-                            Debug.Log("LiveTime" + UI.LiveTime.ToString());
-                            aClip.name = entry.Name; // Need a complete path to find dependencies
-                            LoadAnimation(aClip); 
-                            break;
-                        }
-
-                        if (aClip.name.Contains("tear"))
-                        {
-                            break;
-                        }
-
-                        //UmaAssetManager.UnloadAllBundle();
-                        break;
-                    }
-
-                case GameObject go:
-                    {
-                        if (bundle.name.Contains("cloth"))
-                        {
-                            if (!CurrentUMAContainer.PhysicsContainer)
-                            {
-                                CurrentUMAContainer.PhysicsContainer = new GameObject("PhysicsController");
-                                CurrentUMAContainer.PhysicsContainer.transform.SetParent(CurrentUMAContainer.transform);
-                            }
-                            Instantiate(go, CurrentUMAContainer.PhysicsContainer.transform);
-                        }
-                        else if (bundle.name.Contains("/head/"))
-                        {
-                            if (bundle.name.Contains("_hair") && !bundle.name.Contains("mchr"))
-                            {
-                                LoadHair(go);
-                            }
-                            else
-                            {
-                                LoadHead(go);
-                            }
-                        }
-                        else if (bundle.name.Contains("/body/"))
-                        {
-                            LoadBody(go);
-                        }
-                        else if (bundle.name.Contains("/tail/"))
-                        {
-                            LoadTail(go);
-                        }
-                        else if (bundle.name.Contains("pfb_chr_tear"))
-                        {
-                            LoadTear(go);
-                        }
-                        else
-                        {
-                            if (!IsSubAsset)
-                            {
-                                LoadProp(go, SetParent);
-                            }
-                        }
-                        break;
-                    }
-
-                case Shader sha:
-                    if (!ShaderList.Contains(sha))
-                    {
-                        ShaderList.Add(sha);
-                    }
-                    break;
-
-                case Texture2D tex2D:
-
-                    if (bundle.name.Contains("/mini/head"))
-                    {
-                        CurrentUMAContainer.MiniHeadTextures.Add(tex2D);
-                    }
-                    else if (bundle.name.Contains("/tail/"))
-                    {
-                        CurrentUMAContainer.TailTextures.Add(tex2D);
-                    }
-                    else if (bundle.name.Contains("bdy0"))
-                    {
-                        CurrentUMAContainer.GenericBodyTextures.Add(tex2D);
-                    }
-                    else if (bundle.name.Contains("_face") || bundle.name.Contains("_hair"))
-                    {
-                        if (CurrentUMAContainer.IsMob)
-                            CurrentUMAContainer.MobHeadTextures.Add(tex2D);
-                    }
-                    break;
-            }
-        }
-    }
-
-    private void LoadBody(GameObject go)
-    {
-        CurrentUMAContainer.Body = Instantiate(go, CurrentUMAContainer.transform);
-        CurrentUMAContainer.UmaAnimator = CurrentUMAContainer.Body.GetComponent<Animator>();
-
-        if (CurrentUMAContainer.IsMini)
-        {
-            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.transform.Find("Position/Hip").gameObject;
-        }
-        else
-        {
-            CurrentUMAContainer.UpBodyBone = CurrentUMAContainer.Body.GetComponent<AssetHolder>()._assetTable["upbody_ctrl"] as GameObject;
-        }
-
-        if (CurrentUMAContainer.IsGeneric)
-        {
-            List<Texture2D> textures = CurrentUMAContainer.GenericBodyTextures;
-            string costumeIdShort = CurrentUMAContainer.VarCostumeIdShort,
-                   costumeIdLong = CurrentUMAContainer.VarCostumeIdLong,
-                   height = CurrentUMAContainer.VarHeight,
-                   skin = CurrentUMAContainer.VarSkin,
-                   socks = CurrentUMAContainer.VarSocks,
-                   bust = CurrentUMAContainer.VarBust;
-
-            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
-            {
-                foreach (Material m in r.sharedMaterials)
-                {
-                    string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
-
-                    if (CurrentUMAContainer.IsMini)
-                    {
-                        m.SetTexture("_MainTex", textures[0]);
-                    }
-                    else
-                    {
-
-                        if (m.shader.name.Contains("Noline") && m.shader.name.Contains("TSER"))
-                        {
-                            var s = ShaderList.Find(a => a.name == m.shader.name.Replace("Noline", "")); //Generic costume shader need to change manually.
-                            if (s)
-                            {
-                                m.shader = s;
-                            }
-                        }
-
-                        //BodyAlapha's shader need to change manually.
-                        if (m.name.Contains("bdy"))
-                        {
-                            if (m.name.Contains("Alpha"))
-                            {
-                                m.shader = bodyAlphaShader;
-                            }
-                            else
-                            {
-                                //some costume use area texture
-                                var areaTex = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/textures") && a.Name.EndsWith("area"));
-                                if (areaTex != null)
-                                {
-                                    RecursiveLoadAsset(areaTex);
-                                    m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains(costumeIdShort) && t.name.EndsWith("area")));
-                                    SetMaskColor(m, CurrentUMAContainer.IsMob ? CurrentUMAContainer.MobDressColor : CurrentUMAContainer.CharaData, CurrentUMAContainer.IsMob);
-                                }
-                            }
-                        }
-
-                        switch (costumeIdShort.Split('_')[0]) //costume ID
-                        {
-                            case "0001":
-                                switch (r.sharedMaterials.ToList().IndexOf(m))
-                                {
-                                    case 0:
-                                        mainTex = $"tex_bdy{costumeIdShort}_00_waku0_diff";
-                                        toonMap = $"tex_bdy{costumeIdShort}_00_waku0_shad_c";
-                                        tripleMap = $"tex_bdy{costumeIdShort}_00_waku0_base";
-                                        optionMap = $"tex_bdy{costumeIdShort}_00_waku0_ctrl";
-                                        break;
-                                    case 1:
-                                        mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_diff";
-                                        toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_{socks.PadLeft(2, '0')}_shad_c";
-                                        tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_base";
-                                        optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_00_ctrl";
-                                        break;
-                                    case 2:
-                                        int color = UnityEngine.Random.Range(0, 4);
-                                        mainTex = $"tex_bdy0001_00_zekken{color}_{bust}_diff";
-                                        toonMap = $"tex_bdy0001_00_zekken{color}_{bust}_shad_c";
-                                        tripleMap = $"tex_bdy0001_00_zekken0_{bust}_base";
-                                        optionMap = $"tex_bdy0001_00_zekken0_{bust}_ctrl";
-                                        break;
-                                }
-
-                                zekkenNumberTex = $"tex_bdy0001_00_num{UnityEngine.Random.Range(1, 18):d2}";
-                                break;
-                            case "0003":
-                                mainTex = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_diff";
-                                toonMap = $"tex_bdy{costumeIdShort}_00_{skin}_{bust}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_base";
-                                optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_ctrl";
-                                break;
-                            case "0006":
-                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
-                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
-                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_ctrl";
-                                break;
-                            case "0009":
-                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
-                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
-                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_ctrl";
-                                break;
-                            default:
-                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_diff";
-                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_base";
-                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_ctrl";
-                                break;
-                        }
-                        Debug.Log("Looking for texture " + mainTex);
-                        m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name == mainTex));
-                        m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name == toonMap));
-                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name == tripleMap));
-                        m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name == optionMap));
-
-                        if (!string.IsNullOrEmpty(zekkenNumberTex))
-                            m.SetTexture("_ZekkenNumberTex", textures.FirstOrDefault(t => t.name == zekkenNumberTex));
-                    }
-                }
-            }
-        }
-        else
-        {
-            foreach (Renderer r in CurrentUMAContainer.Body.GetComponentsInChildren<Renderer>())
-            {
-                foreach (Material m in r.sharedMaterials)
-                {
-                    //BodyAlapha's shader need to change manually.
-                    if (m.name.Contains("bdy") && m.name.Contains("Alpha"))
-                    {
-                        m.shader = bodyAlphaShader;
-                    }
-                }
-            }
-        }
-    }
-
-    private void LoadHead(GameObject go)
-    {
-        var isMob = CurrentUMAContainer.IsMob;
-        var textures = CurrentUMAContainer.MobHeadTextures;
-        GameObject head = Instantiate(go, CurrentUMAContainer.transform);
-        CurrentUMAContainer.Head = head;
-
-        //Some setting for Head
-        CurrentUMAContainer.EnableEyeTracking = UI.EnableEyeTracking;
-
-        foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
-        {
-            foreach (Material m in r.sharedMaterials)
-            {
-                if (head.name.Contains("mchr"))
-                {
-                    if (r.name.Contains("Hair"))
-                    {
-                        CurrentUMAContainer.Tail = head;
-                    }
-                    if (r.name == "M_Face")
-                    {
-                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("face") && t.name.Contains("diff")));
-                    }
-                    if (r.name == "M_Cheek")
-                    {
-                        m.CopyPropertiesFromMaterial(TransMaterialCharas);
-                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("cheek")));
-                    }
-                    if (r.name == "M_Mouth")
-                    {
-                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("mouth")));
-                    }
-                    if (r.name == "M_Eye")
-                    {
-                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("eye")));
-                    }
-                    if (r.name.StartsWith("M_Mayu_"))
-                    {
-                        m.SetTexture("_MainTex", CurrentUMAContainer.MiniHeadTextures.First(t => t.name.Contains("mayu")));
-                    }
-                }
-                else
-                {
-                    if (isMob)
-                    {
-                        if (m.name.EndsWith("eye"))
-                        {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("eye0")));
-                            m.SetTexture("_High0Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi00")));
-                            m.SetTexture("_High1Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi01")));
-                            m.SetTexture("_High2Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi02")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("area")));
-                            SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "eye", false);
-                        }
-                        if (m.name.EndsWith("face"))
-                        {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
-                            m.SetTexture("_ToonMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("shad_c")));
-                            m.SetTexture("_TripleMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("base")));
-                            m.SetTexture("_OptionMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("ctrl")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
-                            SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "mayu", true);
-                        }
-                        if (m.name.EndsWith("mayu"))
-                        {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
-                            SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "mayu", true);
-                        }
-                    }
-
-                    //Glasses's shader need to change manually.
-                    if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
-                    {
-                        m.shader = alphaShader;
-                    }
-
-                    //Blush Setting
-                    if (r.name.Contains("Cheek"))
-                    {
-                        r.gameObject.SetActive(false);
-                        if (isMob)
-                        {
-                            CurrentUMAContainer.CheekTex_0 = CurrentUMAContainer.MobHeadTextures.FindLast(a => a.name.Contains("cheek0"));
-                            CurrentUMAContainer.CheekTex_1 = CurrentUMAContainer.MobHeadTextures.FindLast(a => a.name.Contains("cheek1"));
-                        }
-                        else
-                        {
-                            var table = CurrentUMAContainer.Head.GetComponent<AssetHolder>()._assetTable;
-                            CurrentUMAContainer.CheekTex_0 = table["cheek0"] as Texture;
-                            CurrentUMAContainer.CheekTex_1 = table["cheek1"] as Texture;
-                        }
-                    }
-                    switch (m.shader.name)
-                    {
-                        case "Gallop/3D/Chara/MultiplyCheek":
-                            m.shader = cheekShader; ;
-                            break;
-                        case "Gallop/3D/Chara/ToonFace/TSER":
-                            m.shader = faceShader;
-                            m.SetFloat("_CylinderBlend", 0.25f);
-                            m.SetColor("_RimColor", new Color(0, 0, 0, 0));
-                            break;
-                        case "Gallop/3D/Chara/ToonEye/T":
-                            m.shader = eyeShader;
-                            m.SetFloat("_CylinderBlend", 0.25f);
-                            break;
-                        case "Gallop/3D/Chara/ToonHair/TSER":
-                            m.shader = hairShader;
-                            m.SetFloat("_CylinderBlend", 0.25f);
-                            break;
-                        case "Gallop/3D/Chara/ToonMayu":
-                            m.shader = eyebrowShader;
-                            break;
-                        default:
-                            Debug.Log(m.shader.name);
-                            // m.shader = Shader.Find("Nars/UmaMusume/Body");
-                            break;
-                    }
-                }
-            }
-        }
-
-        //shader effect
-        var assetholder = head.GetComponent<AssetHolder>();
-        if (assetholder)
-        {
-            CurrentUMAContainer.ShaderEffectData = assetholder._assetTable["chara_shader_effect"] as CharaShaderEffectData;
-            if (CurrentUMAContainer.ShaderEffectData)
-            {
-                CurrentUMAContainer.ShaderEffectData.Initialize();
-            }
-        }
-    }
-
-    private void LoadHair(GameObject go)
-    {
-        GameObject hair = Instantiate(go, CurrentUMAContainer.transform);
-        CurrentUMAContainer.Hair = hair;
-        var textures = CurrentUMAContainer.MobHeadTextures;
-        foreach (Renderer r in hair.GetComponentsInChildren<Renderer>())
-        {
-            foreach (Material m in r.sharedMaterials)
-            {
-
-                //Glasses's shader need to change manually.
-                if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
-                {
-                    m.shader = alphaShader;
-                }
-
-                if (m.name.EndsWith("_hair"))
-                {
-                    m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("diff")));
-                    m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("shad_c")));
-                    m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("base")));
-                    m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("ctrl")));
-                    m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("area")));
-                    SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "hair", true);
-                }
-
-                switch (m.shader.name)
-                {
-                    case "Gallop/3D/Chara/ToonHair/TSER":
-                        m.shader = hairShader;
-                        m.SetFloat("_CylinderBlend", 0.25f);
-                        break;
-                    default:
-                        Debug.Log(m.shader.name);
-                        // m.shader = Shader.Find("Nars/UmaMusume/Body");
-                        break;
-                }
-            }
-        }
-    }
-
-    private void LoadTail(GameObject go)
-    {
-        CurrentUMAContainer.Tail = Instantiate(go, CurrentUMAContainer.transform);
-        var textures = CurrentUMAContainer.TailTextures;
-        foreach (Renderer r in CurrentUMAContainer.Tail.GetComponentsInChildren<Renderer>())
-        {
-            foreach (Material m in r.sharedMaterials)
-            {
-                m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
-                m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
-                m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("base")));
-                m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("ctrl")));
-                if (CurrentUMAContainer.IsMob)
-                {
-                    SetMaskColor(m, CurrentUMAContainer.MobHeadColor, "tail", true);
-                }
-            }
-        }
-    }
-
-    private void LoadProp(GameObject go, Transform SetParent = null)
-    {
-        var container = CurrentOtherContainer;
-        var prop = Instantiate(go, SetParent ? SetParent : container.transform);
-
-        /*
-        foreach (Renderer r in prop.GetComponentsInChildren<Renderer>())
-        {
-            foreach (Material m in r.sharedMaterials)
-            {
-                //Shaders can be differentiated by checking m.shader.name
-                m.shader = Shader.Find("Unlit/Transparent Cutout");
-            }
-        }
-        */
-    }
-
     public void LoadAssetPath(string path, Transform SetParent)
     {
-        RecursiveLoadAsset(UmaViewerMain.Instance.AbList[path], false, SetParent);
+        Instantiate(UmaViewerMain.Instance.AbList[path].Get<GameObject>(), SetParent);
     }
-
+    
     private void LoadTear(GameObject go)
     {
 
@@ -1719,12 +1203,12 @@ public class UmaViewerBuilder : MonoBehaviour
             (AnimationCameraAnimator.runtimeAnimatorController as AnimatorOverrideController)["clip_1"] = clip;
             AnimationCamera.enabled = true;
             AnimationCameraAnimator.Play("motion_1", 0, 0);
-            CurrentUMAContainer.SetHeight(0);
+            CurrentUMAContainer?.SetHeight(0);
         }
         else
         {
             AnimationCamera.enabled = false;
-            CurrentUMAContainer.SetHeight(-1);
+            CurrentUMAContainer?.SetHeight(-1);
         }
     }
 
@@ -1825,7 +1309,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void ClearMorphs()
     {
-        if (CurrentUMAContainer != null && CurrentUMAContainer.FaceDrivenKeyTarget != null)
+        var umaContainer = CurrentUMAContainer;
+        if (umaContainer != null && umaContainer.FaceDrivenKeyTarget != null)
         {
             foreach (var container in UI.EmotionList.GetComponentsInChildren<UmaUIContainer>())
             {
@@ -1837,94 +1322,11 @@ public class UmaViewerBuilder : MonoBehaviour
                 if (container.Slider != null)
                     container.Slider.SetValueWithoutNotify(0);
             }
-            if (CurrentUMAContainer.FaceDrivenKeyTarget)
+            if (umaContainer.FaceDrivenKeyTarget)
             {
-                CurrentUMAContainer.FaceDrivenKeyTarget.ClearAllWeights();
-                CurrentUMAContainer.FaceDrivenKeyTarget.ChangeMorph();
+                umaContainer.FaceDrivenKeyTarget.ClearAllWeights();
+                umaContainer.FaceDrivenKeyTarget.ChangeMorph();
             }
-        }
-    }
-
-    private void SetMaskColor(Material mat, DataRow colordata, bool IsMob)
-    {
-        mat.EnableKeyword("USE_MASK_COLOR");
-        Color c1, c2, c3, c4, c5, c6, t1, t2, t3, t4, t5, t6;
-        if (IsMob)
-        {
-            ColorUtility.TryParseHtmlString(colordata["color_r1"].ToString(), out c1);
-            ColorUtility.TryParseHtmlString(colordata["color_r2"].ToString(), out c2);
-            ColorUtility.TryParseHtmlString(colordata["color_g1"].ToString(), out c3);
-            ColorUtility.TryParseHtmlString(colordata["color_g2"].ToString(), out c4);
-            ColorUtility.TryParseHtmlString(colordata["color_b1"].ToString(), out c5);
-            ColorUtility.TryParseHtmlString(colordata["color_b2"].ToString(), out c6);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_r1"].ToString(), out t1);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_r2"].ToString(), out t2);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_g1"].ToString(), out t3);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_g2"].ToString(), out t4);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_b1"].ToString(), out t5);
-            ColorUtility.TryParseHtmlString(colordata["toon_color_b2"].ToString(), out t6);
-        }
-        else
-        {
-            ColorUtility.TryParseHtmlString("#" + colordata["image_color_main"].ToString(), out c1);
-            ColorUtility.TryParseHtmlString("#" + colordata["image_color_sub"].ToString(), out c2);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_color_sub"].ToString(), out c3);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_color_sub"].ToString(), out c4);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_training_color_1"].ToString(), out c5);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_training_color_2"].ToString(), out c6);
-            float toonstrength = 0.8f;
-            t1 = c1 * toonstrength;
-            t2 = c2 * toonstrength;
-            t3 = c3 * toonstrength;
-            t4 = c4 * toonstrength;
-            t5 = c5 * toonstrength;
-            t6 = c6 * toonstrength;
-        }
-
-        mat.SetColor("_MaskColorR1", c1);
-        mat.SetColor("_MaskColorR2", c2);
-        mat.SetColor("_MaskColorG1", c3);
-        mat.SetColor("_MaskColorG2", c4);
-        mat.SetColor("_MaskColorB1", c5);
-        mat.SetColor("_MaskColorB2", c6);
-        mat.SetColor("_MaskToonColorR1", t1);
-        mat.SetColor("_MaskToonColorR2", t2);
-        mat.SetColor("_MaskToonColorG1", t3);
-        mat.SetColor("_MaskToonColorG2", t4);
-        mat.SetColor("_MaskToonColorB1", t5);
-        mat.SetColor("_MaskToonColorB2", t6);
-    }
-
-    private void SetMaskColor(Material mat, DataRow colordata, string prefix, bool hastoon)
-    {
-        mat.EnableKeyword("USE_MASK_COLOR");
-        Color c1, c2, c3, c4, c5, c6, t1, t2, t3, t4, t5, t6;
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_r1"].ToString(), out c1);
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_r2"].ToString(), out c2);
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_g1"].ToString(), out c3);
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_g2"].ToString(), out c4);
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_b1"].ToString(), out c5);
-        ColorUtility.TryParseHtmlString(colordata[$"{prefix}_color_b2"].ToString(), out c6);
-        mat.SetColor("_MaskColorR1", c1);
-        mat.SetColor("_MaskColorR2", c2);
-        mat.SetColor("_MaskColorG1", c3);
-        mat.SetColor("_MaskColorG2", c4);
-        mat.SetColor("_MaskColorB1", c5);
-        mat.SetColor("_MaskColorB2", c6);
-        if (hastoon)
-        {
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_r1"].ToString(), out t1);
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_r2"].ToString(), out t2);
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_g1"].ToString(), out t3);
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_g2"].ToString(), out t4);
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_b1"].ToString(), out t5);
-            ColorUtility.TryParseHtmlString(colordata[$"{prefix}_toon_color_b2"].ToString(), out t6);
-            mat.SetColor("_MaskToonColorR1", t1);
-            mat.SetColor("_MaskToonColorR2", t2);
-            mat.SetColor("_MaskToonColorG1", t3);
-            mat.SetColor("_MaskToonColorG2", t4);
-            mat.SetColor("_MaskToonColorB1", t5);
-            mat.SetColor("_MaskToonColorB2", t6);
         }
     }
 

@@ -317,7 +317,7 @@ namespace Gallop.Live
 
         public List<Transform> charaObjs;
 
-        public List<UmaContainer> CharaContainerScript = new List<UmaContainer>();
+        public List<UmaContainerCharacter> CharaContainerScript = new List<UmaContainerCharacter>();
 
         public List<Animation> charaAnims;
 

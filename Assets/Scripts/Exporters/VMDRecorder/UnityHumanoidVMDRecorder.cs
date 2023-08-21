@@ -139,7 +139,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             transformDictionary.Add(pair.Key.ToString(), pair.Value);
         }
 
-        var animator = GetComponentInParent<UmaContainer>().UmaAnimator;
+        var animator = GetComponentInParent<UmaContainerCharacter>().UmaAnimator;
         var state = animator.GetCurrentAnimatorStateInfo(0);
         animator.Rebind();
 
@@ -814,7 +814,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
 
         public MorphRecorder(Transform model)
         {
-            var facialTarget = model.GetComponentInParent<UmaContainer>().FaceDrivenKeyTarget;
+            var facialTarget = model.GetComponentInParent<UmaContainerCharacter>().FaceDrivenKeyTarget;
             FacialMorphList = new List<FacialMorph>();
             FacialMorphList.AddRange(facialTarget.EyeBrowMorphs);
             FacialMorphList.AddRange(facialTarget.EyeMorphs);

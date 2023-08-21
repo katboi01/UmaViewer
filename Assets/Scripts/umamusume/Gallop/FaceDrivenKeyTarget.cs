@@ -12,7 +12,7 @@ namespace Gallop
 {
     public class FaceDrivenKeyTarget : ScriptableObject
     {
-        public UmaContainer Container;
+        public UmaContainerCharacter Container;
 
         public List<EyeTarget> _eyeTarget;
         public List<EyebrowTarget> _eyebrowTarget;
