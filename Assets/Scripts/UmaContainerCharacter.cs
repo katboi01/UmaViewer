@@ -976,7 +976,7 @@ public class UmaContainerCharacter : UmaContainer
             if (IsMini) return;
             LoadFaceAnimation(clip);
         }
-        else if (clip.name.EndsWith("_ear"))
+        else if (clip.name.Contains("_ear"))
         {
             if (IsMini) return;
             LoadEarAnimation(clip);
@@ -1044,32 +1044,38 @@ public class UmaContainerCharacter : UmaContainer
             UmaAnimator.Rebind();
             OverrideController["clip_2"] = clip;
             // If Cut-in, play immediately without state interpolation
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
+            {
+                LoadAnimation(facialMotion);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
+            {
+                LoadAnimation(earMotion);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/camera")}_cam", out UmaDatabaseEntry cameraMotion))
+            {
+                LoadAnimation(cameraMotion);
+            }
+            else
+            {
+                Builder.SetPreviewCamera(null);
+            }
+
+            if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
+            {
+                LoadAnimation(posMotion);
+            }
+
+            if (IsMini)
+            {
+                Builder.SetPreviewCamera(null);
+            }
+
             if (clip.name.Contains("crd") || clip.name.Contains("res_chr"))
             {
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
-                {
-                    LoadAnimation(facialMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
-                {
-                    LoadAnimation(earMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/camera")}_cam", out UmaDatabaseEntry cameraMotion))
-                {
-                    LoadAnimation(cameraMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
-                {
-                    LoadAnimation(posMotion);
-                }
-
-                if (IsMini)
-                {
-                    Builder.SetPreviewCamera(null);
-                }
 
                 if (clip.name.Contains("_cti_crd"))
                 {
@@ -1108,35 +1114,19 @@ public class UmaContainerCharacter : UmaContainer
                     }
                 }
 
-                UmaAnimator.Play("motion_2", 0, 0);
             }
-            else
-            {
-                Builder.SetPreviewCamera(null);
 
-                //Some animations have facial animation
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_face", out UmaDatabaseEntry facialMotion))
-                {
-                    LoadAnimation(facialMotion);
-                }
-
-                if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/facial")}_ear", out UmaDatabaseEntry earMotion))
-                {
-                    LoadAnimation(earMotion);
-                }
-
-                UmaAnimator.Play("motion_2", 0, 0);
-            }
+            UmaAnimator.Play("motion_2", 0, 0);
         }
     }
 
     private void LoadFaceAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_s"))
+        if (clip.name.Contains("_s_"))
         {
             FaceOverrideController["clip_s"] = clip;
         }
-        else if (clip.name.Contains("_e"))
+        else if (clip.name.Contains("_e_"))
         {
             FaceOverrideController["clip_e"] = clip;
         }
@@ -1178,11 +1168,11 @@ public class UmaContainerCharacter : UmaContainer
 
     private void LoadEarAnimation(AnimationClip clip)
     {
-        if (clip.name.Contains("_s"))
+        if (clip.name.Contains("_s_"))
         {
             FaceOverrideController["clip_s_ear"] = clip;
         }
-        else if (clip.name.Contains("_e"))
+        else if (clip.name.Contains("_e_"))
         {
             FaceOverrideController["clip_e_ear"] = clip;
         }
