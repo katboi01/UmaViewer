@@ -40,8 +40,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public GameObject LiveControllerPrefab;
 
-    private bool ShadersLoaded = false;
-
     private void Awake()
     {
         Instance = this;

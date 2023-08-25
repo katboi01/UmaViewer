@@ -196,7 +196,9 @@ public class UmaViewerMain : MonoBehaviour
         UI.LoadLivePanels();
         loadingUI.LoadingProgressChange(-1, -1);
 
-        UmaAssetManager.LoadAssetBundle(AbList["shader"], true); //Load Shader First
+        //Load Shader First
+        var shaders = UmaAssetManager.LoadAssetBundle(AbList["shader"], true);
+        Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>()); 
     }
 
     public void OpenUrl(string url)

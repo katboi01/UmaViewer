@@ -49,6 +49,7 @@ public class TextureExporter
                     if (mat_shader.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Texture)
                     {
                         Texture2D mat_texture = (Texture2D)mat.GetTexture(p_name);
+
                         if (mat_texture)
                         {
                             string tex_name = mat_texture.name;
@@ -59,8 +60,23 @@ public class TextureExporter
                                 textureNames.Add(dpath);
                             }
                             if (!File.Exists(tex_path))
-                            {
+                            {   
+
                                 mat_texture = duplicateTexture(mat_texture);
+
+                                if (tex_name.EndsWith("eye0"))
+                                {
+                                    var clip_texture = duplicateTexture(mat_texture);
+                                    var pixels = clip_texture.GetPixels(0, 0, clip_texture.width / 4, clip_texture.height);
+                                    clip_texture.Resize(clip_texture.width / 4, clip_texture.height);
+                                    clip_texture.SetPixels(pixels);
+
+
+                                    byte[] clip = clip_texture.EncodeToPNG();
+                                    File.WriteAllBytes(tex_path, clip);
+                                    tex_path = savePath + tex_name + "_all" + ".png";
+                                }
+
                                 byte[] bytes = mat_texture.EncodeToPNG();
                                 File.WriteAllBytes(tex_path, bytes);
                             }
