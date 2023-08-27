@@ -1174,42 +1174,11 @@ namespace Gallop.Live.Cutt
                 {
                     pos = LerpWithoutClamp(getFunc(liveTimelineKeyCameraPositionData, this, config), getFunc(liveTimelineKeyCameraPositionData2, this, config), t);
                 }
-                else if (liveTimelineKeyCameraPositionData2.necessaryToUseNewBezierCalcMethod)
+                else
                 {
                     BezierCalcWork.cameraPos.Set(getFunc(liveTimelineKeyCameraPositionData, this, config), getFunc(liveTimelineKeyCameraPositionData2, this, config), bezierPointCount);
                     BezierCalcWork.cameraPos.UpdatePoints(liveTimelineKeyCameraPositionData2, this);
                     BezierCalcWork.cameraPos.Calc(bezierPointCount, t, out pos);
-                }
-                else
-                {
-                    Vector3 end = getFunc(liveTimelineKeyCameraPositionData2, this, config);
-                    Vector3 cp = liveTimelineKeyCameraPositionData2.GetBezierPoint(0, this);
-                    Vector3 cp2 = liveTimelineKeyCameraPositionData2.GetBezierPoint(1, this);
-                    Vector3 cp3 = liveTimelineKeyCameraPositionData2.GetBezierPoint(2, this);
-                    switch (liveTimelineKeyCameraPositionData2.GetBezierPointCount())
-                    {
-                        default:
-                            pos = LerpWithoutClamp(getFunc(liveTimelineKeyCameraPositionData, this, config), getFunc(liveTimelineKeyCameraPositionData2, this, config), t);
-                            break;
-                        case 1:
-                            {
-                                Vector3 start3 = getFunc(liveTimelineKeyCameraPositionData, this, config);
-                                BezierUtil.Calc(ref start3, ref end, ref cp, t, out pos);
-                                break;
-                            }
-                        case 2:
-                            {
-                                Vector3 start2 = getFunc(liveTimelineKeyCameraPositionData, this, config);
-                                BezierUtil.Calc(ref start2, ref end, ref cp, ref cp2, t, out pos);
-                                break;
-                            }
-                        case 3:
-                            {
-                                Vector3 start = getFunc(liveTimelineKeyCameraPositionData, this, config);
-                                BezierUtil.Calc(ref start, ref end, ref cp, ref cp2, ref cp3, t, out pos);
-                                break;
-                            }
-                    }
                 }
             }
             else
