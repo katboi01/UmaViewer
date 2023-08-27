@@ -22,10 +22,12 @@ namespace CriWareFormats
     public sealed class AwbReader : IDisposable
     {
         private readonly BinaryReader binaryReader;
+        private readonly long offset;
 
         private readonly byte offsetSize;
+        private readonly ushort waveIdAlignment;
         private readonly int totalSubsongs;
-        private readonly ushort alignment;
+        private readonly ushort offsetAlignment;
         private readonly ushort subkey;
 
         private readonly List<Row> cueNames;
@@ -41,40 +43,41 @@ namespace CriWareFormats
         public AwbReader(Stream awbStream, long positionOffset)
         {
             binaryReader = new BinaryReader(awbStream);
+            offset = positionOffset;
 
-            binaryReader.BaseStream.Position = positionOffset;
+            binaryReader.BaseStream.Position = offset;
 
-            if (!binaryReader.ReadChars(4).SequenceEqual("AFS2".ToCharArray()))
+            if (!binaryReader.ReadChars(4).SequenceEqual("AFS2"))
                 throw new InvalidDataException("Incorrect magic.");
 
             binaryReader.BaseStream.Position += 0x1;
             offsetSize = binaryReader.ReadByte();
-            binaryReader.BaseStream.Position += 0x2;
+            waveIdAlignment = binaryReader.ReadUInt16();
             totalSubsongs = binaryReader.ReadInt32();
-            alignment = binaryReader.ReadUInt16();
+            offsetAlignment = binaryReader.ReadUInt16();
             subkey = binaryReader.ReadUInt16();
 
             waves = new List<Wave>(totalSubsongs);
 
             for (int subsong = 1; subsong <= totalSubsongs; subsong++)
             {
-                long offset = 0x10;
+                long currentOffset = 0x10;
 
-                long waveIdOffset = offset + (subsong - 1) * 0x2;
+                long waveIdOffset = currentOffset + (subsong - 1) * waveIdAlignment;
 
-                binaryReader.BaseStream.Position = waveIdOffset;
+                binaryReader.BaseStream.Position = offset + waveIdOffset;
 
                 int waveId = binaryReader.ReadUInt16();
 
-                offset += totalSubsongs * 0x2;
+                currentOffset += totalSubsongs * waveIdAlignment;
 
                 long subfileOffset = 0;
                 long subfileNext = 0;
                 long fileSize = binaryReader.BaseStream.Length;
 
-                offset += (subsong - 1) * offsetSize;
+                currentOffset += (subsong - 1) * offsetSize;
 
-                binaryReader.BaseStream.Position = offset;
+                binaryReader.BaseStream.Position = offset + currentOffset;
 
                 switch (offsetSize)
                 {
@@ -93,10 +96,10 @@ namespace CriWareFormats
                         break;
                 }
 
-                subfileOffset += subfileOffset % alignment > 0 ?
-                    alignment - subfileOffset % alignment : 0;
-                subfileNext += subfileNext % alignment > 0 && subfileNext < fileSize ?
-                    alignment - subfileNext % alignment : 0;
+                subfileOffset += subfileOffset % offsetAlignment > 0 ?
+                    offsetAlignment - subfileOffset % offsetAlignment : 0;
+                subfileNext += subfileNext % offsetAlignment > 0 && subfileNext < fileSize ?
+                    offsetAlignment - subfileNext % offsetAlignment : 0;
                 long subfileSize = subfileNext - subfileOffset;
 
                 waves.Add(new Wave()
@@ -123,7 +126,7 @@ namespace CriWareFormats
 
         public Stream GetWaveSubfileStream(Wave wave)
         {
-            return new SpliceStream(binaryReader.BaseStream, wave.Offset, wave.Length);
+            return new SpliceStream(binaryReader.BaseStream, offset + wave.Offset, wave.Length);
         }
 
         private static void Fail()

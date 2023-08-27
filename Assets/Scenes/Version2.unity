@@ -3091,7 +3091,7 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
-    m_LineSpacing: 1
+    m_LineSpacing: 0.6
   m_Text: 
 --- !u!114 &123935080
 MonoBehaviour:
@@ -42758,14 +42758,6 @@ MonoBehaviour:
   TransMaterialProps: {fileID: 2100000, guid: 59dfbb3f0a697874c81bba8ff758c891, type: 2}
   CurrentUMAContainer: {fileID: 0}
   CurrentOtherContainer: {fileID: 0}
-  hairShader: {fileID: 0}
-  faceShader: {fileID: 0}
-  eyeShader: {fileID: 0}
-  cheekShader: {fileID: 0}
-  eyebrowShader: {fileID: 0}
-  alphaShader: {fileID: 0}
-  bodyAlphaShader: {fileID: 0}
-  bodyBehindAlphaShader: {fileID: 0}
   CurrentAudioSources: []
   OverrideController: {fileID: 22100000, guid: 130057757529b0f40a4fdc08bf0861ef, type: 2}
   FaceOverrideController: {fileID: 22100000, guid: 21f82840716293147bcb9f4bfb58cc99,

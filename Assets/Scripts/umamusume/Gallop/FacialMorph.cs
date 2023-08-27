@@ -81,5 +81,6 @@ namespace Gallop
         public LocatorPart Part;
         public BindType Type;
         public float Value;
+        public float DefaultValue;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,12 +31,12 @@ public class UmaSceneController:MonoBehaviour
         UmaAssetManager.OnLoadProgressChange += LoadingProgressChange;
     }
 
-    public static void LoadScene(string name, Action OnSceneloaded = null, Action OnLastSceneUnloaded = null)
+    public static void LoadScene(string name, Action OnSceneloaded = null, Action OnPrevSceneUnloaded = null)
     {
-        instance.StartCoroutine(instance.LoadLiveSceneAsync(name, OnSceneloaded, OnLastSceneUnloaded));
+        instance.StartCoroutine(instance.LoadLiveSceneAsync(name, OnSceneloaded, OnPrevSceneUnloaded));
     }
 
-    IEnumerator LoadLiveSceneAsync(string sceneName, Action OnSceneloaded, Action OnLastSceneUnloaded)
+    IEnumerator LoadLiveSceneAsync(string sceneName, Action OnSceneloaded, Action OnPrevSceneUnloaded)
     {
 
         if (CavansInstance)
@@ -64,7 +63,7 @@ public class UmaSceneController:MonoBehaviour
         AsyncOperation asyncUnLoad = SceneManager.UnloadSceneAsync(currentScene);
         yield return new WaitUntil(() => asyncUnLoad.isDone);
 
-        OnLastSceneUnloaded?.Invoke();
+        OnPrevSceneUnloaded?.Invoke();
 
         animation.Play("SceneTransition_e");
         yield return new WaitUntil(() => !animation.isPlaying);

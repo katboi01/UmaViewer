@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class UmaUtility
+public static class UmaUtility
 {
     public static Dictionary<string, Transform> ConvertListToDictionary(List<Transform> transformList)
     {
@@ -55,5 +55,19 @@ public class UmaUtility
         JsonUtility.FromJsonOverwrite(json, to);
     }
 
+    public static string GetCurrentLyrics(float time, List<UmaLyricsData> lyricsDatas)
+    {
+        for (int i = lyricsDatas.Count - 1; i >= 0; i--)
+        {
+            if (lyricsDatas[i].time < time)
+            {
+                var lyric = lyricsDatas[i].text;
+                lyric = lyric.Replace("[COMMA]", ",");
+                lyric = lyric.Replace("\\n", "\n");
+                return lyric;
+            }
+        }
+        return "";
+    }
 }
 

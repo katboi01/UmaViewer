@@ -380,6 +380,7 @@ namespace Gallop.Live.Cutt
                 SetupFacialUpdateInfo_Eyebrow(ref updateInfo, facialDataList.eyebrowKeys, liveTime);
                 SetupFacialUpdateInfo_Ear(ref updateInfo, facialDataList.earKeys, liveTime);
                 SetupFacialUpdateInfo_EyeTrack(ref updateInfo, facialDataList.eyeTrackKeys, liveTime);
+                SetupFacialUpdateInfo_Effect(ref updateInfo, facialDataList.effectKeys, liveTime);
                 this.OnUpdateFacial(updateInfo, liveTime, 0);
             }
 
@@ -391,6 +392,7 @@ namespace Gallop.Live.Cutt
                 SetupFacialUpdateInfo_Eyebrow(ref updateInfo, otherFacialDataList[i].eyebrowKeys, liveTime);
                 SetupFacialUpdateInfo_Ear(ref updateInfo, otherFacialDataList[i].earKeys, liveTime);
                 SetupFacialUpdateInfo_EyeTrack(ref updateInfo, otherFacialDataList[i].eyeTrackKeys, liveTime);
+                SetupFacialUpdateInfo_Effect(ref updateInfo, otherFacialDataList[i].effectKeys, liveTime);
                 this.OnUpdateFacial(updateInfo, liveTime, i+1);
             }
         }
@@ -432,6 +434,20 @@ namespace Gallop.Live.Cutt
                 updateInfo.eyeCur = liveTimelineKey2 as LiveTimelineKeyFacialEyeData;
                 updateInfo.eyeNext = liveTimelineKey3 as LiveTimelineKeyFacialEyeData;
                 updateInfo.eyeKeyIndex = curKey.index;
+            }
+        }
+
+        private void SetupFacialUpdateInfo_Effect(ref FacialDataUpdateInfo updateInfo, LiveTimelineKeyFacialEffectDataList keys, float time)
+        {
+            LiveTimelineKey liveTimelineKey = null;
+
+            LiveTimelineKeyIndex curKey = AlterUpdate_Key(keys, time);
+            if (curKey != null)
+            {
+                liveTimelineKey = curKey.key;
+
+                updateInfo.effect = liveTimelineKey as LiveTimelineKeyFacialEffectData;
+                updateInfo.effectKeyIndex = curKey.index;
             }
         }
 

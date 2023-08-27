@@ -16,7 +16,10 @@ public class UmaViewerAudio
 
     public class CuteAudioSource
     {
+        public string tag;
+        public bool enable;
         public float volume;
+        public float pan;
         public List<AudioSource> sourceList;
     }
 
@@ -27,7 +30,7 @@ public class UmaViewerAudio
         return info;
     }
 
-    static public CuteAudioSource ApplySound(string cueName)
+    static public CuteAudioSource ApplySound(string cueName, int part)
     {
         UmaSoundInfo soundInfo = getSoundPath(cueName);
 
@@ -48,7 +51,10 @@ public class UmaViewerAudio
 
         CuteAudioSource cute = new CuteAudioSource
         {
+            tag = ((PartForm)part).ToString(),
+            enable = false,
             volume = 1,
+            pan = 0,
             sourceList = sourceList
         };
 
@@ -83,29 +89,19 @@ public class UmaViewerAudio
     {
         center = 0,
         left = 1,
-        right = 2
-    }
-
-    public static void SetSelectorLabel(CuteAudioSource sourceList, int index)
-    {
-        for(int i = 0; i < sourceList.sourceList.Count; i++)
-        {
-            if(i != index)
-            {
-                sourceList.sourceList[i].volume = 0;
-            }
-            else
-            {
-                sourceList.sourceList[i].volume = 1;
-            }
-        }
+        right = 2,
+        left2 = 3,
+        right2 = 4,
+        left3 = 5,
+        right3 = 6,
     }
 
     public static void ApplyMainVolume(CuteAudioSource sourceList)
     {
         foreach (var source in sourceList.sourceList)
         {
-            source.volume *= sourceList.volume;
+            source.volume = (sourceList.enable ? sourceList.volume : 0);
+            source.panStereo = sourceList.pan;
         }
     }
 
@@ -125,98 +121,28 @@ public class UmaViewerAudio
             }
         }
 
-        var volumeMixer = 0;
-        var useMixer = false;
-
-        float _999_count = 0;
-        bool _no999 = false;
-
         for (int i = 0; i < liveVocal.Count; i++)
         {
-            string partName = ((PartForm)i).ToString();
+            string partName = liveVocal[i].tag;
 
             if (partInfo.PartSettings.ContainsKey(partName)){
-                var value = partInfo.PartSettings[partName][targetIndex];
-
-                if (value == 0)
-                {
-                    liveVocal[i].volume = 0;
-                    volumeMixer += 1;
-                }
-                else
-                {
-                    liveVocal[i].volume = 1;
-                    SetSelectorLabel(liveVocal[i], Convert.ToInt32(value - 1));
-                }
-
+                liveVocal[i].enable = partInfo.PartSettings[partName][targetIndex] > 0;
                 
-                float volume;
                 if (partInfo.PartSettings.ContainsKey(partName + "_vol"))
                 {
-                    volume = partInfo.PartSettings[partName + "_vol"][targetIndex];
-                    if(volume != 999)
-                    {
-                        liveVocal[i].volume *= volume;
-                    }
-                    else
-                    {
-                        _999_count += 1;
-                    }
+                    var volume = partInfo.PartSettings[partName + "_vol"][targetIndex];
+                    liveVocal[i].volume = (volume == 999 ? 1 : volume);
                 }
-                else
+
+                if (partInfo.PartSettings.ContainsKey(partName + "_pan"))
                 {
-                    _no999 = true;
+                    var pan = partInfo.PartSettings[partName + "_pan"][targetIndex];
+                    liveVocal[i].pan = (pan == 999 ? 0 : pan);
                 }
+               
             }
         }
 
-        if ((_999_count == liveVocal.Count && liveVocal.Count != 0) || _no999)
-        {
-            useMixer = true;
-        }
-
-        if (useMixer)
-        {
-            switch (volumeMixer)
-            {
-                case 0:
-                    liveVocal[0].volume = 0.7056f;
-                    if(liveVocal.Count > 2)
-                    {
-                        liveVocal[2].volume = 0.56f;
-                    }
-                    if (liveVocal.Count > 1)
-                    {
-                        liveVocal[1].volume = 0.56f;
-
-                    }
-                    break;
-                case 1:
-                    for (int i = 0; i < liveVocal.Count; i++)
-                    {
-                        if (liveVocal[i].volume != 0)
-                        {
-                            liveVocal[i].volume = 0.7031f;
-                        }
-                    }
-                    break;
-                case 2:
-                    for (int i = 0; i < liveVocal.Count; i++)
-                    {
-                        if (liveVocal[i].volume != 0)
-                        {
-                            liveVocal[i].volume = 0.9954f;
-                        }
-                    }
-                    break;
-                default:
-                    for (int i = 0; i < liveVocal.Count; i++)
-                    {
-                        liveVocal[i].volume = 0;
-                    }
-                    break;
-            }
-        }
 
         foreach(var cute in liveVocal)
         {

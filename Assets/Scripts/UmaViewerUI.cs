@@ -169,7 +169,7 @@ public class UmaViewerUI : MonoBehaviour
     private void Update()
     {
 
-        if (Builder.CurrentAudioSources.Count > 0)
+        if (Builder.CurrentAudioSources.Count > 0 && Builder.CurrentAudioSources[0])
         {
             AudioSource MianSource = Builder.CurrentAudioSources[0];
             if (MianSource.clip)
@@ -177,7 +177,8 @@ public class UmaViewerUI : MonoBehaviour
                 TitleText.text = MianSource.clip.name;
                 ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
                 AudioSlider.SetValueWithoutNotify(MianSource.time / MianSource.clip.length);
-                LyricsText.text = GetCurrentLyrics(MianSource.time);
+                LyricsText.text = UmaUtility.GetCurrentLyrics(MianSource.time, Builder.CurrentLyrics);
+                LyricsText.text = LyricsText.text;
             }
         }
 
@@ -1214,18 +1215,6 @@ public class UmaViewerUI : MonoBehaviour
         int minute = seconds % 3600 / 60;
         seconds = seconds % 3600 % 60;
         return string.Format("{0:D2}m:{1:D2}s:{2:D2}f", minute, seconds, frames);
-    }
-
-    public string GetCurrentLyrics(float time)
-    {
-        for (int i = Builder.CurrentLyrics.Count - 1; i >= 0; i--)
-        {
-            if (Builder.CurrentLyrics[i].time < time)
-            {
-                return Builder.CurrentLyrics[i].text;
-            }
-        }
-        return "";
     }
 
     public void RecordVMD()

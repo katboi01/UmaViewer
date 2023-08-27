@@ -129,7 +129,7 @@ namespace Gallop.Live.Cutt
 		public int cheekType;
 		public int tearyType;
 		public int tearfulType;
-		public LiveTimelineKeyFacialEffectData.TeardropConfig[] teardropConfigs;
+		public TeardropConfig[] teardropConfigs;
 		public int mangameIndex;
 	}
 

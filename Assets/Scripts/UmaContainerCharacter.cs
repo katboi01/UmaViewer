@@ -116,7 +116,7 @@ public class UmaContainerCharacter : UmaContainer
         //MergeHead
         if (Head)
         {
-            var headskins = Head.GetComponentsInChildren<SkinnedMeshRenderer>();
+            var headskins = Head.GetComponentsInChildren<SkinnedMeshRenderer>(true);
             foreach (SkinnedMeshRenderer headskin in headskins)
             {
                 MergeBone(headskin, bodyBones, ref emptyBones);
@@ -231,28 +231,29 @@ public class UmaContainerCharacter : UmaContainer
 
     public void MergeBone(SkinnedMeshRenderer from, Dictionary<string, Transform> targetBones, ref List<Transform> emptyBones)
     {
-        var rootbone = targetBones[from.rootBone.name];
-        if (rootbone) from.rootBone = rootbone;
-
-        Transform[] tmpBone = new Transform[from.bones.Length];
-        for (int i = 0; i < tmpBone.Length; i++)
+        if(targetBones.TryGetValue(from.rootBone.name, out Transform rootbone))
         {
-            if (targetBones.TryGetValue(from.bones[i].name, out Transform targetbone))
+            from.rootBone = rootbone;
+            Transform[] tmpBone = new Transform[from.bones.Length];
+            for (int i = 0; i < tmpBone.Length; i++)
             {
-                tmpBone[i] = targetbone;
-                from.bones[i].position = targetbone.position;
-                while (from.bones[i].transform.childCount > 0)
+                if (targetBones.TryGetValue(from.bones[i].name, out Transform targetbone))
                 {
-                    from.bones[i].transform.GetChild(0).SetParent(targetbone);
+                    tmpBone[i] = targetbone;
+                    from.bones[i].position = targetbone.position;
+                    while (from.bones[i].transform.childCount > 0)
+                    {
+                        from.bones[i].transform.GetChild(0).SetParent(targetbone);
+                    }
+                    emptyBones.Add(from.bones[i]);
                 }
-                emptyBones.Add(from.bones[i]);
+                else
+                {
+                    tmpBone[i] = from.bones[i];
+                }
             }
-            else
-            {
-                tmpBone[i] = from.bones[i];
-            }
-        }
-        from.bones = tmpBone;
+            from.bones = tmpBone;
+        };
     }
 
     public void LoadPhysics()

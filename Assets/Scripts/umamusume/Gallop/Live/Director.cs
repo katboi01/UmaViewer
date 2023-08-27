@@ -559,18 +559,10 @@ namespace Gallop.Live
 
         public void InitializeMusic(int songid, List<LiveCharacterSelect> characters)
         {
-            Debug.Log(songid);
-
-            int singer = 3;
-
-            if (_soloMode)
-            {
-                singer = 1;
-            }
 
             for (int i = 0; i < characters.Count; i++)
             {
-                if (characters[i].CharaEntry.Name != "" && i < 3)
+                if (characters[i].CharaEntry.Name != "" && i < partInfo.SingerCount)
                 {
                     var charaid = characters[i].CharaEntry.Id;
 
@@ -591,13 +583,13 @@ namespace Gallop.Live
                     if (entry != null)
                     {
                         Debug.Log(entry.Name);
-                        liveVocal.Add(UmaViewerAudio.ApplySound(entry.Name.Split('.')[0]));
+                        liveVocal.Add(UmaViewerAudio.ApplySound(entry.Name.Split('.')[0], i));
                     }
                 }
             }
 
 
-            liveMusic = UmaViewerAudio.ApplySound(string.Format(SONG_PATH, songid));
+            liveMusic = UmaViewerAudio.ApplySound(string.Format(SONG_PATH, songid), -1);
         }
 
         public void Play()
@@ -725,6 +717,7 @@ namespace Gallop.Live
                         OnTimelineUpdate(_liveCurrentTime);
                     }
                 }
+
                 UpdateMainCamera();
             }
         }
@@ -735,6 +728,11 @@ namespace Gallop.Live
             {
                 _liveTimelineControl.AlterLateUpdate();
             }
+        }
+
+        private void FixedUpdate()
+        {
+            LiveViewerUI.Instance.UpdateLyrics(_liveCurrentTime);
         }
 
         DateTime ExitTime;

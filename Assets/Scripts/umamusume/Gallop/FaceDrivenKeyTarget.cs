@@ -47,6 +47,12 @@ namespace Gallop
 
         List<FacialMorph> leftEarMorph = new List<FacialMorph>();
         List<FacialMorph> rightEarMorph = new List<FacialMorph>();
+
+        FacialOtherMorph CheekMorph;
+        FacialOtherMorph ShadeMorph;
+        FacialOtherMorph MangaMorph;
+        List<FacialOtherMorph> TearMorphs = new List<FacialOtherMorph>();
+
         public void Initialize(Dictionary<string, Transform> objs)
         {
             Objs = objs;
@@ -247,6 +253,7 @@ namespace Gallop
                     CheekMorph.BindProperties.Add(cheekProperty2);
                 }
                 OtherMorphs.Add(CheekMorph);
+                this.CheekMorph = CheekMorph;
             }
 
             Container.FaceMaterial = Container.Head.transform.Find("M_Face").GetComponent<SkinnedMeshRenderer>().material;
@@ -266,6 +273,7 @@ namespace Gallop
                         PropertyName = "_faceShadowAlpha"
                     });
                 OtherMorphs.Add(FaceShadowMorph);
+                ShadeMorph = FaceShadowMorph;
             }
 
             FacialOtherMorph FaceMangaMorph = new FacialOtherMorph()
@@ -290,6 +298,7 @@ namespace Gallop
                 BindPrefab = mangaObjects
             });
             OtherMorphs.Add(FaceMangaMorph);
+            MangaMorph = FaceMangaMorph;
 
             foreach (var tear in Container.TearControllers)
             {
@@ -304,30 +313,35 @@ namespace Gallop
                     Part = BindProperty.LocatorPart.ScaX,
                     Type = BindProperty.BindType.TearWeight,
                     BindTearController = tear,
-                    Value = tear.Weight
+                    Value = tear.Weight,
+                    DefaultValue = tear.Weight
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.PosY,
                     Type = BindProperty.BindType.TearSide,
                     BindTearController = tear,
-                    Value = tear.CurrentDir
+                    Value = tear.CurrentDir,
+                    DefaultValue = tear.CurrentDir
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.ScaY,
                     Type = BindProperty.BindType.TearSelect,
                     BindTearController = tear,
-                    Value = tear.CurrenObject
+                    Value = tear.CurrenObject,
+                    DefaultValue = tear.CurrenObject
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.ScaZ,
                     Type = BindProperty.BindType.TearSpeed,
                     BindTearController = tear,
-                    Value = tear.Speed
+                    Value = tear.Speed,
+                    DefaultValue = tear.Speed
                 });
                 OtherMorphs.Add(FaceTearMorph);
+                TearMorphs.Add(FaceTearMorph);
             }
         }
 
@@ -415,6 +429,11 @@ namespace Gallop
             ApplyRotationEar();
         }
 
+        public void ChangeMorphEffect()
+        {
+            OtherMorphs.ForEach(morph => ProcessExtraMorph(morph));
+        }
+
         public void ClearAllWeights()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
@@ -426,7 +445,7 @@ namespace Gallop
             {
                 morph.BindProperties.ForEach(property =>
                 {
-                    property.Value = morph.GetLocatorValue(property.Part);
+                    property.Value = property.DefaultValue;
                 });
             });
         }
@@ -467,11 +486,10 @@ namespace Gallop
                             morph.BindGameObject.SetActive(true);
                             property.BindMaterial.mainTexture = property.BindTexture;
                             property.BindMaterial.SetFloat(property.PropertyName, property.Value);
-                            return;
                         }
                         else
                         {
-                            if (morph.BindProperties.IndexOf(property) == morph.BindProperties.Count - 1)
+                            if (morph.BindProperties.Find(p =>p.Value >0) == null)
                             {
                                 morph.BindGameObject.SetActive(false);
                             }
@@ -544,6 +562,17 @@ namespace Gallop
         {
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
+        }
+
+        public void FacialResetEffect()
+        {
+            foreach(var morphs in OtherMorphs)
+            {
+                foreach(var property in morphs.BindProperties)
+                {
+                    property.Value = property.DefaultValue;
+                }
+            }
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -655,16 +684,17 @@ namespace Gallop
             ChangeMorph();
         }
 
-        public void ChangeMorphWeight(BindProperty property, float val, FacialMorph morph)
+        public void ChangeMorphWeight(BindProperty property, float val, FacialMorph morph, bool autoHideEye = true)
         {
             Container.isAnimatorControl = false;
             property.Value = val < 0 ? 0 : val;
-            ChangeMorph();
+            ChangeMorphEffect();
 
-            if (property.Type == BindProperty.BindType.Enable && morph.name.Contains("Manga"))
+            if (autoHideEye && property.Type == BindProperty.BindType.Enable && morph.name.Contains("Manga"))
             {
-                ChangeMorphWeight(EyeMorphs[42], val > 0 ? 1 : 0);
-                ChangeMorphWeight(EyeMorphs[43], val > 0 ? 1 : 0);
+                EyeMorphs[42].weight = (val > 0 ? 1 : 0);
+                EyeMorphs[43].weight = (val > 0 ? 1 : 0);
+                ChangeMorphEye();
             }
         }
 
@@ -888,6 +918,35 @@ namespace Gallop
                 ChangeMorphMouth();
 
             }
+
+            var HasManga = false;
+            if (updateInfo_.effect != null)
+            {
+                var info = updateInfo_.effect;
+                var cheektype = info.cheekType;
+                for (int i = 0; i < CheekMorph.BindProperties.Count; i++)
+                {
+                    CheekMorph.BindProperties[i].Value = (cheektype - 1 == i ? 1 : 0);
+                }
+
+                var mangatype = info.mangameIndex;
+                if (mangatype == 0)
+                {
+                    HasManga = false;
+                    MangaMorph.BindProperties[1].Value = mangatype;
+                }
+                else
+                {
+                    HasManga = true;
+                    MangaMorph.BindProperties[0].Value = mangatype - 1;
+                    MangaMorph.BindProperties[1].Value = 1;
+                }
+
+                //TODO Support Tear effect
+
+                ChangeMorphEffect();
+            }
+
             if (updateInfo_.eyeCur != null)
             {
 
@@ -936,8 +995,9 @@ namespace Gallop
                     rightEyeMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyeCur.weight / 100);
                 }
 
+                EyeMorphs[42].weight = (HasManga ? 1 : 0); //Hide eye when has Manga eye
+                EyeMorphs[43].weight = (HasManga ? 1 : 0);
                 ChangeMorphEye();
-
             }
 
             if (updateInfo_.eyebrowCur != null)
@@ -1070,8 +1130,6 @@ namespace Gallop
 
                 SetEyeTrack(finalRotation);
             }
-
-
         }
 
         public Vector2 GetTimelineEyeTrackRotation(LiveTimelineKeyFacialEyeTrackData key)

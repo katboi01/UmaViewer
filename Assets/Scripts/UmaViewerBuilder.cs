@@ -664,7 +664,6 @@ public class UmaViewerBuilder : MonoBehaviour
                 mController.live = live;
                 mController.IsRecordVMD = UI.isRecordVMD;
 
-
                 List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
                     GameObject.Find("ViewerMain"),
@@ -689,6 +688,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
                 LoadLiveUma(characters);
 
+                var Lyrics = LoadLiveLyrics(live.MusicId);
+                if (Lyrics != null)
+                {
+                    LiveViewerUI.Instance.CurrentLyrics = Lyrics;
+                }
             },
             delegate ()
             {
@@ -800,7 +804,7 @@ public class UmaViewerBuilder : MonoBehaviour
         return clips;
     }
 
-    public void LoadLiveLyrics(int songid)
+    public List<UmaLyricsData> LoadLiveLyrics(int songid)
     {
         if (CurrentLyrics.Count > 0) CurrentLyrics.Clear();
 
@@ -820,13 +824,14 @@ public class UmaViewerBuilder : MonoBehaviour
                     UmaLyricsData lyricsData = new UmaLyricsData()
                     {
                         time = float.Parse(words[0]) / 1000,
-                        text = (words.Length > 1) ? words[1].Replace("[COMMA]", "，") : ""
+                        text = (words.Length > 1) ? words[1] : ""
                     };
                     CurrentLyrics.Add(lyricsData);
                 }
                 catch { }
             }
         }
+        return CurrentLyrics;
     }
 
     public void LoadAssetPath(string path, Transform SetParent)

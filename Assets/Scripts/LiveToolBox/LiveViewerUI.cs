@@ -15,6 +15,11 @@ public class LiveViewerUI : MonoBehaviour
     public Dropdown FrameRateDropDown;
 
     public GameObject RecordingUI;
+
+    public Text LyricsText;
+
+    public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
+
     float targetHeight = 0;
     float height;
     private void Awake()
@@ -52,5 +57,11 @@ public class LiveViewerUI : MonoBehaviour
     public void SetFrameRate(int fps)
     {
         Application.targetFrameRate = int.Parse(FrameRateDropDown.options[fps].text);
+    }
+
+    public void UpdateLyrics(float time)
+    {
+        var text = UmaUtility.GetCurrentLyrics(time, CurrentLyrics);
+        LyricsText.text = text;
     }
 }
