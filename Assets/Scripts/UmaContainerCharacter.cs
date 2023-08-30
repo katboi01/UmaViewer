@@ -54,6 +54,8 @@ public class UmaContainerCharacter : UmaContainer
     public List<GameObject> RightMangaObject = new List<GameObject>();
 
     [Header("Tear")]
+    public GameObject StaticTear_L;
+    public GameObject StaticTear_R;
     public GameObject TearPrefab_0;
     public GameObject TearPrefab_1;
     public List<TearController> TearControllers = new List<TearController>();
@@ -632,6 +634,7 @@ public class UmaContainerCharacter : UmaContainer
         var textures = MobHeadTextures;
         GameObject head = Instantiate(go, transform);
         Head = head;
+        var table = Head.GetComponent<AssetHolder>()._assetTable;
 
         //Some setting for Head
         EnableEyeTracking = UI.EnableEyeTracking;
@@ -705,7 +708,7 @@ public class UmaContainerCharacter : UmaContainer
                     }
 
                     //Blush Setting
-                    if (r.name.Contains("Cheek"))
+                    if(r.name.Contains("Cheek"))
                     {
                         r.gameObject.SetActive(false);
                         if (IsMob)
@@ -715,11 +718,21 @@ public class UmaContainerCharacter : UmaContainer
                         }
                         else
                         {
-                            var table = Head.GetComponent<AssetHolder>()._assetTable;
                             CheekTex_0 = table["cheek0"] as Texture;
                             CheekTex_1 = table["cheek1"] as Texture;
                         }
                     }
+
+                    if(Main.AbList.TryGetValue("3d/chara/common/textures/tex_chr_tear00", out var tearEntry))
+                    {
+                       var ab =  UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
+                       var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
+                       StaticTear_L = table["tearmesh_l"] as GameObject;
+                       StaticTear_R = table["tearmesh_r"] as GameObject;
+                       StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
+                       StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
+                    }
+
                     switch (m.shader.name)
                     {
                         case "Gallop/3D/Chara/MultiplyCheek":
@@ -747,6 +760,8 @@ public class UmaContainerCharacter : UmaContainer
                             break;
                     }
                 }
+
+                m.SetFloat("_StencilMask", CharaEntry.Id);
             }
         }
 
@@ -1252,7 +1267,12 @@ public class UmaContainerCharacter : UmaContainer
             obj.SetActive(false);
 
             var leftObj = Instantiate(obj, eyeLocator_L.transform);
-            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>()).ForEach(a => a.material.renderQueue = -1);
+            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>(true)).ForEach(a => { 
+                a.material.SetFloat("_StencilMask", id);
+                a.material.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
+                a.material.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
+                a.material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+            });
             LeftMangaObject.Add(leftObj);
 
             var RightObj = Instantiate(obj, eyeLocator_R.transform);
@@ -1261,7 +1281,12 @@ public class UmaContainerCharacter : UmaContainer
                 if (holder._assetTableValue["invert"] > 0)
                     RightObj.transform.localScale = new Vector3(-1, 1, 1);
             }
-            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>()).ForEach(a => { a.material.renderQueue = -1; });
+            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>(true)).ForEach(a => { 
+                a.material.SetFloat("_StencilMask", id);
+                a.material.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
+                a.material.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
+                a.material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+            });
             RightMangaObject.Add(RightObj);
         });
 
@@ -1280,10 +1305,10 @@ public class UmaContainerCharacter : UmaContainer
             var p0 = TearPrefab_0;
             var p1 = TearPrefab_1;
             var t = headBone.transform;
-            TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
-            TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
-            TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
-            TearControllers.Add(new TearController(t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
+            TearControllers.Add(new TearController(CharaEntry.Id, t, Instantiate(p0, t), Instantiate(p1, t), 0, 1));
+            TearControllers.Add(new TearController(CharaEntry.Id, t, Instantiate(p0, t), Instantiate(p1, t), 1, 1));
+            TearControllers.Add(new TearController(CharaEntry.Id, t, Instantiate(p0, t), Instantiate(p1, t), 0, 0));
+            TearControllers.Add(new TearController(CharaEntry.Id, t, Instantiate(p0, t), Instantiate(p1, t), 1, 0));
         }
 
         var firsehead = Head;

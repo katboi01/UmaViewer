@@ -380,7 +380,7 @@ public class UmaViewerUI : MonoBehaviour
                     foreach (var prop in extraMorph.BindProperties)
                     {
                         var container = Instantiate(UmaContainerSliderPrefab, TargetList.content).GetComponent<UmaUIContainer>();
-                        container.Name = $"{morph.locator.name}({prop.Type})";
+                        container.Name = $"{morph.name}({prop.Type})";
                         container.Slider.value = prop.Value;
                         switch (prop.Type)
                         {
@@ -391,12 +391,12 @@ public class UmaViewerUI : MonoBehaviour
                                 break;
                             case BindProperty.BindType.Select:
                                 container.Slider.wholeNumbers = true;
-                                container.Slider.maxValue = prop.BindPrefab.Count - 1;
+                                container.Slider.maxValue = prop.BindPrefabs.Count - 1;
                                 container.Slider.minValue = 0;
                                 break;
                             case BindProperty.BindType.EyeSelect:
                                 container.Slider.wholeNumbers = true;
-                                container.Slider.maxValue = prop.BindPrefab.Count / 2 - 1;
+                                container.Slider.maxValue = prop.BindPrefabs.Count / 2 - 1;
                                 container.Slider.minValue = 0;
                                 break;
                             case BindProperty.BindType.Enable:

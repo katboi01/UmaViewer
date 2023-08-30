@@ -49,7 +49,6 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         int id = chara.Id;
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
-        umaContainer.CharaEntry = chara;
         CurrentUMAContainer = umaContainer;
 
         if (mini)
@@ -110,6 +109,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadNormalUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, bool loadMotion = false)
     {
         int id = chara.Id;
+        umaContainer.CharaEntry = chara;
         DataRow charaData = umaContainer.CharaData;
         bool genericCostume = umaContainer.IsGeneric = costumeId.Length >= 4;
         string skin, height, socks, bust, sex, shape, costumeIdShort = "";
@@ -319,6 +319,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadMobUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
     {
         int id = chara.Id;
+        umaContainer.CharaEntry = chara;
         umaContainer.IsMob = chara.IsMob;
         umaContainer.MobDressColor = UmaDatabaseController.ReadMobDressColor(umaContainer.CharaData["dress_color_id"].ToString());
         umaContainer.MobHeadColor = UmaDatabaseController.ReadMobHairColor(umaContainer.CharaData["chara_hair_color"].ToString());
@@ -539,6 +540,7 @@ public class UmaViewerBuilder : MonoBehaviour
     private void LoadMiniUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId)
     {
         int id = chara.Id;
+        umaContainer.CharaEntry = chara;
         DataRow charaData = umaContainer.CharaData;
         umaContainer.IsMini = true;
         bool isGeneric = umaContainer.IsGeneric = costumeId.Length >= 4;

@@ -51,6 +51,7 @@ namespace Gallop
         FacialOtherMorph CheekMorph;
         FacialOtherMorph ShadeMorph;
         FacialOtherMorph MangaMorph;
+        FacialOtherMorph StaticTearMorph;
         List<FacialOtherMorph> TearMorphs = new List<FacialOtherMorph>();
 
         public void Initialize(Dictionary<string, Transform> objs)
@@ -289,16 +290,42 @@ namespace Gallop
             {
                 Part = BindProperty.LocatorPart.ScaY,
                 Type = BindProperty.BindType.EyeSelect,
-                BindPrefab = mangaObjects
+                BindPrefabs = mangaObjects
             });
             FaceMangaMorph.BindProperties.Add(new BindProperty()
             {
                 Part = BindProperty.LocatorPart.ScaX,
                 Type = BindProperty.BindType.Enable,
-                BindPrefab = mangaObjects
+                BindPrefabs = mangaObjects
             });
             OtherMorphs.Add(FaceMangaMorph);
             MangaMorph = FaceMangaMorph;
+
+            if(Container.StaticTear_L && Container.StaticTear_R)
+            {
+                FacialOtherMorph StaticTearMorph = new FacialOtherMorph()
+                {
+                    name = "StaticTear_Ctrl",
+                    locator = DrivenKeyLocator.Find("Cheek_Ctrl")
+                };
+
+                StaticTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.PosX,
+                    Type = BindProperty.BindType.Enable,
+                    BindPrefabs = new List<GameObject>() { Container.StaticTear_L }
+                });
+
+                StaticTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.PosY,
+                    Type = BindProperty.BindType.Enable,
+                    BindPrefabs = new List<GameObject>() { Container.StaticTear_R }
+                });
+
+                this.StaticTearMorph = StaticTearMorph;
+                OtherMorphs.Add(StaticTearMorph);
+            }
 
             foreach (var tear in Container.TearControllers)
             {
@@ -499,18 +526,22 @@ namespace Gallop
                         property.BindMaterial.SetFloat(property.PropertyName, property.Value);
                         break;
                     case BindProperty.BindType.Select:
-                        property.BindPrefab.ForEach(a => a.SetActive((int)property.Value == property.BindPrefab.IndexOf(a)));
+                        property.BindPrefabs.ForEach(a => a.SetActive((int)property.Value == property.BindPrefabs.IndexOf(a)));
                         break;
                     case BindProperty.BindType.EyeSelect:
-                        var count = property.BindPrefab.Count / 2;
+                        var count = property.BindPrefabs.Count / 2;
                         var val = (int)property.Value;
-                        property.BindPrefab.ForEach(a =>
-                        a.SetActive(val + count < property.BindPrefab.Count && (val == property.BindPrefab.IndexOf(a) || val + count == property.BindPrefab.IndexOf(a))));
+                        property.BindPrefabs.ForEach(a =>
+                        a.SetActive(val + count < property.BindPrefabs.Count && (val == property.BindPrefabs.IndexOf(a) || val + count == property.BindPrefabs.IndexOf(a))));
                         break;
                     case BindProperty.BindType.Enable:
-                        if (property.Value <= 0)
+                        if(property.BindPrefabs.Count == 1)
                         {
-                            property.BindPrefab.ForEach(a => a.SetActive(false));
+                            property.BindPrefabs.ForEach(a => a.SetActive(property.Value > 0));
+                        }
+                        else if(property.Value <= 0)
+                        {
+                            property.BindPrefabs.ForEach(a => a.SetActive(false));
                         }
                         break;
                     case BindProperty.BindType.TearSide:
@@ -942,7 +973,8 @@ namespace Gallop
                     MangaMorph.BindProperties[1].Value = 1;
                 }
 
-                //TODO Support Tear effect
+                var tearytype = info.tearyType;
+                StaticTearMorph.BindProperties.ForEach(p => p.Value = tearytype);
 
                 ChangeMorphEffect();
             }

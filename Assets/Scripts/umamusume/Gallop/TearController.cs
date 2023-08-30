@@ -29,7 +29,7 @@ public class TearController
     private AssetHolder AssetHolder1;
 
     bool intialized;
-    public TearController(Transform headBone, GameObject tearPrefab_0, GameObject tearPrefab_1, int dir, int currentObject)
+    public TearController(int id ,Transform headBone, GameObject tearPrefab_0, GameObject tearPrefab_1, int dir, int currentObject)
     {
         AttachBone_2_L = headBone.transform.Find("Eye_tear_attach_02_L");
         AttachBone_2_R = headBone.transform.Find("Eye_tear_attach_02_R");
@@ -40,6 +40,10 @@ public class TearController
         AssetHolder0 = TearObject_0.GetComponent<AssetHolder>();
         TearMaterial_0 = TearObject_0.GetComponentInChildren<SkinnedMeshRenderer>().material;
         TearMaterial_0.SetFloat("_OffsetFactor", -1000);
+        TearMaterial_0.SetFloat("_StencilMask", id);
+        TearMaterial_0.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
+        TearMaterial_0.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
+        TearMaterial_0.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
         Animator_0 = TearObject_0.GetComponent<Animator>();
         var clip = AssetHolder0._assetTable["default_animation"] as AnimationClip;
         var controller = new AnimatorOverrideController(Animator_0.runtimeAnimatorController);
@@ -50,6 +54,10 @@ public class TearController
         AssetHolder1 = TearObject_1.GetComponent<AssetHolder>();
         TearMaterial_1 = TearObject_1.GetComponentInChildren<SkinnedMeshRenderer>().material;
         TearMaterial_1.SetFloat("_OffsetFactor", -1000);
+        TearMaterial_1.SetFloat("_StencilMask", id);
+        TearMaterial_1.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
+        TearMaterial_1.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
+        TearMaterial_1.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
         Animator_1 = TearObject_1.GetComponent<Animator>();
         clip = AssetHolder1._assetTable["default_animation"] as AnimationClip;
         controller = new AnimatorOverrideController(Animator_1.runtimeAnimatorController);

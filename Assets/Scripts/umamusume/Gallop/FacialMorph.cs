@@ -35,6 +35,7 @@ namespace Gallop
         public List<BindProperty> BindProperties = new List<BindProperty>();
         public float GetLocatorValue(BindProperty.LocatorPart part)
         {
+            if (!locator) return 0;
             switch (part)
             {
                 case BindProperty.LocatorPart.PosX: return locator.localPosition.x;
@@ -76,7 +77,7 @@ namespace Gallop
         public Material BindMaterial;
         public Texture BindTexture;
         public TearController BindTearController;
-        public List<GameObject> BindPrefab = new List<GameObject>();
+        public List<GameObject> BindPrefabs = new List<GameObject>();
         public string PropertyName;
         public LocatorPart Part;
         public BindType Type;
