@@ -634,7 +634,12 @@ public class UmaContainerCharacter : UmaContainer
         var textures = MobHeadTextures;
         GameObject head = Instantiate(go, transform);
         Head = head;
-        var table = Head.GetComponent<AssetHolder>()._assetTable;
+
+        AssetTable table = null;
+        if (!IsMini)
+        {
+            table = Head.GetComponent<AssetHolder>()._assetTable;
+        }
 
         //Some setting for Head
         EnableEyeTracking = UI.EnableEyeTracking;
