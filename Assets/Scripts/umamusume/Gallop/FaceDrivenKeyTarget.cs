@@ -3,19 +3,23 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static DynamicBone;
+using static Gallop.DrivenKeyComponent;
+using static Gallop.FaceDrivenKeyTarget;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
+using static RootMotion.FinalIK.FBBIKHeadEffector;
 
 namespace Gallop
 {
     public class FaceDrivenKeyTarget : ScriptableObject
     {
-        public UmaContainer Container;
+        public UmaContainerCharacter Container;
 
         public List<EyeTarget> _eyeTarget;
         public List<EyebrowTarget> _eyebrowTarget;
         public List<MouthTarget> _mouthTarget;
         public List<TargetInfomation> _earTarget;
 
-        public List<Transform> Objs;
+        public Dictionary<string, Transform> Objs;
         private FacialMorph BaseLEarMorph, BaseREarMorph;
         private FacialMorph BaseLEyeBrowMorph, BaseREyeBrowMorph;
         private FacialMorph BaseLEyeMorph, BaseREyeMorph;
@@ -37,16 +41,33 @@ namespace Gallop
 
         List<FacialMorph> leftEyeMorph = new List<FacialMorph>();
         List<FacialMorph> rightEyeMorph = new List<FacialMorph>();
-        public void Initialize(List<Transform> objs)
+
+        List<FacialMorph> leftEyebrowMorph = new List<FacialMorph>();
+        List<FacialMorph> rightEyebrowMorph = new List<FacialMorph>();
+
+        List<FacialMorph> leftEarMorph = new List<FacialMorph>();
+        List<FacialMorph> rightEarMorph = new List<FacialMorph>();
+
+        FacialOtherMorph CheekMorph;
+        FacialOtherMorph ShadeMorph;
+        FacialOtherMorph MangaMorph;
+        FacialOtherMorph StaticTearMorph;
+        List<FacialOtherMorph> TearMorphs = new List<FacialOtherMorph>();
+
+        public void Initialize(Dictionary<string, Transform> objs)
         {
             Objs = objs;
 
-            List<Particle> particles = new List<Particle>();
+            Dictionary<string, Particle> particles = new Dictionary<string, Particle>();
             foreach (CySpringDataContainer spring in Container.cySpringDataContainers)
             {
                 foreach (DynamicBone dynamicbone in spring.DynamicBones)
                 {
-                    particles.AddRange(dynamicbone.Particles);
+                    foreach(var particle in dynamicbone.Particles)
+                    {
+                        if (!particles.ContainsKey(particle.m_Transform.name)) 
+                            particles.Add(particle.m_Transform.name,particle);
+                    }
                 }
             }
 
@@ -62,13 +83,12 @@ namespace Gallop
                     morph.trsArray = _earTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        var physicsParticle = particles.Find(a => a.m_Transform.name.Equals(trs._path));
-                        if (physicsParticle != null)
+                        if (particles.TryGetValue(trs._path, out Particle physicsParticle))
                         {
                             trs.isPhysics = true;
                             trs.physicsParticle = physicsParticle;
                         }
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path,out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -77,6 +97,9 @@ namespace Gallop
                     }
                     else
                     {
+                        if (morph.direction) leftEarMorph.Add(morph);
+                        else rightEarMorph.Add(morph);
+
                         EarMorphs.Add(morph);
                     }
                 }
@@ -94,7 +117,7 @@ namespace Gallop
                     morph.trsArray = _eyebrowTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path, out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -103,6 +126,9 @@ namespace Gallop
                     }
                     else
                     {
+                        if (morph.direction) leftEyebrowMorph.Add(morph);
+                        else rightEyebrowMorph.Add(morph);
+
                         EyeBrowMorphs.Add(morph);
                     }
                 }
@@ -120,7 +146,7 @@ namespace Gallop
                     morph.trsArray = _eyeTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                         Objs.TryGetValue(trs._path,out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -139,11 +165,10 @@ namespace Gallop
                             if (morph.direction) LeftEyeYrange = morph;
                             else RightEyeYrange = morph;
                         }
-                        else
-                        {
-                            if (morph.direction) leftEyeMorph.Add(morph);
-                            else rightEyeMorph.Add(morph);
-                        }
+
+                        if (morph.direction) leftEyeMorph.Add(morph);
+                        else rightEyeMorph.Add(morph);
+
                         EyeMorphs.Add(morph);
                     }
                 }
@@ -161,7 +186,7 @@ namespace Gallop
                     morph.trsArray = _mouthTarget[i]._faceGroupInfo[j]._trsArray;
                     foreach (TrsArray trs in morph.trsArray)
                     {
-                        trs.transform = Objs.Find(ani => ani.name.Equals(trs._path));
+                        Objs.TryGetValue(trs._path, out trs.transform);
                     }
                     if (i == 0)
                     {
@@ -229,6 +254,7 @@ namespace Gallop
                     CheekMorph.BindProperties.Add(cheekProperty2);
                 }
                 OtherMorphs.Add(CheekMorph);
+                this.CheekMorph = CheekMorph;
             }
 
             Container.FaceMaterial = Container.Head.transform.Find("M_Face").GetComponent<SkinnedMeshRenderer>().material;
@@ -248,6 +274,7 @@ namespace Gallop
                         PropertyName = "_faceShadowAlpha"
                     });
                 OtherMorphs.Add(FaceShadowMorph);
+                ShadeMorph = FaceShadowMorph;
             }
 
             FacialOtherMorph FaceMangaMorph = new FacialOtherMorph()
@@ -263,15 +290,42 @@ namespace Gallop
             {
                 Part = BindProperty.LocatorPart.ScaY,
                 Type = BindProperty.BindType.EyeSelect,
-                BindPrefab = mangaObjects
+                BindPrefabs = mangaObjects
             });
             FaceMangaMorph.BindProperties.Add(new BindProperty()
             {
                 Part = BindProperty.LocatorPart.ScaX,
                 Type = BindProperty.BindType.Enable,
-                BindPrefab = mangaObjects
+                BindPrefabs = mangaObjects
             });
             OtherMorphs.Add(FaceMangaMorph);
+            MangaMorph = FaceMangaMorph;
+
+            if(Container.StaticTear_L && Container.StaticTear_R)
+            {
+                FacialOtherMorph StaticTearMorph = new FacialOtherMorph()
+                {
+                    name = "StaticTear_Ctrl",
+                    locator = DrivenKeyLocator.Find("Cheek_Ctrl")
+                };
+
+                StaticTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.PosX,
+                    Type = BindProperty.BindType.Enable,
+                    BindPrefabs = new List<GameObject>() { Container.StaticTear_L }
+                });
+
+                StaticTearMorph.BindProperties.Add(new BindProperty()
+                {
+                    Part = BindProperty.LocatorPart.PosY,
+                    Type = BindProperty.BindType.Enable,
+                    BindPrefabs = new List<GameObject>() { Container.StaticTear_R }
+                });
+
+                this.StaticTearMorph = StaticTearMorph;
+                OtherMorphs.Add(StaticTearMorph);
+            }
 
             foreach (var tear in Container.TearControllers)
             {
@@ -286,30 +340,35 @@ namespace Gallop
                     Part = BindProperty.LocatorPart.ScaX,
                     Type = BindProperty.BindType.TearWeight,
                     BindTearController = tear,
-                    Value = tear.Weight
+                    Value = tear.Weight,
+                    DefaultValue = tear.Weight
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.PosY,
                     Type = BindProperty.BindType.TearSide,
                     BindTearController = tear,
-                    Value = tear.CurrentDir
+                    Value = tear.CurrentDir,
+                    DefaultValue = tear.CurrentDir
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.ScaY,
                     Type = BindProperty.BindType.TearSelect,
                     BindTearController = tear,
-                    Value = tear.CurrenObject
+                    Value = tear.CurrenObject,
+                    DefaultValue = tear.CurrenObject
                 });
                 FaceTearMorph.BindProperties.Add(new BindProperty()
                 {
                     Part = BindProperty.LocatorPart.ScaZ,
                     Type = BindProperty.BindType.TearSpeed,
                     BindTearController = tear,
-                    Value = tear.Speed
+                    Value = tear.Speed,
+                    DefaultValue = tear.Speed
                 });
                 OtherMorphs.Add(FaceTearMorph);
+                TearMorphs.Add(FaceTearMorph);
             }
         }
 
@@ -353,6 +412,10 @@ namespace Gallop
         public void ChangeMorph()
         {
             FacialResetAll();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
             EarMorphs.ForEach(morph => ProcessMorph(morph));
             EyeBrowMorphs.ForEach(morph => ProcessMorph(morph));
             EyeMorphs.ForEach(morph => ProcessMorph(morph));
@@ -361,7 +424,44 @@ namespace Gallop
             ApplyRotation();
         }
 
-        public void ClearMorph()
+        public void ChangeMorphEye()
+        {
+            FacialResetEye();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                OverrideFace(Container.FaceOverrideData);
+            }
+            EyeMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEye();
+        }
+
+        public void ChangeMorphMouth()
+        {
+            FacialResetMouth();
+            MouthMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationMouth();
+        }
+
+        public void ChangeMorphEyebrow()
+        {
+            FacialResetEyebrow();
+            EyeBrowMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEyebrow();
+        }
+
+        public void ChangeMorphEar()
+        {
+            FacialResetEar();
+            EarMorphs.ForEach(morph => ProcessMorph(morph));
+            ApplyRotationEar();
+        }
+
+        public void ChangeMorphEffect()
+        {
+            OtherMorphs.ForEach(morph => ProcessExtraMorph(morph));
+        }
+
+        public void ClearAllWeights()
         {
             EarMorphs.ForEach(morph => morph.weight = 0);
             EyeBrowMorphs.ForEach(morph => morph.weight = 0);
@@ -372,25 +472,31 @@ namespace Gallop
             {
                 morph.BindProperties.ForEach(property =>
                 {
-                    property.Value = morph.GetLocatorValue(property.Part);
+                    property.Value = property.DefaultValue;
                 });
             });
         }
 
         private void ProcessMorph(FacialMorph morph)
         {
+            var isOverride = Container.FaceOverrideData && Container.FaceOverrideData.Enable;
+            if (isOverride && morph.OverrideType == OverrideType.Ignore) return;
+            if (morph.weight == 0 && (!isOverride || morph.OverrideType == OverrideType.None))return;
+
+            var weight = (isOverride && morph.OverrideType == OverrideType.Override ? morph.overrideWeight : morph.weight);
+
             foreach (TrsArray trs in morph.trsArray)
             {
                 if (trs.isPhysics && Container.EnablePhysics)
                 {
-                    trs.physicsParticle.m_InitLocalPosition += trs._position * morph.weight;
-                    ParticleRecorder[trs.physicsParticle] += trs._rotation * morph.weight;
+                    trs.physicsParticle.m_InitLocalPosition += trs._position * weight;
+                    ParticleRecorder[trs.physicsParticle] += trs._rotation * weight;
                 }
                 else if (trs.transform)
                 {
-                    trs.transform.localScale += trs._scale * morph.weight;
-                    trs.transform.localPosition += trs._position * morph.weight;
-                    RotationRecorder[trs.transform] += trs._rotation * morph.weight;
+                    trs.transform.localScale += trs._scale * weight;
+                    trs.transform.localPosition += trs._position * weight;
+                    RotationRecorder[trs.transform] += trs._rotation * weight;
                 }
             }
         }
@@ -407,11 +513,10 @@ namespace Gallop
                             morph.BindGameObject.SetActive(true);
                             property.BindMaterial.mainTexture = property.BindTexture;
                             property.BindMaterial.SetFloat(property.PropertyName, property.Value);
-                            return;
                         }
                         else
                         {
-                            if (morph.BindProperties.IndexOf(property) == morph.BindProperties.Count - 1)
+                            if (morph.BindProperties.Find(p =>p.Value >0) == null)
                             {
                                 morph.BindGameObject.SetActive(false);
                             }
@@ -421,18 +526,22 @@ namespace Gallop
                         property.BindMaterial.SetFloat(property.PropertyName, property.Value);
                         break;
                     case BindProperty.BindType.Select:
-                        property.BindPrefab.ForEach(a => a.SetActive((int)property.Value == property.BindPrefab.IndexOf(a)));
+                        property.BindPrefabs.ForEach(a => a.SetActive((int)property.Value == property.BindPrefabs.IndexOf(a)));
                         break;
                     case BindProperty.BindType.EyeSelect:
-                        var count = property.BindPrefab.Count / 2;
+                        var count = property.BindPrefabs.Count / 2;
                         var val = (int)property.Value;
-                        property.BindPrefab.ForEach(a =>
-                        a.SetActive(val + count < property.BindPrefab.Count && (val == property.BindPrefab.IndexOf(a) || val + count == property.BindPrefab.IndexOf(a))));
+                        property.BindPrefabs.ForEach(a =>
+                        a.SetActive(val + count < property.BindPrefabs.Count && (val == property.BindPrefabs.IndexOf(a) || val + count == property.BindPrefabs.IndexOf(a))));
                         break;
                     case BindProperty.BindType.Enable:
-                        if (property.Value <= 0)
+                        if(property.BindPrefabs.Count == 1)
                         {
-                            property.BindPrefab.ForEach(a => a.SetActive(false));
+                            property.BindPrefabs.ForEach(a => a.SetActive(property.Value > 0));
+                        }
+                        else if(property.Value <= 0)
+                        {
+                            property.BindPrefabs.ForEach(a => a.SetActive(false));
                         }
                         break;
                     case BindProperty.BindType.TearSide:
@@ -453,10 +562,6 @@ namespace Gallop
 
         public void FacialResetAll()
         {
-            if (Container.FaceOverrideData&& Container.FaceOverrideData.Enable)
-            {
-                OverrideFace(Container.FaceOverrideData);
-            }
             FacialReset(BaseLEarMorph.trsArray);
             FacialReset(BaseREarMorph.trsArray);
             FacialReset(BaseLEyeBrowMorph.trsArray);
@@ -465,6 +570,40 @@ namespace Gallop
             FacialReset(BaseREyeMorph.trsArray);
             FacialReset(BaseMouthMorph.trsArray);
             ApplyRotation();
+        }
+
+        public void FacialResetEye()
+        {
+            FacialReset(BaseLEyeMorph.trsArray);
+            FacialReset(BaseREyeMorph.trsArray);
+        }
+
+        public void FacialResetMouth()
+        {
+            FacialReset(BaseMouthMorph.trsArray);
+        }
+
+        public void FacialResetEyebrow()
+        {
+            FacialReset(BaseLEyeBrowMorph.trsArray);
+            FacialReset(BaseREyeBrowMorph.trsArray);
+        }
+
+        public void FacialResetEar()
+        {
+            FacialReset(BaseLEarMorph.trsArray);
+            FacialReset(BaseREarMorph.trsArray);
+        }
+
+        public void FacialResetEffect()
+        {
+            foreach(var morphs in OtherMorphs)
+            {
+                foreach(var property in morphs.BindProperties)
+                {
+                    property.Value = property.DefaultValue;
+                }
+            }
         }
 
         public void FacialReset(List<TrsArray> trsArrays)
@@ -500,6 +639,75 @@ namespace Gallop
             }
         }
 
+        public void ApplyRotationEye()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+               foreach (TrsArray trs in trsArray)
+               {
+                   if(trs.transform)
+                   trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+               }
+            };
+            applyRotation.Invoke(BaseLEyeMorph.trsArray);
+            applyRotation.Invoke(BaseREyeMorph.trsArray);
+        }
+
+        public void ApplyRotationMouth()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if (trs.transform)
+                        trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                }
+            };
+            applyRotation.Invoke(BaseMouthMorph.trsArray);
+        }
+
+        public void ApplyRotationEyebrow()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if (trs.transform)
+                        trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                }
+            };
+            applyRotation.Invoke(BaseLEyeBrowMorph.trsArray);
+            applyRotation.Invoke(BaseREyeBrowMorph.trsArray);
+        }
+
+        public void ApplyRotationEar()
+        {
+            Action<List<TrsArray>> applyRotation = delegate (List<TrsArray> trsArray)
+            {
+                foreach (TrsArray trs in trsArray)
+                {
+                    if(trs.isPhysics && Container.EnablePhysics)
+                    {
+                        trs.physicsParticle.m_InitLocalRotation = RotationConvert.fromMaya(ParticleRecorder[trs.physicsParticle]);
+                    }
+                    else if (trs.transform)
+                    {
+                        if (RotationRecorder.ContainsKey(trs.transform))
+                        {
+                            //Debug.Log("Key Found:" + trs.transform.name);
+                            trs.transform.localRotation = RotationConvert.fromMaya(RotationRecorder[trs.transform]);
+                        }
+                        else
+                        {
+                            //Debug.Log("No Key Found:" + trs.transform.name);
+                        }
+                    }   
+                }
+            };
+            applyRotation.Invoke(BaseLEarMorph.trsArray);
+            applyRotation.Invoke(BaseREarMorph.trsArray);
+        }
+
         public void ChangeMorphWeight(FacialMorph morph, float val)
         {
             Container.isAnimatorControl = false;
@@ -507,11 +715,18 @@ namespace Gallop
             ChangeMorph();
         }
 
-        public void ChangeMorphWeight(BindProperty property, float val)
+        public void ChangeMorphWeight(BindProperty property, float val, FacialMorph morph, bool autoHideEye = true)
         {
             Container.isAnimatorControl = false;
             property.Value = val < 0 ? 0 : val;
-            ChangeMorph();
+            ChangeMorphEffect();
+
+            if (autoHideEye && property.Type == BindProperty.BindType.Enable && morph.name.Contains("Manga"))
+            {
+                EyeMorphs[42].weight = (val > 0 ? 1 : 0);
+                EyeMorphs[43].weight = (val > 0 ? 1 : 0);
+                ChangeMorphEye();
+            }
         }
 
         public void SetEyeRange(float lx, float ly, float rx, float ry)
@@ -520,7 +735,14 @@ namespace Gallop
             LeftEyeYrange.weight = ly;
             RightEyeXrange.weight = rx;
             RightEyeYrange.weight = ry;
-            ChangeMorph();
+            if (Container.FaceOverrideData && Container.FaceOverrideData.Enable)
+            {
+                ChangeMorph();
+            }
+            else
+            {
+                ChangeMorphEye();
+            }
         }
 
         public void ProcessLocator()
@@ -585,47 +807,45 @@ namespace Gallop
 
             Action<List<FacialMorph>, FaceOverrideReplaceDataSet[]> action = delegate (List<FacialMorph> morphs, FaceOverrideReplaceDataSet[] datalist)
             {
+                Dictionary<LiveTimelineDefine.FacialEyeId, FacialMorph> morphDic = new Dictionary<LiveTimelineDefine.FacialEyeId, FacialMorph>();
+                morphs.ForEach(m => {
+                    m.OverrideType = OverrideType.Ignore;
+                    m.overrideWeight = 0; 
+                    morphDic.Add((LiveTimelineDefine.FacialEyeId)m.index, m); 
+                });
+
                 foreach (var data in datalist)
                 {
-                    if (data.IsOnlyBaseReplace)
-                    {
-                        var replacemorph = GetMorphByType(morphs, data.BaseReplaceFaceType);
-                        var morph = morphs.Find(m => (m.weight > 0 && m != replacemorph));
-                        if (morph == null)
-                        {
-                            replacemorph.weight = 1;
-                            break;
-                        }
-                        replacemorph.weight = 0;
-                    }
-
+                    bool changed = false;
                     foreach (var arr in data.DataArray)
                     {
-                        List<Action> targetMorph = new List<Action>();
-                        bool changed = false;
                         foreach (var src in arr.SrcArray)
                         {
                             if (src == LiveTimelineDefine.FacialEyeId.Base) continue;
-                            var srcmorph = GetMorphByType(morphs, src);
-                            if (srcmorph.weight > 0 && !changed)
+                            if (morphDic[src].weight > 0 )
                             {
                                 foreach (var dst in arr.DstArray)
                                 {
-                                    var dm = GetMorphByType(morphs, dst.Index);
-                                    var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, srcmorph.weight));
-                                    targetMorph.Add(delegate () { dm.weight = weight; });
+                                    var dm = morphDic[dst.Index];
+                                    var weight = (dst.Weight == 1 ? 1 : Mathf.Lerp(0, dst.Weight, morphDic[src].weight));
+                                    dm.overrideWeight += weight;
+                                    dm.OverrideType =  OverrideType.Override;
                                 }
+                                morphDic[src].OverrideType = OverrideType.Override;
                                 changed = true;
-                            }
-
-                            if (new List<FaceOverrideElement>(arr.DstArray).Find(f=>f.Index == src) == null) 
-                            { 
-                                srcmorph.weight = 0; 
+                                break;
                             }
                         }
-                        targetMorph.ForEach(a => a.Invoke());
+                    }
+
+                    if (!changed && data.IsOnlyBaseReplace) 
+                    {
+                        var replacemorph = morphDic[data.BaseReplaceFaceType];
+                        replacemorph.overrideWeight += 1;
+                        replacemorph.OverrideType = OverrideType.Override;
                     }
                 }
+                morphs.ForEach(m=> { m.overrideWeight = Mathf.Clamp01(m.overrideWeight); });
             };
 
             if (overrideData.IsBothEyesSetting)
@@ -635,9 +855,442 @@ namespace Gallop
             }
         }
 
-        public FacialMorph GetMorphByType(List<FacialMorph> morphs, LiveTimelineDefine.FacialEyeId Type)
+        public void AlterUpdateAutoLip(LiveTimelineKeyLipSyncData _prevLipKeyData, LiveTimelineKeyLipSyncData keyData_, float liveTime_, float _switch)
         {
-            return morphs.Find(m => m.index == (int)Type);
+            //|| lockMouth
+            
+            
+            if (_switch == 0 || lockMouth)
+            {
+                return;
+            }
+            
+            
+
+            float weightRatio = CalcMorphWeight(liveTime_, keyData_.speed, keyData_.time, keyData_.interpolateType, keyData_, null);
+
+            MouthMorphs.ForEach(morph => morph.weight = 0);
+
+            if (_prevLipKeyData != null)
+            {
+                if(weightRatio != 1)
+                {
+                    foreach (var part in _prevLipKeyData.facialPartsDataArray)
+                    {
+                        if (part.FacialPartsId == 0 ) { continue; }
+                        MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)_prevLipKeyData.weight / 100);
+                    }
+                }
+                else
+                {
+                    foreach (var part in _prevLipKeyData.facialPartsDataArray)
+                    {
+                        if (part.FacialPartsId == 0) { continue; }
+                        MouthMorphs[part.FacialPartsId - 1].weight = 0;
+                    }
+                }
+            } 
+
+            foreach (var part in keyData_.facialPartsDataArray)
+            {
+                if (part.FacialPartsId == 0) { continue; }
+                MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)keyData_.weight / 100);
+            }
+
+            ChangeMorphMouth();
+        }
+
+        public bool lockMouth = false;
+
+        public void AlterUpdateFacialNew(ref FacialDataUpdateInfo updateInfo_, float liveTime_)
+        {
+            if (updateInfo_.mouthCur != null)
+            {
+                if((int)updateInfo_.mouthCur.attribute == 131072 || (int)updateInfo_.mouthCur.attribute == 0)
+                {
+                    lockMouth = true;
+                }
+                else
+                {
+                    lockMouth = false;
+                }
+
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.mouthCur.speed, updateInfo_.mouthCur.time, updateInfo_.mouthCur.interpolateType, updateInfo_.mouthCur, updateInfo_.mouthNext);
+
+                MouthMorphs.ForEach(morph => morph.weight = 0);
+
+                if (updateInfo_.mouthPrev != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in updateInfo_.mouthPrev.facialPartsDataArray)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.mouthPrev.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in updateInfo_.mouthPrev.facialPartsDataArray)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            MouthMorphs[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.mouthCur.facialPartsDataArray)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.mouthCur.weight / 100);
+                }
+
+                ChangeMorphMouth();
+
+            }
+
+            var HasManga = false;
+            if (updateInfo_.effect != null)
+            {
+                var info = updateInfo_.effect;
+                var cheektype = info.cheekType;
+                for (int i = 0; i < CheekMorph.BindProperties.Count; i++)
+                {
+                    CheekMorph.BindProperties[i].Value = (cheektype - 1 == i ? 1 : 0);
+                }
+
+                var mangatype = info.mangameIndex;
+                if (mangatype == 0)
+                {
+                    HasManga = false;
+                    MangaMorph.BindProperties[1].Value = mangatype;
+                }
+                else
+                {
+                    HasManga = true;
+                    MangaMorph.BindProperties[0].Value = mangatype - 1;
+                    MangaMorph.BindProperties[1].Value = 1;
+                }
+
+                var tearytype = info.tearyType;
+                StaticTearMorph.BindProperties.ForEach(p => p.Value = tearytype);
+
+                ChangeMorphEffect();
+            }
+
+            if (updateInfo_.eyeCur != null)
+            {
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeCur.speed, updateInfo_.eyeCur.time, updateInfo_.eyeCur.interpolateType, updateInfo_.eyeCur, updateInfo_.eyeNext);
+
+                EyeMorphs.ForEach(morph => morph.weight = 0);
+
+                if (updateInfo_.eyePrev != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
+                        }
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyeMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyeMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.eyeCur.facialPartsDataArrayL)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    leftEyeMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyeCur.weight / 100);
+                }
+                foreach (var part in updateInfo_.eyeCur.facialPartsDataArrayR)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    rightEyeMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyeCur.weight / 100);
+                }
+
+                EyeMorphs[42].weight = (HasManga ? 1 : 0); //Hide eye when has Manga eye
+                EyeMorphs[43].weight = (HasManga ? 1 : 0);
+                ChangeMorphEye();
+            }
+
+            if (updateInfo_.eyebrowCur != null)
+            {
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyebrowCur.speed, updateInfo_.eyebrowCur.time, updateInfo_.eyebrowCur.interpolateType, updateInfo_.eyebrowCur, updateInfo_.eyebrowNext);
+
+                EyeBrowMorphs.ForEach(morph => morph.weight = 0);
+
+                if (updateInfo_.eyebrowPrev != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyebrowPrev.weight / 100);
+                        }
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyebrowMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyebrowPrev.weight / 100);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayL)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            leftEyebrowMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                        foreach (var part in updateInfo_.eyebrowPrev.facialPartsDataArrayR)
+                        {
+                            if (part.FacialPartsId == 0) { continue; }
+                            rightEyebrowMorph[part.FacialPartsId - 1].weight = 0;
+                        }
+                    }
+                }
+
+                foreach (var part in updateInfo_.eyebrowCur.facialPartsDataArrayL)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    leftEyebrowMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyebrowCur.weight / 100);
+                }
+                foreach (var part in updateInfo_.eyebrowCur.facialPartsDataArrayR)
+                {
+                    if (part.FacialPartsId == 0) { continue; }
+                    rightEyebrowMorph[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.eyebrowCur.weight / 100);
+                }
+
+                ChangeMorphEyebrow();
+
+            }
+
+            if (updateInfo_.earCur != null)
+            {
+
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.earCur.speed, updateInfo_.earCur.time, updateInfo_.earCur.interpolateType, updateInfo_.earCur, updateInfo_.earNext);
+
+                EarMorphs.ForEach(morph => morph.weight = 0);
+
+                if (updateInfo_.earPrev != null)
+                {
+                    if (weightRatio != 1)
+                    {
+                        var partL = updateInfo_.earPrev.facialEarIdL;
+
+                        if (partL != 0)
+                        {
+                            leftEarMorph[partL - 1].weight = (((1 - weightRatio)) * ((float)updateInfo_.earPrev.weight / 100));
+                        }
+
+                        var partR = updateInfo_.earPrev.facialEarIdR;
+
+                        if (partR != 0)
+                        {
+                            rightEarMorph[partR - 1].weight = (((1 - weightRatio)) * ((float)updateInfo_.earPrev.weight / 100));
+                        }
+                    }
+                    else
+                    {
+                        var partL = updateInfo_.earPrev.facialEarIdL;
+
+                        if (partL != 0)
+                        {
+                            leftEarMorph[partL - 1].weight = 0;
+                        }
+
+                        var partR = updateInfo_.earPrev.facialEarIdR;
+
+                        if (partR != 0)
+                        {
+                            rightEarMorph[partR - 1].weight = 0;
+                        }
+                    }
+                }
+
+                var curPartL = updateInfo_.earCur.facialEarIdL;
+
+                if (curPartL != 0)
+                {
+                    leftEarMorph[curPartL - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
+                }
+
+                var curPartR = updateInfo_.earCur.facialEarIdR;
+
+                if (curPartR != 0)
+                {
+                    rightEarMorph[curPartR - 1].weight += weightRatio * ((float)updateInfo_.earCur.weight / 100);
+                }
+
+                ChangeMorphEar();
+
+            }
+
+            if (updateInfo_.eyeTrackCur != null)
+            {
+                float weightRatio = CalcMorphWeight(liveTime_, updateInfo_.eyeTrackCur.speed, updateInfo_.eyeTrackCur.time, updateInfo_.eyeTrackCur.interpolateType, updateInfo_.eyeTrackCur, updateInfo_.eyeTrackNext);
+
+                Vector2 finalRotation = new Vector2();
+
+                if (updateInfo_.eyeTrackPrev != null)
+                {
+                    finalRotation = Vector2.Lerp(GetTimelineEyeTrackRotation(updateInfo_.eyeTrackPrev), GetTimelineEyeTrackRotation(updateInfo_.eyeTrackCur), weightRatio);
+                }
+                else
+                {
+                    finalRotation = GetTimelineEyeTrackRotation(updateInfo_.eyeTrackCur);
+                }
+
+                SetEyeTrack(finalRotation);
+            }
+        }
+
+        public Vector2 GetTimelineEyeTrackRotation(LiveTimelineKeyFacialEyeTrackData key)
+        {
+            Vector3 target = new Vector3();
+            if(CalcTargetPosition(key, ref target))
+            {
+                return GetEyeTrackRotation(target) + new Vector2((float)key.horizontalRatePer / 100, (float)key.verticalRatePer / 100);
+            }
+            else
+            {
+                return new Vector2(0, 0) + new Vector2((float)key.horizontalRatePer / 100, (float)key.verticalRatePer / 100);
+            }
+        }
+
+        public bool CalcTargetPosition(LiveTimelineKeyFacialEyeTrackData key, ref Vector3 target)
+        {
+
+            switch (key.targetType)
+            {
+                case FacialEyeTrackTargetType.Arena:
+                    target = Container.HeadBone.transform.position + new Vector3(0, 1, 10);
+                    return true;
+                case FacialEyeTrackTargetType.DirectPosition:
+                    target = key.DirectPosition;
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        public Vector2 GetEyeTrackRotation(Vector3 target)
+        {
+            var targetPosotion = target - Container.HeadBone.transform.up * Container.EyeHeight;
+            var deltaPos = Container.HeadBone.transform.InverseTransformPoint(targetPosotion);
+            var deltaRotation = Quaternion.LookRotation(deltaPos.normalized, Container.HeadBone.transform.up).eulerAngles;
+            if (deltaRotation.x > 180) deltaRotation.x -= 360;
+            if (deltaRotation.y > 180) deltaRotation.y -= 360;
+
+            var finalRotation = new Vector2(Mathf.Clamp(deltaRotation.y / 35, -1, 1), Mathf.Clamp(-deltaRotation.x / 25, -1, 1));//Limited to the angle of view 
+
+            return finalRotation;
+            
+        }
+
+        public void SetEyeTrack(Vector2 rotation)
+        {
+            SetEyeRange(rotation.x, rotation.y, rotation.x, -rotation.y);
+        }
+
+        public static float CalcMorphWeight(float time, int speed, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
+        {
+
+            float keyTime = (float)curKey.frame / 60;
+
+            switch (speed)
+            {
+                case 1:
+                    interFrame = 3;
+                    break;
+                case 10:
+                    interFrame = 2;
+                    break;
+                case 20:
+                    interFrame = 6;
+                    break;
+                case 21:
+                    interFrame = 9;
+                    break;
+                default:
+                    break;
+            }
+
+            float duringTime;
+            if (nextKey != null)
+            {
+                duringTime = nextKey.frame - curKey.frame;
+            }
+            else
+            {
+                duringTime = interFrame;
+            }
+
+            float easeTime;
+
+            if (duringTime < interFrame)
+            {
+                easeTime = (float)duringTime / 60;
+            }
+            else
+            {
+                easeTime = (float)interFrame / 60;
+            }
+
+
+            float passTime = time - keyTime;
+
+            float weightRatio = 0;
+
+            if (passTime >= easeTime)
+            {
+                weightRatio = 1;
+            }
+            else
+            {
+                float ratio = passTime / easeTime;
+                switch (interType)
+                {
+                    case InterpolateType.Linear:
+                        weightRatio = ratio;
+                        break;
+                    case InterpolateType.EaseIn:
+                        weightRatio = Easing.EaseIn(ratio);
+                        break;
+                    case InterpolateType.EaseOut:
+                        weightRatio = Easing.EaseOut(ratio);
+                        break;
+                    case InterpolateType.EaseInOut:
+                        weightRatio = Easing.EaseInOut(ratio);
+                        break;
+                    default:
+                        weightRatio = ratio;
+                        break;
+                }
+            }
+
+            return weightRatio;
         }
     }
 }

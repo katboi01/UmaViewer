@@ -1,41 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Gallop;
-using System.IO;
-using static UmaViewerUI;
-
-public class UmaDatabaseEntry
-{
-    public UmaFileType Type;
-    public string Name;
-    public string Url;
-    public string Checksum;
-    public string Prerequisites;
-    public string FilePath 
-    {
-        get 
-        {
-            var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
-            if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
-            {
-                DownloadAsset(this);
-            }
-            return path;
-        }
-    } 
-
-    //TODO Make it async
-    public static void DownloadAsset(UmaDatabaseEntry entry)
-    {
-        var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-        UmaViewerDownload.DownloadAssetSync(entry, path , delegate(string msg, UIMessageType type) 
-        {
-            Instance.ShowMessage(msg, type);
-        });
-    }
-
-}
+using System;
 
 public class UmaCharaData
 {
@@ -69,34 +35,24 @@ public class FaceTypeData
 {
     public string label, eyebrow_l, eyebrow_r, eye_l, eye_r, mouth, inverce_face_type;
     public int mouth_shape_type, set_face_group;
-
     public FaceEmotionKeyTarget target;
-
     public List<EmotionKey> emotionKeys;
-
-    private float _weight;
-    public float Weight
-    {
-        get
-        {
-            return _weight;
-        }
-        set
-        {
-            _weight = value;
-            target.UpdateAllFacialKeyTargets();
-        }
-    }
+    public float weight;
 }
 
 [System.Serializable]
 public class CharaEntry
 {
     public string Name;
+    public string EnName;
     public Sprite Icon;
     public int Id;
     public string ThemeColor;
     public bool IsMob;
+    public string GetName()
+    {
+        return string.IsNullOrEmpty(EnName) ? Name : EnName;
+    }
 }
 
 [System.Serializable]
@@ -121,6 +77,48 @@ public class LiveEntry
     }
 }
 
+public class PartEntry
+{
+    public Dictionary<string, List<float>> PartSettings = new Dictionary<string, List<float>>();
+    public int SingerCount = 0;
+    public PartEntry(string data)
+    {
+        string[] lines = data.Split('\n');
+
+        string[] names = lines[0].Split(',');
+
+        foreach (var name in names)
+        {
+            var temp = name;
+            temp.Replace("lleft", "left2");
+            temp.Replace("rright", "right2");
+            temp.Replace("llleft", "left3");
+            temp.Replace("rrright", "right3");
+            PartSettings[temp] = new List<float>();
+        }
+
+        for (int i = 1; i < lines.Length - 1; i++)
+        {
+            var values = lines[i].Split(',');
+            for (int j = 0; j < names.Length; j++)
+            {
+                PartSettings[names[j]].Add((float)Convert.ToDouble(values[j]));
+            }
+        }
+
+        foreach(var part in PartSettings)
+        {
+            if (part.Key != "time" && !part.Key.Contains("_"))
+            {
+                if (part.Value.FindAll(v => v > 0).Count > 0) 
+                {
+                    SingerCount += 1;
+                }
+            }
+        } 
+    }
+}
+
 
 [System.Serializable]
 public class CostumeEntry
@@ -138,7 +136,8 @@ public enum UIMessageType
     Default,
     Warning,
     Error,
-    Success
+    Success,
+    Close
 }
 public enum UmaFileType
 {
@@ -151,6 +150,7 @@ public enum UmaFileType
     gacha,
     gachaselect,
     guide,
+    heroes,
     home,
     imageeffect,
     item,
@@ -160,6 +160,7 @@ public enum UmaFileType
     manifest,
     manifest2,
     manifest3,
+    mapevent,
     master,
     minigame,
     mob,

@@ -65,14 +65,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 9a444f34ba8719a4083a94891d66b364, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!114 &7159069016347322542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -138,7 +138,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c73dbc71d1114ee4d9faf37a28216671, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CharaId: 0
+  CharaEntry:
+    Name: 
+    EnName: 
+    Icon: {fileID: 0}
+    Id: 0
+    ThemeColor: 
+    IsMob: 0
   CostumeId: 
   CharaImage: {fileID: 1679236400528196890}
   BackGroundImage: {fileID: 4359019069968187769}
@@ -372,8 +378,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: fcb07487bdd0f054f81d8865b4800c13, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: f0efb3b3a93d2674e90438758b0fb001, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

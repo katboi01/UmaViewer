@@ -97,8 +97,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CameraMode: 0
+  AAMode: 0
   Light: {fileID: 0}
   CameraModeDropdown: {fileID: 0}
+  AAModeDropdown: {fileID: 0}
   CameraTargetHelper: {fileID: 0}
   TargetCenter: {x: 0, y: 0, z: 0}
   OrbitCamSettingsTab: {fileID: 0}
@@ -107,8 +109,10 @@ MonoBehaviour:
   OrbitCamZoomSpeedSlider: {fileID: 0}
   OrbitCamTargetHeightSlider: {fileID: 0}
   OrbitCamHeightSlider: {fileID: 0}
+  OrbitCamRotationSlider: {fileID: 0}
   OrbitCamSpeedSlider: {fileID: 0}
   FreeCamSettingsTab: {fileID: 0}
   FreeCamFovSlider: {fileID: 0}
+  FreeCamRotationSlider: {fileID: 0}
   FreeCamMoveSpeedSlider: {fileID: 0}
   FreeCamRotateSpeedSlider: {fileID: 0}

@@ -1,0 +1,212 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &101100000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Dummy Bust
+  m_Mask: 00000000000000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: BipDummy
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh/Bip002 L Calf
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh/Bip002 L Calf/Bip002
+      L Foot
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh/Bip002 L Calf/Bip002
+      L Foot/Bip002 L Toe0
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh/Bip002 L Calf/Bip002
+      L Foot/Bip002 L Toe0/Bip002 L Toe01
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 L Thigh/Bip002 L Calf/Bip002
+      L Foot/Bip002 L Toe0/Bip002 L Toe01/Bip002 L Toe02
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh/Bip002 R Calf
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh/Bip002 R Calf/Bip002
+      R Foot
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh/Bip002 R Calf/Bip002
+      R Foot/Bip002 R Toe0
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh/Bip002 R Calf/Bip002
+      R Foot/Bip002 R Toe0/Bip002 R Toe01
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 R Thigh/Bip002 R Calf/Bip002
+      R Foot/Bip002 R Toe0/Bip002 R Toe01/Bip002 R Toe02
+    m_Weight: 0
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 Head
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/Bip002 L Finger0
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/Bip002 L Finger0/BipDummy L Finger01
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/Bip002 L Finger0/BipDummy L Finger01/BipDummy L Finger02
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger1
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger1/BipDummy L Finger11
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger1/BipDummy L Finger11/BipDummy L Finger12
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger2
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger2/BipDummy L Finger21
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger2/BipDummy L Finger21/BipDummy L Finger22
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger3
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger3/BipDummy L Finger31
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger3/BipDummy L Finger31/BipDummy L Finger32
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger4
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger4/BipDummy L Finger41
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 L Clavicle/Bip002 L UpperArm/Bip002 L Forearm/Bip002
+      L Hand/BipDummy L Finger4/BipDummy L Finger41/BipDummy L Finger42
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/Bip002 R Finger0
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/Bip002 R Finger0/BipDummy R Finger01
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/Bip002 R Finger0/BipDummy R Finger01/BipDummy R Finger02
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger1
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger1/BipDummy R Finger11
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger1/BipDummy R Finger11/BipDummy R Finger12
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger2
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger2/BipDummy R Finger21
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger2/BipDummy R Finger21/BipDummy R Finger22
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger3
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger3/BipDummy R Finger31
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger3/BipDummy R Finger31/BipDummy R Finger32
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger4
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger4/BipDummy R Finger41
+    m_Weight: 1
+  - m_Path: BipDummy/Bip002 Pelvis/Bip002 Spine/Bip002 Spine1/Bip002 Spine2/Bip002
+      Spine3/Bip002 Neck/Bip002 R Clavicle/Bip002 R UpperArm/Bip002 R Forearm/Bip002
+      R Hand/BipDummy R Finger4/BipDummy R Finger41/BipDummy R Finger42
+    m_Weight: 1
+  - m_Path: Dummy
+    m_Weight: 1

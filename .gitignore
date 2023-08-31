@@ -65,3 +65,5 @@ crashlytics-build.properties
 /VMDRecords
 /umamusume
 Config.json
+/gltf
+/Assets/Plugins/RootMotion/FinalIK/_Integration

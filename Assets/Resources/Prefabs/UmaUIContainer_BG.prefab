@@ -67,6 +67,7 @@ MonoBehaviour:
   Text: {fileID: 1349694594143736175}
   Button: {fileID: 4701344421301256321}
   Slider: {fileID: 0}
+  Toggle: {fileID: 0}
   Image: {fileID: 1612022709539783031}
   ToggleImage: {fileID: 711352666123214694}
 --- !u!114 &6355100493817770452

@@ -318,20 +318,6 @@ MonoBehaviour:
       m_Height: 9
     m_Scale: 1
     m_AtlasIndex: 0
-  - m_Index: 2203
-    m_Metrics:
-      m_Width: 27
-      m_Height: 47
-      m_HorizontalBearingX: 8
-      m_HorizontalBearingY: 48
-      m_HorizontalAdvance: 43
-    m_GlyphRect:
-      m_X: 10
-      m_Y: 10
-      m_Width: 27
-      m_Height: 47
-    m_Scale: 1
-    m_AtlasIndex: 0
   - m_Index: 2185
     m_Metrics:
       m_Width: 51
@@ -344,6 +330,20 @@ MonoBehaviour:
       m_Y: 10
       m_Width: 51
       m_Height: 50
+    m_Scale: 1
+    m_AtlasIndex: 0
+  - m_Index: 2203
+    m_Metrics:
+      m_Width: 27
+      m_Height: 47
+      m_HorizontalBearingX: 8
+      m_HorizontalBearingY: 48
+      m_HorizontalAdvance: 43
+    m_GlyphRect:
+      m_X: 10
+      m_Y: 10
+      m_Width: 27
+      m_Height: 47
     m_Scale: 1
     m_AtlasIndex: 0
   m_CharacterTable:
@@ -384,12 +384,12 @@ MonoBehaviour:
     m_GlyphIndex: 2030
     m_Scale: 1
   - m_ElementType: 1
-    m_Unicode: 9834
-    m_GlyphIndex: 2203
-    m_Scale: 1
-  - m_ElementType: 1
     m_Unicode: 9660
     m_GlyphIndex: 2185
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 9834
+    m_GlyphIndex: 2203
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: 28268798066460806}
@@ -650,7 +650,7 @@ Texture2D:
   m_ForcedFallbackFormat: 4
   m_DownscaleFallback: 0
   m_IsAlphaChannelOptional: 0
-  serializedVersion: 3
+  serializedVersion: 2
   m_Width: 512
   m_Height: 512
   m_CompleteImageSize: 262144
@@ -684,6 +684,3 @@ Texture2D:
     offset: 0
     size: 0
     path: 
-  m_OriginalWidth: 0
-  m_OriginalHeight: 0
-  m_OriginalAssetGuid: 00000000000000000000000000000000

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-	[System.Serializable]
+    [System.Serializable]
 	public class LiveTimelineKeyFacialFaceData : LiveTimelineKey
 	{
 		public int facialId;
@@ -129,7 +129,7 @@ namespace Gallop.Live.Cutt
 		public int cheekType;
 		public int tearyType;
 		public int tearfulType;
-		public LiveTimelineKeyFacialEffectData.TeardropConfig[] teardropConfigs;
+		public TeardropConfig[] teardropConfigs;
 		public int mangameIndex;
 	}
 

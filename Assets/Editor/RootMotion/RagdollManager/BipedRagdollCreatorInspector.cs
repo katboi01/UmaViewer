@@ -14,7 +14,7 @@ namespace RootMotion.Dynamics {
 
 		void OnEnable() {
 			if (script == null) return;
-			//if (Application.isPlaying) return;
+			if (Application.isPlaying) return;
 
 			// Autodetection
 			if (script.references.IsEmpty(false)) {
@@ -29,7 +29,6 @@ namespace RootMotion.Dynamics {
 					script.references = BipedRagdollReferences.FromAvatar(animator);
 
 				} else {
-					
 					BipedReferences r = new BipedReferences();
 					BipedReferences.AutoDetectReferences(ref r, script.transform, BipedReferences.AutoDetectParams.Default);
 					if (r.isFilled) script.references = BipedRagdollReferences.FromBipedReferences(r);
@@ -68,12 +67,12 @@ namespace RootMotion.Dynamics {
 
 			serializedObject.Update();
 
-			//if (Application.isPlaying) {
-			//	GUILayout.BeginVertical("Box");
-			//	GUILayout.Label("Can not edit ragdolls in play mode.");
-			//	GUILayout.EndVertical();
-			//	return;
-			//}
+			if (Application.isPlaying) {
+				GUILayout.BeginVertical("Box");
+				GUILayout.Label("Can not edit ragdolls in play mode.");
+				GUILayout.EndVertical();
+				return;
+			}
 
 			GUI.changed = false;
 			GUILayout.Space(10);
@@ -94,13 +93,10 @@ namespace RootMotion.Dynamics {
 			EditorGUILayout.EndVertical();
 
 			if (referencesValid) {
-
 				if (!script.canBuild) {
-					UnityEditor.EditorApplication.isPaused = true;
 					GUILayout.Space(5);
 
 					if (GUILayout.Button("Create a Ragdoll")) {
-						
 						script.canBuild = true;
 					}
 					GUILayout.Label("Clears all existing physics components, creates a new ragdoll and starts live-updating. NB! THIS CAN NOT BE UNDONE!", miniLabelStyle);
@@ -123,9 +119,8 @@ namespace RootMotion.Dynamics {
 					BipedRagdollCreator.Create(script.references, script.options);
 
 					GUILayout.Space(10);
-					
+
 					if (GUILayout.Button("Done")) {
-						UnityEditor.EditorApplication.isPaused = false;
 						EditorGUI.indentLevel = indent;
 						DestroyImmediate(script);
 						return;
@@ -143,7 +138,6 @@ namespace RootMotion.Dynamics {
 					GUILayout.Label("Replaces this component with the RagdollEditor.", miniLabelStyle);
 
 					GUILayout.Space(10);
-					
 				}
 			} else {
 				GUILayout.Space(10);

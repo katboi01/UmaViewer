@@ -133,7 +133,7 @@ namespace Cutt
 
         public List<LiveTimelineLensFlareData> lensFlareList = new List<LiveTimelineLensFlareData>();
 
-        public List<LiveTimelineMonitorCameraPositionData> monitorCameraPosKeys = new List<LiveTimelineMonitorCameraPositionData>();
+        public List<DereLiveTimelineMonitorCameraPositionData> monitorCameraPosKeys = new List<DereLiveTimelineMonitorCameraPositionData>();
 
         public List<LiveTimelineMonitorCameraLookAtData> monitorLookAtPosKeys = new List<LiveTimelineMonitorCameraLookAtData>();
 
@@ -336,7 +336,7 @@ namespace Cutt
             }
             return key.dataType switch
             {
-                LiveTimelineKeyDataType.MonitorCameraPos => monitorCameraPosKeys.FindIndex((LiveTimelineMonitorCameraPositionData x) => x.keys.Contains(key)),
+                LiveTimelineKeyDataType.MonitorCameraPos => monitorCameraPosKeys.FindIndex((DereLiveTimelineMonitorCameraPositionData x) => x.keys.Contains(key)),
                 LiveTimelineKeyDataType.MonitorCameraLookAt => monitorLookAtPosKeys.FindIndex((LiveTimelineMonitorCameraLookAtData x) => x.keys.Contains(key)),
                 LiveTimelineKeyDataType.MultiCameraPos => multiCameraPositionKeys.FindIndex((LiveTimelineMultiCameraPositionData x) => x.keys.Contains(key)),
                 LiveTimelineKeyDataType.MultiCameraLookAt => multiCameraLookAtKeys.FindIndex((LiveTimelineMultiCameraLookAtData x) => x.keys.Contains(key)),

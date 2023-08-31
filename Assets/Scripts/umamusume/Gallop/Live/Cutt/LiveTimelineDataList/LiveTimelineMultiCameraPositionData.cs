@@ -33,6 +33,8 @@ namespace Gallop.Live.Cutt
         public float fov;
         public float maskRoll;
         public Vector2 maskOffset;
+
+
     }
 
     [System.Serializable]

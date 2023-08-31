@@ -21,7 +21,7 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 ------------
 
 - For Developers/Contributors
-1. [Unity Hub](https://unity3d.com/get-unity/download) with [Unity Engine Version 2020.3.28f1](unityhub://2020.3.28f1/f5400f52e03f) is recommended. It should be possible to run it on newer 2020.3.X versions.
+1. [Unity Hub](https://unity3d.com/get-unity/download) with [Unity Engine Version 2020.3.24f1](unityhub://2020.3.28f1/f5400f52e03f) is recommended. It should be possible to run it on newer 2020.3.X versions.
 1. Clone or download and extract this repository.
 1. Import and Open the project in Unity Hub, missing files should be automatically repaired.
 1. Open the Assets/Scenes/Version2 scene.
@@ -45,7 +45,7 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 | Exporting animations to MMD | ✓  |
 | Recording animations (.gif), screenshots | ✓  |
 | Viewing Props, Scenery, Live scenes | /  |
-| Exporting models | x  |
+| Exporting models | /  |
 
 
 All characters and animations are supported
