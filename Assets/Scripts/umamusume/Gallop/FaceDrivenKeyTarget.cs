@@ -976,6 +976,15 @@ namespace Gallop
                 var tearytype = info.tearyType;
                 StaticTearMorph.BindProperties.ForEach(p => p.Value = tearytype);
 
+                var shaderEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrFaceShadowVisible) > 0;
+                if (shaderEnable)
+                {
+                    ShadeMorph.BindProperties[0].Value = Mathf.MoveTowards(ShadeMorph.BindProperties[0].Value, 1, Time.deltaTime * 2);
+                }
+                else
+                {
+                    ShadeMorph.BindProperties[0].Value = 0;
+                }
                 ChangeMorphEffect();
             }
 

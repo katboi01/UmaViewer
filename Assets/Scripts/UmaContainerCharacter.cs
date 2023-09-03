@@ -397,11 +397,10 @@ public class UmaContainerCharacter : UmaContainer
                     FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
                     FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
                 }
-                FaceMaterial.SetFloat("_faceShadowEndY", HeadBone.transform.position.y);
+                FaceMaterial.SetMatrix("_faceShadowHeadMat", HeadBone.transform.worldToLocalMatrix);
             }
 
             TearControllers.ForEach(a => a.UpdateOffset());
-
         }
     }
 
