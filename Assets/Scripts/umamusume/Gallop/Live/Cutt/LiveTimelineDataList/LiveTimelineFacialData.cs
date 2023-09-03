@@ -131,6 +131,14 @@ namespace Gallop.Live.Cutt
 		public int tearfulType;
 		public TeardropConfig[] teardropConfigs;
 		public int mangameIndex;
+
+		public const int kAttrCheek = 65536;
+		public const int kAttrTeary = 131072;
+		public const int kAttrTearful = 262144;
+		public const int kAttrTeardrop = 524288;
+		public const int kAttrMangame = 2097152;
+		public const int kAttrFaceShadow = 4194304;
+		public const int kAttrFaceShadowVisible = 8388608;
 	}
 
 	[System.Serializable]
