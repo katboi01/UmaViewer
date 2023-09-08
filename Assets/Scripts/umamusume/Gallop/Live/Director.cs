@@ -768,7 +768,7 @@ namespace Gallop.Live
 
         private void SaveMultiCameraVMD()
         {
-            for (int i = 0; i < _liveTimelineControl.MultiRecordFrames.Count; i++)
+            for (int i = 0; i < _liveTimelineControl.data.worksheetList[0].multiCameraPosKeys.Count; i++)
             {
                 var frames = _liveTimelineControl.MultiRecordFrames[i];
                 frames[0].FovVaild = true;
@@ -789,7 +789,7 @@ namespace Gallop.Live
 
                 UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames, i);
             }
-        }
+        } 
 
         private void SaveCameraVMD()
         {
