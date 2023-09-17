@@ -995,32 +995,32 @@ namespace Gallop
 
                 EyeMorphs.ForEach(morph => morph.weight = 0);
 
-                if (updateInfo_.eyeNext != null)
+                if (updateInfo_.eyePrev != null)
                 {
                     if (weightRatio != 1)
                     {
-                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * weightRatio * ((float)updateInfo_.eyeCur.weight / 100));
+                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
                         }
-                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * weightRatio * ((float)updateInfo_.eyeCur.weight / 100));
+                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
                         }
                     }
                     else
                     {
-                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyeMorph[part.FacialPartsId - 1].weight = part.WeightPer / 100;
+                            leftEyeMorph[part.FacialPartsId - 1].weight = 0;
                         }
-                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyeMorph[part.FacialPartsId - 1].weight = part.WeightPer / 100;
+                            rightEyeMorph[part.FacialPartsId - 1].weight = 0;
                         }
                     }
                 }
