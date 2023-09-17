@@ -697,6 +697,16 @@ namespace Gallop.Live.Cutt
             return _multiCameraCache[index].cacheTransform.rotation;
         }
 
+        public Vector3 GetMultiCameraWorldPosition(int index)
+        {
+            if (_multiCameraCache == null || _multiCameraCache.Length <= index)
+            {
+                return Vector3.zero;
+            }
+            return _multiCameraCache[index].cacheTransform.position;
+        }
+
+
         public bool ExistsMultiCamera(int index)
         {
             if (_multiCameraCache != null && index < _multiCameraCache.Length)
@@ -835,7 +845,7 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
-                                    retPos += liveCharactorLocators[i].liveCharaConstHeightHeadPosition;
+                                    retPos.y += liveCharactorLocators[i].liveCharaConstHeightHeadPosition.y;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += charaPos;
                                     num++;
@@ -849,7 +859,7 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
-                                    retPos += liveCharactorLocators[i].liveCharaConstHeightWaistPosition;
+                                    retPos.y += liveCharactorLocators[i].liveCharaConstHeightWaistPosition.y;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += charaPos;
                                     num++;
@@ -863,7 +873,7 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
-                                    retPos += liveCharactorLocators[i].liveCharaConstHeightChestPosition;
+                                    retPos.y += liveCharactorLocators[i].liveCharaConstHeightChestPosition.y;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += charaPos;
                                     num++;
@@ -877,7 +887,7 @@ namespace Gallop.Live.Cutt
                             {
                                 if (posFlags.hasFlag((LiveCharaPosition)i) && liveCharactorLocators[i] != null)
                                 {
-                                    retPos += liveCharactorLocators[i].liveCharaFootPosition;
+                                    retPos.y += liveCharactorLocators[i].liveCharaFootPosition.y;
                                     retPos += cameraOffset * liveCharactorLocators[i].liveCharaHeightRatio;
                                     retPos += charaPos;
                                     num++;

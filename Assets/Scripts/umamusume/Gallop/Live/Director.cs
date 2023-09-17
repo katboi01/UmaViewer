@@ -283,7 +283,7 @@ namespace Gallop.Live
         public HandShakeCamera HandShakeCamera { get; }
         //public GallopFrameBuffer FrameBuffer { get; }
         public Camera MainCameraObject { get; }
-        public Transform MainCameraTransform { get; }
+        public Transform MainCameraTransform => _mainCameraTransform;
         public List<CharacterObject> CharacterObjectList { get; }
         public List<CharaEffectInfo> listShadowEffectInfo { get; }
         public List<CharaEffectInfo> listSpotLightEffectInfo { get; }
@@ -380,12 +380,12 @@ namespace Gallop.Live
                 _instance = this;
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
                 Debug.Log(live.BackGroundId);
-                Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), this.gameObject.transform);
-                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
+                Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), transform);
+                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
 
                 //Make CharacterObject
 
-                var characterStandPos = this._liveTimelineControl.transform.Find("CharacterStandPos");
+                var characterStandPos = _liveTimelineControl.transform.Find("CharacterStandPos");
                 int counter = 0;
                 foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>())
                 {
@@ -393,7 +393,7 @@ namespace Gallop.Live
                     {
                         continue;
                     }
-                    var newObj = Instantiate(trans, this.transform);
+                    var newObj = Instantiate(trans, transform);
                     newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
                     charaObjs.Add(newObj.transform);
                     counter++;

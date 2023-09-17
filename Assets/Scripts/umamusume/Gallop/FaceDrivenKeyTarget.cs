@@ -995,32 +995,32 @@ namespace Gallop
 
                 EyeMorphs.ForEach(morph => morph.weight = 0);
 
-                if (updateInfo_.eyePrev != null)
+                if (updateInfo_.eyeNext != null)
                 {
                     if (weightRatio != 1)
                     {
-                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
+                            leftEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * weightRatio * ((float)updateInfo_.eyeCur.weight / 100));
                         }
-                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.eyePrev.weight / 100);
+                            rightEyeMorph[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * weightRatio * ((float)updateInfo_.eyeCur.weight / 100));
                         }
                     }
                     else
                     {
-                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayL)
+                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayL)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            leftEyeMorph[part.FacialPartsId - 1].weight = 0;
+                            leftEyeMorph[part.FacialPartsId - 1].weight = part.WeightPer / 100;
                         }
-                        foreach (var part in updateInfo_.eyePrev.facialPartsDataArrayR)
+                        foreach (var part in updateInfo_.eyeNext.facialPartsDataArrayR)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            rightEyeMorph[part.FacialPartsId - 1].weight = 0;
+                            rightEyeMorph[part.FacialPartsId - 1].weight = part.WeightPer / 100;
                         }
                     }
                 }
@@ -1175,8 +1175,7 @@ namespace Gallop
 
         public Vector2 GetTimelineEyeTrackRotation(LiveTimelineKeyFacialEyeTrackData key)
         {
-            Vector3 target = new Vector3();
-            if(CalcTargetPosition(key, ref target))
+            if(CalcTargetPosition(key, out Vector3 target))
             {
                 return GetEyeTrackRotation(target) + new Vector2((float)key.horizontalRatePer / 100, (float)key.verticalRatePer / 100);
             }
@@ -1186,7 +1185,7 @@ namespace Gallop
             }
         }
 
-        public bool CalcTargetPosition(LiveTimelineKeyFacialEyeTrackData key, ref Vector3 target)
+        public bool CalcTargetPosition(LiveTimelineKeyFacialEyeTrackData key, out Vector3 target)
         {
 
             switch (key.targetType)
@@ -1194,13 +1193,29 @@ namespace Gallop
                 case FacialEyeTrackTargetType.Arena:
                     target = Container.HeadBone.transform.position + new Vector3(0, 1, 10);
                     return true;
+                case FacialEyeTrackTargetType.CharaForward:
+                    target = Container.HeadBone.transform.position + Container.HeadBone.transform.forward;
+                    return true;
                 case FacialEyeTrackTargetType.DirectPosition:
                     target = key.DirectPosition;
                     return true;
-                default:
-                    break;
+                case FacialEyeTrackTargetType.Camera:
+                    target = Live.Director.instance.MainCameraTransform.position;
+                    return true;
+                case FacialEyeTrackTargetType.MultiCamera1:
+                    target = Live.Director.instance._liveTimelineControl.GetMultiCameraWorldPosition(0);
+                    return true;
+                case FacialEyeTrackTargetType.MultiCamera2:
+                    target = Live.Director.instance._liveTimelineControl.GetMultiCameraWorldPosition(1);
+                    return true;
+                case FacialEyeTrackTargetType.MultiCamera3:
+                    target = Live.Director.instance._liveTimelineControl.GetMultiCameraWorldPosition(2);
+                    return true;
+                case FacialEyeTrackTargetType.MultiCamera4:
+                    target = Live.Director.instance._liveTimelineControl.GetMultiCameraWorldPosition(3);
+                    return true;
             }
-
+            target = Vector3.zero;
             return false;
         }
 
