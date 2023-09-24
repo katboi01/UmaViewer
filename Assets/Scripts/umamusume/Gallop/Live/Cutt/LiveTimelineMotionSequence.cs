@@ -123,6 +123,7 @@ namespace Gallop.Live.Cutt
                     }
                     double interval = currentTime - (double)arg.frame / 60;
 
+                    _tempAnim.wrapMode = (arg.loop ? WrapMode.Loop : WrapMode.Default);
                     _tempAnim[anim.name].time = (float)(start + interval);
                     _tempAnim.Play(anim.name);
                 }
