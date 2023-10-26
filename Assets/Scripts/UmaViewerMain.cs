@@ -201,6 +201,12 @@ public class UmaViewerMain : MonoBehaviour
         Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>()); 
     }
 
+    public void ChangeAA(int val)
+    {
+        
+    }
+
+
     public void OpenUrl(string url)
     {
         Application.OpenURL(url);
