@@ -22,18 +22,6 @@ namespace Gallop
         private const int DATA_NUM = 12;
         private const float INT_TO_FLOAT = 0.001f;
 
-        private int uTypeIndex;
-        private int scrollX;
-        private int vTypeIndex;
-        private int scrollY;
-        private int powerTypeIndex;
-        private int powerIndex;
-        private int xCurveIndex;
-        private int yCurveIndex;
-        private int powerCurveIndex;
-        private int setTuexture;
-        private int setShader;
-        private int setDirt;
 
         private float magicClock = 0;
 
@@ -58,35 +46,7 @@ namespace Gallop
 
         public void Initialize()
         {
-            foreach(var settingData in _settingDataArray)
-            {
-                if (settingData.TargetMaterial)
-                {
-                    var mat = settingData.TargetMaterial;
-                    if (settingData.Type == EffectType.UVScrollEmissive)
-                    {
-                        var p = settingData.ParamArray;
-
-                        /*
-                        uTypeIndex = p[0];
-                        scrollX = p[1];
-                        vTypeIndex = p[2];
-                        scrollY = p[3];
-                        powerTypeIndex = p[4];
-                        powerIndex = p[5];
-                        xCurveIndex = p[6];
-                        yCurveIndex = p[7];
-                        powerCurveIndex = p[8];
-                        setTuexture = p[9];
-                        setShader = p[10];
-                        setDirt = p[11];
-                        */
-
-                        mat.SetVector("_UVEmissiveRange", new Vector4(p[0], p[1], p[2],p[3]));
-                        //mat.SetVector("_UVEmissiveScroll", new Vector4(p[4], p[5], p[6], p[7]));
-                    }
-                }
-            }
+            //Something TBD?
         }
 
 
