@@ -20,7 +20,8 @@ public class UmaContainer : MonoBehaviour
     public LiveTimelineCharaLocator LiveLocator;
 
     [Header("Other")]
-    public CharaShaderEffectData ShaderEffectData;
+    public CharaShaderEffectData HeadShaderEffectData;
+    public CharaShaderEffectData BodyShaderEffectData;
     public List<MaterialHelper> Materials = new List<MaterialHelper>();
 
     protected UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
@@ -38,16 +39,16 @@ public class UmaContainer : MonoBehaviour
             foreach(var rend in Renderers)
             {
                 Debug.Log(rend.Key.name);
-                Material[] mat = new Material[rend.Key.materials.Length];
+                Material[] mat = new Material[rend.Key.sharedMaterials.Length];
                 for(int i = 0; i < mat.Length; i++)
                 {
                     //if material slot is not in list, keep current material
                     //if material slot in list and toggle is on - assign original
                     //if material slot in list and toggle is off - assign invisible
-                    mat[i] = rend.Value.Contains(i) ? (value? Mat : UmaViewerBuilder.Instance.TransMaterialCharas ): rend.Key.materials[i];
+                    mat[i] = rend.Value.Contains(i) ? (value? Mat : UmaViewerBuilder.Instance.TransMaterialCharas ): rend.Key.sharedMaterials[i];
                 }
 
-                rend.Key.materials = mat;
+                rend.Key.sharedMaterials = mat;
             }
         }
     }
