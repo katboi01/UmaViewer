@@ -745,9 +745,10 @@ public class UmaViewerUI : MonoBehaviour
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.HeadPath) && a.Name.Contains(chara.Id.ToString())));
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
-                        if(!chara.IsMob && !isHeadFix)
+                        var motion_path = $"3d/motion/event/body/chara/chr{chara.Id}_00/anm_eve_chr{chara.Id}_00_idle01_loop";
+                        if (!chara.IsMob && !isHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
                         {
-                            list.Add(Main.AbList[$"3d/motion/event/body/chara/chr{chara.Id}_00/anm_eve_chr{chara.Id}_00_idle01_loop"]);
+                            list.Add(motion_entry);
                         }
 
                         Builder.UnloadUma();

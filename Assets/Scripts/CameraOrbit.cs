@@ -10,14 +10,11 @@ public class CameraOrbit : MonoBehaviour
 {
     public static CameraOrbit instance;
     public int CameraMode = 0;
-    public int AAMode = 0;
 
     [Header("Light")]
     public GameObject Light;
 
     public Dropdown CameraModeDropdown;
-
-    public Dropdown AAModeDropdown;
 
     public GameObject CameraTargetHelper;
     public Vector3 TargetCenter;
@@ -84,14 +81,6 @@ public class CameraOrbit : MonoBehaviour
             CameraMode = CameraModeDropdown.value;
         }
 
-        if (AAMode != AAModeDropdown.value)
-        {
-            var postprocessLayerMain = Camera.main.GetComponent<PostProcessLayer>();
-            var postprocessLayerPreview = UmaViewerBuilder.Instance.AnimationCamera.GetComponent<PostProcessLayer>();
-            postprocessLayerMain.antialiasingMode = postprocessLayerPreview.antialiasingMode = (PostProcessLayer.Antialiasing)AAModeDropdown.value;
-            Debug.Log($"Switched AntiAliasing to {(PostProcessLayer.Antialiasing)AAModeDropdown.value}");
-            AAMode = AAModeDropdown.value;
-        }
         switch (CameraModeDropdown.value)
         {
             case 0:
@@ -101,7 +90,6 @@ public class CameraOrbit : MonoBehaviour
             case 1: FreeCamera(); break;
         }
     }
-
 
     #region PC controls
     /// <summary>

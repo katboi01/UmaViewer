@@ -123,16 +123,22 @@ public class ModelExporter
             }
         };
 
-        Mesh basefaceMesh = new Mesh();
-        faceMesh.BakeMesh(basefaceMesh);
-
-        Mesh baseEyeBrowMesh = new Mesh();
-        eyebrowMesh.BakeMesh(baseEyeBrowMesh);
-
-        addBlendShapePart(faceMesh, facial.EyeBrowMorphs, basefaceMesh);
-        addBlendShapePart(faceMesh, facial.EyeMorphs, basefaceMesh);
-        addBlendShapePart(faceMesh, facial.MouthMorphs, basefaceMesh);
-        addBlendShapePart(eyebrowMesh, facial.EyeBrowMorphs, baseEyeBrowMesh);
+        if (faceMesh)
+        {
+            Mesh basefaceMesh = new Mesh();
+            faceMesh.BakeMesh(basefaceMesh);
+            addBlendShapePart(faceMesh, facial.EyeBrowMorphs, basefaceMesh);
+            addBlendShapePart(faceMesh, facial.EyeMorphs, basefaceMesh);
+            addBlendShapePart(faceMesh, facial.MouthMorphs, basefaceMesh);
+        }
+        
+        if (eyebrowMesh)
+        {
+            Mesh baseEyeBrowMesh = new Mesh();
+            eyebrowMesh.BakeMesh(baseEyeBrowMesh);
+            addBlendShapePart(eyebrowMesh, facial.EyeBrowMorphs, baseEyeBrowMesh);
+        }
+            
         facial.ClearAllWeights();
         facial.ChangeMorph();
     }

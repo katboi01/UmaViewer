@@ -283,7 +283,7 @@ namespace Gallop.Live
         public HandShakeCamera HandShakeCamera { get; }
         //public GallopFrameBuffer FrameBuffer { get; }
         public Camera MainCameraObject { get; }
-        public Transform MainCameraTransform { get; }
+        public Transform MainCameraTransform => _mainCameraTransform;
         public List<CharacterObject> CharacterObjectList { get; }
         public List<CharaEffectInfo> listShadowEffectInfo { get; }
         public List<CharaEffectInfo> listSpotLightEffectInfo { get; }
@@ -380,24 +380,33 @@ namespace Gallop.Live
                 _instance = this;
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
                 Debug.Log(live.BackGroundId);
-                Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), this.gameObject.transform);
-                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), this.gameObject.transform);
+                Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), transform);
+                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
 
                 //Make CharacterObject
 
-                var characterStandPos = this._liveTimelineControl.transform.Find("CharacterStandPos");
+                var characterStandPos = _liveTimelineControl.transform.Find("CharacterStandPos");
                 int counter = 0;
-                foreach (Transform trans in characterStandPos.GetComponentsInChildren<Transform>())
+                var standPos = characterStandPos.GetComponentsInChildren<Transform>();
+                var count = _liveTimelineControl.data.characterSettings.useHighPolygonModel.Length;
+                for (int i = 0; i < count; i++) 
                 {
-                    if (trans == characterStandPos)
+                    if (i < characterStandPos.childCount) 
                     {
-                        continue;
+                        var newObj = Instantiate(standPos[i + 1], transform);
+                        newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
+                        charaObjs.Add(newObj.transform);
+                        counter++;
                     }
-                    var newObj = Instantiate(trans, this.transform);
-                    newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
-                    charaObjs.Add(newObj.transform);
-                    counter++;
+                    else
+                    {
+                        var newObj = Instantiate(standPos[i % characterStandPos.childCount + 1], transform);
+                        newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
+                        charaObjs.Add(newObj.transform);
+                        counter++;
+                    }
                 };
+
 
                 //Get live parts info
                 UmaDatabaseEntry partAsset = UmaViewerMain.Instance.AbList[string.Format(LIVE_PART_PATH, live.MusicId)];
@@ -768,7 +777,7 @@ namespace Gallop.Live
 
         private void SaveMultiCameraVMD()
         {
-            for (int i = 0; i < _liveTimelineControl.MultiRecordFrames.Count; i++)
+            for (int i = 0; i < _liveTimelineControl.data.worksheetList[0].multiCameraPosKeys.Count; i++)
             {
                 var frames = _liveTimelineControl.MultiRecordFrames[i];
                 frames[0].FovVaild = true;
@@ -789,7 +798,7 @@ namespace Gallop.Live
 
                 UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames, i);
             }
-        }
+        } 
 
         private void SaveCameraVMD()
         {

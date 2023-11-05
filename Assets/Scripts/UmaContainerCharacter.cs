@@ -159,9 +159,9 @@ public class UmaContainerCharacter : UmaContainer
         //Materials
         foreach (var rend in gameObject.GetComponentsInChildren<Renderer>())
         {
-            for (int i = 0; i < rend.materials.Length; i++)
+            for (int i = 0; i < rend.sharedMaterials.Length; i++)
             {
-                Material mat = rend.materials[i];
+                Material mat = rend.sharedMaterials[i];
 
                 var matHlp = Materials.FirstOrDefault(m => m.Mat == mat);
                 if (matHlp == null)
@@ -401,6 +401,18 @@ public class UmaContainerCharacter : UmaContainer
             }
 
             TearControllers.ForEach(a => a.UpdateOffset());
+
+            //Apply UV Animation
+
+            if(HeadShaderEffectData != null)
+            {
+                HeadShaderEffectData.updateUV(Time.fixedDeltaTime);
+            }
+
+            if(BodyShaderEffectData != null)
+            {
+                BodyShaderEffectData.updateUV(Time.fixedDeltaTime);
+            }
         }
     }
 
@@ -625,6 +637,16 @@ public class UmaContainerCharacter : UmaContainer
                 }
             }
         }
+
+        var assetholder = Body.GetComponent<AssetHolder>();
+        if (assetholder)
+        {
+            BodyShaderEffectData = assetholder._assetTable["chara_shader_effect"] as CharaShaderEffectData;
+            if (BodyShaderEffectData)
+            {
+                BodyShaderEffectData.Initialize();
+            }
+        }
     }
 
     public void LoadHead(UmaDatabaseEntry entry)
@@ -773,10 +795,10 @@ public class UmaContainerCharacter : UmaContainer
         var assetholder = head.GetComponent<AssetHolder>();
         if (assetholder)
         {
-            ShaderEffectData = assetholder._assetTable["chara_shader_effect"] as CharaShaderEffectData;
-            if (ShaderEffectData)
+            HeadShaderEffectData = assetholder._assetTable["chara_shader_effect"] as CharaShaderEffectData;
+            if (HeadShaderEffectData)
             {
-                ShaderEffectData.Initialize();
+                HeadShaderEffectData.Initialize();
             }
         }
     }
@@ -1318,8 +1340,10 @@ public class UmaContainerCharacter : UmaContainer
         var firsehead = Head;
         var faceDriven = Instantiate(firsehead.GetComponent<AssetHolder>()._assetTable["facial_target"]) as FaceDrivenKeyTarget;
 
+        //Need Instantiate or not?
         var earDriven = firsehead.GetComponent<AssetHolder>()._assetTable["ear_target"] as DrivenKeyTarget;
         var faceOverride = firsehead.GetComponent<AssetHolder>()._assetTable["face_override"] as FaceOverrideData;
+
         faceDriven._earTarget = earDriven._targetFaces;
         FaceDrivenKeyTarget = faceDriven;
         FaceDrivenKeyTarget.Container = this;

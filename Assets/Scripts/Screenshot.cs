@@ -29,8 +29,9 @@ public class Screenshot : MonoBehaviour
         string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
         byte[] pngShot = ImageConversion.EncodeToPNG(image);
         Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
-        File.WriteAllBytes(fileName + ".png", pngShot);
-
+        var fullpath = $"{fileName}.png";
+        File.WriteAllBytes(fullpath, pngShot);
+        UmaViewerUI.Instance.ShowMessage($"Screenshot saved: {fullpath}", UIMessageType.Success);
         Destroy(image);
     }
 
@@ -106,7 +107,7 @@ public class Screenshot : MonoBehaviour
         }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
+        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default,8);
         var grab_area = new Rect(0, 0, width, height);
 
         RenderTexture.active = render_texture;

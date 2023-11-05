@@ -83,21 +83,18 @@ public class UmaViewerBuilder : MonoBehaviour
             if (characters[i].CharaEntry.Name != "")
             {
                 var umaContainer = new GameObject($"Chara_{characters[i].CharaEntry.Id}_{characters[i].CostumeId}").AddComponent<UmaContainerCharacter>();
+                umaContainer.IsLive = true;
+                umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
+                var charObjs = Gallop.Live.Director.instance.charaObjs;
+                umaContainer.transform.parent = charObjs[i];
+                umaContainer.transform.localPosition = new Vector3();
 
                 if (characters[i].CharaEntry.IsMob)
                 {
-                    umaContainer.IsLive = true;
-                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    umaContainer.transform.localPosition = new Vector3();
                     LoadMobUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
                 else
                 {
-                    umaContainer.IsLive = true;
-                    umaContainer.CharaData = UmaDatabaseController.ReadCharaData(characters[i].CharaEntry);
-                    umaContainer.transform.parent = Gallop.Live.Director.instance.charaObjs[i];
-                    umaContainer.transform.localPosition = new Vector3();
                     LoadNormalUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
                 }
 
