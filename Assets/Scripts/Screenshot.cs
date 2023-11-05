@@ -19,7 +19,7 @@ public class Screenshot : MonoBehaviour
 
     public static void TakeScreenshot()
     {
-        var camera = UmaViewerBuilder.Instance.AnimationCamera.GetComponent<Camera>().enabled ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
+        var camera = GetActiveCamera();
         int width = int.Parse(UmaViewerUI.Instance.SSWidth.text);
         int height = int.Parse(UmaViewerUI.Instance.SSHeight.text);
         width = width == -1 ? Screen.width : width;
@@ -29,7 +29,8 @@ public class Screenshot : MonoBehaviour
         string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
         byte[] pngShot = ImageConversion.EncodeToPNG(image);
         Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
-        var fullpath = $"{fileName}.png";
+        //fixes "/../" in path
+        var fullpath = Path.GetFullPath($"{fileName}.png");
         File.WriteAllBytes(fullpath, pngShot);
         UmaViewerUI.Instance.ShowMessage($"Screenshot saved: {fullpath}", UIMessageType.Success);
         Destroy(image);
@@ -47,7 +48,7 @@ public class Screenshot : MonoBehaviour
 
     private IEnumerator RecordGif(int width, int height, bool transparent, int quality)
     {
-        var camera = UmaViewerBuilder.Instance.AnimationCamera.GetComponent<Camera>().enabled ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
+        var camera = GetActiveCamera();
         var ppLayer = camera.GetComponent<PostProcessLayer>();
         bool oldPpState = ppLayer.enabled;
         ppLayer.enabled = false;
@@ -125,6 +126,12 @@ public class Screenshot : MonoBehaviour
         RenderTexture.ReleaseTemporary(render_texture);
 
         return tex_color;
+    }
+
+    private static Camera GetActiveCamera()
+    {
+        //sometimes animation camera gameobject is enabled even when camera component is disabled
+        return UmaViewerBuilder.Instance.AnimationCamera.isActiveAndEnabled ? UmaViewerBuilder.Instance.AnimationCamera : Camera.main;
     }
 
     public static Vector2Int GetResolution(int width, int height)
