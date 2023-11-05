@@ -39,8 +39,9 @@ namespace uGIF
 			while(bytes == null) yield return new WaitForEndOfFrame();
             string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
             Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
-			var fullpath = $"{fileName}.gif";
-			File.WriteAllBytes(fullpath, bytes);
+            //fixes "/../" in path
+            var fullpath = Path.GetFullPath($"{fileName}.gif");
+            File.WriteAllBytes(fullpath, bytes);
             bytes = null;
 			UmaViewerUI.Instance.ShowMessage($"GIF saved: {fullpath}", UIMessageType.Success);
 			Frames.Clear();
