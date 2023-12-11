@@ -158,5 +158,13 @@ namespace Gallop
                 dynamic.enabled = isOn;
             }
         }
+
+        public void ResetPhysics()
+        {
+            foreach (DynamicBone dynamic in DynamicBones)
+            {
+                dynamic.ResetParticlesPosition();
+            }
+        }
     }
 }

@@ -291,6 +291,15 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
+    public void ResetDynamicBone()
+    {
+        if (IsMini) return;
+        foreach (CySpringDataContainer cySpring in cySpringDataContainers)
+        {
+            cySpring.ResetPhysics();
+        }
+    }
+
     public void SetEyeTracking(bool isOn)
     {
         EnableEyeTracking = isOn;
@@ -1121,6 +1130,7 @@ public class UmaContainerCharacter : UmaContainer
 
                 if (clip.name.Contains("_cti_crd"))
                 {
+                    ResetDynamicBone();
                     var dir = Path.GetDirectoryName(clip.name).Replace("\\", "/");
                     string[] param = Path.GetFileName(clip.name).Split('_');
                     if (param.Length > 4)
