@@ -147,6 +147,7 @@ public enum UmaFileType
     bg,
     chara,
     font,
+    fontresources,
     gacha,
     gachaselect,
     guide,
