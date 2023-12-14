@@ -1,15 +1,13 @@
 using Gallop;
-using Gallop.Live.Cutt;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using static SerializableBone;
 
 public class UmaContainerCharacter : UmaContainer
 {
@@ -86,6 +84,7 @@ public class UmaContainerCharacter : UmaContainer
     private Collider dragCollider;
     private BipedIK IK;
     private PuppetMaster PuppetMaster;
+    private HashSet<Transform> _humanoidBones;
 
     public void Initialize(bool smile)
     {
@@ -100,7 +99,7 @@ public class UmaContainerCharacter : UmaContainer
         if (FaceDrivenKeyTarget && smile)
             FaceDrivenKeyTarget.ChangeMorphWeight(FaceDrivenKeyTarget.MouthMorphs[3], 1);
 
-        CreateIK();
+        //CreateIK();
     }
 
     public void MergeModel()
@@ -1358,5 +1357,98 @@ public class UmaContainerCharacter : UmaContainer
         emotionDriven.FaceDrivenKeyTarget = faceDriven;
         emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData;
         emotionDriven.Initialize();
+    }
+
+    public void SetupBoneHandles()
+    {
+        var humanBones = GetHumanBones();
+        foreach(var bone in humanBones)
+        {
+            List<BoneTags> tags = new List<BoneTags>() { BoneTags.Humanoid };
+            if (bone.name.EndsWith("_L")) tags.Add(BoneTags.Left);
+            if (bone.name.EndsWith("_R")) tags.Add(BoneTags.Right);
+
+            var handle = new GameObject(bone.name + "_Handle").AddComponent<UIHandleBone>();
+            handle.transform.parent = bone;
+            handle.transform.localPosition = Vector3.zero;
+            handle.transform.localScale = Vector3.one;
+            handle.Init(bone.gameObject, tags);
+        }
+    }
+
+    public List<SerializableBone> SaveBones()
+    {
+        var boneList = new List<SerializableBone>();
+
+        GatherSerializableBonesRecursive(Position, boneList, 0);
+
+        return boneList;
+    }
+
+    private void GatherSerializableBonesRecursive(Transform current, List<SerializableBone> bones, int depth)
+    {
+        for(int i = 0; i < current.childCount; i++)
+        {
+            GatherSerializableBonesRecursive(current.GetChild(i), bones, depth + 1);
+        }
+
+        //this can be optimized by keeping track if the bone is dynamic
+        //and generating a list of tags beforehand
+        //otherwise getComponentInParent() is called for every bone
+        var bone = new SerializableBone(current, true);
+        
+        if(depth == 0)
+        {
+            //make it independent from character name
+            bone.ParentName = "root";
+        }
+
+        bones.Add(bone);
+    }
+
+    public bool LoadBones(PoseData data)
+    {
+        var currentBones = SaveBones();
+
+        foreach (var bone in currentBones)
+        {
+            var savedBone = data.Bones.FirstOrDefault(b => b.Name == bone.Name && b.ParentName == bone.ParentName);
+            if (savedBone == null) continue;
+
+            savedBone.ApplyTo(bone);
+        }
+
+        //could add a 'bone not found' threshold for returning false
+        return true;
+    }
+
+    public HashSet<Transform> GetHumanBones()
+    {
+        if(_humanoidBones == null)
+        {
+            var animator = UmaAnimator;
+            HashSet<Transform> humanBones = new HashSet<Transform>();
+
+            //foreach (HumanBodyBones boneName in Enum.GetValues(typeof(HumanBodyBones)))
+            //{
+            //    if (boneName == HumanBodyBones.LastBone) break;
+
+            //    var bone = animator.GetBoneTransform(boneName);
+            //    if (bone != null)
+            //    {
+            //        humanBones.Add(bone);
+            //    }
+            //}
+
+            BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
+            foreach(var bone in r.GetRagdollTransforms())
+            {
+                humanBones.Add(bone);
+            }
+
+            _humanoidBones = humanBones;
+        }
+
+        return _humanoidBones;
     }
 }

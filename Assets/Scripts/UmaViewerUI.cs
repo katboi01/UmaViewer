@@ -44,6 +44,8 @@ public class UmaViewerUI : MonoBehaviour
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
+    public PoseManager PoseManager;
+    public HandleManager HandleManager;
 
     [Header("lists")]
     public ScrollRect EmotionList;
@@ -60,6 +62,8 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect NormalSubSoundList;
     public PageManager NormalSoundCtrl;
 
+    [Header("pose mode")]
+    public Transform HandlesPanel;
 
     [Header("audio")]
     public Slider AudioSlider;
@@ -158,6 +162,8 @@ public class UmaViewerUI : MonoBehaviour
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
+
+        PoseManager.LoadPoses();
     }
 
     private void OnDestroy()
@@ -1398,5 +1404,10 @@ public class UmaViewerUI : MonoBehaviour
                 ModelExporter.ExportModel(container, path);
             }
         }
+    }
+
+    public void ToggleVisible(GameObject go)
+    {
+        go.SetActive(!go.activeSelf);
     }
 }

@@ -67,3 +67,4 @@ crashlytics-build.properties
 Config.json
 /gltf
 /Assets/Plugins/RootMotion/FinalIK/_Integration
+/Poses

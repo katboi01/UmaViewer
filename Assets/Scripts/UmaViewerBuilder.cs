@@ -51,6 +51,8 @@ public class UmaViewerBuilder : MonoBehaviour
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
         CurrentUMAContainer = umaContainer;
 
+        UmaViewerUI.Instance.PoseManager.SetPoseMode(false);
+
         if (mini)
         {
             umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
@@ -301,6 +303,7 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.MergeModel();
         umaContainer.SetHeight(-1);
         umaContainer.Initialize(!UI.isTPose);
+        umaContainer.SetupBoneHandles();
 
         umaContainer.Position = umaContainer.transform.Find("Position");
 
