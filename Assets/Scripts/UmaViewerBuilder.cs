@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using UmaMusumeAudio;
@@ -17,8 +16,8 @@ using Random = UnityEngine.Random;
 public class UmaViewerBuilder : MonoBehaviour
 {
     public static UmaViewerBuilder Instance;
-    public static UmaViewerMain Main => UmaViewerMain.Instance;
-    UmaViewerUI UI => UmaViewerUI.Instance;
+    static UmaViewerMain Main => UmaViewerMain.Instance;
+    static UmaViewerUI UI => UmaViewerUI.Instance;
 
     public List<AssetBundle> Loaded;
     public List<Shader> ShaderList = new List<Shader>();
@@ -47,11 +46,11 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
     {
+        PoseManager.SetPoseModeStatic(false);
+
         int id = chara.Id;
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
         CurrentUMAContainer = umaContainer;
-
-        UmaViewerUI.Instance.PoseManager.SetPoseMode(false);
 
         if (mini)
         {
@@ -303,9 +302,9 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.MergeModel();
         umaContainer.SetHeight(-1);
         umaContainer.Initialize(!UI.isTPose);
-        umaContainer.SetupBoneHandles();
 
         umaContainer.Position = umaContainer.transform.Find("Position");
+        umaContainer.SetupBoneHandles();
 
         if (!UI.isTPose && loadMotion)
         {

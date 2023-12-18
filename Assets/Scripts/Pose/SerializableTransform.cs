@@ -50,4 +50,20 @@ public class SerializableTransform
             t.localScale = Scale;
         }
     }
+
+    public void ApplyTo(Transform t, PoseLoadOptions options)
+    {
+        if (Space == Space.World)
+        {
+            if (options.Position) t.position = Position;
+            if (options.Rotation) t.eulerAngles = Rotation;
+            if (options.Scale) t.localScale = Scale;
+        }
+        else
+        {
+            if (options.Position) t.localPosition = Position;
+            if (options.Rotation) t.localEulerAngles = Rotation;
+            if (options.Scale) t.localScale = Scale;
+        }
+    }
 }

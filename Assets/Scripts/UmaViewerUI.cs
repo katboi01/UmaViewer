@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -163,7 +164,7 @@ public class UmaViewerUI : MonoBehaviour
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
 
-        PoseManager.LoadPoses();
+        PoseManager.LoadLocalPoseFiles();
     }
 
     private void OnDestroy()
@@ -1057,19 +1058,19 @@ public class UmaViewerUI : MonoBehaviour
     public void SetDynamicBoneEnable(bool isOn)
     {
         DynamicBoneEnable = isOn;
-        (Builder.CurrentUMAContainer)?.SetDynamicBoneEnable(isOn);
+        Builder.CurrentUMAContainer?.SetDynamicBoneEnable(isOn);
     }
 
     public void SetEyeTrackingEnable(bool isOn)
     {
         EnableEyeTracking = isOn;
-        (Builder.CurrentUMAContainer)?.SetEyeTracking(isOn);
+        Builder.CurrentUMAContainer?.SetEyeTracking(isOn);
     }
 
     public void SetFaceOverrideEnable(bool isOn)
     {
         EnableFaceOverride = isOn;
-        (Builder.CurrentUMAContainer)?.SetFaceOverrideData(isOn);
+        Builder.CurrentUMAContainer?.SetFaceOverrideData(isOn);
     }
 
     public void AudioPause()

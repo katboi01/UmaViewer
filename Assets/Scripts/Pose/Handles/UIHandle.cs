@@ -1,10 +1,5 @@
-using I18N.Common;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 public class UIHandle : MonoBehaviour
 {
@@ -12,7 +7,7 @@ public class UIHandle : MonoBehaviour
     public GameObject Owner;
 
     /// <summary> Object that the handle refers to. Cast in inheriting class </summary>
-    public object Target;
+    public Transform Target;
 
     /// <summary> Display object on the UI </summary>
     public GameObject Handle;
@@ -23,11 +18,13 @@ public class UIHandle : MonoBehaviour
     /// <summary> Object that appears when right-clicking the handle </summary>
     public UIPopupPanel Popup;
 
+    public LineRenderer LineRenderer;
+
     protected SerializableTransform _defaultTransform;
-    protected float _baseScale = 4;
+    protected float _baseScale = 1;
     protected bool _forceDisplayOff = false;
 
-    public virtual UIHandle Init(GameObject owner, object target)
+    public virtual UIHandle Init(GameObject owner, Transform target)
     {
         Target = target;
         return Init(owner);
@@ -35,17 +32,19 @@ public class UIHandle : MonoBehaviour
 
     public virtual UIHandle Init(GameObject owner)
     {
-        gameObject.layer = LayerMask.NameToLayer("UIHandle");
-        Target = Target == null? owner : Target;
-        Owner = owner;
+        HandleManager.RegisterHandle(this);
 
-        Popup = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_Popup, UmaViewerUI.Instance.HandlesPanel).Init(this);
-        Popup.gameObject.SetActive(false);
+        gameObject.layer = LayerMask.NameToLayer("UIHandle");
+        Target = Target == null? owner.transform : Target;
+        Owner = owner;
 
         Handle = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_HandleDisplay, UmaViewerUI.Instance.HandlesPanel);
         Handle.transform.SetAsFirstSibling();
 
-        _defaultTransform = new SerializableTransform(transform, Space.Self);
+        Popup = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_Popup, UmaViewerUI.Instance.HandlesPanel).Init(this);
+        Popup.gameObject.SetActive(false);
+
+        _defaultTransform = new SerializableTransform(Target, Space.Self);
 
         var collider = gameObject.AddComponent<SphereCollider>();
         collider.center = Vector3.zero;
@@ -55,25 +54,26 @@ public class UIHandle : MonoBehaviour
         return this;
     }
 
-    protected virtual void Update()
+    public virtual void UpdateManual(Camera camera, bool linesEnabled)
     {
-        var cam = Camera.main;
-        if (Handle != null && cam != null && transform != null)
+        //Made it like this to minimize calls to Camera.main and UI.Inst.Manager.LinesEnabled. Done by HandleManager.
+
+        if (Handle != null && camera != null && transform != null)
         {
-            Handle.transform.localScale = Vector3.one * Mathf.Clamp(_baseScale / Vector3.Distance(cam.transform.position, transform.position), 0.1f, 1);
+            Handle.transform.localScale = Vector3.one * Mathf.Clamp(_baseScale / Vector3.Distance(camera.transform.position, transform.position), 0.1f, 1);
 
             if (Collider.transform.localScale.x != 0 && transform.lossyScale.x != 0)
             {
-                Collider.radius = 35 /* magic number */ * (1 / transform.lossyScale.x) * GetRadiusOnScreen(Collider.transform.position, Handle.transform.localScale.x);
+                Collider.radius = 35 /* magic number */ * (1 / transform.lossyScale.x) * GetRadiusOnScreen(camera, Collider.transform.position, Handle.transform.localScale.x);
             }
 
-            Handle.transform.position = cam.WorldToScreenPoint(Collider.transform.TransformPoint(Collider.center));
+            Handle.transform.position = camera.WorldToScreenPoint(Collider.transform.TransformPoint(Collider.center));
 
-            if (_forceDisplayOff)
+            if (ShouldBeHidden())
             {
                 if (Handle.activeSelf == true)
                 {
-                    Handle.SetActive(false);
+                    ToggleActive(false);
                 }
             }
             else
@@ -84,15 +84,33 @@ public class UIHandle : MonoBehaviour
 
                 if (Handle.activeSelf != isOnScreen)
                 {
-                    Handle.SetActive(!Handle.activeSelf);
+                    ToggleActive(!Handle.activeSelf);
                 }
+            }
+        }
+
+        if(Handle.activeSelf && LineRenderer != null)
+        {
+            if (LineRenderer.enabled != linesEnabled)
+            {
+                LineRenderer.enabled = linesEnabled;
+            }
+            if (linesEnabled)
+            {
+                LineRenderer.SetPositions(new Vector3[] { (Target).position, (Target).parent.position });
             }
         }
     }
 
-    public void TogglePopup(int offset)
+    protected virtual bool ShouldBeHidden()
     {
-        //Popup.GetComponent<PopupController>().offset = offset * Popup.GetComponent<RectTransform>().sizeDelta.x;
+        return _forceDisplayOff;
+    }
+
+    /// <summary> For future, `offset` param will allow popups to be spaced out when selecting more than 1 handle at a time. </summary>
+    public void TogglePopup(int offset = 0)
+    {
+        Popup.Offset = offset * Popup.GetComponent<RectTransform>().sizeDelta.x;
         UmaViewerUI.Instance.ToggleVisible(Popup.gameObject);
     }
 
@@ -120,7 +138,7 @@ public class UIHandle : MonoBehaviour
     public UIHandle SetName(string name)
     {
         Handle.gameObject.name = name;
-        Popup.GetComponentInChildren<Text>().text = name;
+        Popup.NameLabel.text = name;
         return this;
     }
 
@@ -130,21 +148,24 @@ public class UIHandle : MonoBehaviour
         return this;
     }
 
-    public float GetRadiusOnScreen(Vector3 position, float screenSize)
+    public float GetRadiusOnScreen(Camera cam, Vector3 position, float screenSize)
     {
-        Vector3 a = Camera.main.WorldToScreenPoint(position);
+        Vector3 a = cam.WorldToScreenPoint(position);
         Vector3 b = new Vector3(a.x, a.y + screenSize, a.z);
 
-        Vector3 aa = Camera.main.ScreenToWorldPoint(a);
-        Vector3 bb = Camera.main.ScreenToWorldPoint(b);
+        Vector3 aa = cam.ScreenToWorldPoint(a);
+        Vector3 bb = cam.ScreenToWorldPoint(b);
 
         return (aa - bb).magnitude;
     }
 
-    public UIHandle ClearForDeletion()
+    public UIHandle WithLineRenderer()
     {
-        Popup = null;
-        Handle = null;
+        LineRenderer = Handle.gameObject.AddComponent<LineRenderer>();
+        LineRenderer.positionCount  = 2;
+        LineRenderer.startWidth     = LineRenderer.endWidth = 0.005f;
+        LineRenderer.material       = UmaViewerUI.Instance.HandleManager.LineRendererMaterial;
+        LineRenderer.startColor     = LineRenderer.endColor = Handle.GetComponent<Image>().color;
         return this;
     }
 
@@ -158,35 +179,71 @@ public class UIHandle : MonoBehaviour
         {
             Destroy(Handle);
         }
+        HandleManager.UnregisterHandle(this);
     }
 
-    public UIHandle PositionReset()
+    public void TransformReset(PoseLoadOptions options = null)
     {
-        transform.localPosition = _defaultTransform.Position;
-        return this;
+        if(options == null)
+        {
+            options = PoseLoadOptions.All();
+        }
+
+        _defaultTransform.ApplyTo(Target);
     }
 
-    public UIHandle RotationReset()
+    public void TransformResetAll()
     {
-        transform.localEulerAngles = _defaultTransform.Rotation;
-        return this;
+        var undoData = new HandleManager.RuntimeGizmoUndoData();
+
+        undoData.OldPosition = new SerializableTransform(Target, Space.World);
+        TransformReset();
+        undoData.NewPosition = Target;
+
+        HandleManager.RegisterRuntimeGizmoUndoAction.Invoke(undoData);
     }
 
-    public UIHandle ScaleReset()
+    public void TransformResetPosition()
     {
-        transform.localScale = _defaultTransform.Scale;
-        return this;
+        var undoData = new HandleManager.RuntimeGizmoUndoData();
+
+        undoData.OldPosition = new SerializableTransform(Target, Space.World);
+        TransformReset(new PoseLoadOptions() { Position = true });
+        undoData.NewPosition = Target;
+
+        HandleManager.RegisterRuntimeGizmoUndoAction.Invoke(undoData);
+    }
+
+    public void TransformResetRotation()
+    {
+        var undoData = new HandleManager.RuntimeGizmoUndoData();
+
+        undoData.OldPosition = new SerializableTransform(Target, Space.World);
+        TransformReset(new PoseLoadOptions() { Rotation = true });
+        undoData.NewPosition = Target;
+
+        HandleManager.RegisterRuntimeGizmoUndoAction.Invoke(undoData);
+    }
+
+    public void TransformResetScale()
+    {
+        var undoData = new HandleManager.RuntimeGizmoUndoData();
+
+        undoData.OldPosition = new SerializableTransform(Target, Space.World);
+        TransformReset(new PoseLoadOptions() { Scale = true });
+        undoData.NewPosition = Target;
+
+        HandleManager.RegisterRuntimeGizmoUndoAction.Invoke(undoData);
     }
 
     public void ToggleActive(bool value)
     {
-        this.enabled = value;
         Handle.SetActive(value);
         Collider.enabled = value;
         Popup.gameObject.SetActive(false);
     }
 
-    public void ToggleVisible(bool value)
+    public void ForceDisplayOff(bool value)
     {
         _forceDisplayOff = value;
     }

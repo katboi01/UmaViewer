@@ -18,9 +18,18 @@ namespace RuntimeGizmos
 			this.transform = transform;
 
 			oldValues = new TransformValues() {position=transform.position, rotation=transform.rotation, scale=transform.localScale};
-		}
+        }
 
-		public void StoreNewTransformValues()
+        public TransformCommand(TransformGizmo transformGizmo, HandleManager.RuntimeGizmoUndoData data)
+        {
+            this.transformGizmo = transformGizmo;
+            this.transform = data.NewPosition;
+
+            oldValues = new TransformValues() { position = data.OldPosition.Position, rotation = Quaternion.Euler(data.OldPosition.Rotation), scale = data.OldPosition.Scale };
+            newValues = new TransformValues() { position = transform.position, rotation = transform.rotation, scale = transform.localScale };
+        }
+
+        public void StoreNewTransformValues()
 		{
 			newValues = new TransformValues() {position=transform.position, rotation=transform.rotation, scale=transform.localScale};
 		}

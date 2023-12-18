@@ -4,6 +4,7 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using System.Collections;
 using CommandUndoRedo;
+using System.Linq;
 
 namespace RuntimeGizmos
 {
@@ -20,6 +21,7 @@ namespace RuntimeGizmos
         public CenterType centerType = CenterType.All;
         public ScaleType scaleType = ScaleType.FromPoint;
 
+        public KeyCode changeModeHotkey = KeyCode.LeftAlt;
         //These are the same as the unity editor hotkeys
         public KeyCode SetMoveType = KeyCode.W;
         public KeyCode SetRotateType = KeyCode.E;
@@ -33,6 +35,7 @@ namespace RuntimeGizmos
         public KeyCode translationSnapping = KeyCode.LeftControl;
         public KeyCode AddSelection = KeyCode.LeftShift;
         public KeyCode RemoveSelection = KeyCode.LeftControl;
+        public string DevNote = "Action key is set to LeftControl at runtime! It's in Awake()";
         public KeyCode ActionKey = KeyCode.LeftShift; //Its set to shift instead of control so that while in the editor we dont accidentally undo editor changes =/
         public KeyCode UndoAction = KeyCode.Z;
         public KeyCode RedoAction = KeyCode.Y;
@@ -133,7 +136,31 @@ namespace RuntimeGizmos
         {
             myCamera = GetComponent<Camera>();
             SetMaterial();
+
+#if !UNITY_EDITOR
+            ActionKey = KeyCode.LeftControl;
+#endif
         }
+
+        private void Start()
+        {
+            HandleManager.RegisterRuntimeGizmoUndoAction = (data) =>
+            {
+                var transformCommand = new TransformCommand(this, data);
+                UndoRedoManager.Insert(transformCommand);
+            };
+
+            HandleManager.RegisterRuntimeGizmoUndoActions = (data) =>
+            {
+                CommandGroup commandGroup = new CommandGroup();
+                commandGroup.Set(data.Select(d=> new TransformCommand(this, d)).ToList<ICommand>());
+                UndoRedoManager.Insert(commandGroup);
+            };
+
+            PoseManager.SetTooltip(0, $"H - show/hide this\r\n\r\nUndo:\t\t{ActionKey} + {UndoAction}\r\nRedo:\t\t{ActionKey} + {RedoAction}\r\n\r\nMove only: \t{changeModeHotkey} + {SetMoveType}\r\nRotate only: {changeModeHotkey} + {SetRotateType}\r\nScale only: \t{changeModeHotkey} + {SetScaleType}\r\nAll:\t \t{changeModeHotkey} + {SetAllTransformType}");
+            PoseManager.SetTooltip(1, $"\r\n\r\nSpace Toggle:\t{changeModeHotkey} + {SetSpaceToggle}\r\nPivot Toggle:\t{changeModeHotkey} + {SetPivotModeToggle}\r\nScale type toggle: \t{changeModeHotkey} + {SetScaleTypeToggle}\r\nCenter type toggle:{changeModeHotkey} + {SetCenterTypeToggle}");
+        }
+
         private void RenderPipelineManager_endFrameRendering(ScriptableRenderContext context, Camera[] camera)
         {
             OnPostRender();
@@ -173,6 +200,8 @@ namespace RuntimeGizmos
             }
 
             GetTarget();
+
+            PoseManager.SetTooltip(2, $"\n\nSpace:\t{space}\nPivot:\t\t{pivot}\nScale:\t\t{scaleType}\nCenter:\t{centerType}");
 
             if (mainTargetRoot == null) return;
 
@@ -319,40 +348,46 @@ namespace RuntimeGizmos
         {
             if (Input.GetKey(ActionKey)) return;
 
-            if (Input.GetKeyDown(SetMoveType)) transformType = TransformType.Move;
-            else if (Input.GetKeyDown(SetRotateType)) transformType = TransformType.Rotate;
-            else if (Input.GetKeyDown(SetScaleType)) transformType = TransformType.Scale;
-            //else if(Input.GetKeyDown(SetRectToolType)) type = TransformType.RectTool;
-            else if (Input.GetKeyDown(SetAllTransformType)) transformType = TransformType.All;
+            if (Input.GetKey(changeModeHotkey))
+            {
+                if (Input.GetKeyDown(SetMoveType)) transformType = TransformType.Move;
+                else if (Input.GetKeyDown(SetRotateType)) transformType = TransformType.Rotate;
+                else if (Input.GetKeyDown(SetScaleType)) transformType = TransformType.Scale;
+                //else if(Input.GetKeyDown(SetRectToolType)) type = TransformType.RectTool;
+                else if (Input.GetKeyDown(SetAllTransformType)) transformType = TransformType.All;
+            }
 
             if (!isTransforming) translatingType = transformType;
 
-            if (Input.GetKeyDown(SetPivotModeToggle))
+            if (Input.GetKey(changeModeHotkey))
             {
-                if (pivot == TransformPivot.Pivot) pivot = TransformPivot.Center;
-                else if (pivot == TransformPivot.Center) pivot = TransformPivot.Pivot;
+                if (Input.GetKeyDown(SetPivotModeToggle))
+                {
+                    if (pivot == TransformPivot.Pivot) pivot = TransformPivot.Center;
+                    else if (pivot == TransformPivot.Center) pivot = TransformPivot.Pivot;
 
-                SetPivotPoint();
-            }
+                    SetPivotPoint();
+                }
 
-            if (Input.GetKeyDown(SetCenterTypeToggle))
-            {
-                if (centerType == CenterType.All) centerType = CenterType.Solo;
-                else if (centerType == CenterType.Solo) centerType = CenterType.All;
+                if (Input.GetKeyDown(SetCenterTypeToggle))
+                {
+                    if (centerType == CenterType.All) centerType = CenterType.Solo;
+                    else if (centerType == CenterType.Solo) centerType = CenterType.All;
 
-                SetPivotPoint();
-            }
+                    SetPivotPoint();
+                }
 
-            if (Input.GetKeyDown(SetSpaceToggle))
-            {
-                if (space == TransformSpace.Global) space = TransformSpace.Local;
-                else if (space == TransformSpace.Local) space = TransformSpace.Global;
-            }
+                if (Input.GetKeyDown(SetSpaceToggle))
+                {
+                    if (space == TransformSpace.Global) space = TransformSpace.Local;
+                    else if (space == TransformSpace.Local) space = TransformSpace.Global;
+                }
 
-            if (Input.GetKeyDown(SetScaleTypeToggle))
-            {
-                if (scaleType == ScaleType.FromPoint) scaleType = ScaleType.FromPointOffset;
-                else if (scaleType == ScaleType.FromPointOffset) scaleType = ScaleType.FromPoint;
+                if (Input.GetKeyDown(SetScaleTypeToggle))
+                {
+                    if (scaleType == ScaleType.FromPoint) scaleType = ScaleType.FromPointOffset;
+                    else if (scaleType == ScaleType.FromPointOffset) scaleType = ScaleType.FromPoint;
+                }
             }
 
             if (transformType == TransformType.Scale)
@@ -374,7 +409,7 @@ namespace RuntimeGizmos
 
         IEnumerator TransformSelected(TransformType transType)
         {
-            isTransforming = true;
+            SetTransforming(true);
             totalScaleAmount = 0;
             totalRotationAmount = Quaternion.identity;
 
@@ -593,7 +628,7 @@ namespace RuntimeGizmos
 
             totalRotationAmount = Quaternion.identity;
             totalScaleAmount = 0;
-            isTransforming = false;
+            SetTransforming(false);
             SetTranslatingAxis(transformType, Axis.None);
 
             SetPivotPoint();
@@ -649,8 +684,13 @@ namespace RuntimeGizmos
 
         void GetTarget()
         {
-            if (nearAxis == Axis.None && Input.GetMouseButtonDown(0))
+            if (nearAxis == Axis.None)
             {
+                bool leftClick = Input.GetMouseButtonDown(0);
+                bool rightClick = Input.GetMouseButtonDown(1);
+
+                if (!leftClick && !rightClick) return;
+
                 bool isAdding = Input.GetKey(AddSelection);
                 bool isRemoving = Input.GetKey(RemoveSelection);
 
@@ -658,28 +698,34 @@ namespace RuntimeGizmos
                 if (Physics.Raycast(myCamera.ScreenPointToRay(Input.mousePosition), out hitInfo, Mathf.Infinity, selectionMask))
                 {
                     Transform target = hitInfo.transform;
-                    //UIHandle handle = target.GetComponent<UIHandle>();
-                    //target = handle.Target as Transform;
+                    UIHandle handle = target.GetComponent<UIHandle>();
+                    target = handle.Target as Transform;
 
-                    if (isAdding)
+                    if (rightClick)
                     {
-                        AddTarget(target);
+                        HandleManager.CloseAllPopups();
+                        handle.TogglePopup(0);
                     }
-                    else if (isRemoving)
+                    else if (leftClick)
                     {
-                        RemoveTarget(target);
-                    }
-                    else if (!isAdding && !isRemoving)
-                    {
-                        ClearAndAddTarget(target);
+                        if (isAdding)
+                        {
+                            AddTarget(target);
+                        }
+                        else if (isRemoving)
+                        {
+                            RemoveTarget(target);
+                        }
+                        else if (!isAdding && !isRemoving)
+                        {
+                            ClearAndAddTarget(target);
+                        }
                     }
                 }
-                else
+                else if (rightClick)
                 {
-                    if (!isAdding && !isRemoving)
-                    {
-                        ClearTargets();
-                    }
+                    HandleManager.CloseAllPopups();
+                    ClearTargets();
                 }
             }
         }
@@ -1442,6 +1488,12 @@ namespace RuntimeGizmos
                 lineMaterial = new Material(Shader.Find("Custom/Lines"));
                 outlineMaterial = new Material(Shader.Find("Custom/Outline"));
             }
+        }
+
+        void SetTransforming(bool value)
+        {
+            isTransforming = value;
+            HandleManager.InteractionInProgress = value;
         }
     }
 }

@@ -23,16 +23,16 @@ public class SerializableBone
         {
             if (t.name.EndsWith("_L"))
             {
-                Tags.Add(BoneTags.Left);
+                tags.Add(BoneTags.Left);
             }
             else if (t.name.EndsWith("_R"))
             {
-                Tags.Add(BoneTags.Right);
+                tags.Add(BoneTags.Right);
             }
 
             if(t.GetComponentInParent<DynamicBone>() != null)
             {
-                Tags.Add(BoneTags.Dynamic);
+                tags.Add(BoneTags.Dynamic);
             }
         }
 
@@ -44,23 +44,14 @@ public class SerializableBone
         Bone = t;
     }
 
-    public void ApplyTo(SerializableBone target)
-    {
-        if(target.Bone == null)
-        {
-            Debug.LogError($"Target bone {target.Name} does not reference a bone in the scene.");
-            return;
-        }
-
-        Transform.ApplyTo(target.Bone);
-    }
-
-    //feel free to add more
+    //feel free to add more. do not change order!
     public enum BoneTags
     {
         Left,
         Right,
         Dynamic,
         Humanoid,
+        Finger,
+        Face
     }
 }

@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,50 @@ public class UIPoseContainer : MonoBehaviour
         return poseContainer;
     }
 
+    public static void CreateBackupFromScene()
+    {
+        UmaContainerCharacter container = UmaViewerBuilder.Instance.CurrentUMAContainer;
+
+        if (container == null) return;
+
+        var poseData = new PoseData();
+        poseData.Name = "AutoBackup";
+        poseData.Date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        poseData.Character = container.name;
+        poseData.Description = "Last created pose";
+        poseData.ViewerVersion = Application.version;
+        poseData.Bones = container.SaveBones();
+        poseData.Morphs = container.SaveMorphs(true);
+
+        string fullpath = $"{Application.dataPath}/../Poses/{poseData.Name}.umaPose";
+        fullpath = Path.GetFullPath(fullpath);
+
+        try
+        {
+            Directory.CreateDirectory(Application.dataPath + "/../Poses");
+
+            File.WriteAllText(fullpath, JsonConvert.SerializeObject(poseData));
+
+            UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
+
+            var poseContainers = UmaViewerUI.Instance.PoseManager.SavedPoseList.content.GetComponentsInChildren<UIPoseContainer>();
+            var poseContainer = poseContainers.FirstOrDefault(c => c.NameLabel.text == "AutoBackup");
+
+            if (poseContainer != null)
+            {
+                poseContainer.Init(poseData);
+            }
+            else
+            {
+                UIPoseContainer.Create(poseData);
+            }
+        }
+        catch (Exception e)
+        {
+            UmaViewerUI.Instance.ShowMessage(e.Message, UIMessageType.Error);
+        }
+    }
+
     public void Init(PoseData data)
     {
         PoseData = data;
@@ -35,6 +80,47 @@ public class UIPoseContainer : MonoBehaviour
         NameLabel.text = data.Name;
         DescriptionLabel.text = data.Description;
         InfoLabel.text = $"Version: {data.ViewerVersion}\nCharacter: {data.Character}\nSave date: {data.Date}";
+    }
+
+    public void SaveNew()
+    {
+        UmaContainerCharacter container = UmaViewerBuilder.Instance.CurrentUMAContainer;
+
+        if (container == null) return;
+
+        var poseData = new PoseData();
+        poseData.Name = NameLabel.text;
+        poseData.Date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        poseData.Character = container.name;
+        poseData.Description = DescriptionLabel.text;
+        poseData.ViewerVersion = Application.version;
+        poseData.Bones = container.SaveBones();
+        poseData.Morphs = container.SaveMorphs(true);
+
+        var duplicateContainer = CheckIfContainerExists(poseData.Name);
+        if (duplicateContainer != this)
+        {
+            UmaViewerUI.Instance.ShowMessage($"Another save exists with name {poseData.Name}", UIMessageType.Error);
+            return;
+        }
+
+        string fullpath = $"{Application.dataPath}/../Poses/{poseData.Name}.umaPose";
+        fullpath = Path.GetFullPath(fullpath);
+
+        try
+        {
+            Directory.CreateDirectory(Application.dataPath + "/../Poses");
+
+            File.WriteAllText(fullpath, JsonConvert.SerializeObject(poseData));
+
+            UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
+
+            UIPoseContainer.Create(poseData);
+        }
+        catch (Exception e)
+        {
+            UmaViewerUI.Instance.ShowMessage(e.Message, UIMessageType.Error);
+        }
     }
 
     public void Save()
@@ -50,6 +136,14 @@ public class UIPoseContainer : MonoBehaviour
         poseData.Description    = DescriptionLabel.text;
         poseData.ViewerVersion  = Application.version;
         poseData.Bones          = container.SaveBones();
+        poseData.Morphs         = container.SaveMorphs(true);
+
+        var duplicateContainer = CheckIfContainerExists(poseData.Name);
+        if (duplicateContainer != this)
+        {
+            UmaViewerUI.Instance.ShowMessage($"Another save exists with name {poseData.Name}", UIMessageType.Error);
+            return;
+        }
 
         string fullpath = $"{Application.dataPath}/../Poses/{poseData.Name}.umaPose";
         fullpath = Path.GetFullPath(fullpath);
@@ -62,8 +156,15 @@ public class UIPoseContainer : MonoBehaviour
 
             UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
 
-            //Only replace the data if everything succeeded
-            Init(poseData);
+            if(poseData.Name != PoseData.Name)
+            {
+                UIPoseContainer.Create(poseData);
+            }
+            else
+            {
+                //Only replace the data if everything succeeded
+                Init(poseData);
+            }
         }
         catch (Exception e)
         {
@@ -73,13 +174,20 @@ public class UIPoseContainer : MonoBehaviour
 
     public void Load()
     {
-        UmaViewerUI.Instance.PoseManager.SetPoseMode(true);
+        PoseManager.SetPoseModeStatic(true);
 
         UmaContainerCharacter container = UmaViewerBuilder.Instance.CurrentUMAContainer;
 
         if (container == null) return;
 
-        container.LoadBones(PoseData);
+        var loadOptions = PoseManager.GetLoadOptions();
+
+        container.LoadBones(PoseData, loadOptions);
+
+        if (loadOptions.Morphs)
+        {
+            container.LoadMorphs(PoseData);
+        }
     }
 
     public void Delete()
@@ -95,5 +203,13 @@ public class UIPoseContainer : MonoBehaviour
         }
 
         UmaViewerUI.Instance.ShowMessage($"Deleted pose: {fullpath}", UIMessageType.Success);
+    }
+
+    private UIPoseContainer CheckIfContainerExists(string poseName)
+    {
+        var poseContainers = UmaViewerUI.Instance.PoseManager.SavedPoseList.content.GetComponentsInChildren<UIPoseContainer>();
+        var poseContainer = poseContainers.FirstOrDefault(c => c.NameLabel.text == poseName);
+
+        return poseContainer;
     }
 }

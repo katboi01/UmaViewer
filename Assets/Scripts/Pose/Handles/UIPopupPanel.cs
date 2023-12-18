@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,15 +16,13 @@ public class UIPopupPanel : MonoBehaviour
     {
         Owner = owner;
         transform.SetAsFirstSibling();
-        NameLabel.text = owner.name;
+        NameLabel.text = owner.Target.name;
         return this;
     }
 
-    private void Update()
+    public void UpdateManual(Camera camera)
     {
-        var cam = Camera.current;
-
-        if (cam.WorldToScreenPoint(Owner.transform.position).x < cam.pixelWidth / 2 - _side)
+        if (camera.WorldToScreenPoint(Owner.transform.position).x < camera.pixelWidth / 2 - _side)
         {
             _side = -1;
         }
@@ -35,8 +31,8 @@ public class UIPopupPanel : MonoBehaviour
             _side = 1;
         }
 
-        float pos = _side * cam.pixelWidth / 20 + Offset;
-        transform.position = cam.WorldToScreenPoint(Owner.transform.position) + pos * Vector3.right;
+        float pos = _side * camera.pixelWidth / 20 + Offset;
+        transform.position = camera.WorldToScreenPoint(Owner.transform.position) + pos * Vector3.right;
 
         foreach (var kv in ConditionalButtons)
         {
@@ -48,14 +44,14 @@ public class UIPopupPanel : MonoBehaviour
     {
         Button b = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_PopupButton, Content).GetComponent<Button>();
         b.onClick.AddListener(()=>callback.Invoke());
-        b.GetComponentInChildren<Text>().text = name;
+        b.GetComponentInChildren<TMPro.TMP_Text>().text = name;
     }
 
     public void AddConditionalButton(string name, System.Func<bool> condition, System.Action callback)
     {
         Button b = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_PopupButton, Content).GetComponent<Button>();
         b.onClick.AddListener(() => callback.Invoke());
-        b.GetComponentInChildren<Text>().text = name;
+        b.GetComponentInChildren<TMPro.TMP_Text>().text = name;
         ConditionalButtons.Add(b.gameObject, condition);
     }
 }
