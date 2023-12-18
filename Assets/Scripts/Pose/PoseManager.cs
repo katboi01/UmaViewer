@@ -107,6 +107,8 @@ public class PoseManager : MonoBehaviour
 
     public void EnablePoseMode()
     {
+        if (PoseModeOn) return;
+
         var ui = UmaViewerUI.Instance;
         var builder = UmaViewerBuilder.Instance;
         ui.SetEyeTrackingEnable(false);
@@ -123,6 +125,8 @@ public class PoseManager : MonoBehaviour
 
     public void DisablePoseMode()
     {
+        if (!PoseModeOn) return;
+
         UIPoseContainer.CreateBackupFromScene();
 
         var ui = UmaViewerUI.Instance;

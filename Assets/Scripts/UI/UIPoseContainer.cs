@@ -158,7 +158,10 @@ public class UIPoseContainer : MonoBehaviour
 
             if(poseData.Name != PoseData.Name)
             {
+                //Create new container with new data
                 UIPoseContainer.Create(poseData);
+                //Reset back to old data
+                Init(PoseData);
             }
             else
             {
