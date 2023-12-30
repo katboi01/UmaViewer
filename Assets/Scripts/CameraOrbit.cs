@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.Rendering.PostProcessing;
 
 public class CameraOrbit : MonoBehaviour
 {
@@ -57,6 +53,8 @@ public class CameraOrbit : MonoBehaviour
 
     void Update()
     {
+        if (HandleManager.InteractionInProgress) return;
+
         if(CameraMode != CameraModeDropdown.value)
         {
             switch (CameraMode) //old

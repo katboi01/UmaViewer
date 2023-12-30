@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -44,6 +45,8 @@ public class UmaViewerUI : MonoBehaviour
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
+    public PoseManager PoseManager;
+    public HandleManager HandleManager;
 
     [Header("lists")]
     public ScrollRect EmotionList;
@@ -60,6 +63,8 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect NormalSubSoundList;
     public PageManager NormalSoundCtrl;
 
+    [Header("pose mode")]
+    public Transform HandlesPanel;
 
     [Header("audio")]
     public Slider AudioSlider;
@@ -158,6 +163,8 @@ public class UmaViewerUI : MonoBehaviour
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
+
+        PoseManager.LoadLocalPoseFiles();
     }
 
     private void OnDestroy()
@@ -592,6 +599,7 @@ public class UmaViewerUI : MonoBehaviour
     public void PlayLive()
     {
         if (currentLive == null) return;
+        PoseManager.SetPoseMode(false);
         var selectlist = LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>();
         if (selectlist != null)
         {
@@ -693,7 +701,6 @@ public class UmaViewerUI : MonoBehaviour
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         list.Add(Main.AbList[$"3d/motion/event/body/chara/chr{achara.Id}_00/anm_eve_chr{achara.Id}_00_idle01_loop"]);
-
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
@@ -1051,19 +1058,19 @@ public class UmaViewerUI : MonoBehaviour
     public void SetDynamicBoneEnable(bool isOn)
     {
         DynamicBoneEnable = isOn;
-        (Builder.CurrentUMAContainer)?.SetDynamicBoneEnable(isOn);
+        Builder.CurrentUMAContainer?.SetDynamicBoneEnable(isOn);
     }
 
     public void SetEyeTrackingEnable(bool isOn)
     {
         EnableEyeTracking = isOn;
-        (Builder.CurrentUMAContainer)?.SetEyeTracking(isOn);
+        Builder.CurrentUMAContainer?.SetEyeTracking(isOn);
     }
 
     public void SetFaceOverrideEnable(bool isOn)
     {
         EnableFaceOverride = isOn;
-        (Builder.CurrentUMAContainer)?.SetFaceOverrideData(isOn);
+        Builder.CurrentUMAContainer?.SetFaceOverrideData(isOn);
     }
 
     public void AudioPause()
@@ -1398,5 +1405,10 @@ public class UmaViewerUI : MonoBehaviour
                 ModelExporter.ExportModel(container, path);
             }
         }
+    }
+
+    public void ToggleVisible(GameObject go)
+    {
+        go.SetActive(!go.activeSelf);
     }
 }
