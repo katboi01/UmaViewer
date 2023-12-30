@@ -782,6 +782,7 @@ public class UmaContainerCharacter : UmaContainer
                             break;
                         case "Gallop/3D/Chara/ToonMayu":
                             m.shader = UmaAssetManager.EyebrowShader;
+                            m.renderQueue += 1; //fix eyebrows disappearing sometimes
                             break;
                         default:
                             Debug.Log(m.shader.name);
@@ -1365,6 +1366,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void SetupBoneHandles()
     {
+        if (IsLive) return;
         UIHandleCharacterRoot rootHandle = UIHandleCharacterRoot.CreateAsChild(this);
 
         var humanBones = GetHumanBones();
@@ -1512,7 +1514,7 @@ public class UmaContainerCharacter : UmaContainer
             };
         }
 
-        return _humanoidBones;
+        return _humanoidBones.Where(b => b != null).ToList();
     }
 
     public List<SerializableMorph> SaveMorphs(bool changedOnly)

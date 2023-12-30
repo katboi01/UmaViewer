@@ -53,7 +53,7 @@ public class UIPoseContainer : MonoBehaviour
 
             File.WriteAllText(fullpath, JsonConvert.SerializeObject(poseData));
 
-            UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
+            //UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
 
             var poseContainers = UmaViewerUI.Instance.PoseManager.SavedPoseList.content.GetComponentsInChildren<UIPoseContainer>();
             var poseContainer = poseContainers.FirstOrDefault(c => c.NameLabel.text == "AutoBackup");

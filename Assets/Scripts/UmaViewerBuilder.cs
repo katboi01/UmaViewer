@@ -46,8 +46,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
     {
-        PoseManager.SetPoseModeStatic(false);
-
         int id = chara.Id;
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
         CurrentUMAContainer = umaContainer;
@@ -526,6 +524,7 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.Initialize(!UI.isTPose);
 
         umaContainer.Position = umaContainer.transform.Find("Position");
+        umaContainer.SetupBoneHandles();
 
         if (!UI.isTPose && loadMotion)
         {
@@ -638,7 +637,10 @@ public class UmaViewerBuilder : MonoBehaviour
         var eyebrowRmat = matList.FirstOrDefault(a => a.gameObject.name.Equals("M_Mayu_R"));
         UI.LoadFacialPanelsMini(eyemat.material, eyebrowLmat.material, eyebrowRmat.material, mouthmat.material);
 
-        if(Main.AbList.TryGetValue($"3d/motion/mini/event/body/chara/chr{id}_00/anm_min_eve_chr{id}_00_idle01_loop",out asset))
+        umaContainer.Position = umaContainer.transform.Find("Position");
+        umaContainer.SetupBoneHandles();
+
+        if (Main.AbList.TryGetValue($"3d/motion/mini/event/body/chara/chr{id}_00/anm_min_eve_chr{id}_00_idle01_loop",out asset))
         {
             umaContainer.LoadAnimation(asset);
         }
@@ -932,6 +934,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void UnloadUma()
     {
+        PoseManager.SetPoseModeStatic(false);
+
         if (CurrentUMAContainer != null)
         {
             //It seems that OnDestroy will executed after new model loaded, which cause new FacialPanels empty...

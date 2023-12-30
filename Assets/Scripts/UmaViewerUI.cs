@@ -599,6 +599,7 @@ public class UmaViewerUI : MonoBehaviour
     public void PlayLive()
     {
         if (currentLive == null) return;
+        PoseManager.SetPoseMode(false);
         var selectlist = LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>();
         if (selectlist != null)
         {
@@ -700,7 +701,6 @@ public class UmaViewerUI : MonoBehaviour
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         list.Add(Main.AbList[$"3d/motion/event/body/chara/chr{achara.Id}_00/anm_eve_chr{achara.Id}_00_idle01_loop"]);
-
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
