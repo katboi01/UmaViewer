@@ -1,162 +1,185 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections;
-using RootMotion;
+﻿using UnityEditor;
+using UnityEngine;
 
-namespace RootMotion.Dynamics {
+namespace RootMotion.Dynamics
+{
 
-	[CustomEditor(typeof(BipedRagdollCreator))]
-	public class BipedRagdollCreatorInspector : Editor {
+    [CustomEditor(typeof(BipedRagdollCreator))]
+    public class BipedRagdollCreatorInspector : Editor
+    {
 
-		public BipedRagdollCreator script { get { return target as BipedRagdollCreator; }}
+        public BipedRagdollCreator script { get { return target as BipedRagdollCreator; } }
 
-		private GUIStyle miniLabelStyle = new GUIStyle();
+        private GUIStyle miniLabelStyle = new GUIStyle();
 
-		void OnEnable() {
-			if (script == null) return;
-			if (Application.isPlaying) return;
+        void OnEnable()
+        {
+            if (script == null) return;
+            if (Application.isPlaying) return;
 
-			// Autodetection
-			if (script.references.IsEmpty(false)) {
-				Animator animator = script.gameObject.GetComponent<Animator>();
-				
-				if (animator == null && script.references.root != null) {
-					animator = script.references.root.GetComponentInChildren<Animator>();
-					if (animator == null) animator = GetAnimatorInParents(script.references.root);
-				}
-				
-				if (animator != null) {
-					script.references = BipedRagdollReferences.FromAvatar(animator);
+            // Autodetection
+            if (script.references.IsEmpty(false))
+            {
+                Animator animator = script.gameObject.GetComponent<Animator>();
 
-				} else {
-					BipedReferences r = new BipedReferences();
-					BipedReferences.AutoDetectReferences(ref r, script.transform, BipedReferences.AutoDetectParams.Default);
-					if (r.isFilled) script.references = BipedRagdollReferences.FromBipedReferences(r);
-				}
+                if (animator == null && script.references.root != null)
+                {
+                    animator = script.references.root.GetComponentInChildren<Animator>();
+                    if (animator == null) animator = GetAnimatorInParents(script.references.root);
+                }
 
-				if (!OnRoot()) {
-					Debug.LogWarning("BipedRagdollCreator must be added to the root of the character. Destroying the component.");
-					DestroyImmediate(script);
-					return;
-				}
+                if (animator != null)
+                {
+                    script.references = BipedRagdollReferences.FromAvatar(animator);
 
-				string msg = string.Empty;
-				if (script.references.IsValid(ref msg)) {
-					script.options = BipedRagdollCreator.AutodetectOptions(script.references);
-					//BipedRagdollCreator.Create(script.references, script.options);
+                }
+                else
+                {
+                    BipedReferences r = new BipedReferences();
+                    BipedReferences.AutoDetectReferences(ref r, script.transform, BipedReferences.AutoDetectParams.Default);
+                    if (r.isFilled) script.references = BipedRagdollReferences.FromBipedReferences(r);
+                }
 
-					//if (animator != null) DestroyImmediate(animator);
-					//if (script.GetComponent<Animation>() != null) DestroyImmediate(script.GetComponent<Animation>());
-				}
-			}
-		}
+                if (!OnRoot())
+                {
+                    Debug.LogWarning("BipedRagdollCreator must be added to the root of the character. Destroying the component.");
+                    DestroyImmediate(script);
+                    return;
+                }
 
-		private bool OnRoot() {
-			if (script.references.Contains(script.transform, true)) return false;
-			if (script.references.root != null) {
-				var bipedRagdollCreatorOnChild = script.references.root.GetComponentInChildren<BipedRagdollCreator>();
-				if (bipedRagdollCreatorOnChild != null && bipedRagdollCreatorOnChild.transform != script.references.root) return false;
-			}
-			return true;
-		}
+                string msg = string.Empty;
+                if (script.references.IsValid(ref msg))
+                {
+                    script.options = BipedRagdollCreator.AutodetectOptions(script.references);
+                    //BipedRagdollCreator.Create(script.references, script.options);
 
-		public override void OnInspectorGUI() {
-			miniLabelStyle.wordWrap = true;
-			miniLabelStyle.fontSize = 9;
-			miniLabelStyle.normal.textColor = EditorStyles.miniLabel.normal.textColor;
+                    //if (animator != null) DestroyImmediate(animator);
+                    //if (script.GetComponent<Animation>() != null) DestroyImmediate(script.GetComponent<Animation>());
+                }
+            }
+        }
 
-			serializedObject.Update();
+        private bool OnRoot()
+        {
+            if (script.references.Contains(script.transform, true)) return false;
+            if (script.references.root != null)
+            {
+                var bipedRagdollCreatorOnChild = script.references.root.GetComponentInChildren<BipedRagdollCreator>();
+                if (bipedRagdollCreatorOnChild != null && bipedRagdollCreatorOnChild.transform != script.references.root) return false;
+            }
+            return true;
+        }
 
-			if (Application.isPlaying) {
-				GUILayout.BeginVertical("Box");
-				GUILayout.Label("Can not edit ragdolls in play mode.");
-				GUILayout.EndVertical();
-				return;
-			}
+        public override void OnInspectorGUI()
+        {
+            miniLabelStyle.wordWrap = true;
+            miniLabelStyle.fontSize = 9;
+            miniLabelStyle.normal.textColor = EditorStyles.miniLabel.normal.textColor;
 
-			GUI.changed = false;
-			GUILayout.Space(10);
-			EditorGUILayout.BeginVertical("Box");
-			int indent = EditorGUI.indentLevel;
-			EditorGUI.indentLevel = 1;
+            serializedObject.Update();
 
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("references"), new GUIContent("References", "Definition of the biped ragdoll."), true);
+            if (Application.isPlaying)
+            {
+                GUILayout.BeginVertical("Box");
+                GUILayout.Label("Can not edit ragdolls in play mode.");
+                GUILayout.EndVertical();
+                return;
+            }
 
-			if (GUI.changed) {
-				serializedObject.ApplyModifiedProperties();
-				EditorUtility.SetDirty(script);
-			}
+            GUI.changed = false;
+            GUILayout.Space(10);
+            EditorGUILayout.BeginVertical("Box");
+            int indent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 1;
 
-			string msg = string.Empty;
-			bool referencesValid = script.references.IsValid(ref msg);
-			if (serializedObject.FindProperty("references").isExpanded) GUILayout.Space(5);
-			EditorGUILayout.EndVertical();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("references"), new GUIContent("References", "Definition of the biped ragdoll."), true);
 
-			if (referencesValid) {
-				if (!script.canBuild) {
-					GUILayout.Space(5);
+            if (GUI.changed)
+            {
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(script);
+            }
 
-					if (GUILayout.Button("Create a Ragdoll")) {
-						script.canBuild = true;
-					}
-					GUILayout.Label("Clears all existing physics components, creates a new ragdoll and starts live-updating. NB! THIS CAN NOT BE UNDONE!", miniLabelStyle);
-					GUILayout.Space(5);
-				} 
+            string msg = string.Empty;
+            bool referencesValid = script.references.IsValid(ref msg);
+            if (serializedObject.FindProperty("references").isExpanded) GUILayout.Space(5);
+            EditorGUILayout.EndVertical();
 
-				if (script.canBuild) {
-					GUI.changed = false;
-					//GUILayout.Space(5);
-					EditorGUILayout.BeginVertical("Box");
-					EditorGUILayout.PropertyField(serializedObject.FindProperty("options"), new GUIContent("Options", "Options for automatic ragdoll generation."), true);
+            if (referencesValid)
+            {
+                if (!script.canBuild)
+                {
+                    GUILayout.Space(5);
 
-					if (GUI.changed) {
-						serializedObject.ApplyModifiedProperties();
-						EditorUtility.SetDirty(script);
-					}
-					if (serializedObject.FindProperty("options").isExpanded) GUILayout.Space(5);
-					EditorGUILayout.EndVertical();
+                    if (GUILayout.Button("Create a Ragdoll"))
+                    {
+                        script.canBuild = true;
+                    }
+                    GUILayout.Label("Clears all existing physics components, creates a new ragdoll and starts live-updating. NB! THIS CAN NOT BE UNDONE!", miniLabelStyle);
+                    GUILayout.Space(5);
+                }
 
-					BipedRagdollCreator.Create(script.references, script.options);
+                if (script.canBuild)
+                {
+                    GUI.changed = false;
+                    //GUILayout.Space(5);
+                    EditorGUILayout.BeginVertical("Box");
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("options"), new GUIContent("Options", "Options for automatic ragdoll generation."), true);
 
-					GUILayout.Space(10);
+                    if (GUI.changed)
+                    {
+                        serializedObject.ApplyModifiedProperties();
+                        EditorUtility.SetDirty(script);
+                    }
+                    if (serializedObject.FindProperty("options").isExpanded) GUILayout.Space(5);
+                    EditorGUILayout.EndVertical();
 
-					if (GUILayout.Button("Done")) {
-						EditorGUI.indentLevel = indent;
-						DestroyImmediate(script);
-						return;
-					}
+                    BipedRagdollCreator.Create(script.references, script.options);
 
-					GUILayout.Label("Removes this component.", miniLabelStyle);
+                    GUILayout.Space(10);
 
-					if (GUILayout.Button("Start Editing Manually")) {
-						script.gameObject.AddComponent<RagdollEditor>();
-						EditorGUI.indentLevel = indent;
-						DestroyImmediate(script);
-						return;
-					}
-						
-					GUILayout.Label("Replaces this component with the RagdollEditor.", miniLabelStyle);
+                    if (GUILayout.Button("Done"))
+                    {
+                        EditorGUI.indentLevel = indent;
+                        DestroyImmediate(script);
+                        return;
+                    }
 
-					GUILayout.Space(10);
-				}
-			} else {
-				GUILayout.Space(10);
-				GUILayout.BeginVertical("Box");
-				GUILayout.Label(msg);
-				GUILayout.EndVertical();
-				GUILayout.Space(10);
+                    GUILayout.Label("Removes this component.", miniLabelStyle);
 
-				if (script.canBuild) RagdollCreator.ClearAll(script.transform);
-			}
+                    if (GUILayout.Button("Start Editing Manually"))
+                    {
+                        script.gameObject.AddComponent<RagdollEditor>();
+                        EditorGUI.indentLevel = indent;
+                        DestroyImmediate(script);
+                        return;
+                    }
 
-			EditorGUI.indentLevel = indent;
-		}
+                    GUILayout.Label("Replaces this component with the RagdollEditor.", miniLabelStyle);
 
-		private static Animator GetAnimatorInParents(Transform transform) {
-			if (transform.GetComponent<Animator>() != null) return transform.GetComponent<Animator>();
-			if (transform.parent == null) return null;
-			return GetAnimatorInParents(transform.parent);
-		}
+                    GUILayout.Space(10);
+                }
+            }
+            else
+            {
+                GUILayout.Space(10);
+                GUILayout.BeginVertical("Box");
+                GUILayout.Label(msg);
+                GUILayout.EndVertical();
+                GUILayout.Space(10);
 
-	}
+                if (script.canBuild) RagdollCreator.ClearAll(script.transform);
+            }
+
+            EditorGUI.indentLevel = indent;
+        }
+
+        private static Animator GetAnimatorInParents(Transform transform)
+        {
+            if (transform.GetComponent<Animator>() != null) return transform.GetComponent<Animator>();
+            if (transform.parent == null) return null;
+            return GetAnimatorInParents(transform.parent);
+        }
+
+    }
 }

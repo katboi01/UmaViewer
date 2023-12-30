@@ -1,6 +1,6 @@
 ﻿// StageA2UManager
-using System.Collections.Generic;
 using Cutt;
+using System.Collections.Generic;
 
 public class StageA2UManager : A2UManager
 {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Collections;
-using Stage;
+﻿using System.Collections;
 
 /// <summary>
 /// Liveで使用するアセットファイルを取りまとめるクラス
@@ -110,7 +105,7 @@ public interface LiveDirector
     {
         get;
     }
-    
+
     string[] charaMotionFiles
     {
         get;

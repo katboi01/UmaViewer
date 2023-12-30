@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Threading;
+﻿using DereTore.Exchange.Archive.ACB;
 using DereTore.Exchange.Audio.HCA;
-using DereTore.Exchange.Archive.ACB;
+using System;
+using System.IO;
 
 public class DecodeACB
 {
@@ -56,7 +55,7 @@ public class DecodeACB
         MemoryStream memoryStream = new MemoryStream(inputData);
 
         //acbファイルを展開
-        using (AcbFile acb = AcbFile.FromStream(memoryStream,0,inputData.Length,"default",true))
+        using (AcbFile acb = AcbFile.FromStream(memoryStream, 0, inputData.Length, "default", true))
         {
             var fileNames = acb.GetFileNames();
             var s = fileNames[0];

@@ -11,7 +11,7 @@ namespace Cutt
         AnimationState liveMSQCurrentAnimState { get; set; }
 
         float liveMSQCurrentAnimStartTime { get; set; }
-        
+
         ILiveTimelineMSQTarget[] spareTarget { get; }
 
         void OnMotionChange();

@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Audio.HCA {
-    internal sealed class DataBits {
+﻿namespace DereTore.Exchange.Audio.HCA
+{
+    internal sealed class DataBits
+    {
 
-        public DataBits(byte[] data, uint size) {
+        public DataBits(byte[] data, uint size)
+        {
             _data = data;
             _size = size * 8 - 16;
             _bit = 0;
@@ -33,13 +36,15 @@
             return v;
         }
 
-        public int GetBit(int bitSize) {
+        public int GetBit(int bitSize)
+        {
             var v = CheckBit(bitSize);
             _bit += bitSize;
             return v;
         }
 
-        public void AddBit(int bitSize) {
+        public void AddBit(int bitSize)
+        {
             _bit += bitSize;
         }
 

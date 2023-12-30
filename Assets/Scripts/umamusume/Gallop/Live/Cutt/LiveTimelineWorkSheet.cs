@@ -1,7 +1,5 @@
-using Gallop.Live.Cutt;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
@@ -69,7 +67,7 @@ namespace Gallop.Live.Cutt
         Other = 262142,
         All = 262143
     }
-    
+
     public enum LiveCameraLookAtCharaParts
     {
         Face,
@@ -204,7 +202,7 @@ namespace Gallop.Live.Cutt
         //TO DO -> binary search algorithm
         public LiveTimelineKeyIndex FindCurrentKey(float currentTime)
         {
-            if(thisList.Count > 0)
+            if (thisList.Count > 0)
             {
                 int ret = BinarySearchKey(0, thisList.Count - 1, currentTime);
                 if (ret == -1)
@@ -251,7 +249,7 @@ namespace Gallop.Live.Cutt
             }
             else
             {
-                if(frame >= thisList[mid].frame)
+                if (frame >= thisList[mid].frame)
                 {
                     return BinarySearchKey(mid + 1, high, time);
                 }
@@ -259,7 +257,7 @@ namespace Gallop.Live.Cutt
                 {
                     return BinarySearchKey(low, mid - 1, time);
                 }
-            } 
+            }
         }
 
         public LiveTimelineKeyIndex FindCurrentKeyLinear(float currentTime)

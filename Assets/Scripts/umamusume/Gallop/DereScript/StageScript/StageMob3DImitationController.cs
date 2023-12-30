@@ -1,6 +1,6 @@
 ﻿// StageMob3DImitationController
-using System.Collections.Generic;
 using Cutt;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class StageMob3DImitationController : MonoBehaviour
@@ -61,8 +61,8 @@ public class StageMob3DImitationController : MonoBehaviour
     public void UpdateParams(ref MobCyalume3DUpdateInfo updateInfo)
     {
         float num = (updateInfo.paletteScrollSection + 0.5f) * 60f / 1024f;
-        float x = num - (float)(int)num;
-        float num2 = ((float)((int)num * 256) + 0.5f) / 1024f;
+        float x = num - (int)num;
+        float num2 = ((int)num * 256 + 0.5f) / 1024f;
         for (int i = 0; i < _materialList.Count; i++)
         {
             Material material = _materialList[i];

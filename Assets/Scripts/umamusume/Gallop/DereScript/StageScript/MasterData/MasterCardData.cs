@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterCardData
 {
@@ -282,12 +278,12 @@ public class MasterCardData
         List<CardData> list = new List<CardData>();
         foreach (KeyValuePair<int, CardData> item in cardDataDic)
         {
-            if ((int)item.Value.charaId == charaId)
+            if (item.Value.charaId == charaId)
             {
                 list.Add(item.Value);
             }
         }
-        list.Sort((CardData x, CardData y) => (int)x.id - (int)y.id);
+        list.Sort((CardData x, CardData y) => x.id - y.id);
         _dictionaryWithCharaId.Add(charaId, list);
         return _dictionaryWithCharaId[charaId];
     }
@@ -296,10 +292,10 @@ public class MasterCardData
     {
         List<CardData> list = new List<CardData>();
         List<CardData> listWithCharaIdOrderByIdAsc = GetListWithCharaIdOrderByIdAsc(charaId);
-        listWithCharaIdOrderByIdAsc.Sort((CardData a, CardData b) => (int)a.albumId - (int)b.albumId);
+        listWithCharaIdOrderByIdAsc.Sort((CardData a, CardData b) => a.albumId - b.albumId);
         for (int i = 0; i < listWithCharaIdOrderByIdAsc.Count; i++)
         {
-            if ((int)listWithCharaIdOrderByIdAsc[i].rarity == (int)rality)
+            if (listWithCharaIdOrderByIdAsc[i].rarity == rality)
             {
                 list.Add(listWithCharaIdOrderByIdAsc[i]);
             }

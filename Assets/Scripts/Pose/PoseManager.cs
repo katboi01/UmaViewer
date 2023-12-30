@@ -48,13 +48,13 @@ public class PoseManager : MonoBehaviour
         var pm = UmaViewerUI.Instance.PoseManager;
         return new PoseLoadOptions()
         {
-            Root        = pm._loadRoot.isOn,
-            Position    = pm._loadPosition.isOn,
-            Rotation    = pm._loadRotation.isOn,
-            Scale       = pm._loadScale.isOn,
-            Morphs      = pm._loadMorphs.isOn,
-            FaceBones   = pm._loadFaceBones.isOn,
-            Physics     = pm._loadPhysics.isOn
+            Root = pm._loadRoot.isOn,
+            Position = pm._loadPosition.isOn,
+            Rotation = pm._loadRotation.isOn,
+            Scale = pm._loadScale.isOn,
+            Morphs = pm._loadMorphs.isOn,
+            FaceBones = pm._loadFaceBones.isOn,
+            Physics = pm._loadPhysics.isOn
         };
     }
 
@@ -72,7 +72,7 @@ public class PoseManager : MonoBehaviour
                     UIPoseContainer.Create(data);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e);
                 Debug.LogError(file + " is not a valid pose file.");

@@ -352,7 +352,7 @@ public class Character3DBase : MonoBehaviour
                 if (card.openDressId == 0) { dressID = 1; }
                 else { dressID = card.openDressId; }
 
-                Initialize(card.id, card.charaId, dressID, 1, chara.modelHeightId, chara.modelWeightId, chara.modelBustId, chara.modelSkinId, (int)chara.attribute - 1, change_dressId, chara.height, card.attribute);
+                Initialize(card.id, card.charaId, dressID, 1, chara.modelHeightId, chara.modelWeightId, chara.modelBustId, chara.modelSkinId, chara.attribute - 1, change_dressId, chara.height, card.attribute);
             }
         }
 
@@ -506,7 +506,7 @@ public class Character3DBase : MonoBehaviour
                         int num2 = UnityEngine.Random.Range(0, propsConditionGroup.randomNameArray.Length);
                         text = text + "_" + propsConditionGroup.randomNameArray[num2];
                     }
-                    if (propsConditionGroup.alterPropsMode == LiveTimelinePropsSettings.AlterPropsMode.LeftHanded && (int)MasterDBManager.instance.masterCharaData.Get(_charaId).hand == 3002)
+                    if (propsConditionGroup.alterPropsMode == LiveTimelinePropsSettings.AlterPropsMode.LeftHanded && MasterDBManager.instance.masterCharaData.Get(_charaId).hand == 3002)
                     {
                         text += "_alt";
                     }
@@ -550,7 +550,7 @@ public class Character3DBase : MonoBehaviour
             List<MasterCardData.CardData> listWithCharaIdOrderByIdAsc = MasterDBManager.instance.masterCardData.GetListWithCharaIdOrderByIdAsc(charaId);
             for (int i = 0; i < listWithCharaIdOrderByIdAsc.Count; i++)
             {
-                if ((int)listWithCharaIdOrderByIdAsc[i].openDressId == dressId)
+                if (listWithCharaIdOrderByIdAsc[i].openDressId == dressId)
                 {
                     return listWithCharaIdOrderByIdAsc[i].id;
                 }
@@ -2538,8 +2538,8 @@ public class Character3DBase : MonoBehaviour
             if (!_useTrack && _targetMaterial.HasProperty(_shdPropID_frameOption))
             {
                 Vector4 vector = _targetMaterial.GetVector(_shdPropID_frameOption);
-                _randomFrameSwitch = (double)vector.x != 0.0;
-                _fixedFrameSwitch = (double)vector.y != 0.0;
+                _randomFrameSwitch = vector.x != 0.0;
+                _fixedFrameSwitch = vector.y != 0.0;
                 if (_randomFrameSwitch)
                 {
                     _specificalFrame = (int)Time.time % (int)_frameInfo.w;
@@ -3755,7 +3755,6 @@ public class Character3DBase : MonoBehaviour
 
         protected override MultiTextures OnGetMultiTextures(Material mtrl)
         {
-            MultiTextures multiTextures = null;
             return MaterialPack.CheckMaterialCategory(mtrl) switch
             {
                 MaterialPack.eMaterialCategory.Cheek => _texturePack.Get(TexturePack.eCategory.Cheek),
@@ -4207,7 +4206,6 @@ public class Character3DBase : MonoBehaviour
 
         public static bool IsSupport(Parts.eCategory category)
         {
-            bool flag = false;
             if (category == Parts.eCategory.Body)
             {
                 return true;
@@ -4223,7 +4221,7 @@ public class Character3DBase : MonoBehaviour
             {
                 int key = _lstUVIndexOffset[i].Key;
                 int value = _lstUVIndexOffset[i].Value;
-                float num = (float)i * 0.5f;
+                float num = i * 0.5f;
                 for (int j = key; j < value; j++)
                 {
                     Vector2 value2 = _lstUV[j];
@@ -5678,7 +5676,7 @@ public class Character3DBase : MonoBehaviour
         MasterCharaData.CharaData charaData = MasterDBManager.instance.masterCharaData.Get(id_character);
         if (charaData != null)
         {
-            result = new CharacterData(charaData.baseCardId, charaData.charaId, id_dress, id_accessory, charaData.modelHeightId, charaData.modelWeightId, charaData.modelBustId, charaData.modelSkinId, (int)charaData.attribute - 1, charaData.height, id_dress, charaData.attribute);
+            result = new CharacterData(charaData.baseCardId, charaData.charaId, id_dress, id_accessory, charaData.modelHeightId, charaData.modelWeightId, charaData.modelBustId, charaData.modelSkinId, charaData.attribute - 1, charaData.height, id_dress, charaData.attribute);
         }
         return result;
     }
@@ -5699,7 +5697,7 @@ public class Character3DBase : MonoBehaviour
             List<MasterDressColorData.DressColorData> listWithCharaIdAndModelTypeOrderByDressIdAsc = masterDressColorData.GetListWithCharaIdAndModelTypeOrderByDressIdAsc(id_character, 1);
             for (int i = 0; i < listWithCharaIdAndModelTypeOrderByDressIdAsc.Count; i++)
             {
-                if (id_dress == (int)listWithCharaIdAndModelTypeOrderByDressIdAsc[i].dressId)
+                if (id_dress == listWithCharaIdAndModelTypeOrderByDressIdAsc[i].dressId)
                 {
                     headTextureIndex = listWithCharaIdAndModelTypeOrderByDressIdAsc[i].colorId;
                     break;
@@ -5959,7 +5957,7 @@ public class Character3DBase : MonoBehaviour
 
     protected void UpdateCloth()
     {
-        if (isSetting && Time.realtimeSinceStartup - _cyspringUpdateTime >= 1f / (float)Application.targetFrameRate && isClothUpdate && _clothController != null && _clothController.Update(0f, isGather: false))
+        if (isSetting && Time.realtimeSinceStartup - _cyspringUpdateTime >= 1f / Application.targetFrameRate && isClothUpdate && _clothController != null && _clothController.Update(0f, isGather: false))
         {
             _cyspringUpdateTime = Time.realtimeSinceStartup;
         }
@@ -6326,12 +6324,12 @@ public class Character3DBase : MonoBehaviour
         int activeDressId = data.activeDressId;
         for (int i = 0; i < listWithMusicIdAndCharaIdOrderByDressIdAsc.Count; i++)
         {
-            if (activeDressId != (int)listWithMusicIdAndCharaIdOrderByDressIdAsc[i].dressId)
+            if (activeDressId != listWithMusicIdAndCharaIdOrderByDressIdAsc[i].dressId)
             {
                 continue;
             }
-            float fSpringFactor = (float)(int)listWithMusicIdAndCharaIdOrderByDressIdAsc[i].bodyRatio * 0.01f;
-            float fSpringFactor2 = (float)(int)listWithMusicIdAndCharaIdOrderByDressIdAsc[i].headRatio * 0.01f;
+            float fSpringFactor = listWithMusicIdAndCharaIdOrderByDressIdAsc[i].bodyRatio * 0.01f;
+            float fSpringFactor2 = listWithMusicIdAndCharaIdOrderByDressIdAsc[i].headRatio * 0.01f;
             foreach (Parts lstPart in _lstParts)
             {
                 if (lstPart.cloth != null && lstPart.cloth.spring != null)
@@ -7420,7 +7418,7 @@ public class Character3DBase : MonoBehaviour
         {
             _charaHeight = _bodyNodeNeck.position.y + num;
             _bodyScale = _bodyRoot.position.y / 1.02f;
-            _bodySubScale = (float)data.height / _charaHeight / 100f;
+            _bodySubScale = data.height / _charaHeight / 100f;
             _bodyScaleSubScale = _bodyScale * _bodySubScale;
         }
         Transform transform2 = null;
@@ -7589,7 +7587,7 @@ public class Character3DBase : MonoBehaviour
         float bodyCollisionScale = 1f;
         if (StageUtil.IsModelCommonDressId(_createInfo.activeDressId))
         {
-            bodyCollisionScale = (float)_createInfo.charaData.heightWithoutHeel / 154f;
+            bodyCollisionScale = _createInfo.charaData.heightWithoutHeel / 154f;
         }
         yield return _clothController.CreateCollision(_createInfo.cyspringPurpose, _bodyScale, bodyCollisionScale);
         if ((_createInfo.cyspringPurpose & CySpringCollisionComponent.ePurpose.Union) == 0)

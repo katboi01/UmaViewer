@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UmaSceneController:MonoBehaviour
+public class UmaSceneController : MonoBehaviour
 {
     public static UmaSceneController instance;
     public GameObject CavansPrefab;
@@ -55,7 +55,7 @@ public class UmaSceneController:MonoBehaviour
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
         // Wait until the last operation fully loads to return anything
-        yield return new WaitUntil(()=> asyncLoad.isDone);
+        yield return new WaitUntil(() => asyncLoad.isDone);
 
         OnSceneloaded?.Invoke();
 
@@ -72,7 +72,7 @@ public class UmaSceneController:MonoBehaviour
 
     public void LoadingProgressChange(int curren, int target, string message = null)
     {
-        if(curren == -1)
+        if (curren == -1)
         {
             LoadingProgressPanel.SetActive(false);
         }

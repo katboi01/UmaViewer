@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-//using LZ4Sharp;
+﻿//using LZ4Sharp;
 using LZ4ps;
+using System;
 
 namespace LZ4
 {
@@ -16,13 +12,13 @@ namespace LZ4
         public static byte[] decompress(byte[] indata)
         {
             int m_curPos = 4;
-            int token =  (int)(indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24));
+            int token = indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24);
             m_curPos += 4;
-            int decompSize = (int)(indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24));
+            int decompSize = indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24);
             m_curPos += 4;
-            int compSize = (int)(indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24));
+            int compSize = indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24);
             m_curPos += 4;
-            int tmp4 = (int)(indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24));
+            int tmp4 = indata[m_curPos - 4] | (indata[m_curPos - 3] << 8) | (indata[m_curPos - 2] << 16) | (indata[m_curPos - 1] << 24);
 
             //byte[] srcBytes = new byte[compSize];
             //Array.Copy(indata, 0x10, srcBytes, 0, compSize);

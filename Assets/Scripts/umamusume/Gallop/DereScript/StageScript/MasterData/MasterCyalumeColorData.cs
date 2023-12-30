@@ -1,6 +1,4 @@
 ﻿using Cute;
-using Sqlite3Plugin;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,13 +26,13 @@ namespace Stage
 
             public CyalumeColorData(string[] record)
             {
-                this._inColor.r = (float)int.Parse(record[1]) / 255f;
-                this._inColor.g = (float)int.Parse(record[2]) / 255f;
-                this._inColor.b = (float)int.Parse(record[3]) / 255f;
+                this._inColor.r = int.Parse(record[1]) / 255f;
+                this._inColor.g = int.Parse(record[2]) / 255f;
+                this._inColor.b = int.Parse(record[3]) / 255f;
                 this._inColor.a = 1f;
-                this._outColor.r = (float)int.Parse(record[4]) / 255f;
-                this._outColor.g = (float)int.Parse(record[5]) / 255f;
-                this._outColor.b = (float)int.Parse(record[6]) / 255f;
+                this._outColor.r = int.Parse(record[4]) / 255f;
+                this._outColor.g = int.Parse(record[5]) / 255f;
+                this._outColor.b = int.Parse(record[6]) / 255f;
                 this._outColor.a = 1f;
             }
 
@@ -85,7 +83,7 @@ namespace Stage
         public static MasterCyalumeColorData CreateFromSchemalessTable(string csvString)
         {
             MasterCyalumeColorData result = null;
-            
+
             /*
             using (Query query = db.Query("SELECT `raw` FROM `cyalume_color`"))
             {

@@ -1,7 +1,7 @@
 ﻿// TransformCollector
+using Cutt;
 using System;
 using System.Collections.Generic;
-using Cutt;
 using UnityEngine;
 
 /// <summary>

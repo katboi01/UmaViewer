@@ -1,8 +1,6 @@
-using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using System;
-using RootMotion;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace RootMotion.Dynamics
 {
@@ -215,7 +213,7 @@ namespace RootMotion.Dynamics
         /// <summary>
         /// All PropMuscles added to this PuppetMaster.
         /// </summary>
-        [SerializeField] [HideInInspector] public PropMuscle[] propMuscles = new PropMuscle[0];
+        [SerializeField][HideInInspector] public PropMuscle[] propMuscles = new PropMuscle[0];
 
         public delegate void UpdateDelegate();
         public delegate void MuscleDelegate(Muscle muscle);
@@ -313,16 +311,16 @@ namespace RootMotion.Dynamics
         /// <summary>
         /// If true, PuppetMaster will not handle internal collision ignores and you can have full control over handling it (call SetInternalCollisionsManual();).
         /// </summary>
-        [HideInInspector] [NonSerialized] public bool manualInternalCollisionControl;
+        [HideInInspector][NonSerialized] public bool manualInternalCollisionControl;
         /// <summary>
         /// If true, PuppetMaster will not handle angular limits and you can have full control over handling it (call SetAngularLimitsManual();).
         /// </summary>
-        [HideInInspector] [NonSerialized] public bool manualAngularLimitControl;
+        [HideInInspector][NonSerialized] public bool manualAngularLimitControl;
 
         /// <summary>
         /// If disabled, disconnected bones will not be mapped to disconnected ragdoll parts.
         /// </summary>
-        [SerializeField] [HideInInspector] public bool mapDisconnectedMuscles = true;
+        [SerializeField][HideInInspector] public bool mapDisconnectedMuscles = true;
 
         /// <summary>
         /// Normal means Animator is in Normal or Unscaled Time or Animation has Animate Physics unchecked.
@@ -450,7 +448,7 @@ namespace RootMotion.Dynamics
             get
             {
 #if UNITY_2018_3_OR_NEWER
-            return Physics.autoSimulation;
+                return Physics.autoSimulation;
 #else
                 return true;
 #endif
@@ -580,7 +578,7 @@ namespace RootMotion.Dynamics
             if (!initiated) return;
 
             // Find the SolverManagers on the Target hierarchy
-            var solversArray = (SolverManager[])targetRoot.GetComponentsInChildren<SolverManager>();
+            var solversArray = targetRoot.GetComponentsInChildren<SolverManager>();
             solvers.AddRange(solversArray);
         }
 
@@ -1112,7 +1110,7 @@ namespace RootMotion.Dynamics
                 foreach (BehaviourBase behaviour in behaviours) behaviour.OnRead();
             }
             if (muscleRead) Read();
-            
+
             // Switching states
             SwitchStates();
 
@@ -1161,12 +1159,12 @@ namespace RootMotion.Dynamics
 
                 foreach (Muscle m in muscles) m.CalculateMappedVelocity();
             }
-            
+
             if (mapDisconnectedMuscles)
             {
                 for (int i = 0; i < muscles.Length; i++) muscles[i].MapDisconnected();
             }
-            
+
 
             // Freezing
             if (freezeFlag) OnFreezeFlag();

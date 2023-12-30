@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public enum ColumnType : byte {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public enum ColumnType : byte
+    {
 
         Byte = 0x00,
         SByte = 0x01,

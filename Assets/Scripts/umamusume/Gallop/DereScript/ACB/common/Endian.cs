@@ -1,5 +1,7 @@
-﻿namespace DereTore.Common {
-    public enum Endian {
+﻿namespace DereTore.Common
+{
+    public enum Endian
+    {
 
         BigEndian,
         LittleEndian

@@ -30,7 +30,7 @@ namespace Cutt
             Top = (Capacity + Top - 1) % Capacity;
             Count = Math.Max(Count - 1, 0);
             T result = Items[Top];
-            Items[Top] = (T)null;
+            Items[Top] = null;
             return result;
         }
 
@@ -42,14 +42,14 @@ namespace Cutt
                 index = ((index <= num) ? (num - index) : (Capacity + (num - index)));
                 return Items[index];
             }
-            return (T)null;
+            return null;
         }
 
         public void Clear()
         {
             for (int i = 0; i < Capacity; i++)
             {
-                Items[i] = (T)null;
+                Items[i] = null;
             }
             Top = 0;
             Count = 0;

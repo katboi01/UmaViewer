@@ -1,10 +1,14 @@
 ﻿using DereTore.Common;
 
-namespace DereTore.Exchange.Audio.HCA {
-    internal sealed class Ath {
+namespace DereTore.Exchange.Audio.HCA
+{
+    internal sealed class Ath
+    {
 
-        public bool Initialize(uint type, uint key) {
-            switch (type) {
+        public bool Initialize(uint type, uint key)
+        {
+            switch (type)
+            {
                 case 0:
                     Init0();
                     break;
@@ -25,15 +29,20 @@ namespace DereTore.Exchange.Audio.HCA {
             }
         }
 
-        private void Init0() {
+        private void Init0()
+        {
             _table.ZeroMem();
         }
 
-        private void Init1(uint key) {
-            for (uint i = 0, v = 0; i < _table.Length; ++i, v += key) {
+        private void Init1(uint key)
+        {
+            for (uint i = 0, v = 0; i < _table.Length; ++i, v += key)
+            {
                 uint index = v >> 13;
-                if (index > 0x28e) {
-                    for (; i < _table.Length; ++i) {
+                if (index > 0x28e)
+                {
+                    for (; i < _table.Length; ++i)
+                    {
                         _table[i] = 0xff;
                     }
                     break;

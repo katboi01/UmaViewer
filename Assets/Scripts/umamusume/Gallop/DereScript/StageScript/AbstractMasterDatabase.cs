@@ -1,5 +1,4 @@
 ﻿using Sqlite3Plugin;
-using System;
 
 namespace Stage
 {

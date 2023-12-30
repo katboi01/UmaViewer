@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Archive.ACB.Serialization {
-    public abstract class UtfRowBase {
+﻿namespace DereTore.Exchange.Archive.ACB.Serialization
+{
+    public abstract class UtfRowBase
+    {
 
-        protected UtfRowBase() {
+        protected UtfRowBase()
+        {
         }
 
     }

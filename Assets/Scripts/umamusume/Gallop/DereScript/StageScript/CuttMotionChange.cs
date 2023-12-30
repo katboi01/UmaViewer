@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Cutt;
+﻿using Cutt;
 using Stage;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class CuttMotionChange

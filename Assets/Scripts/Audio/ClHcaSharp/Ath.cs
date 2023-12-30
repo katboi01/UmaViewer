@@ -83,7 +83,7 @@ namespace ClHcaSharp
 
                 if (index >= 654)
                 {
-                    Fill<byte>(athCurve,  i, SamplesPerSubframe - i,0xFF);
+                    Fill<byte>(athCurve, i, SamplesPerSubframe - i, 0xFF);
                     break;
                 }
                 athCurve[i] = baseCurve[index];

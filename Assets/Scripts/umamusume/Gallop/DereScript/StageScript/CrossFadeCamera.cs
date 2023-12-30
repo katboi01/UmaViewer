@@ -29,8 +29,8 @@ public class CrossFadeCamera : MonoBehaviour
     {
         Release();
         Camera component = GetComponent<Camera>();
-        int width = (int)((float)Screen.width * Director.instance.mainCameraRect.width);
-        int height = (int)((float)Screen.height * Director.instance.mainCameraRect.height);
+        int width = (int)(Screen.width * Director.instance.mainCameraRect.width);
+        int height = (int)(Screen.height * Director.instance.mainCameraRect.height);
         _renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
         _renderTexture.name = "CrossFadeCamera.colorBuffer";
         if (!_renderTexture.Create())

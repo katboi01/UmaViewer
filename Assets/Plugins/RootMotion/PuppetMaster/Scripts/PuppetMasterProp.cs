@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using RootMotion.Dynamics;
-using RootMotion;
 
 namespace RootMotion.Dynamics
 {

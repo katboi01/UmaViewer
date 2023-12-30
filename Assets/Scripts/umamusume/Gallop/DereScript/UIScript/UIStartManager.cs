@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// MenuからStartを押した際にViewに渡す変数を取りまとめる
@@ -287,9 +287,9 @@ public class UIStartManager : MonoBehaviour
 
             //ちひろ、最上、ジュリアが共通衣装を着ていた場合はアペンド扱いとなる
             bool special = false;
-            if(charas[i].charaID == 20 || charas[i].charaID == 313 || charas[i].charaID == 314)
+            if (charas[i].charaID == 20 || charas[i].charaID == 313 || charas[i].charaID == 314)
             {
-                if(dresses[i].dressID < 100)
+                if (dresses[i].dressID < 100)
                 {
                     special = true;
                 }

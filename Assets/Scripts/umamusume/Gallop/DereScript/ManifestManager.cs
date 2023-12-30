@@ -1,14 +1,10 @@
-﻿using System;
+﻿using Sqlite3Plugin;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Net;
-using Sqlite3Plugin;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.Events;
 
 public class ManifestManager : MonoBehaviour
 {
@@ -28,14 +24,14 @@ public class ManifestManager : MonoBehaviour
         {
             //OS設定を取得
             string osname = OSConfig.osName;
-            return string.Format(_manifestName,osname);
+            return string.Format(_manifestName, osname);
         }
     }
     private const string localmanifestName = @"manifest.db";
     private const string _manifestURLbase = @"https://asset-starlight-stage.akamaized.net/dl/{0}/manifests/{1}";
 
     public bool isError = false;
-        
+
     /// <summary>
     /// マニュフェストURL
     /// </summary>
@@ -62,7 +58,7 @@ public class ManifestManager : MonoBehaviour
     private List<URLData> datalists = null;
     private Dictionary<String, URLData> namedictionary = null;
     private Dictionary<String, URLData> hashdictionary = null;
-    
+
     /// <summary>
     ///　読み込みが完了しているか
     /// </summary>
@@ -70,7 +66,7 @@ public class ManifestManager : MonoBehaviour
     {
         get
         {
-            if(datalists != null && datalists.Count > 0)
+            if (datalists != null && datalists.Count > 0)
             {
                 return true;
             }
@@ -226,7 +222,7 @@ public class ManifestManager : MonoBehaviour
 
         while (true)
         {
-            if(datalists != null && datalists.Count > 0)
+            if (datalists != null && datalists.Count > 0)
             {
                 break;
             }

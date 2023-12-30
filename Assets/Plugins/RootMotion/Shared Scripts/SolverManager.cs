@@ -1,127 +1,142 @@
 using UnityEngine;
-using System.Collections;
 
-namespace RootMotion {
+namespace RootMotion
+{
 
-	/// <summary>
-	/// Manages solver initiation and updating
-	/// </summary>
-	public class SolverManager: MonoBehaviour {
-		
-		#region Main Interface
-		
-		/// <summary>
-		/// If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.
-		/// </summary>
-		[Tooltip("If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.")]
-		public bool fixTransforms = true;
+    /// <summary>
+    /// Manages solver initiation and updating
+    /// </summary>
+    public class SolverManager : MonoBehaviour
+    {
 
-		/// <summary>
-		/// [DEPRECATED] Use "enabled = false" instead.
-		/// </summary>
-		public void Disable() {
-			Debug.Log("IK.Disable() is deprecated. Use enabled = false instead", transform);
+        #region Main Interface
 
-			enabled = false;
-		}
+        /// <summary>
+        /// If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.
+        /// </summary>
+        [Tooltip("If true, will fix all the Transforms used by the solver to their initial state in each Update. This prevents potential problems with unanimated bones and animator culling with a small cost of performance. Not recommended for CCD and FABRIK solvers.")]
+        public bool fixTransforms = true;
 
-		#endregion Main
+        /// <summary>
+        /// [DEPRECATED] Use "enabled = false" instead.
+        /// </summary>
+        public void Disable()
+        {
+            Debug.Log("IK.Disable() is deprecated. Use enabled = false instead", transform);
 
-		protected virtual void InitiateSolver() {}
-		protected virtual void UpdateSolver() {}
-		protected virtual void FixTransforms() {}
-		
-		private Animator animator;
-		private Animation legacy;
-		private bool updateFrame;
-		private bool componentInitiated;
+            enabled = false;
+        }
 
-		void OnDisable() {
-			if (!Application.isPlaying) return;
-			Initiate();
-		}
+        #endregion Main
 
-		void Start() {
-			Initiate();
-		}
+        protected virtual void InitiateSolver() { }
+        protected virtual void UpdateSolver() { }
+        protected virtual void FixTransforms() { }
 
-		private bool animatePhysics {
-			get {
-				if (animator != null) return animator.updateMode == AnimatorUpdateMode.AnimatePhysics;
-				if (legacy != null) return legacy.animatePhysics;
-				return false;
-			}
-		}
+        private Animator animator;
+        private Animation legacy;
+        private bool updateFrame;
+        private bool componentInitiated;
 
-		private void Initiate() {
-			if (componentInitiated) return;
+        void OnDisable()
+        {
+            if (!Application.isPlaying) return;
+            Initiate();
+        }
 
-			FindAnimatorRecursive(transform, true);
-			
-			InitiateSolver();
-			componentInitiated = true;
-		}
+        void Start()
+        {
+            Initiate();
+        }
 
-		void Update() {
-			if (skipSolverUpdate) return;
-			if (animatePhysics) return;
+        private bool animatePhysics
+        {
+            get
+            {
+                if (animator != null) return animator.updateMode == AnimatorUpdateMode.AnimatePhysics;
+                if (legacy != null) return legacy.animatePhysics;
+                return false;
+            }
+        }
 
-			if (fixTransforms) FixTransforms();
-		}
+        private void Initiate()
+        {
+            if (componentInitiated) return;
 
-		// Finds the first Animator/Animation up the hierarchy
-		private void FindAnimatorRecursive(Transform t, bool findInChildren) {
-			if (isAnimated) return;
+            FindAnimatorRecursive(transform, true);
 
-			animator = t.GetComponent<Animator>();
-			legacy = t.GetComponent<Animation>();
+            InitiateSolver();
+            componentInitiated = true;
+        }
 
-			if (isAnimated) return;
+        void Update()
+        {
+            if (skipSolverUpdate) return;
+            if (animatePhysics) return;
 
-			if (animator == null && findInChildren) animator = t.GetComponentInChildren<Animator>();
-			if (legacy == null && findInChildren) legacy = t.GetComponentInChildren<Animation>();
+            if (fixTransforms) FixTransforms();
+        }
 
-			if (!isAnimated && t.parent != null) FindAnimatorRecursive(t.parent, false);
-		}
+        // Finds the first Animator/Animation up the hierarchy
+        private void FindAnimatorRecursive(Transform t, bool findInChildren)
+        {
+            if (isAnimated) return;
 
-		private bool isAnimated {
-			get {
-				return animator != null || legacy != null;
-			}
-		}
+            animator = t.GetComponent<Animator>();
+            legacy = t.GetComponent<Animation>();
 
-		// Workaround hack for the solver to work with animatePhysics
-		void FixedUpdate() {
-			if (skipSolverUpdate) {
-				skipSolverUpdate = false;
-			}
+            if (isAnimated) return;
 
-			updateFrame = true;
+            if (animator == null && findInChildren) animator = t.GetComponentInChildren<Animator>();
+            if (legacy == null && findInChildren) legacy = t.GetComponentInChildren<Animation>();
 
-			if (animatePhysics && fixTransforms) FixTransforms();
-		}
+            if (!isAnimated && t.parent != null) FindAnimatorRecursive(t.parent, false);
+        }
 
-		// Updating
-		void LateUpdate() {
-			if (skipSolverUpdate) return;
+        private bool isAnimated
+        {
+            get
+            {
+                return animator != null || legacy != null;
+            }
+        }
 
-			// Check if either animatePhysics is false or FixedUpdate has been called
-			if (!animatePhysics) updateFrame = true;
-			if (!updateFrame) return;
-			updateFrame = false;
+        // Workaround hack for the solver to work with animatePhysics
+        void FixedUpdate()
+        {
+            if (skipSolverUpdate)
+            {
+                skipSolverUpdate = false;
+            }
 
-			UpdateSolver();
-		}
+            updateFrame = true;
 
-		// This enables other scripts to update the Animator on in FixedUpdate and the solvers with it
-		private bool skipSolverUpdate;
+            if (animatePhysics && fixTransforms) FixTransforms();
+        }
 
-		public void UpdateSolverExternal() {
-			if (!enabled) return;
+        // Updating
+        void LateUpdate()
+        {
+            if (skipSolverUpdate) return;
 
-			skipSolverUpdate = true;
-			
-			UpdateSolver();
-		}
-	}
+            // Check if either animatePhysics is false or FixedUpdate has been called
+            if (!animatePhysics) updateFrame = true;
+            if (!updateFrame) return;
+            updateFrame = false;
+
+            UpdateSolver();
+        }
+
+        // This enables other scripts to update the Animator on in FixedUpdate and the solvers with it
+        private bool skipSolverUpdate;
+
+        public void UpdateSolverExternal()
+        {
+            if (!enabled) return;
+
+            skipSolverUpdate = true;
+
+            UpdateSolver();
+        }
+    }
 }

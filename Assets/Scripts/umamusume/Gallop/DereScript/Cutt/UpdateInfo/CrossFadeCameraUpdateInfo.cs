@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Cutt
+﻿namespace Cutt
 {
     public struct CrossFadeCameraUpdateInfo
     {

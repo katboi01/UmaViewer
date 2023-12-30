@@ -1,8 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-
-public class SQLiveDataPosition
+﻿public class SQLiveDataPosition
 {
     public int liveDataID;
     public int positionNum;
@@ -29,7 +25,7 @@ public class SQLiveDataPosition
                 array[1] = charaPosition2;
                 array[2] = charaPosition1;
                 array[3] = charaPosition3;
-                array[4] = charaPosition5;                
+                array[4] = charaPosition5;
                 return array;
             }
             else

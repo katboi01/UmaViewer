@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class UICharaView : MonoBehaviour
 {
@@ -31,7 +31,7 @@ public class UICharaView : MonoBehaviour
     private int clickPlace = -1;
 
     private Transform content;
-    
+
     private void Awake()
     {
         SortChangeBtn = base.transform.Find("Header/SortingButton/RightButton").gameObject;
@@ -60,7 +60,7 @@ public class UICharaView : MonoBehaviour
         setSize.x = 47f;
 
         //横コンテンツ数は最大10個
-        for(int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
             if (setSize.x + contentXsize > windowSize.x)
             {

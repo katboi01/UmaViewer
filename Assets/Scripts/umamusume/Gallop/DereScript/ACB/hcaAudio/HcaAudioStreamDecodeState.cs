@@ -1,8 +1,10 @@
 ﻿using System;
 
-namespace DereTore.Exchange.Audio.HCA {
+namespace DereTore.Exchange.Audio.HCA
+{
     [Flags]
-    internal enum HcaAudioStreamDecodeState {
+    internal enum HcaAudioStreamDecodeState
+    {
         Initialized = 0,
         WaveHeaderTransmitting = 1,
         WaveHeaderTransmitted = 2,

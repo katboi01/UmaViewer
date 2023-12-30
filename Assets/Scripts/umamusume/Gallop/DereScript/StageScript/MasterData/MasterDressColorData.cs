@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterDressColorData
 {
@@ -78,16 +74,16 @@ public class MasterDressColorData
         ulong key = (uint)charaId | ((ulong)modelType << 32);
         if (!_dictionaryWithCharaIdAndModelType.ContainsKey(key))
         {
-                List<DressColorData> list = new List<DressColorData>();
-                foreach (KeyValuePair<int, DressColorData> item in dressColorDataDic)
+            List<DressColorData> list = new List<DressColorData>();
+            foreach (KeyValuePair<int, DressColorData> item in dressColorDataDic)
+            {
+                if (item.Value.charaId == charaId && item.Value.modelType == modelType)
                 {
-                    if ((int)item.Value.charaId == charaId && (byte)item.Value.modelType == modelType)
-                    {
-                        list.Add(item.Value);
-                    }
+                    list.Add(item.Value);
                 }
-                list.Sort((DressColorData x, DressColorData y) => (int)x.dressId - (int)y.dressId);
-                _dictionaryWithCharaIdAndModelType.Add(key, list);
+            }
+            list.Sort((DressColorData x, DressColorData y) => x.dressId - y.dressId);
+            _dictionaryWithCharaIdAndModelType.Add(key, list);
         }
         return _dictionaryWithCharaIdAndModelType[key];
     }
@@ -97,7 +93,7 @@ public class MasterDressColorData
     {
         foreach (KeyValuePair<int, DressColorData> item in dressColorDataDic)
         {
-            if ((int)item.Value.charaId == charaID && (byte)item.Value.dressId == dressID)
+            if (item.Value.charaId == charaID && (byte)item.Value.dressId == dressID)
             {
                 return item.Value.colorId;
             }

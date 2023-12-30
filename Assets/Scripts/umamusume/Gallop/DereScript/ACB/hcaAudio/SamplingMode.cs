@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Audio.HCA {
-    public enum SamplingMode {
+﻿namespace DereTore.Exchange.Audio.HCA
+{
+    public enum SamplingMode
+    {
 
         S16,
         R32,

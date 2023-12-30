@@ -51,7 +51,7 @@ namespace UnityStandardAssets.ImageEffects
                 Graphics.Blit(source, destination);
                 return;
             }
-            float num = 1f / (1f * (float)(1 << downsample));
+            float num = 1f / (1f * (1 << downsample));
             blurMaterial.SetVector("_Parameter", new Vector4(blurSize * num, (0f - blurSize) * num, 0f, 0f));
             source.filterMode = FilterMode.Bilinear;
             int width = source.width >> downsample;
@@ -62,7 +62,7 @@ namespace UnityStandardAssets.ImageEffects
             int num2 = 0;
             for (int i = 0; i < blurIterations; i++)
             {
-                float num3 = (float)i * 1f;
+                float num3 = i * 1f;
                 blurMaterial.SetVector("_Parameter", new Vector4(blurSize * num + num3, (0f - blurSize) * num - num3, 0f, 0f));
                 RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0, source.format);
                 temporary.filterMode = FilterMode.Bilinear;

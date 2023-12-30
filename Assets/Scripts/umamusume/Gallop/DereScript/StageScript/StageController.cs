@@ -5,8 +5,8 @@ using Stage;
 using Stage.Cyalume;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 [RequireComponent(typeof(ShaderParamController))]
 public class StageController : MonoBehaviour
@@ -1064,8 +1064,8 @@ public class StageController : MonoBehaviour
         if (ViewLauncher.instance.liveDirector.live3DData.mobCyalume3DResourceID != 0)
         {
             _mobCyalume3DController = MobController.CreateMobController(base.gameObject.transform);
-        }       
-        
+        }
+
         StartStageObject();
         StartShaderParam();
         ReadOtherResource();
@@ -1477,7 +1477,7 @@ public class StageController : MonoBehaviour
         if (updateInfo.data.nameHash == HASH_BG_BL)
         {
             UpdateShaderParamColor1NoCheck(ref param.Param, ref updateInfo);
-            if ( null != _mobController)
+            if (null != _mobController)
             {
                 _mobController.SetAmbientColor(updateInfo.color * updateInfo.value);
             }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,7 +38,7 @@ namespace Gallop.Live.Cutt
 
         public void Initialize(Transform target, int targetIndex, int seqDataIndex, LiveTimelineControl timelineControl, List<AnimationClip> animclips = null)
         {
-            if(animclips != null)
+            if (animclips != null)
             {
                 if (targetIndex < Director.instance.charaAnims.Count)
                 {
@@ -68,7 +67,7 @@ namespace Gallop.Live.Cutt
                 _tempAnim = Director.instance.charaAnims[targetIndex];
             }
 
-            if(_currentKey != null && _tempAnim != null)
+            if (_currentKey != null && _tempAnim != null)
             {
                 foreach (var key in _currentKey.thisList)
                 {
@@ -112,7 +111,7 @@ namespace Gallop.Live.Cutt
 
                     AnimationClip anim = arg.clip;
                     double start;
-                    if(arg.isMotionHeadFrameAll)
+                    if (arg.isMotionHeadFrameAll)
                     {
                         start = (double)arg.motionHeadFrame / 60;
                     }
@@ -127,7 +126,7 @@ namespace Gallop.Live.Cutt
                     _tempAnim.Play(anim.name);
                 }
 
-                _prevIndex = _curIndex;            
+                _prevIndex = _curIndex;
             }
         }
     }

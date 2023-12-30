@@ -1,7 +1,5 @@
-﻿using System;
-using Cute;
-using Cutt;
-using Stage;
+﻿using Cutt;
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -2271,10 +2269,10 @@ public class PostEffectLive3D : MyPostEffectsBase
         }
         float dividerBasedOnQuality = GetDividerBasedOnQuality();
         float lowResolutionDividerBasedOnQuality = GetLowResolutionDividerBasedOnQuality(dividerBasedOnQuality);
-        int num = (int)((float)source.width * lowResolutionDividerBasedOnQuality);
-        int num2 = (int)((float)source.height * lowResolutionDividerBasedOnQuality);
-        _DiffusionPixelSize.x = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / (float)num;
-        _DiffusionPixelSize.y = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / (float)num2;
+        int num = (int)(source.width * lowResolutionDividerBasedOnQuality);
+        int num2 = (int)(source.height * lowResolutionDividerBasedOnQuality);
+        _DiffusionPixelSize.x = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / num;
+        _DiffusionPixelSize.y = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / num2;
         _DiffusionColorParam.x = _bright;
         _DiffusionColorParam.y = _saturation;
         _DiffusionColorParam.z = _contrast;
@@ -2449,8 +2447,8 @@ public class PostEffectLive3D : MyPostEffectsBase
         {
             _dofSmoothness = 0.1f;
         }
-        _dofInvRenderTargetSize.x = 1f / (float)renderTexture.width;
-        _dofInvRenderTargetSize.y = 1f / (float)renderTexture.height;
+        _dofInvRenderTargetSize.x = 1f / renderTexture.width;
+        _dofInvRenderTargetSize.y = 1f / renderTexture.height;
 
         if (_isMobCyalume3D)
         {
@@ -2834,7 +2832,7 @@ public class PostEffectLive3D : MyPostEffectsBase
         material.SetColor(_propID[(int)eProp._PostFilmColor1], overlay.postFilmColor1);
         material.SetColor(_propID[(int)eProp._PostFilmColor2], overlay.postFilmColor2);
         material.SetColor(_propID[(int)eProp._PostFilmColor3], overlay.postFilmColor3);
-        float num = Mathf.Min((float)source.width / (float)source.height, 1.77777779f) * 0.5625f;
+        float num = Mathf.Min(source.width / (float)source.height, 1.77777779f) * 0.5625f;
         float value2 = 1f / num;
         material.SetFloat(_propID[(int)eProp._PostFilmAspect], num);
         material.SetFloat(_propID[(int)eProp._PostFilmAspectInv], value2);
@@ -3047,10 +3045,10 @@ public class PostEffectLive3D : MyPostEffectsBase
                 }
             case DofBlurType.Disc:
                 {
-                    float num = (float)to.width / (float)to.height;
+                    float num = to.width / (float)to.height;
                     RenderTexture temporary = RenderTexture.GetTemporary(to.width >> 1, to.height >> 1);
                     float num2 = spread / 50f * 4f + 6f;
-                    float value = Mathf.Min(0.05f, num2 / (float)to.height);
+                    float value = Mathf.Min(0.05f, num2 / to.height);
                     _weightedBlurMaterial.SetFloat(SharedShaderParam.instance.getPropertyID(SharedShaderParam.ShaderProperty.MaxCoC), value);
                     _weightedBlurMaterial.SetFloat(SharedShaderParam.instance.getPropertyID(SharedShaderParam.ShaderProperty.Aspect), 1f / num);
                     Graphics.Blit(from, temporary, _weightedBlurMaterial, 1);
@@ -3069,8 +3067,8 @@ public class PostEffectLive3D : MyPostEffectsBase
         float dividerBasedOnQuality = GetDividerBasedOnQuality();
         float lowResolutionDividerBasedOnQuality = GetLowResolutionDividerBasedOnQuality(dividerBasedOnQuality);
         RenderTexture temporary = RenderTexture.GetTemporary(_rezworkWidth, _rezworkHeight, 0);
-        _DiffusionPixelSize.x = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / (float)_rezworkWidth;
-        _DiffusionPixelSize.y = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / (float)_rezworkHeight;
+        _DiffusionPixelSize.x = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / _rezworkWidth;
+        _DiffusionPixelSize.y = _diffusionBlurSize * lowResolutionDividerBasedOnQuality / _rezworkHeight;
         _DiffusionColorParam.x = _bright;
         _DiffusionColorParam.y = _saturation;
         _DiffusionColorParam.z = _contrast;
@@ -3122,8 +3120,8 @@ public class PostEffectLive3D : MyPostEffectsBase
         }
         _dofFocalStartCurve = _dofFocalDistance01 * _dofSmoothness;
         _dofFocalEndCurve = _dofFocalStartCurve;
-        _dofWidthOverHeight = (float)source.width / (float)source.height;
-        _dofHeightBaseSize = 1f / (512f * (float)source.height / (float)source.width);
+        _dofWidthOverHeight = source.width / (float)source.height;
+        _dofHeightBaseSize = 1f / (512f * source.height / source.width);
         _dofCurveParams.x = 1f / _dofFocalStartCurve;
         _dofCurveParams.y = 1f / _dofFocalEndCurve;
         _dofCurveParams.z = _focalSize / num * 0.5f + _dofFocalDistance01;
@@ -3132,8 +3130,8 @@ public class PostEffectLive3D : MyPostEffectsBase
         mtrl.SetVector(_propID[(int)eProp._InvRenderTargetSize], _dofInvRenderTargetSize);
         float dividerBasedOnQuality = GetDividerBasedOnQuality();
         float lowResolutionDividerBasedOnQuality = GetLowResolutionDividerBasedOnQuality(dividerBasedOnQuality);
-        _rezworkWidth = (int)((float)source.width * lowResolutionDividerBasedOnQuality);
-        _rezworkHeight = (int)((float)source.height * lowResolutionDividerBasedOnQuality);
+        _rezworkWidth = (int)(source.width * lowResolutionDividerBasedOnQuality);
+        _rezworkHeight = (int)(source.height * lowResolutionDividerBasedOnQuality);
     }
 
     /// <summary>
@@ -3353,7 +3351,7 @@ public class PostEffectLive3D : MyPostEffectsBase
     private void RenderBloom(RenderTexture source, RenderTexture sourceQuarterRezColor, int rtW4, int rtH4, ref BloomParameters param)
     {
         RenderTextureFormat format = (doHdr ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.Default);
-        float num = 1f * (float)source.width / (1f * (float)source.height);
+        float num = 1f * source.width / (1f * source.height);
         float num2 = 0.001953125f;
         RenderTexture temporary = RenderTexture.GetTemporary(rtW4, rtH4, 0, format);
         BrightFilter(sourceQuarterRezColor, param.secondQuarterRezColor, param.pass, param);
@@ -3362,7 +3360,7 @@ public class PostEffectLive3D : MyPostEffectsBase
         GL.Clear(clearDepth: false, clearColor: true, Color.black);
         for (int i = 0; i < num3; i++)
         {
-            float num4 = (1f + (float)i * 0.25f) * param.sepBlurSpread;
+            float num4 = (1f + i * 0.25f) * param.sepBlurSpread;
             float num5 = num4 / num * num2;
             float num6 = num4 * num2;
             RenderTexture temporary2 = RenderTexture.GetTemporary(rtW4, rtH4, 0, format);
@@ -3456,7 +3454,7 @@ public class PostEffectLive3D : MyPostEffectsBase
                 y = 0f;
                 y2 = 1f;
             }
-            float x = 0f + 1f / ((float)dest.width * 1f);
+            float x = 0f + 1f / (dest.width * 1f);
             float y3 = 0f;
             float y4 = 1f;
             GL.Begin(7);
@@ -3468,7 +3466,7 @@ public class PostEffectLive3D : MyPostEffectsBase
             GL.Vertex3(x, y4, 0.1f);
             GL.TexCoord2(0f, y2);
             GL.Vertex3(0f, y4, 0.1f);
-            float x2 = 1f - 1f / ((float)dest.width * 1f);
+            float x2 = 1f - 1f / (dest.width * 1f);
             x = 1f;
             y3 = 0f;
             y4 = 1f;
@@ -3482,7 +3480,7 @@ public class PostEffectLive3D : MyPostEffectsBase
             GL.Vertex3(x2, y4, 0.1f);
             x = 1f;
             y3 = 0f;
-            y4 = 0f + 1f / ((float)dest.height * 1f);
+            y4 = 0f + 1f / (dest.height * 1f);
             GL.TexCoord2(0f, y);
             GL.Vertex3(0f, y3, 0.1f);
             GL.TexCoord2(1f, y);
@@ -3492,7 +3490,7 @@ public class PostEffectLive3D : MyPostEffectsBase
             GL.TexCoord2(0f, y2);
             GL.Vertex3(0f, y4, 0.1f);
             x = 1f;
-            y3 = 1f - 1f / ((float)dest.height * 1f);
+            y3 = 1f - 1f / (dest.height * 1f);
             y4 = 1f;
             GL.TexCoord2(0f, y);
             GL.Vertex3(0f, y3, 0.1f);
@@ -3534,7 +3532,7 @@ public class PostEffectLive3D : MyPostEffectsBase
             GL.Begin(7);
             if (isDrawV)
             {
-                float x = 0f + 1f / ((float)dest.width * 1f);
+                float x = 0f + 1f / (dest.width * 1f);
                 float y3 = 0f;
                 float y4 = 1f;
                 GL.TexCoord2(0f, y);
@@ -3545,7 +3543,7 @@ public class PostEffectLive3D : MyPostEffectsBase
                 GL.Vertex3(x, y4, 0.1f);
                 GL.TexCoord2(0f, y2);
                 GL.Vertex3(0f, y4, 0.1f);
-                float x2 = 1f - 1f / ((float)dest.width * 1f);
+                float x2 = 1f - 1f / (dest.width * 1f);
                 x = 1f;
                 y3 = 0f;
                 y4 = 1f;
@@ -3562,7 +3560,7 @@ public class PostEffectLive3D : MyPostEffectsBase
             {
                 float x = 1f;
                 float y3 = 0f;
-                float y4 = 0f + 1f / ((float)dest.height * 1f);
+                float y4 = 0f + 1f / (dest.height * 1f);
                 GL.TexCoord2(0f, y);
                 GL.Vertex3(0f, y3, 0.1f);
                 GL.TexCoord2(1f, y);
@@ -3572,7 +3570,7 @@ public class PostEffectLive3D : MyPostEffectsBase
                 GL.TexCoord2(0f, y2);
                 GL.Vertex3(0f, y4, 0.1f);
                 x = 1f;
-                y3 = 1f - 1f / ((float)dest.height * 1f);
+                y3 = 1f - 1f / (dest.height * 1f);
                 y4 = 1f;
                 GL.TexCoord2(0f, y);
                 GL.Vertex3(0f, y3, 0.1f);
@@ -3608,7 +3606,7 @@ public class PostEffectLive3D : MyPostEffectsBase
         bool flag = false;
         float num2 = vector2.x * vector2.y;
         int num3 = _blurIterations * 2;
-        float num4 = (float)(1 + 6 * num3) / (float)(4 + 6 * num3) * 0.9f;
+        float num4 = (1 + 6 * num3) / (float)(4 + 6 * num3) * 0.9f;
         if (num2 < num4)
         {
             flag = true;
@@ -3662,12 +3660,12 @@ public class PostEffectLive3D : MyPostEffectsBase
             RenderTexture temporary3 = RenderTexture.GetTemporary(width, height, 0);
             Graphics.Blit(temporary2, temporary3, _sunShaftsMaterial, num5 + 1);
             RenderTexture.ReleaseTemporary(temporary2);
-            num6 = _sunShaftBlurRadius * (((float)i * 2f + 1f) * 6f) / 768f;
+            num6 = _sunShaftBlurRadius * ((i * 2f + 1f) * 6f) / 768f;
             _sunShaftsMaterial.SetVector(propertyID, new Vector4(num6, num6, 0f, 0f));
             temporary2 = RenderTexture.GetTemporary(width, height, 0);
             Graphics.Blit(temporary3, temporary2, _sunShaftsMaterial, num5 + 1);
             RenderTexture.ReleaseTemporary(temporary3);
-            num6 = _sunShaftBlurRadius * (((float)i * 2f + 2f) * 6f) / 768f;
+            num6 = _sunShaftBlurRadius * ((i * 2f + 2f) * 6f) / 768f;
             _sunShaftsMaterial.SetVector(propertyID, new Vector4(num6, num6, 0f, 0f));
         }
         _sunShaftsMaterial.SetVector(propertyID4, new Vector4(_sunColor.r, _sunColor.g, _sunColor.b, _sunColor.a) * _sunShaftIntensity);
@@ -3709,7 +3707,7 @@ public class PostEffectLive3D : MyPostEffectsBase
         _tiltShift.param.w = Mathf.Cos(_tiltShift.roll * ((float)Math.PI / 180f));
         _tiltShift.mtrl.SetVector("_Params", _tiltShift.param);
         RenderTexture renderTexture = temporary;
-        if ((float)_tiltShift.downsample > 0f)
+        if (_tiltShift.downsample > 0f)
         {
             renderTexture = RenderTexture.GetTemporary(source.width >> _tiltShift.downsample, source.height >> _tiltShift.downsample, 0, source.format);
             renderTexture.filterMode = FilterMode.Bilinear;

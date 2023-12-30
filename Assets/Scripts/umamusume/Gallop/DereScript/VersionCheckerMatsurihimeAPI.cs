@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MiniJSON;
-using UnityEngine;
+﻿using MiniJSON;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class VersionCheckerMatsurihimeAPI
 {
     private const string url = @"https://api.matsurihi.me/cgss/v1/version/latest";
-    
+
     public int version = 0;
 
     public IEnumerator Check()

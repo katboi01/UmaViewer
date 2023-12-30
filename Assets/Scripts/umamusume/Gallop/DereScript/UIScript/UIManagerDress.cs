@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class UIManagerDress : MonoBehaviour
 {
@@ -518,7 +517,7 @@ public class UIManagerDress : MonoBehaviour
         int dressCount = dressDatas.Count;
         List<string> dressIcons = new List<string>(dressCount);
         dressDic = new Dictionary<int, SQDressData>();
-        
+
         foreach (var tmp in dressDatas)
         {
             if (!dressDic.ContainsKey(tmp.dressIconKey))

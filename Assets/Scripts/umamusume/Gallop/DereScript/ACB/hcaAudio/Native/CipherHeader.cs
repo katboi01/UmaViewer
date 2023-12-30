@@ -1,15 +1,19 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DereTore.Exchange.Audio.HCA.Native {
+namespace DereTore.Exchange.Audio.HCA.Native
+{
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CipherHeader {
+    public struct CipherHeader
+    {
 
-        public uint CIPH {
+        public uint CIPH
+        {
             get { return _ciph; }
             set { _ciph = value; }
         }
 
-        public ushort Type {
+        public ushort Type
+        {
             get { return _type; }
             set { _type = value; }
         }

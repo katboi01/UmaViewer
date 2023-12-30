@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using Cutt;
+﻿using Cutt;
+using System.Collections;
 using UnityEngine;
 
 public class MultiCameraManager : MonoBehaviour

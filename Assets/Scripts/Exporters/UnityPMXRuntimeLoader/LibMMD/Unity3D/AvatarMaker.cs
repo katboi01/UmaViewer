@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using LibMMD.Unity3D;
-using System.Diagnostics;
 using System.Threading.Tasks;
+using UnityEngine;
 namespace LibMMD.Unity3D
 {
     public class AvatarMaker : MonoBehaviour

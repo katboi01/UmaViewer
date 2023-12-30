@@ -1,9 +1,9 @@
-using System;
-using System.IO;
-using System.Text;
 using LibMMD.Material;
 using LibMMD.Model;
 using LibMMD.Util;
+using System;
+using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace LibMMD.Reader
@@ -25,7 +25,7 @@ namespace LibMMD.Reader
                 throw new MMDFileParseException("Could not read pmx meta data.");
             }
 
-            if (!"PMX ".Equals(pmxHeader.Magic) || Math.Abs(pmxHeader.Version - 2.0f) > 0.0001f || pmxHeader.FileFlagSize !=8)
+            if (!"PMX ".Equals(pmxHeader.Magic) || Math.Abs(pmxHeader.Version - 2.0f) > 0.0001f || pmxHeader.FileFlagSize != 8)
             {
                 throw new MMDFileParseException("File is not a PMX 2.0 file");
             }
@@ -113,7 +113,7 @@ namespace LibMMD.Reader
                     AssociatedBoneIndex = MMDReaderWriteUtil.ReadIndex(reader, pmxConfig.BoneIndexSize),
                     CollisionGroup = reader.ReadByte(),
                     CollisionMask = reader.ReadUInt16(),
-                    Shape = (MMDRigidBody.RigidBodyShape) reader.ReadByte(),
+                    Shape = (MMDRigidBody.RigidBodyShape)reader.ReadByte(),
                     Dimemsions = MMDReaderWriteUtil.ReadRawCoordinateVector3(reader),
                     Position = MMDReaderWriteUtil.ReadVector3(reader),
                     Rotation = MMDReaderWriteUtil.ReadAmpVector3(reader, Mathf.Rad2Deg),
@@ -122,7 +122,7 @@ namespace LibMMD.Reader
                     RotateDamp = reader.ReadSingle(),
                     Restitution = reader.ReadSingle(),
                     Friction = reader.ReadSingle(),
-                    Type = (MMDRigidBody.RigidBodyType) reader.ReadByte()
+                    Type = (MMDRigidBody.RigidBodyType)reader.ReadByte()
                 };
                 model.Rigidbodies[i] = rigidBody;
             }
@@ -164,13 +164,13 @@ namespace LibMMD.Reader
                 {
                     Name = MMDReaderWriteUtil.ReadSizedString(reader, pmxConfig.Encoding),
                     NameEn = MMDReaderWriteUtil.ReadSizedString(reader, pmxConfig.Encoding),
-                    Category = (Morph.MorphCategory) reader.ReadByte()
+                    Category = (Morph.MorphCategory)reader.ReadByte()
                 };
                 if (morph.Category == Morph.MorphCategory.MorphCatSystem)
                 {
                     baseMorphIndex = i;
                 }
-                morph.Type = (Morph.MorphType) reader.ReadByte();
+                morph.Type = (Morph.MorphType)reader.ReadByte();
                 var morphDataNum = reader.ReadInt32();
                 morph.MorphDatas = new Morph.MorphData[morphDataNum];
                 switch (morph.Type)
@@ -245,7 +245,7 @@ namespace LibMMD.Reader
                                 morphData.MaterialIndex = 0;
                                 morphData.Global = true;
                             }
-                            morphData.Method = (Morph.MaterialMorphData.MaterialMorphMethod) reader.ReadByte();
+                            morphData.Method = (Morph.MaterialMorphData.MaterialMorphMethod)reader.ReadByte();
                             morphData.Diffuse = MMDReaderWriteUtil.ReadColor(reader, true);
                             morphData.Specular = MMDReaderWriteUtil.ReadColor(reader, false);
                             morphData.Shiness = reader.ReadSingle();
@@ -460,7 +460,7 @@ namespace LibMMD.Reader
             }
 
             var op = new SkinningOperator();
-            var skinningType = (SkinningOperator.SkinningType) reader.ReadByte();
+            var skinningType = (SkinningOperator.SkinningType)reader.ReadByte();
             op.Type = skinningType;
 
             switch (skinningType)
@@ -535,7 +535,7 @@ namespace LibMMD.Reader
             {
                 material.SubTexture = textureList[subTextureIndex];
             }
-            material.SubTextureType = (MMDMaterial.SubTextureTypeEnum) reader.ReadByte();
+            material.SubTextureType = (MMDMaterial.SubTextureTypeEnum)reader.ReadByte();
             var useGlobalToon = reader.ReadByte() != 0;
             if (useGlobalToon)
             {
@@ -594,9 +594,9 @@ namespace LibMMD.Reader
             public int ExtraUvNumber { get; set; }
             public int VertexIndexSize { get; set; }
             public int TextureIndexSize { get; set; }
-            public int MaterialIndexSize{ get; set; }
+            public int MaterialIndexSize { get; set; }
             public int BoneIndexSize { get; set; }
-            public int MorphIndexSize  { get; set; }
+            public int MorphIndexSize { get; set; }
             public int RigidBodyIndexSize { get; set; }
         }
 

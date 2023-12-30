@@ -48,7 +48,7 @@ namespace IK
             _joint[EndEffector] = new JointInfo();
             _joint[EndEffector].transform = transform;
             transform = transform.parent;
-            
+
             _joint[Center] = new JointInfo();
             _joint[Center].transform = transform;
             transform = transform.parent;

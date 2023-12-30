@@ -28,7 +28,7 @@ namespace HSVPicker
         {
             image = GetComponent<RawImage>();
 
-            if(Application.isPlaying)
+            if (Application.isPlaying)
                 RegenerateTexture();
         }
 

@@ -1,6 +1,6 @@
 ﻿using Cutt;
-using UnityEngine;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// Unityのレンズフレアをもとにしたコントローラー

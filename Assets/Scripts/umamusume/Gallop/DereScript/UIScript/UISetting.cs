@@ -1,9 +1,9 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UISetting : MonoBehaviour {
+public class UISetting : MonoBehaviour
+{
 
     [SerializeField]
     private GameObject menuSetting;
@@ -22,7 +22,7 @@ public class UISetting : MonoBehaviour {
     {
         //ウィンドウのサイズを取得
         Vector2 windowSize = GameObject.Find("Canvas").GetComponent<RectTransform>().sizeDelta;
-        
+
         //自分のサイズを取得
         Vector3 mylocalScale = GetComponent<RectTransform>().localScale;
         Vector2 mysize = GetComponent<RectTransform>().sizeDelta;
@@ -79,10 +79,11 @@ public class UISetting : MonoBehaviour {
     {
         StartCoroutine(SetScrollRect(1f));
     }
-    
+
     // Update is called once per frame
-    void Update () {
-        
+    void Update()
+    {
+
     }
 
     public void OnClickClose()

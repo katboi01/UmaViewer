@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterLiveData
 {
@@ -140,7 +136,7 @@ public class MasterLiveData
         {
             get
             {
-                string[] array = ((string)_charaIdText).Split(':');
+                string[] array = _charaIdText.Split(':');
                 int num = array.Length;
                 int[] array2 = new int[num];
                 for (int i = 0; i < num; i++)
@@ -219,25 +215,25 @@ public class MasterLiveData
 
         public bool IsSupport2DRich()
         {
-            return ((byte)_supportVariableMv & 2) == 2;
+            return (_supportVariableMv & 2) == 2;
         }
 
         public bool IsSupportVerticalMV()
         {
-            return ((byte)_supportVariableMv & 1) == 1;
+            return (_supportVariableMv & 1) == 1;
         }
 
         public bool IsSupportOnly2D()
         {
-            return ((byte)_supportVariableMv & 4) == 4;
+            return (_supportVariableMv & 4) == 4;
         }
 
         public bool IsSupportMovie()
         {
-            return ((byte)_supportVariableMv & 8) == 8;
+            return (_supportVariableMv & 8) == 8;
         }
     }
-    
+
     public enum eVariableMvType
     {
         Vertical = 1,
@@ -292,7 +288,7 @@ public class MasterLiveData
             }
         }
     }
-    
+
     public LiveData Get(int id)
     {
         if (liveDataDic.TryGetValue(id, out var value))
@@ -304,9 +300,9 @@ public class MasterLiveData
 
     public LiveData GetFromMusicID(int music_id)
     {
-        foreach(var tmp in liveDataDic)
+        foreach (var tmp in liveDataDic)
         {
-            if(tmp.Value.musicDataId == music_id)
+            if (tmp.Value.musicDataId == music_id)
             {
                 return tmp.Value;
             }

@@ -1,8 +1,7 @@
-﻿using System.IO;
-using UnityEngine;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
+using UnityEngine;
 
 public class UmaDatabaseEntry
 {
@@ -28,7 +27,7 @@ public class UmaDatabaseEntry
     public T Get<T>(bool withDependencies = true)
     {
         UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
-        Object asset = UmaAssetManager.Get(this).LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
+        Object asset = UmaAssetManager.Get(this).LoadAllAssets().FirstOrDefault(a => a.GetType() == typeof(T));
         return (T)System.Convert.ChangeType(asset, typeof(T));
     }
 

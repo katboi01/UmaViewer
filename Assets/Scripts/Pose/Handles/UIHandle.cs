@@ -35,7 +35,7 @@ public class UIHandle : MonoBehaviour
         HandleManager.RegisterHandle(this);
 
         gameObject.layer = LayerMask.NameToLayer("UIHandle");
-        Target = Target == null? owner.transform : Target;
+        Target = Target == null ? owner.transform : Target;
         Owner = owner;
 
         Handle = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_HandleDisplay, UmaViewerUI.Instance.HandlesPanel);
@@ -89,7 +89,7 @@ public class UIHandle : MonoBehaviour
             }
         }
 
-        if(Handle.activeSelf && LineRenderer != null)
+        if (Handle.activeSelf && LineRenderer != null)
         {
             if (LineRenderer.enabled != linesEnabled)
             {
@@ -116,9 +116,9 @@ public class UIHandle : MonoBehaviour
 
     public UIHandle SetDefaults(Vector3 localPos, Vector3 localRot, Vector3 localScale)
     {
-        _defaultTransform.Position  = localPos;
-        _defaultTransform.Rotation  = localRot;
-        _defaultTransform.Scale     = localScale;
+        _defaultTransform.Position = localPos;
+        _defaultTransform.Rotation = localRot;
+        _defaultTransform.Scale = localScale;
         return this;
     }
 
@@ -162,10 +162,10 @@ public class UIHandle : MonoBehaviour
     public UIHandle WithLineRenderer()
     {
         LineRenderer = Handle.gameObject.AddComponent<LineRenderer>();
-        LineRenderer.positionCount  = 2;
-        LineRenderer.startWidth     = LineRenderer.endWidth = 0.005f;
-        LineRenderer.material       = UmaViewerUI.Instance.HandleManager.LineRendererMaterial;
-        LineRenderer.startColor     = LineRenderer.endColor = Handle.GetComponent<Image>().color;
+        LineRenderer.positionCount = 2;
+        LineRenderer.startWidth = LineRenderer.endWidth = 0.005f;
+        LineRenderer.material = UmaViewerUI.Instance.HandleManager.LineRendererMaterial;
+        LineRenderer.startColor = LineRenderer.endColor = Handle.GetComponent<Image>().color;
         return this;
     }
 
@@ -184,7 +184,7 @@ public class UIHandle : MonoBehaviour
 
     public void TransformReset(PoseLoadOptions options = null)
     {
-        if(options == null)
+        if (options == null)
         {
             options = PoseLoadOptions.All();
         }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using System.IO;
 
 /// <summary>
 /// DirectorでAddCommpornentされる

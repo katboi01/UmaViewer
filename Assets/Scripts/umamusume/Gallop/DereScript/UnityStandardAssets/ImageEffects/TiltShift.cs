@@ -59,7 +59,7 @@ namespace UnityStandardAssets.ImageEffects
             tiltShiftMaterial.SetFloat("_BlurArea", blurArea);
             source.filterMode = FilterMode.Bilinear;
             RenderTexture renderTexture = destination;
-            if ((float)downsample > 0f)
+            if (downsample > 0f)
             {
                 renderTexture = RenderTexture.GetTemporary(source.width >> downsample, source.height >> downsample, 0, source.format);
                 renderTexture.filterMode = FilterMode.Bilinear;

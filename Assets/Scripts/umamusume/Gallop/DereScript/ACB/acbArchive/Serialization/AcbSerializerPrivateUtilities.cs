@@ -1,12 +1,17 @@
 ﻿using System;
 
-namespace DereTore.Exchange.Archive.ACB.Serialization {
+namespace DereTore.Exchange.Archive.ACB.Serialization
+{
 
-    internal static class AcbSerializerPrivateUtilities {
+    internal static class AcbSerializerPrivateUtilities
+    {
 
-        public static int IndexOf(this Type[] types, Type value) {
-            for (var i = 0; i < types.Length; ++i) {
-                if (types[i] == value) {
+        public static int IndexOf(this Type[] types, Type value)
+        {
+            for (var i = 0; i < types.Length; ++i)
+            {
+                if (types[i] == value)
+                {
                     return i;
                 }
             }

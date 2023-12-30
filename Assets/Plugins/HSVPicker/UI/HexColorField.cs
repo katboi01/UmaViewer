@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 namespace HSVPicker
 {
     [RequireComponent(typeof(TMP_InputField))]
@@ -36,7 +35,7 @@ namespace HSVPicker
         {
             Color color;
             if (!newHex.StartsWith("#"))
-                newHex = "#"+newHex;
+                newHex = "#" + newHex;
             if (ColorUtility.TryParseHtmlString(newHex, out color))
                 hsvpicker.CurrentColor = color;
             else

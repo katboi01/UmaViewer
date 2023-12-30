@@ -1,5 +1,4 @@
 ﻿using System;
-using Cutt;
 
 namespace Cutt
 {

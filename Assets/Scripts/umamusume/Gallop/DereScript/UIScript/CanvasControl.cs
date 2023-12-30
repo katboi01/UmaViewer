@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CanvasControl : MonoBehaviour
@@ -25,10 +23,10 @@ public class CanvasControl : MonoBehaviour
     {
         get
         {
-            if(resolution.y > 0 && resolution.x > 0)
+            if (resolution.y > 0 && resolution.x > 0)
             {
                 //縦長である場合(同じサイズの場合は横長扱い)
-                if(resolution.y > resolution.x)
+                if (resolution.y > resolution.x)
                 {
                     return true;
                 }

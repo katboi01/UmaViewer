@@ -17,7 +17,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
             if (emotion.label == "Base") continue;
             emotion.target = this;
             emotion.emotionKeys = new List<EmotionKey>();
-            InitializeEmotionTarget(emotion,FaceDrivenKeyTarget.MouthMorphs, emotion.mouth, false);
+            InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.MouthMorphs, emotion.mouth, false);
             InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_l, true);
             InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeMorphs, emotion.eye_r, false);
             InitializeEmotionTarget(emotion, FaceDrivenKeyTarget.EyeBrowMorphs, emotion.eyebrow_l, true);
@@ -25,12 +25,12 @@ public class FaceEmotionKeyTarget : ScriptableObject
         }
 
         if (UmaViewerUI.Instance)
-        { 
+        {
             UmaViewerUI.Instance.LoadEmotionPanels(this);
         }
     }
 
-    private void InitializeEmotionTarget(FaceTypeData faceTypeData, List<FacialMorph> morphs,string tags,bool direction)
+    private void InitializeEmotionTarget(FaceTypeData faceTypeData, List<FacialMorph> morphs, string tags, bool direction)
     {
         foreach (var morphName in tags.Split('|'))
         {
@@ -79,7 +79,7 @@ public class FaceEmotionKeyTarget : ScriptableObject
     public void UpdateAllTargetWeight()
     {
         if (FaceDrivenKeyTarget == null) return;
-        
+
         foreach (var emotion in FaceEmotionKey)
         {
             if (emotion.emotionKeys != null)

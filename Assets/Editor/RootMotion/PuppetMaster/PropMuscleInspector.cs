@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace RootMotion.Dynamics
 {
@@ -20,7 +19,7 @@ namespace RootMotion.Dynamics
         {
             if (script == null) return;
             serializedObject.Update();
-            
+
             style.wordWrap = true;
             style.normal.textColor = EditorGUIUtility.isProSkin ? pro : free;
 
@@ -57,14 +56,14 @@ namespace RootMotion.Dynamics
 
                     var target = script.muscle.target;
 
-                    
+
                     muscles.DeleteArrayElementAtIndex(index);
 
                     for (int i = 0; i < puppetMasterS.FindProperty("muscles").arraySize; i++)
                     {
                         muscles.GetArrayElementAtIndex(i).FindPropertyRelative("index").intValue = i;
                     }
-                    
+
                     puppetMasterS.ApplyModifiedProperties();
 
                     PuppetMasterInspector.DestroyImmediateSafe(target.gameObject);
@@ -98,7 +97,7 @@ namespace RootMotion.Dynamics
             }
 
             serializedObject.ApplyModifiedProperties();
-            
+
         }
 
         private bool AddAdditionalPin()
@@ -175,14 +174,15 @@ namespace RootMotion.Dynamics
             return Mathf.Lerp(s, 0.025f, 0.2f);
         }
 
-        void OnSceneGUI() {
+        void OnSceneGUI()
+        {
             DrawScene(script);
-		}
+        }
 
         private static void CubeCapSafe(Vector3 position, Quaternion rotation, float size)
         {
 #if UNITY_5_6_OR_NEWER
-                Handles.CubeHandleCap(0, position, rotation, size, EventType.Repaint);
+            Handles.CubeHandleCap(0, position, rotation, size, EventType.Repaint);
 #else
             Handles.CubeCap(0, position, rotation, size);
 #endif
@@ -191,7 +191,7 @@ namespace RootMotion.Dynamics
         private static void SphereCapSafe(Vector3 position, Quaternion rotation, float size)
         {
 #if UNITY_5_6_OR_NEWER
-                Handles.SphereHandleCap(0, position, rotation, size, EventType.Repaint);
+            Handles.SphereHandleCap(0, position, rotation, size, EventType.Repaint);
 #else
             Handles.SphereCap(0, position, rotation, size);
 #endif
@@ -212,7 +212,8 @@ namespace RootMotion.Dynamics
             if (Selection.activeGameObject == script.gameObject)
             {
                 Handles.Label(script.transform.position + script.transform.forward * size * 2f, new GUIContent(script.transform.name), sceneLabelStyle);
-            } else
+            }
+            else
             {
                 Handles.Label(script.transform.position + script.transform.forward * size * 2f, new GUIContent("Click to select Prop Muscle"), sceneLabelStyle);
             }
@@ -220,7 +221,8 @@ namespace RootMotion.Dynamics
             if (Selection.activeGameObject == script.gameObject)
             {
                 CubeCapSafe(script.transform.position, script.transform.rotation, size * 2f);
-            } else
+            }
+            else
             {
                 if (DotButton(script.transform.position, script.transform.rotation, size, size))
                 {
@@ -245,7 +247,7 @@ namespace RootMotion.Dynamics
         public static bool DotButton(Vector3 position, Quaternion direction, float size, float pickSize)
         {
 #if UNITY_5_6_OR_NEWER
-			return Handles.Button(position, direction, size, pickSize, Handles.DotHandleCap);
+            return Handles.Button(position, direction, size, pickSize, Handles.DotHandleCap);
 #else
             return Handles.Button(position, direction, size, pickSize, Handles.DotCap);
 #endif

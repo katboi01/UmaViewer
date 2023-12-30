@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public sealed class AcbCueRecord {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public sealed class AcbCueRecord
+    {
 
-        internal AcbCueRecord() {
+        internal AcbCueRecord()
+        {
         }
 
         public uint CueId { get; set; }

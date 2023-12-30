@@ -146,7 +146,7 @@ public class TrailAfterImage : AfterImage
             Vector2[] array5 = new Vector2[_dimention * 2];
             for (int num2 = 0; num2 < _cntAfterImage; num2++)
             {
-                float x = (float)(_cntAfterImage - num2) / (float)_cntAfterImage;
+                float x = (_cntAfterImage - num2) / (float)_cntAfterImage;
                 array5[num2 * 2].x = x;
                 array5[num2 * 2].y = 0f;
                 array5[num2 * 2 + 1].x = x;

@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class UIManagerChara : MonoBehaviour
 {
@@ -337,7 +336,7 @@ public class UIManagerChara : MonoBehaviour
         }
         return ret;
     }
-    
+
     /// <summary>
     /// 追加メンバーのキャラデータを取得する
     /// </summary>
@@ -371,7 +370,7 @@ public class UIManagerChara : MonoBehaviour
         }
         return ret;
     }
-    
+
     /// <summary>
     /// フォトスタジオ用のキャラデータを取得する
     /// </summary>
@@ -398,7 +397,7 @@ public class UIManagerChara : MonoBehaviour
             return data;
         }
     }
-    
+
     public SQCharaData GetCharaData(int charaID)
     {
         SQCharaData data = null;

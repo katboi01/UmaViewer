@@ -47,7 +47,7 @@ public abstract class AfterImage : MonoBehaviour
 
     protected Color _specularColor = Color.white;
 
-    protected Color _luminousColor = new Color(1f,1f,1f,0f);
+    protected Color _luminousColor = new Color(1f, 1f, 1f, 0f);
 
     protected bool _pause;
 
@@ -72,7 +72,7 @@ public abstract class AfterImage : MonoBehaviour
 
         set
         {
-            if(_currentTargetCamera != value)
+            if (_currentTargetCamera != value)
             {
                 if (_isAttachCommandBuffer)
                 {

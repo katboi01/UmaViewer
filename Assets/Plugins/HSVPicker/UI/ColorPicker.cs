@@ -32,7 +32,7 @@ namespace HSVPicker
                 _color = value;
 
                 RGBChanged();
-            
+
                 SendChangedEvent();
             }
         }

@@ -1,12 +1,9 @@
-﻿using UnityEngine;
+﻿using Cute;
+/*musicScore用*/
+using Sqlite3Plugin;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Stage;
-using Cute;
-
-/*musicScore用*/
-using Sqlite3Plugin;
 
 public class LiveDirectorHQ : LiveDirector
 {
@@ -29,7 +26,7 @@ public class LiveDirectorHQ : LiveDirector
     private bool isSmartMode = false;
 
     private bool anotherMode = false;
-    
+
     private int soloCharaID = -1;
 
     public bool isHQ
@@ -44,7 +41,7 @@ public class LiveDirectorHQ : LiveDirector
     {
         get
         {
-            if(liveData.chara_all_flag == 2)
+            if (liveData.chara_all_flag == 2)
             {
                 return true;
             }
@@ -86,7 +83,7 @@ public class LiveDirectorHQ : LiveDirector
     public LiveDirectorHQ(SQMusicData data)
     {
         liveData = data;
-        if(master3dLive == null)
+        if (master3dLive == null)
         {
             master3dLive = MasterDBManager.instance.master3dLive;
         }
@@ -369,7 +366,7 @@ public class LiveDirectorHQ : LiveDirector
         get
         {
             return liveData.member_number;
-        } 
+        }
     }
 
     public string[] charaMotionFiles

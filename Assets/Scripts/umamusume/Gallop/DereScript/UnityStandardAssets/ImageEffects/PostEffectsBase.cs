@@ -181,7 +181,7 @@ namespace UnityStandardAssets.ImageEffects
                     y = 0f;
                     y2 = 1f;
                 }
-                float x = 0f + 1f / ((float)dest.width * 1f);
+                float x = 0f + 1f / (dest.width * 1f);
                 float y3 = 0f;
                 float y4 = 1f;
                 GL.Begin(7);
@@ -193,7 +193,7 @@ namespace UnityStandardAssets.ImageEffects
                 GL.Vertex3(x, y4, 0.1f);
                 GL.TexCoord2(0f, y2);
                 GL.Vertex3(0f, y4, 0.1f);
-                float x2 = 1f - 1f / ((float)dest.width * 1f);
+                float x2 = 1f - 1f / (dest.width * 1f);
                 x = 1f;
                 y3 = 0f;
                 y4 = 1f;
@@ -207,7 +207,7 @@ namespace UnityStandardAssets.ImageEffects
                 GL.Vertex3(x2, y4, 0.1f);
                 x = 1f;
                 y3 = 0f;
-                y4 = 0f + 1f / ((float)dest.height * 1f);
+                y4 = 0f + 1f / (dest.height * 1f);
                 GL.TexCoord2(0f, y);
                 GL.Vertex3(0f, y3, 0.1f);
                 GL.TexCoord2(1f, y);
@@ -217,7 +217,7 @@ namespace UnityStandardAssets.ImageEffects
                 GL.TexCoord2(0f, y2);
                 GL.Vertex3(0f, y4, 0.1f);
                 x = 1f;
-                y3 = 1f - 1f / ((float)dest.height * 1f);
+                y3 = 1f - 1f / (dest.height * 1f);
                 y4 = 1f;
                 GL.TexCoord2(0f, y);
                 GL.Vertex3(0f, y3, 0.1f);

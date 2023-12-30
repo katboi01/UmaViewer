@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,7 +8,7 @@ namespace HSVPicker
     {
         private static Dictionary<string, ColorPresetList> _presets = new Dictionary<string, ColorPresetList>();
 
-        public static  ColorPresetList Get(string listId = "default")
+        public static ColorPresetList Get(string listId = "default")
         {
             ColorPresetList preset;
             if (!_presets.TryGetValue(listId, out preset))

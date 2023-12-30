@@ -17,7 +17,7 @@ public class CuttMotionVmRun : ConditionVmRun
         int characterIdFromPosition = GetCharacterIdFromPosition(position);
         if (characterIdFromPosition >= 0 && chr_flags == ConditionVmData.CHR_FLAGS.LEFTY)
         {
-            flag = (int)GetCharaMaster(characterIdFromPosition).hand == 3002;
+            flag = GetCharaMaster(characterIdFromPosition).hand == 3002;
         }
         if (!flag)
         {
@@ -32,7 +32,7 @@ public class CuttMotionVmRun : ConditionVmRun
         int cardIdFromPosition = GetCardIdFromPosition(position);
         if (cardIdFromPosition >= 0 && card_flags == ConditionVmData.CARD_FLAGS.SSR)
         {
-            flag = (int)GetCardMaster(cardIdFromPosition).rarity == 7;
+            flag = GetCardMaster(cardIdFromPosition).rarity == 7;
         }
         if (!flag)
         {

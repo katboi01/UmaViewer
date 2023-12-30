@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using Stage;
+﻿using Stage;
+using UnityEngine;
 
 public class MultiCamera : MonoBehaviour
 {

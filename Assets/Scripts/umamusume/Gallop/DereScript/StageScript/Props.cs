@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Stage;
 
 public class Props : MonoBehaviour
 {

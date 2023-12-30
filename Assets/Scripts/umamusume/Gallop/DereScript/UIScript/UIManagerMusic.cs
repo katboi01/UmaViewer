@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
+using UnityEngine;
 
 public class UIManagerMusic : MonoBehaviour
 {
@@ -12,7 +11,7 @@ public class UIManagerMusic : MonoBehaviour
     private List<SQMusicData> musicList;
     private Dictionary<int, SQMusicData> musicDic;
     private Dictionary<int, Sprite> iconDic;
-    
+
     public bool isLoad
     {
         get

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections;
 
 namespace LibMMD.Util
 {
-    using System.Threading;
     using System.Collections.Generic;
+    using System.Threading;
 
     public class BlockingQueue<T>
     {

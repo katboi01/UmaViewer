@@ -1,7 +1,5 @@
 ﻿// Stage.GeneralEventManager
 using System;
-using Stage;
-using UnityEngine;
 
 public class GeneralEventManager : SingletonMonoBehaviour<GeneralEventManager>
 {

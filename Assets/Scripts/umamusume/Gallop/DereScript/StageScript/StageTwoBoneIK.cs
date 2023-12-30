@@ -1,6 +1,5 @@
 ﻿// Stage.StageTwoBoneIK
 using IK;
-using Stage;
 using UnityEngine;
 
 public class StageTwoBoneIK

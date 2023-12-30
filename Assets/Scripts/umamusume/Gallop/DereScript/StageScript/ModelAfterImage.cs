@@ -69,7 +69,7 @@ public class ModelAfterImage : AfterImage
         _matrixBuffer[_lastIndex] = Matrix4x4.TRS(_targetTransform.position, _targetTransform.rotation, Vector3.one * _scale);
         for (int i = 0; i < _cntAfterImage; i++)
         {
-            Color color = Color.Lerp(_rootColor, _tipColor, (float)i / (float)_dimention);
+            Color color = Color.Lerp(_rootColor, _tipColor, i / (float)_dimention);
             color *= _color;
             int num = (_lastIndex - i + _dimention) % _dimention;
             _materialBuffer[i].SetVector(_blurColorPropertyIndex, color);

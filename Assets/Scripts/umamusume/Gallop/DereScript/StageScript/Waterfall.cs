@@ -71,14 +71,14 @@ public class Waterfall : MonoBehaviour
             _lerpAlphaId = Shader.PropertyToID("_lerpAlpha");
         }
     }
-    
+
     private void Update()
     {
-        if(_renderer != null)
+        if (_renderer != null)
         {
-            if(_propBlock != null)
+            if (_propBlock != null)
             {
-                if(Director.instance != null && !Director.instance.IsPauseLive())
+                if (Director.instance != null && !Director.instance.IsPauseLive())
                 {
                     //水が流れるのでScroll値を更新
                     float diffuseScrollValue = diffuseScroll * SCROLL_SPEED + _offset_0;
@@ -87,7 +87,7 @@ public class Waterfall : MonoBehaviour
                     _offset_1 = alphaScrollValue;
 
                     //値をループさせる
-                    if(diffuseScrollValue >= 1.0f)
+                    if (diffuseScrollValue >= 1.0f)
                     {
                         _offset_0 = 0f;
                     }

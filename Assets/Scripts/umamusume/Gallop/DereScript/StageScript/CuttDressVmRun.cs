@@ -26,7 +26,6 @@ public class CuttDressVmRun : ConditionVmRun
 
     public override int GetPositionAndStatus(ConditionVmData.POSITION position, ConditionVmData.STATUS status)
     {
-        int num = 0;
         if (status == ConditionVmData.STATUS.POSITION)
         {
             return (_position_id == (int)position) ? 1 : 0;

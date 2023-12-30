@@ -1,13 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Networking;
-using System.Collections;
-using UnityEngine.Events;
-using System.Threading;
 using System.Net;
+using UnityEngine;
 
 /// <summary>
 /// アセットファイルを管理するクラス
@@ -147,7 +143,7 @@ public class AssetManager : MonoBehaviour
         {
             dlList.Clear();
         }
-        if(proccessingFilesDic != null)
+        if (proccessingFilesDic != null)
         {
             proccessingFilesDic.Clear();
         }
@@ -224,7 +220,7 @@ public class AssetManager : MonoBehaviour
     {
         StartCoroutine(DownloadFromFilenamesAsync(filenames));
 
-        foreach(var tmp in filenames)
+        foreach (var tmp in filenames)
         {
             while (!CheckFileFromFilename(tmp))
             {

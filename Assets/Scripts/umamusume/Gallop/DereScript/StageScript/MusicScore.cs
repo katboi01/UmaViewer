@@ -1,7 +1,5 @@
-﻿using Stage;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class MusicScore
 {
@@ -223,7 +221,7 @@ public class MusicScore
                 */
             }
             goto IL_0359;
-            IL_0359:
+        IL_0359:
             _keys.Add(musicScoreKey);
             if (musicScoreKey._type == MusicScoreKey.eKeyType.Slide)
             {

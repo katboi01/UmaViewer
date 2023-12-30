@@ -22,7 +22,7 @@ public class EyeTraceController : MonoBehaviour
 
     private void LateUpdate()
     {
-        float num = 1f / (float)Application.targetFrameRate;
+        float num = 1f / Application.targetFrameRate;
         float deltaTimeRate = Time.deltaTime / num;
         _eyeObject[0].LateUpdate(deltaTimeRate);
         _eyeObject[1].LateUpdate(deltaTimeRate);

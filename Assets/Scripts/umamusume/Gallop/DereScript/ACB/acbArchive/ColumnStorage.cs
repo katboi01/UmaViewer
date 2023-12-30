@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public enum ColumnStorage : byte {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public enum ColumnStorage : byte
+    {
 
         Zero = 0x10,
         Constant = 0x30,

@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterDressData
 {

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Runtime.Serialization;
-using System.Net;
-using UnityEngine;
-using MiniJSON;
+﻿using MiniJSON;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class VersionCheckerKiraraAPI
 {

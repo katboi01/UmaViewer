@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Cute;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cute;
 using UnityEngine;
 
 /// <summary>

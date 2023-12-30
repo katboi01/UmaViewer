@@ -1,7 +1,6 @@
+using System;
 using UnityEditor;
 using UnityEngine;
-using System.Collections;
-using System;
 
 namespace RootMotion.FinalIK
 {
@@ -348,7 +347,7 @@ namespace RootMotion.FinalIK
             // Display limits
             for (int i = 0; i < 360; i += 2)
             {
-                float evaluatedLimit = script.spline.Evaluate((float)i);
+                float evaluatedLimit = script.spline.Evaluate(i);
                 Quaternion offset = Quaternion.AngleAxis(i, swing);
                 Quaternion evaluatedRotation = Quaternion.AngleAxis(evaluatedLimit, offset * script.crossAxis);
                 Quaternion testRotation = Quaternion.AngleAxis(179.9f, offset * script.crossAxis);

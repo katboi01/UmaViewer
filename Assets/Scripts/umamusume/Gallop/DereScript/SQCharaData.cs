@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class SQCharaData
 {
@@ -32,7 +31,7 @@ public class SQCharaData
     {
         get
         {
-            if(charaID == 20)
+            if (charaID == 20)
             {
                 return 2;
             }

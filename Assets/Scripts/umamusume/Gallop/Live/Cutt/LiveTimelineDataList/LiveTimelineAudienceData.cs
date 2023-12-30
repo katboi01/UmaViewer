@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Gallop.Cyalume;
+using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {

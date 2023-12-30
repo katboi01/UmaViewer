@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class DynamicBoneDemo1 : MonoBehaviour
 {
@@ -39,16 +38,16 @@ public class DynamicBoneDemo1 : MonoBehaviour
         m_weight = GUI.HorizontalSlider(new Rect(x + 50, y, w1, h), m_weight, 0, 1);
         foreach (var db in dbs)
             db.SetWeight(m_weight);
-/*
-        y += h * 2;
-        GUI.Label(new Rect(x, y, w2, h), "Sleep");
-        m_sleepTime = GUI.HorizontalSlider(new Rect(x + 50, y, w1, h), m_sleepTime, 0, 1);
-        if (m_sleepTime > 0)
-            System.Threading.Thread.Sleep((int)(m_sleepTime * 100));
+        /*
+                y += h * 2;
+                GUI.Label(new Rect(x, y, w2, h), "Sleep");
+                m_sleepTime = GUI.HorizontalSlider(new Rect(x + 50, y, w1, h), m_sleepTime, 0, 1);
+                if (m_sleepTime > 0)
+                    System.Threading.Thread.Sleep((int)(m_sleepTime * 100));
 
-        y += h;
-        GUI.Label(new Rect(x, y, w2, h), "Time Scale");
-        Time.timeScale = GUI.HorizontalSlider(new Rect(x + 80, y, w1, h), Time.timeScale, 0, 2);
-*/
+                y += h;
+                GUI.Label(new Rect(x, y, w2, h), "Time Scale");
+                Time.timeScale = GUI.HorizontalSlider(new Rect(x + 80, y, w1, h), Time.timeScale, 0, 2);
+        */
     }
 }

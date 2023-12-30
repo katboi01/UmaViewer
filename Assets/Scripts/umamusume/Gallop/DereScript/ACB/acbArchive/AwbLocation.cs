@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public enum AwbLocation {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public enum AwbLocation
+    {
 
         Unknown = 0,
         Internal = 1,

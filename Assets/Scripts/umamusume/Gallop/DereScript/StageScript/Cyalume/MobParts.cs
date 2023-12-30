@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using Cutt;
 using UnityEngine;
-using Cutt;
 
 namespace Stage.Cyalume
 {

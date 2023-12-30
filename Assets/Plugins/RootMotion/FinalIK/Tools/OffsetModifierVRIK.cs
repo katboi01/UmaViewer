@@ -1,54 +1,60 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
-namespace RootMotion.FinalIK {
+namespace RootMotion.FinalIK
+{
 
-	/// <summary>
-	/// Base class for all FBBIK effector positionOffset modifiers. Works with animatePhysics, safe delegates, offset limits.
-	/// </summary>
-	public abstract class OffsetModifierVRIK: MonoBehaviour {
+    /// <summary>
+    /// Base class for all FBBIK effector positionOffset modifiers. Works with animatePhysics, safe delegates, offset limits.
+    /// </summary>
+    public abstract class OffsetModifierVRIK : MonoBehaviour
+    {
 
-		[Tooltip("The master weight")]
-		public float weight = 1f;
+        [Tooltip("The master weight")]
+        public float weight = 1f;
 
-		[Tooltip("Reference to the VRIK component")]
-		public VRIK ik;
+        [Tooltip("Reference to the VRIK component")]
+        public VRIK ik;
 
-		// not using Time.deltaTime or Time.fixedDeltaTime here, because we don't know if animatePhysics is true or not on the character, so we have to keep track of time ourselves.
-		protected float deltaTime { get { return Time.time - lastTime; }}
-		protected abstract void OnModifyOffset();
+        // not using Time.deltaTime or Time.fixedDeltaTime here, because we don't know if animatePhysics is true or not on the character, so we have to keep track of time ourselves.
+        protected float deltaTime { get { return Time.time - lastTime; } }
+        protected abstract void OnModifyOffset();
 
-		private float lastTime;
+        private float lastTime;
 
-		protected virtual void Start() {
-			StartCoroutine(Initiate());
-		}
-		
-		private IEnumerator Initiate() {
-			while (ik == null) yield return null;
+        protected virtual void Start()
+        {
+            StartCoroutine(Initiate());
+        }
 
-			// You can use just LateUpdate, but note that it doesn't work when you have animatePhysics turned on for the character.
-			ik.solver.OnPreUpdate += ModifyOffset;
-			lastTime = Time.time;
-		}
+        private IEnumerator Initiate()
+        {
+            while (ik == null) yield return null;
 
-		// The main function that checks for all conditions and calls OnModifyOffset if they are met
-		private void ModifyOffset() {
-			if (!enabled) return;
-			if (weight <= 0f) return;
-			if (deltaTime <= 0f) return;
-			if (ik == null) return;
-			weight = Mathf.Clamp(weight, 0f, 1f);
+            // You can use just LateUpdate, but note that it doesn't work when you have animatePhysics turned on for the character.
+            ik.solver.OnPreUpdate += ModifyOffset;
+            lastTime = Time.time;
+        }
 
-			OnModifyOffset();
+        // The main function that checks for all conditions and calls OnModifyOffset if they are met
+        private void ModifyOffset()
+        {
+            if (!enabled) return;
+            if (weight <= 0f) return;
+            if (deltaTime <= 0f) return;
+            if (ik == null) return;
+            weight = Mathf.Clamp(weight, 0f, 1f);
 
-			lastTime = Time.time;
-		}
+            OnModifyOffset();
 
-		// Remove the delegate when destroyed
-		protected virtual void OnDestroy() {
-			if (ik != null) ik.solver.OnPreUpdate -= ModifyOffset;
-		}
-	}
+            lastTime = Time.time;
+        }
+
+        // Remove the delegate when destroyed
+        protected virtual void OnDestroy()
+        {
+            if (ik != null) ik.solver.OnPreUpdate -= ModifyOffset;
+        }
+    }
 
 }

@@ -1,12 +1,15 @@
+using DereTore.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DereTore.Common;
 
-namespace DereTore.Exchange.Archive.ACB {
-    public partial class UtfTable {
+namespace DereTore.Exchange.Archive.ACB
+{
+    public partial class UtfTable
+    {
 
-        internal UtfTable(Stream stream, long offset, long size, string acbFileName, bool disposeStream) {
+        internal UtfTable(Stream stream, long offset, long size, string acbFileName, bool disposeStream)
+        {
             _acbFileName = acbFileName;
             _stream = stream;
             _offset = offset;
@@ -14,51 +17,68 @@ namespace DereTore.Exchange.Archive.ACB {
             _disposeStream = disposeStream;
         }
 
-        internal virtual void Initialize() {
+        internal virtual void Initialize()
+        {
             var stream = _stream;
             var offset = _offset;
 
             var magic = stream.PeekBytes(offset, 4);
             magic = CheckEncryption(magic);
-            if (!AcbHelper.AreDataIdentical(magic, UtfSignature)) {
-                throw new FormatException(string.Format("'@UTF' signature (or its encrypted equivalent) is not found in '{0}' at offset 0x{1:x8}.",_acbFileName,offset));
+            if (!AcbHelper.AreDataIdentical(magic, UtfSignature))
+            {
+                throw new FormatException(string.Format("'@UTF' signature (or its encrypted equivalent) is not found in '{0}' at offset 0x{1:x8}.", _acbFileName, offset));
             }
-            using (var tableDataStream = GetTableDataStream()) {
+            using (var tableDataStream = GetTableDataStream())
+            {
                 var header = GetUtfHeader(tableDataStream);
                 _utfHeader = header;
                 _rows = new Dictionary<string, UtfField>[header.RowCount];
-                if (header.TableSize > 0) {
+                if (header.TableSize > 0)
+                {
                     InitializeUtfSchema(stream, tableDataStream, 0x20);
                 }
             }
         }
 
-        protected override void Dispose(bool disposing) {
-            if (_disposeStream) {
-                try {
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposeStream)
+            {
+                try
+                {
                     _stream.Dispose();
-                } catch (ObjectDisposedException) {
+                }
+                catch (ObjectDisposedException)
+                {
                 }
             }
         }
 
-        private static bool GetKeysForEncryptedUtfTable(byte[] encryptedUtfSignature, out byte seed, out byte increment) {
-            for (var s = 0; s <= byte.MaxValue; s++) {
-                if ((encryptedUtfSignature[0] ^ s) != UtfSignature[0]) {
+        private static bool GetKeysForEncryptedUtfTable(byte[] encryptedUtfSignature, out byte seed, out byte increment)
+        {
+            for (var s = 0; s <= byte.MaxValue; s++)
+            {
+                if ((encryptedUtfSignature[0] ^ s) != UtfSignature[0])
+                {
                     continue;
                 }
-                for (var i = 0; i <= byte.MaxValue; i++) {
+                for (var i = 0; i <= byte.MaxValue; i++)
+                {
                     var m = (byte)(s * i);
-                    if ((encryptedUtfSignature[1] ^ m) != UtfSignature[1]) {
+                    if ((encryptedUtfSignature[1] ^ m) != UtfSignature[1])
+                    {
                         continue;
                     }
                     var t = (byte)i;
-                    for (var j = 2; j < UtfSignature.Length; j++) {
+                    for (var j = 2; j < UtfSignature.Length; j++)
+                    {
                         m *= t;
-                        if ((encryptedUtfSignature[j] ^ m) != UtfSignature[j]) {
+                        if ((encryptedUtfSignature[j] ^ m) != UtfSignature[j])
+                        {
                             break;
                         }
-                        if (j < UtfSignature.Length - 1) {
+                        if (j < UtfSignature.Length - 1)
+                        {
                             continue;
                         }
                         seed = (byte)s;
@@ -72,29 +92,38 @@ namespace DereTore.Exchange.Archive.ACB {
             return false;
         }
 
-        private byte[] CheckEncryption(byte[] magicBytes) {
-            if (AcbHelper.AreDataIdentical(magicBytes, UtfSignature)) {
+        private byte[] CheckEncryption(byte[] magicBytes)
+        {
+            if (AcbHelper.AreDataIdentical(magicBytes, UtfSignature))
+            {
                 _isEncrypted = false;
                 _utfReader = new UtfReader();
                 return magicBytes;
-            } else {
+            }
+            else
+            {
                 _isEncrypted = true;
                 byte seed, increment;
                 var keysFound = GetKeysForEncryptedUtfTable(magicBytes, out seed, out increment);
-                if (!keysFound) {
-                    throw new FormatException(string.Format("Unable to decrypt UTF table at offset 0x{0:x8}",_offset));
-                } else {
+                if (!keysFound)
+                {
+                    throw new FormatException(string.Format("Unable to decrypt UTF table at offset 0x{0:x8}", _offset));
+                }
+                else
+                {
                     _utfReader = new UtfReader(seed, increment);
                 }
                 return UtfSignature;
             }
         }
 
-        private Stream GetTableDataStream() {
+        private Stream GetTableDataStream()
+        {
             var stream = _stream;
             var offset = _offset;
             var tableSize = (int)_utfReader.PeekUInt32(stream, offset, 4) + 8;
-            if (!IsEncrypted) {
+            if (!IsEncrypted)
+            {
                 return AcbHelper.ExtractToNewStream(stream, offset, tableSize);
             }
             // Another reading process. Unlike the one with direct reading, this may encounter UTF table decryption.
@@ -103,7 +132,8 @@ namespace DereTore.Exchange.Archive.ACB {
             var memory = new byte[tableSize];
             var currentIndex = 0;
             var currentOffset = offset;
-            do {
+            do
+            {
                 var shouldRead = tableSize - totalBytesRead;
                 var buffer = _utfReader.PeekBytes(stream, currentOffset, shouldRead, totalBytesRead);
                 Array.Copy(buffer, 0, memory, currentIndex, buffer.Length);
@@ -112,22 +142,27 @@ namespace DereTore.Exchange.Archive.ACB {
                 totalBytesRead += buffer.Length;
             } while (totalBytesRead < tableSize);
             stream.Position = originalPosition;
-            var memoryStream = new MemoryStream(memory, false) {
+            var memoryStream = new MemoryStream(memory, false)
+            {
                 Capacity = tableSize
             };
             memoryStream.Seek(0, SeekOrigin.Begin);
             return memoryStream;
         }
 
-        private static UtfHeader GetUtfHeader(Stream stream) {
+        private static UtfHeader GetUtfHeader(Stream stream)
+        {
             return GetUtfHeader(stream, stream.Position);
         }
 
-        private static UtfHeader GetUtfHeader(Stream stream, long offset) {
-            if (offset != stream.Position) {
+        private static UtfHeader GetUtfHeader(Stream stream, long offset)
+        {
+            if (offset != stream.Position)
+            {
                 stream.Seek(offset, SeekOrigin.Begin);
             }
-            var header = new UtfHeader {
+            var header = new UtfHeader
+            {
                 TableSize = stream.PeekUInt32BE(offset + 4),
                 Unknown1 = stream.PeekUInt16BE(offset + 8),
                 PerRowDataOffset = (uint)stream.PeekUInt16BE(offset + 10) + 8,
@@ -142,19 +177,23 @@ namespace DereTore.Exchange.Archive.ACB {
             return header;
         }
 
-        private void InitializeUtfSchema(Stream sourceStream, Stream tableDataStream, long schemaOffset) {
+        private void InitializeUtfSchema(Stream sourceStream, Stream tableDataStream, long schemaOffset)
+        {
             var header = _utfHeader;
             var rows = _rows;
             var baseOffset = _offset;
-            for (uint i = 0; i < header.RowCount; i++) {
+            for (uint i = 0; i < header.RowCount; i++)
+            {
                 var currentOffset = schemaOffset;
                 var row = new Dictionary<string, UtfField>();
                 rows[i] = row;
                 long currentRowOffset = 0;
                 long currentRowBase = header.PerRowDataOffset + header.RowSize * i;
 
-                for (var j = 0; j < header.FieldCount; j++) {
-                    var field = new UtfField {
+                for (var j = 0; j < header.FieldCount; j++)
+                {
+                    var field = new UtfField
+                    {
                         Type = tableDataStream.PeekByte(currentOffset)
                     };
 
@@ -164,12 +203,14 @@ namespace DereTore.Exchange.Archive.ACB {
                     var union = new NumericUnion();
                     var constrainedStorage = (ColumnStorage)(field.Type & (byte)ColumnStorage.Mask);
                     var constrainedType = (ColumnType)(field.Type & (byte)ColumnType.Mask);
-                    switch (constrainedStorage) {
+                    switch (constrainedStorage)
+                    {
                         case ColumnStorage.Constant:
                         case ColumnStorage.Constant2:
                             var constantOffset = currentOffset + 5;
                             long dataOffset;
-                            switch (constrainedType) {
+                            switch (constrainedType)
+                            {
                                 case ColumnType.String:
                                     dataOffset = tableDataStream.PeekInt32BE(constantOffset);
                                     field.StringValue = tableDataStream.PeekZeroEndedStringAsAscii(header.StringTableOffset + dataOffset);
@@ -225,13 +266,14 @@ namespace DereTore.Exchange.Archive.ACB {
                                     currentOffset += 1;
                                     break;
                                 default:
-                                    throw new FormatException(string.Format("Unknown column type at offset: 0x{0:x8}",currentOffset));
+                                    throw new FormatException(string.Format("Unknown column type at offset: 0x{0:x8}", currentOffset));
                             }
                             break;
                         case ColumnStorage.PerRow:
                             // read the constant depending on the type
                             long rowDataOffset;
-                            switch (constrainedType) {
+                            switch (constrainedType)
+                            {
                                 case ColumnType.String:
                                     rowDataOffset = tableDataStream.PeekUInt32BE(currentRowBase + currentRowOffset);
                                     field.StringValue = tableDataStream.PeekZeroEndedStringAsAscii(header.StringTableOffset + rowDataOffset);
@@ -287,16 +329,17 @@ namespace DereTore.Exchange.Archive.ACB {
                                     currentRowOffset += 1;
                                     break;
                                 default:
-                                    throw new FormatException(string.Format("Unknown column type at offset: 0x{0:x8}",currentOffset));
+                                    throw new FormatException(string.Format("Unknown column type at offset: 0x{0:x8}", currentOffset));
                             }
                             field.ConstrainedType = (ColumnType)field.Type;
                             break;
                         default:
-                            throw new FormatException(string.Format("Unknown column storage at offset: 0x{0:x8}",currentOffset));
+                            throw new FormatException(string.Format("Unknown column storage at offset: 0x{0:x8}", currentOffset));
                     }
                     // Union polyfill
                     field.ConstrainedType = constrainedType;
-                    switch (constrainedType) {
+                    switch (constrainedType)
+                    {
                         case ColumnType.String:
                         case ColumnType.Data:
                             break;
@@ -310,46 +353,57 @@ namespace DereTore.Exchange.Archive.ACB {
             }
         }
 
-        private object GetFieldValue(int rowIndex, string fieldName) {
+        private object GetFieldValue(int rowIndex, string fieldName)
+        {
             var rows = Rows;
-            if (rowIndex >= rows.Length) {
+            if (rowIndex >= rows.Length)
+            {
                 return null;
             }
             var row = rows[rowIndex];
             return row.ContainsKey(fieldName) ? row[fieldName].GetValue() : null;
         }
 
-        internal T? GetFieldValueAsNumber<T>(int rowIndex, string fieldName) where T : struct {
+        internal T? GetFieldValueAsNumber<T>(int rowIndex, string fieldName) where T : struct
+        {
             return (T?)GetFieldValue(rowIndex, fieldName);
         }
 
-        internal string GetFieldValueAsString(int rowIndex, string fieldName) {
+        internal string GetFieldValueAsString(int rowIndex, string fieldName)
+        {
             return (string)GetFieldValue(rowIndex, fieldName);
         }
 
-        internal byte[] GetFieldValueAsData(int rowIndex, string fieldName) {
+        internal byte[] GetFieldValueAsData(int rowIndex, string fieldName)
+        {
             return (byte[])GetFieldValue(rowIndex, fieldName);
         }
 
-        internal long? GetFieldOffset(int rowIndex, string fieldName) {
+        internal long? GetFieldOffset(int rowIndex, string fieldName)
+        {
             var rows = Rows;
-            if (rowIndex >= rows.Length) {
+            if (rowIndex >= rows.Length)
+            {
                 return null;
             }
             var row = rows[rowIndex];
-            if (row.ContainsKey(fieldName)) {
+            if (row.ContainsKey(fieldName))
+            {
                 return row[fieldName].Offset;
             }
             return null;
         }
 
-        internal long? GetFieldSize(int rowIndex, string fieldName) {
+        internal long? GetFieldSize(int rowIndex, string fieldName)
+        {
             var rows = Rows;
-            if (rowIndex >= rows.Length) {
+            if (rowIndex >= rows.Length)
+            {
                 return null;
             }
             var row = rows[rowIndex];
-            if (row.ContainsKey(fieldName)) {
+            if (row.ContainsKey(fieldName))
+            {
                 return row[fieldName].Size;
             }
             return null;

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Assets.Scripts.Audio.CriWareFormats.Common;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime;
-using Assets.Scripts.Audio.CriWareFormats.Common;
 
 namespace CriWareFormats.Common
 {

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
+﻿using Gallop;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Gallop;
+using UnityEngine;
 
 //初期ポーズ(T,Aポーズ)の時点でアタッチ、有効化されている必要がある
 public class UnityHumanoidVMDRecorder : MonoBehaviour
@@ -193,7 +193,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             lastvisable = visable;
             visitableDictionary.Add(0, visable);
         }
-        else if(visable != lastvisable)
+        else if (visable != lastvisable)
         {
             lastvisable = visable;
             visitableDictionary.Add(FrameNumber, visable);
@@ -387,7 +387,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             rotationDictionary.Add(boneName, new List<Quaternion>());
         }
         morphRecorder = new MorphRecorder(transform);
-        
+
         if (IsLive)
         {
             var director = Gallop.Live.Director.instance;
@@ -561,7 +561,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 byte[] ikCount = BitConverter.GetBytes(visitableDictionary.Count);
                 binaryWriter.Write(ikCount, 0, intByteLength);
 
-                foreach(var visable in visitableDictionary)
+                foreach (var visable in visitableDictionary)
                 {
                     byte[] ikFrameNumber = BitConverter.GetBytes(visable.Key);
                     byte modelDisplay = Convert.ToByte(visable.Value ? 1 : 0);
@@ -577,7 +577,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                     byte[] rightToeIKName = System.Text.Encoding.GetEncoding(ShiftJIS).GetBytes("右つま先ＩＫ");
                     byte ikOn = Convert.ToByte(1);
                     byte ikOff = Convert.ToByte(0);
-                        
+
                     binaryWriter.Write(ikNumber, 0, intByteLength);
                     binaryWriter.Write(leftIKName, 0, leftIKName.Length);
                     binaryWriter.Write(new byte[IKNameLength - leftIKName.Length], 0, IKNameLength - leftIKName.Length);
@@ -620,7 +620,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         SaveVMD(modelName, fileName);
     }
 
-    public void SaveLiveVMD(LiveEntry liveEntry, DateTime time ,string modelName, int keyReductionLevel = 3)
+    public void SaveLiveVMD(LiveEntry liveEntry, DateTime time, string modelName, int keyReductionLevel = 3)
     {
         string fileName = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
         Directory.CreateDirectory(Path.GetDirectoryName(fileName));
@@ -850,7 +850,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 {
                     foreach (var v in val.UMAMorph)
                     {
-                        if(v.Equals(name))
+                        if (v.Equals(name))
                         {
                             return val.MMDMorph;
                         }

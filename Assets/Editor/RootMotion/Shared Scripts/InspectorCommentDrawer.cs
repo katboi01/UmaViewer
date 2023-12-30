@@ -42,7 +42,7 @@ namespace RootMotion
             color *= 0.5f;
 
             style = GetStyle();
-            
+
             GUI.color = color;
 
             Rect labelRect = pos;

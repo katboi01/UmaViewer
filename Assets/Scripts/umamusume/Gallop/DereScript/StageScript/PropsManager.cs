@@ -1,7 +1,6 @@
-using Stage;
+using Cutt;
 using System.Collections.Generic;
 using UnityEngine;
-using Cutt;
 
 public class PropsManager
 {

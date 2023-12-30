@@ -1723,7 +1723,7 @@ public class CharacterObject : Character3DBase, ILiveTimelineCharactorLocator, I
         foreach (CySpringRootBone obj in boneList)
         {
             obj.IsWind = true;
-            obj.WindGroupIndex = (float)Math.PI * 2f / (float)num;
+            obj.WindGroupIndex = (float)Math.PI * 2f / num;
             num++;
             if (num >= 10)
             {
@@ -1733,7 +1733,7 @@ public class CharacterObject : Character3DBase, ILiveTimelineCharactorLocator, I
         foreach (CySpringRootBone item in list4)
         {
             item.IsWind = true;
-            item.WindGroupIndex = (float)Math.PI * 2f / (float)num;
+            item.WindGroupIndex = (float)Math.PI * 2f / num;
             num++;
             if (num >= 10)
             {

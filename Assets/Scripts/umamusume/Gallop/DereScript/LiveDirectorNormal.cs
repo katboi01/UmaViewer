@@ -1,12 +1,9 @@
-﻿using UnityEngine;
+﻿using Cute;
+/*musicScore用*/
+using Sqlite3Plugin;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cute;
-using Stage;
-
-/*musicScore用*/
-using Sqlite3Plugin;
 
 public class LiveDirectorNormal : LiveDirector
 {
@@ -28,7 +25,7 @@ public class LiveDirectorNormal : LiveDirector
     private bool isSmartMode = false;
 
     private bool anotherMode = false;
-    
+
     private int soloCharaID = -1;
 
     public bool isHQ
@@ -335,7 +332,7 @@ public class LiveDirectorNormal : LiveDirector
         get
         {
             string filename = "";
-            if(live3DData != null)
+            if (live3DData != null)
             {
                 if (live3DData.autolip.Length > 0)
                 {
@@ -368,7 +365,7 @@ public class LiveDirectorNormal : LiveDirector
             return liveData.member_number;
         }
     }
-    
+
     public string[] charaMotionFiles
     {
         get
@@ -535,7 +532,7 @@ public class LiveDirectorNormal : LiveDirector
 
             if (live3DData != null)
             {
-                
+
                 int count = live3DData.mirrorScanMatNames.Length;
                 for (int i = 0; i < count; i++)
                 {
@@ -653,7 +650,7 @@ public class LiveDirectorNormal : LiveDirector
             }
             musicDB.CloseDB();
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine(e);
             musicDB.CloseDB();

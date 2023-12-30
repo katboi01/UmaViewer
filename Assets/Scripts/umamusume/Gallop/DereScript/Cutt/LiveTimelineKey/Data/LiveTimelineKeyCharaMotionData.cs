@@ -76,7 +76,7 @@ namespace Cutt
                     num = Array.IndexOf(timelineControl.data.characterSettings.motionSequenceIndices, num);
                     int num2 = num;
                     int charaId = Director.instance.GetCharacterData(num2 + 1).charaId;
-                    if ((int)MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
+                    if (MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
                     {
                         flag = true;
                     }

@@ -4,7 +4,7 @@ namespace Cutt
     {
         public static bool hasFlag(this LiveTimelineKeyAttribute This, LiveTimelineKeyAttribute bit)
         {
-            return (This & bit) != (LiveTimelineKeyAttribute)0;
+            return (This & bit) != 0;
         }
 
         public static LiveTimelineKeyAttribute addFlag(this LiveTimelineKeyAttribute This, LiveTimelineKeyAttribute bit, bool on)

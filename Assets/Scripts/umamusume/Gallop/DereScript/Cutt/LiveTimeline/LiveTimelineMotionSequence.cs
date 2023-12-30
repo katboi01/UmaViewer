@@ -270,7 +270,7 @@ namespace Cutt
             for (int count = keys.Count; i < count; i++)
             {
                 LiveTimelineKeyCharaMotionData liveTimelineKeyCharaMotionData = keys.thisList[i] as LiveTimelineKeyCharaMotionData;
-                float num = (float)liveTimelineKeyCharaMotionData.frame * spf;
+                float num = liveTimelineKeyCharaMotionData.frame * spf;
                 if (t >= num && t <= num + liveTimelineKeyCharaMotionData.playLength)
                 {
                     if (a != null)
@@ -280,7 +280,7 @@ namespace Cutt
                             a = liveTimelineKeyCharaMotionData;
                             indexA = i;
                         }
-                        else if ((float)a.frame * spf + a.playLength >= num)
+                        else if (a.frame * spf + a.playLength >= num)
                         {
                             b = liveTimelineKeyCharaMotionData;
                             indexB = i;
@@ -357,7 +357,7 @@ namespace Cutt
 
         private void OnMotionBUpdate(LiveTimelineKeyCharaMotionData playingKeyB, bool isHeightMotionTimeline, float blendRate, float currentTime, float spf, ref Dictionary<string, bool> controlClips)
         {
-            float num = (float)playingKeyB.frame * spf;
+            float num = playingKeyB.frame * spf;
             float num2 = (currentTime - num - playingKeyB.motionHeadTime) * playingKeyB.playSpeed;
             WrapMode wrapMode = (playingKeyB.loop ? WrapMode.Loop : WrapMode.ClampForever);
             if (!playingKeyB.loop && num2 < 0f)
@@ -473,7 +473,7 @@ namespace Cutt
             Dictionary<string, bool> controlClips = new Dictionary<string, bool>();
             _target.liveMSQControlled = true;
             float num2 = 1f;
-            float num3 = (float)prevMotionA.frame * num;
+            float num3 = prevMotionA.frame * num;
             AnimationState animationState = GetAnimationState(prevMotionA);
             _target.liveMSQCurrentAnimState = animationState;
             _target.liveMSQCurrentAnimStartTime = num3;
@@ -485,7 +485,7 @@ namespace Cutt
             {
                 if (!flag2)
                 {
-                    float num4 = (float)prevMotionB.frame * num;
+                    float num4 = prevMotionB.frame * num;
                     float num5 = num3 + prevMotionA.playLength - num4;
                     if (!(num5 < 0f))
                     {

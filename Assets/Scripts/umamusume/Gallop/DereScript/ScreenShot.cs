@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
+﻿using System;
+using System.Collections;
 using System.IO;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 public class ScreenShot : MonoBehaviour
@@ -90,7 +89,7 @@ public class ScreenShot : MonoBehaviour
         {
             if (screenshotSetting == 0)
             {
-                if(_colorTexture.width != Screen.width || _colorTexture.height != Screen.height)
+                if (_colorTexture.width != Screen.width || _colorTexture.height != Screen.height)
                 {
                     _colorTexture.Release();
                     _colorTexture.width = Screen.width;

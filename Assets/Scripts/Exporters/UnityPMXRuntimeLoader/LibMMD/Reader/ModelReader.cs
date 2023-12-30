@@ -1,15 +1,16 @@
-using System.IO;
 using LibMMD.Model;
+using System.IO;
 
 namespace LibMMD.Reader
 {
     public abstract class ModelReader
-    {      
+    {
         public RawMMDModel Read(string path, ModelConfig config)
         {
             using (var fileStream = new FileStream(path, FileMode.Open))
             {
-                using (var bufferedStream = new BufferedStream(fileStream)) {
+                using (var bufferedStream = new BufferedStream(fileStream))
+                {
                     using (var binaryReader = new BinaryReader(bufferedStream))
                     {
                         return Read(binaryReader, config);
@@ -19,7 +20,7 @@ namespace LibMMD.Reader
         }
 
         public abstract RawMMDModel Read(BinaryReader reader, ModelConfig config);
-        
+
         public static RawMMDModel LoadMmdModel(string path, ModelConfig config)
         {
             var fileExt = new FileInfo(path).Extension.ToLower();

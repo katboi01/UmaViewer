@@ -22,7 +22,7 @@ namespace Stage.Cyalume
 
         private const string CYALUME_RICH_SHADER = "Cygames/3DLive/Cyalume/CyalumeDefault_hq";
 
-        private const string CYALUME_CONTROL_SHADER = "Cygames/3DLive/Cyalume/CyalumeDefault_control";  
+        private const string CYALUME_CONTROL_SHADER = "Cygames/3DLive/Cyalume/CyalumeDefault_control";
 
         private const float _AudienceZposMargin = 5f;
 
@@ -284,7 +284,7 @@ namespace Stage.Cyalume
             {
                 _speed = _animationSpeed;
             }
-            int num2 = (int)(num * _speed * (float)_animationFrameCount) % _animationFrameCount + _startImage;
+            int num2 = (int)(num * _speed * _animationFrameCount) % _animationFrameCount + _startImage;
             if (num2 < 0)
             {
                 num2 = 0;
@@ -325,7 +325,7 @@ namespace Stage.Cyalume
                 }
             }
             Vector2 mainTextureOffset = default(Vector2);
-            mainTextureOffset.y = (float)num / (float)_animationFrameCount;
+            mainTextureOffset.y = num / (float)_animationFrameCount;
             mainTextureOffset.x = 0f;
             _material.mainTextureOffset = mainTextureOffset;
         }
@@ -451,7 +451,7 @@ namespace Stage.Cyalume
                     {
                         if (mesh2.vertices[l].z >= num3 + 5f || mesh2.vertices[l].z <= num3 - 5f)
                         {
-                            num4 = (float)UnityEngine.Random.Range(0, 9) * 0.1f;
+                            num4 = UnityEngine.Random.Range(0, 9) * 0.1f;
                             num3 = mesh2.vertices[l].z;
                         }
                         array[l] = mesh2.uv[l];

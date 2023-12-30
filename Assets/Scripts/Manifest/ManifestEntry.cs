@@ -2,10 +2,9 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using UnityEngine;
 using static BSVReader;
 
-public struct ManifestEntry 
+public struct ManifestEntry
 {
     public byte[] name;
     public byte[] deps;
@@ -85,13 +84,13 @@ public struct ManifestEntry
         return s.ToString();
     }
 
-    public static ILineParser<ManifestEntry> GetBsvParser(Format format, IBSVReader bsvReader) 
+    public static ILineParser<ManifestEntry> GetBsvParser(Format format, IBSVReader bsvReader)
     {
         if (format == Format.Simplified)
         {
             return new SimplifiedEntryLineReader();
         }
-        else 
+        else
         {
             if (bsvReader is AnonymousSchemaBSVReader)
             {
@@ -105,9 +104,9 @@ public struct ManifestEntry
         }
     }
 
-    public class SimplifiedEntryLineReader : ILineParser<ManifestEntry> 
+    public class SimplifiedEntryLineReader : ILineParser<ManifestEntry>
     {
-        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat) 
+        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat)
         {
             dat.name = GetArray(ReadText(buf, ref offset));
             dat.size = ReadVLQ(buf, ref offset);
@@ -118,10 +117,10 @@ public struct ManifestEntry
 
     }
 
-    public class FullEntryLineReader : ILineParser<ManifestEntry> 
+    public class FullEntryLineReader : ILineParser<ManifestEntry>
     {
 
-        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat) 
+        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat)
         {
             dat.name = GetArray(ReadText(buf, ref offset));
             dat.deps = GetArray(ReadText(buf, ref offset));
@@ -136,9 +135,9 @@ public struct ManifestEntry
 
     }
 
-    public class LegacyFullEntryLineReader : ILineParser<ManifestEntry> 
+    public class LegacyFullEntryLineReader : ILineParser<ManifestEntry>
     {
-        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat) 
+        public void Parse(byte[] buf, ref int offset, ref ManifestEntry dat)
         {
             dat.name = GetArray(ReadText(buf, ref offset));
             dat.deps = GetArray(ReadText(buf, ref offset));

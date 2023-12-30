@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 
 /// <summary>
 /// URLを管理する
@@ -85,7 +81,7 @@ public class URLData
             //hashの先頭2文字を切り出し
             string hashdir = hash.Substring(0, 2);
             ret = ret + hashdir + @"/" + hash;
-            
+
             return ret;
         }
     }

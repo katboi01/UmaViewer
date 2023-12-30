@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live
@@ -74,7 +72,7 @@ namespace Gallop.Live
         private bool _isLipSync; // 0xAD
         private const float AutoBlinkIntervalMin = 3;
         private const float AutoBlinkIntervalMax = 5;
-	    private int _blinkRno; // 0xB0
+        private int _blinkRno; // 0xB0
         private int _currentStartFrameOfEye; // 0xB4
 
         public bool IsUpdateAutoBlink { get; set; }

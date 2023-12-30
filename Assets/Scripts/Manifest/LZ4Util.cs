@@ -1,9 +1,7 @@
-﻿using K4os.Compression.LZ4;
-using K4os.Compression.LZ4.Streams;
+﻿using K4os.Compression.LZ4.Streams;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 public static class LZ4Util
 {
@@ -24,17 +22,17 @@ public static class LZ4Util
         Marshal.Copy(bytes, 0, data, bytes.Length);
 
         int dataLength = 0;
-        dataLength = ((dataLength| bytes[3])<<8);
-        dataLength = ((dataLength| bytes[2])<<8);
-        dataLength = ((dataLength| bytes[1])<<8);
-        dataLength = (dataLength| bytes[0]);
+        dataLength = ((dataLength | bytes[3]) << 8);
+        dataLength = ((dataLength | bytes[2]) << 8);
+        dataLength = ((dataLength | bytes[1]) << 8);
+        dataLength = (dataLength | bytes[0]);
 
-        IntPtr result = Marshal.AllocHGlobal(bytes.Length+ dataLength);
+        IntPtr result = Marshal.AllocHGlobal(bytes.Length + dataLength);
 
         var output = new byte[bytes.Length + dataLength];
         var outlength = LZ4_decompress_safe_ext(data, result, bytes.Length, output.Length);
 
-        Marshal.Copy(result, output, 0,outlength);
+        Marshal.Copy(result, output, 0, outlength);
 
         Array.Resize(ref output, outlength);
         Marshal.FreeHGlobal(data);

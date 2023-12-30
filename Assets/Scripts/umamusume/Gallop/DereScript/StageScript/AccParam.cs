@@ -26,7 +26,7 @@ public class AccParam : ScriptableObject
         public Vector3 rotateSub = Vector3.zero;
 
         public Vector3 scaleSub = Vector3.one;
-        
+
         public void CopyTo(ref Info info, bool bSkipCharaId = false)
         {
             if (!bSkipCharaId)

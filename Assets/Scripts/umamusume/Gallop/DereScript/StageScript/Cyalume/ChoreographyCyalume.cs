@@ -1,9 +1,7 @@
+using Stage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cute;
-using Stage;
-using Stage.Cyalume;
 
 public class ChoreographyCyalume
 {

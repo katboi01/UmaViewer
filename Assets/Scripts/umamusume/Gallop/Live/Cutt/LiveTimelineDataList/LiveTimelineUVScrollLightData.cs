@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-    
+
     [System.Serializable]
     public class LiveTimelineKeyUVScrollLightData : LiveTimelineKeyWithInterpolate
     {
-        
+
         public Color mulColor0;
         public Color mulColor1;
         public float colorPower;
@@ -24,7 +22,7 @@ namespace Gallop.Live.Cutt
         public bool isPasteLoopUnit;
         public bool isChangeLoopInterpolate;
         private const int ENABLE_TEXTURE = 65536;
-        
+
     }
 
     [System.Serializable]
@@ -32,7 +30,7 @@ namespace Gallop.Live.Cutt
     {
 
     }
-    
+
 
     [System.Serializable]
     public class LiveTimelineUVScrollLightData : ILiveTimelineGroupDataWithName

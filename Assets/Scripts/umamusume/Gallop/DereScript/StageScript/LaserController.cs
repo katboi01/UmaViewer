@@ -1,5 +1,4 @@
 ﻿using Cutt;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -112,7 +111,7 @@ public class LaserController : MonoBehaviour
                 case eLaserForm.Circle_3:
                     num = 120f;
                     num2 = num;
-                    num2 *= (float)idx;
+                    num2 *= idx;
                     _dirForward.z = 1f;
                     _dirForward = Quaternion.Euler(0f, num2, 0f) * _dirForward;
                     _dirForward.Normalize();
@@ -133,7 +132,7 @@ public class LaserController : MonoBehaviour
                 case eLaserForm.Circle_5:
                     num = 72f;
                     num2 = num;
-                    num2 *= (float)idx;
+                    num2 *= idx;
                     _dirForward.z = 1f;
                     _dirForward = Quaternion.Euler(0f, num2, 0f) * _dirForward;
                     _dirForward.Normalize();

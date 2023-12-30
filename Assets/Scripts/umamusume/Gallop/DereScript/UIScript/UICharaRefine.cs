@@ -1,9 +1,8 @@
-﻿using System.Collections;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using UnityEngine;
 
-public class UICharaRefine : MonoBehaviour {
+public class UICharaRefine : MonoBehaviour
+{
 
     [SerializeField]
     private bool[] visibleSelect = new bool[] { true, true, true, true };
@@ -35,7 +34,7 @@ public class UICharaRefine : MonoBehaviour {
     private void Awake()
     {
         var toggles = transform.Find("Content/Select/Type/ContentArea/Cute");
-        if(toggles != null)
+        if (toggles != null)
         {
             Cute = toggles.GetComponent<Toggle>();
         }
@@ -193,7 +192,7 @@ public class UICharaRefine : MonoBehaviour {
         else
         {
             visibleSelect[1] = false;
-           // SaveManager.SetInt("CharaCoolVisible", -1);
+            // SaveManager.SetInt("CharaCoolVisible", -1);
 
         }
         //SaveManager.Save();
@@ -246,8 +245,8 @@ public class UICharaRefine : MonoBehaviour {
     private void Save()
     {
         int value = 0;
-        value = visibleSelect[0] ?  1 : -1;
-        if(visibleSelect[0] != lastValue[0]) SaveManager.SetInt("CharaCuteVisible", value);
+        value = visibleSelect[0] ? 1 : -1;
+        if (visibleSelect[0] != lastValue[0]) SaveManager.SetInt("CharaCuteVisible", value);
 
         value = visibleSelect[1] ? 1 : -1;
         if (visibleSelect[1] != lastValue[1]) SaveManager.SetInt("CharaCoolVisible", value);

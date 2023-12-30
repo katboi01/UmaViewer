@@ -1,8 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DereTore.Exchange.Audio.HCA.Native {
+namespace DereTore.Exchange.Audio.HCA.Native
+{
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct WaveSampleSection {
+    public struct WaveSampleSection
+    {
 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 4)]
         public byte[] SMPL;
@@ -24,7 +26,8 @@ namespace DereTore.Exchange.Audio.HCA.Native {
         public uint LoopFraction;
         public uint LoopPlayCount;
 
-        public static WaveSampleSection CreateDefault() {
+        public static WaveSampleSection CreateDefault()
+        {
             var v = default(WaveSampleSection);
             v.SmplSize = 0x3c;
             v.Manufacturer = 0;

@@ -95,7 +95,7 @@ namespace Cutt
                 Vector2 pointA = CubeBezier(start, startTangent, end, endTangent, 0f);
                 for (int i = 1; i < segments; i++)
                 {
-                    Vector2 vector = CubeBezier(start, startTangent, end, endTangent, (float)i / (float)segments);
+                    Vector2 vector = CubeBezier(start, startTangent, end, endTangent, i / (float)segments);
                     DrawLine(pointA, vector, color, width, antiAlias);
                     pointA = vector;
                 }
@@ -783,7 +783,7 @@ namespace Cutt
                     {
                         ILiveTimelineMSQTarget liveTimelineMSQTarget2 = (context.target = spareTarget[i]);
                         _motionSequenceArray[(int)position].Initialize(ref context);
-                        _motionSequenceArray[(int)position].AlterUpdate(0f,60f);
+                        _motionSequenceArray[(int)position].AlterUpdate(0f, 60f);
                     }
                 }
                 context.target = liveTimelineMSQTarget;
@@ -1239,7 +1239,7 @@ namespace Cutt
         private static float LinearInterpolateKeyframes(LiveTimelineKey from, LiveTimelineKey to, float curFrame)
         {
             int num = to.frame - from.frame;
-            return Mathf.Clamp01((curFrame - (float)from.frame) / (float)num);
+            return Mathf.Clamp01((curFrame - from.frame) / num);
         }
 
         private static float CurveInterpolateKeyframes(LiveTimelineKey from, LiveTimelineKey to, float curFrame)
@@ -1255,7 +1255,7 @@ namespace Cutt
                 return 0f;
             }
             int num = to.frame - from.frame;
-            float time = Mathf.Clamp01((curFrame - (float)from.frame) / (float)num);
+            float time = Mathf.Clamp01((curFrame - from.frame) / num);
             return liveTimelineKeyWithInterpolate2.curve.Evaluate(time);
         }
 
@@ -1272,7 +1272,7 @@ namespace Cutt
                 return 0f;
             }
             int num = to.frame - from.frame;
-            return LiveTimelineEasing.GetValue(liveTimelineKeyWithInterpolate2.easingType, curFrame - (float)from.frame, 0f, 1f, (float)num);
+            return LiveTimelineEasing.GetValue(liveTimelineKeyWithInterpolate2.easingType, curFrame - from.frame, 0f, 1f, num);
         }
 
         public float GetCharacterHeight(LiveCharaPosition position)
@@ -1284,7 +1284,7 @@ namespace Cutt
         {
             Vector3 retPos = Vector3.zero;
             Vector3 tmpPos = Vector3.zero;
-            if (posFlags == (LiveCharaPositionFlag)0)
+            if (posFlags == 0)
             {
                 retPos = liveStageCenterPos;
                 tmpPos = liveStageCenterPos;
@@ -1489,13 +1489,13 @@ namespace Cutt
                 bool flag = num > 1;
                 if (flag)
                 {
-                    retPos /= (float)num;
+                    retPos /= num;
                 }
                 if ((uint)(parts - 11) <= 2u)
                 {
                     if (flag)
                     {
-                        tmpPos /= (float)num;
+                        tmpPos /= num;
                     }
                     retPos.y = tmpPos.y;
                 }
@@ -1829,7 +1829,7 @@ namespace Cutt
             }
             if (_limitFovForWidth)
             {
-                float num2 = (float)camera.camera.pixelWidth / (float)camera.camera.pixelHeight;
+                float num2 = camera.camera.pixelWidth / (float)camera.camera.pixelHeight;
                 if (num2 > _baseCameraAspectRatio)
                 {
                     float num3 = num2 / _baseCameraAspectRatio;
@@ -1894,7 +1894,7 @@ namespace Cutt
             {
                 flag2 = false;
             }
-            float num = (float)currentFrame * 0.0166666675f;
+            float num = currentFrame * 0.0166666675f;
             CySpringUpdateInfo updateInfo = default(CySpringUpdateInfo);
             for (int i = 0; i < liveCharaPositionMax; i++)
             {
@@ -2310,7 +2310,7 @@ namespace Cutt
                 int num2 = liveTimelineKey2?.frame ?? frame;
                 bool num3 = liveTimelineKey2?.IsInterpolateKey() ?? false;
                 float num4 = 0f;
-                num4 = ((num3 || (frame != num2 && frame + 120 > num2)) ? ((float)num + (float)(currentFrame - frame) / (float)(num2 - frame) - 0.5f) : ((currentFrame < frame + 60) ? ((float)num + (float)(currentFrame - frame) / 120f - 0.5f) : ((frame == num2 || num2 - 60 >= currentFrame) ? ((float)num) : ((float)(num + 1) - (float)(num2 - currentFrame) / 120f - 0.5f))));
+                num4 = ((num3 || (frame != num2 && frame + 120 > num2)) ? (num + (currentFrame - frame) / (float)(num2 - frame) - 0.5f) : ((currentFrame < frame + 60) ? (num + (currentFrame - frame) / 120f - 0.5f) : ((frame == num2 || num2 - 60 >= currentFrame) ? num : (num + 1 - (num2 - currentFrame) / 120f - 0.5f))));
                 if (num4 < 0f)
                 {
                     num4 = 0f;
@@ -2476,7 +2476,7 @@ namespace Cutt
                         updateInfo.value = liveTimelineKeyBgColor1Data.f32;
                     }
                     updateInfo.data = liveTimelineBgColor1Data;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyBgColor1Data.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyBgColor1Data.frame) * 0.0166666675f;
                     updateInfo.flags = liveTimelineKeyBgColor1Data.flags;
                     this.OnUpdateBgColor1(ref updateInfo);
                 }
@@ -2522,7 +2522,7 @@ namespace Cutt
                         updateInfo.manualRotation = liveTimelineKeyBgColor2Data.manualRotation;
                     }
                     updateInfo.data = liveTimelineBgColor2Data;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyBgColor2Data.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyBgColor2Data.frame) * 0.0166666675f;
                     updateInfo.rndValueIdx = liveTimelineKeyBgColor2Data.RandomTableIndex();
                     updateInfo.groupIndex = liveTimelineBgColor2Data.groupNo;
                     this.OnUpdateBgColor2(ref updateInfo);
@@ -2568,7 +2568,7 @@ namespace Cutt
                     }
                 }
                 _bgColor3UpdateInfo.data = liveTimelineBgColor3Data;
-                _bgColor3UpdateInfo.progressTime = (float)(currentFrame - liveTimelineKeyBgColor3Data.frame) * 0.0166666675f;
+                _bgColor3UpdateInfo.progressTime = (currentFrame - liveTimelineKeyBgColor3Data.frame) * 0.0166666675f;
                 this.OnUpdateBgColor3(ref _bgColor3UpdateInfo);
             }
         }
@@ -2617,7 +2617,7 @@ namespace Cutt
                     updateInfo.komorebi = liveTimelineKeyVolumeLightData.komorebi;
                     updateInfo.isEnabledBorderClear = liveTimelineKeyVolumeLightData.isEnabledBorderClear;
                     updateInfo.data = liveTimelineVolumeLightData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyVolumeLightData.frame) * num;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyVolumeLightData.frame) * num;
                     this.OnUpdateVolumeLight(ref updateInfo);
                 }
             }
@@ -2661,7 +2661,7 @@ namespace Cutt
                     }
                     updateInfo.enable = liveTimelineKeyHdrBloomData.enable;
                     updateInfo.data = liveTimelineHdrBloomData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyHdrBloomData.frame) * num;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyHdrBloomData.frame) * num;
                     this.OnUpdateHdrBloom(ref updateInfo);
                 }
             }
@@ -2711,7 +2711,7 @@ namespace Cutt
                     updateInfo.reversePlayFlag = liveTimelineKeyMonitorControlData.attribute.hasFlag((LiveTimelineKeyAttribute)131072);
                     updateInfo.inputSource = liveTimelineKeyMonitorControlData.inputSource;
                     updateInfo.data = liveTimelineMonitorControlData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyMonitorControlData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyMonitorControlData.frame) * 0.0166666675f;
                     updateInfo.textureLabel = liveTimelineKeyMonitorControlData.outputTextureLabel;
                     updateInfo.playStartOffsetFrame = liveTimelineKeyMonitorControlData.playStartOffsetFrame;
                     this.OnUpdateMonitorControl(ref updateInfo);
@@ -2754,7 +2754,7 @@ namespace Cutt
                     updateInfo.speed = liveTimelineKeyAnimationData.speed;
                     updateInfo.offsetTime = liveTimelineKeyAnimationData.offsetTime;
                     updateInfo.data = liveTimelineAnimationData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyAnimationData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyAnimationData.frame) * 0.0166666675f;
                     this.OnUpdateAnimation(ref updateInfo);
                 }
             }
@@ -2798,7 +2798,7 @@ namespace Cutt
                     updateInfo.tiling = liveTimelineKeyTextureAnimationData.tiling;
                     updateInfo.textureID = liveTimelineKeyTextureAnimationData.textureID;
                     updateInfo.data = liveTimelineTextureAnimationData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyTextureAnimationData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyTextureAnimationData.frame) * 0.0166666675f;
                     this.OnUpdateTextureAnimation(ref updateInfo);
                 }
             }
@@ -2841,7 +2841,7 @@ namespace Cutt
                     }
                     updateInfo.updateData.rotation = Quaternion.Euler(euler);
                     updateInfo.data = liveTimelineTransformData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyTransformData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyTransformData.frame) * 0.0166666675f;
                     this.OnUpdateTransform(ref updateInfo);
                 }
             }
@@ -2867,7 +2867,7 @@ namespace Cutt
                         LiveTimelineKeyRendererData liveTimelineKeyRendererData = curKey as LiveTimelineKeyRendererData;
                         updateInfo.renderEnable = liveTimelineKeyRendererData.renderEnable;
                         updateInfo.data = liveTimelineRendererData;
-                        updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyRendererData.frame) * 0.0166666675f;
+                        updateInfo.progressTime = (currentFrame - liveTimelineKeyRendererData.frame) * 0.0166666675f;
                         this.OnUpdateRenderer(ref updateInfo);
                     }
                 }
@@ -2919,7 +2919,7 @@ namespace Cutt
                     }
                     updateInfo.renderEnable = liveTimelineKeyObjectData.renderEnable;
                     updateInfo.data = liveTimelineObjectData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyObjectData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyObjectData.frame) * 0.0166666675f;
                     updateInfo.updateData.rotation = Quaternion.Euler(euler);
                     updateInfo.reflectionEnable = liveTimelineKeyObjectData.reflectionEnable;
                     updateInfo.colorEnable = liveTimelineKeyObjectData.colorEnable;
@@ -2963,7 +2963,7 @@ namespace Cutt
                         updateInfo.lookAtPos = GetPositionWithCharacters(liveTimelineKeyGazingObjectData.lookAtCharaFlags, liveTimelineKeyGazingObjectData.lookAtCharaParts, Vector3.zero) + liveTimelineKeyGazingObjectData.lookAtOffset;
                     }
                     updateInfo.data = liveTimelineGazingObjectData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyGazingObjectData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyGazingObjectData.frame) * 0.0166666675f;
                     this.OnUpdateGazingObject(ref updateInfo);
                 }
             }
@@ -3090,8 +3090,8 @@ namespace Cutt
                 }
                 LiveTimelineKeyCharaHeightMotionData liveTimelineKeyCharaHeightMotionData = curKey as LiveTimelineKeyCharaHeightMotionData;
                 LiveTimelineKeyCharaHeightMotionData liveTimelineKeyCharaHeightMotionData2 = nextKey as LiveTimelineKeyCharaHeightMotionData;
-                float num = (float)curKey.frame * 0.0166666675f;
-                if ((float)currentFrame * 0.0166666675f > num + liveTimelineKeyCharaHeightMotionData.playLength)
+                float num = curKey.frame * 0.0166666675f;
+                if (currentFrame * 0.0166666675f > num + liveTimelineKeyCharaHeightMotionData.playLength)
                 {
                     liveTimelineMotionSequence.SetHeightMotionKey(null);
                     continue;
@@ -3123,7 +3123,7 @@ namespace Cutt
             LiveTimelineKey curKey = null;
             LiveTimelineKey nextKey = null;
             PropsUpdateInfo updateInfo = default(PropsUpdateInfo);
-            updateInfo.currentTime = (float)currentFrame * 0.0166666675f;
+            updateInfo.currentTime = currentFrame * 0.0166666675f;
             for (int i = 0; i < sheet.propsList.Count; i++)
             {
                 LiveTimelinePropsData liveTimelinePropsData = sheet.propsList[i];
@@ -3160,7 +3160,7 @@ namespace Cutt
                         updateInfo.luminousColor = liveTimelineKeyPropsData.luminousColor;
                     }
                     updateInfo.data = liveTimelinePropsData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyPropsData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyPropsData.frame) * 0.0166666675f;
                     updateInfo.renderEnable = liveTimelineKeyPropsData.rendererEnable;
                     updateInfo.settingFlags = liveTimelineKeyPropsData.settingFlags;
                     updateInfo.propsID = liveTimelineKeyPropsData.propsID;
@@ -3204,7 +3204,7 @@ namespace Cutt
                         updateInfo.rotation = liveTimelineKeyPropsAttachData.rotation;
                     }
                     updateInfo.data = liveTimelinePropsAttachData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyPropsAttachData.frame) * 0.0166666675f;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyPropsAttachData.frame) * 0.0166666675f;
                     updateInfo.settingFlags = liveTimelineKeyPropsAttachData.settingFlags;
                     updateInfo.attachJointHash = liveTimelineKeyPropsAttachData.attachJointHash;
                     updateInfo.propsID = liveTimelineKeyPropsAttachData.propsID;
@@ -3324,7 +3324,7 @@ namespace Cutt
                 updateInfo.dofFocalPoint = LerpWithoutClamp(liveTimelineKeyPostEffectData.dofFocalPoint, liveTimelineKeyPostEffectData2.dofFocalPoint, t);
                 updateInfo.filterIntensity = LerpWithoutClamp(liveTimelineKeyPostEffectData.dofMVFilterIntensity, liveTimelineKeyPostEffectData2.dofMVFilterIntensity, t);
                 float num = LerpWithoutClamp(liveTimelineKeyPostEffectData.dofMVFilterSpd, liveTimelineKeyPostEffectData2.dofMVFilterSpd, t);
-                updateInfo.filterTime = (float)(currentFrame - liveTimelineKeyPostEffectData.frame) * 0.0166666675f * num;
+                updateInfo.filterTime = (currentFrame - liveTimelineKeyPostEffectData.frame) * 0.0166666675f * num;
             }
             else
             {
@@ -3339,7 +3339,7 @@ namespace Cutt
                 updateInfo.dofMVFilterType = liveTimelineKeyPostEffectData.dofMVFilterType;
                 updateInfo.filterResId = liveTimelineKeyPostEffectData.dofMVFilterResId;
                 updateInfo.filterIntensity = liveTimelineKeyPostEffectData.dofMVFilterIntensity;
-                updateInfo.filterTime = (float)(currentFrame - liveTimelineKeyPostEffectData.frame) * 0.0166666675f * liveTimelineKeyPostEffectData.dofMVFilterSpd;
+                updateInfo.filterTime = (currentFrame - liveTimelineKeyPostEffectData.frame) * 0.0166666675f * liveTimelineKeyPostEffectData.dofMVFilterSpd;
                 updateInfo.disableDOFBlur = liveTimelineKeyPostEffectData.IsDisableDOFBlur();
             }
             this.OnUpdatePostEffect(ref updateInfo);
@@ -3393,7 +3393,7 @@ namespace Cutt
                 }
                 updateInfo.colorBlendFactor = LerpWithoutClamp(liveTimelineKeyPostFilmData.colorBlendFactor, liveTimelineKeyPostFilmData2.colorBlendFactor, t);
                 float num = LerpWithoutClamp(liveTimelineKeyPostFilmData.movieSpeed, liveTimelineKeyPostFilmData2.movieSpeed, t);
-                updateInfo.movieTime = (float)(currentFrame - liveTimelineKeyPostFilmData.frame) * 0.0166666675f * num;
+                updateInfo.movieTime = (currentFrame - liveTimelineKeyPostFilmData.frame) * 0.0166666675f * num;
                 updateInfo.screenCircleDir = LerpWithoutClamp(liveTimelineKeyPostFilmData.screenCircleDir, liveTimelineKeyPostFilmData2.screenCircleDir, t);
             }
             else
@@ -3423,7 +3423,7 @@ namespace Cutt
                         break;
                 }
                 updateInfo.colorBlendFactor = liveTimelineKeyPostFilmData.colorBlendFactor;
-                updateInfo.movieTime = (float)(currentFrame - liveTimelineKeyPostFilmData.frame) * 0.0166666675f * liveTimelineKeyPostFilmData.movieSpeed;
+                updateInfo.movieTime = (currentFrame - liveTimelineKeyPostFilmData.frame) * 0.0166666675f * liveTimelineKeyPostFilmData.movieSpeed;
                 updateInfo.screenCircleDir = liveTimelineKeyPostFilmData.screenCircleDir;
             }
             updateInfo.inverseVignette = liveTimelineKeyPostFilmData.isInverseVignette();
@@ -3576,7 +3576,7 @@ namespace Cutt
                 }
                 updateInfo.data = liveTimelineProjectorData;
                 ProjectorWork projectorWork = _projectorWorks[j];
-                float num = (float)(currentFrame - liveTimelineKeyProjectorData.frame) * 0.0166666675f;
+                float num = (currentFrame - liveTimelineKeyProjectorData.frame) * 0.0166666675f;
                 if (liveTimelineKeyProjectorData.IsAnimContinuous())
                 {
                     if (liveTimelineKeyProjectorData.frame != projectorWork.startFrame || projectorWork.lineHash != liveTimelineProjectorData.nameHash)
@@ -3592,7 +3592,7 @@ namespace Cutt
                                 break;
                             }
                         }
-                        projectorWork.progressTime = (float)(liveTimelineKeyProjectorData.frame - frame) * 0.0166666675f;
+                        projectorWork.progressTime = (liveTimelineKeyProjectorData.frame - frame) * 0.0166666675f;
                     }
                     num += projectorWork.progressTime;
                 }
@@ -4255,8 +4255,8 @@ namespace Cutt
 
         private void UpdateDeltaTimeGraph()
         {
-            graphWidth = (float)Screen.width - graphXMargin * 2f;
-            graphYMargin = (float)(Screen.height / 2) - graphHeight;
+            graphWidth = Screen.width - graphXMargin * 2f;
+            graphYMargin = Screen.height / 2 - graphHeight;
         }
 
         private void OnGUI()
@@ -4282,8 +4282,8 @@ namespace Cutt
                 float num5 = _deltaTimeArrayForGraph[num3];
                 float num6 = num4 / 0.0166666675f;
                 float num7 = num5 / 0.0166666675f;
-                Vector2 pointA = new Vector2(graphXMargin + graphWidth - num * (float)i, graphYMargin - graphHeight * num6);
-                Vector2 pointB = new Vector2(graphXMargin + graphWidth - num * (float)(i + 1), graphYMargin - graphHeight * num7);
+                Vector2 pointA = new Vector2(graphXMargin + graphWidth - num * i, graphYMargin - graphHeight * num6);
+                Vector2 pointB = new Vector2(graphXMargin + graphWidth - num * (i + 1), graphYMargin - graphHeight * num7);
                 Drawing.DrawLine(pointA, pointB, Color.green, 2f, antiAlias: false);
                 num2 = num3;
             }
@@ -4581,7 +4581,7 @@ namespace Cutt
                 else
                 {
                     float num2 = liveTimelineKeyLightShuftData.maskAlphaRange.y - liveTimelineKeyLightShuftData.maskAlphaRange.x;
-                    float num3 = (float)(currentFrame - liveTimelineKeyLightShuftData.frame) % num;
+                    float num3 = (currentFrame - liveTimelineKeyLightShuftData.frame) % num;
                     num /= 2f;
                     if (num3 >= num)
                     {
@@ -4821,7 +4821,7 @@ namespace Cutt
                         updateInfo.order = liveTimelineKeyA2UConfigData.order;
                         updateInfo.enable = liveTimelineKeyA2UConfigData.enable;
                         updateInfo.data = liveTimelineA2UConfigData;
-                        updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyA2UConfigData.frame) * num;
+                        updateInfo.progressTime = (currentFrame - liveTimelineKeyA2UConfigData.frame) * num;
                         this.OnUpdateA2UConfig(ref updateInfo);
                     }
                 }
@@ -4880,7 +4880,7 @@ namespace Cutt
                     updateInfo.isFlick = liveTimelineKeyA2UData.isFlick;
                     updateInfo.enable = liveTimelineKeyA2UData.enable;
                     updateInfo.data = liveTimelineA2UData;
-                    updateInfo.progressTime = (float)(currentFrame - liveTimelineKeyA2UData.frame) * num;
+                    updateInfo.progressTime = (currentFrame - liveTimelineKeyA2UData.frame) * num;
                     this.OnUpdateA2U(ref updateInfo);
                 }
             }
@@ -5050,7 +5050,7 @@ namespace Cutt
             }
             if (_limitFovForWidth)
             {
-                float num2 = (float)cam.camera.pixelWidth / (float)cam.camera.pixelHeight;
+                float num2 = cam.camera.pixelWidth / (float)cam.camera.pixelHeight;
                 if (num2 > _baseCameraAspectRatio)
                 {
                     float num3 = num2 / _baseCameraAspectRatio;

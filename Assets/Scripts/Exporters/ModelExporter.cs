@@ -2,7 +2,6 @@ using Gallop;
 using LibMMD.Material;
 using LibMMD.Model;
 using LibMMD.Reader;
-using LibMMD.Unity3D;
 using LibMMD.Writer;
 using System;
 using System.Collections.Generic;
@@ -116,7 +115,7 @@ public class ModelExporter
 
                 Mesh deltaMesh = new Mesh();
                 skin.BakeMesh(deltaMesh);
-                skin.sharedMesh.AddBlendShapeFrame( $"{morph.name}({morph.tag})[{skin.name}]", 1,
+                skin.sharedMesh.AddBlendShapeFrame($"{morph.name}({morph.tag})[{skin.name}]", 1,
                         CalDelta(baseMesh.vertices, deltaMesh.vertices),
                         CalDelta(baseMesh.normals, deltaMesh.normals),
                         CalDelta(Vec4ToVec3(baseMesh.tangents), Vec4ToVec3(deltaMesh.tangents)));
@@ -131,14 +130,14 @@ public class ModelExporter
             addBlendShapePart(faceMesh, facial.EyeMorphs, basefaceMesh);
             addBlendShapePart(faceMesh, facial.MouthMorphs, basefaceMesh);
         }
-        
+
         if (eyebrowMesh)
         {
             Mesh baseEyeBrowMesh = new Mesh();
             eyebrowMesh.BakeMesh(baseEyeBrowMesh);
             addBlendShapePart(eyebrowMesh, facial.EyeBrowMorphs, baseEyeBrowMesh);
         }
-            
+
         facial.ClearAllWeights();
         facial.ChangeMorph();
     }
@@ -161,18 +160,18 @@ public class ModelExporter
             }
             var vertexCount = mesh.vertexCount;
 
-            for (int i = 0; i < mesh.blendShapeCount; i++) 
+            for (int i = 0; i < mesh.blendShapeCount; i++)
             {
                 var deltaVertices = new Vector3[vertexCount];
                 var deltaNormals = new Vector3[vertexCount];
-                var deltaTangents= new Vector3[vertexCount];
+                var deltaTangents = new Vector3[vertexCount];
                 mesh.GetBlendShapeFrameVertices(i, 0, deltaVertices, deltaNormals, deltaTangents);
 
                 Morph morph = new Morph();
                 morph.Name = morph.NameEn = mesh.GetBlendShapeName(i);
                 morph.Type = MorphType.MorphTypeVertex;
                 var datas = new VertexMorphData[vertexCount];
-                for (int j = 0; j < vertexCount; j++) 
+                for (int j = 0; j < vertexCount; j++)
                 {
                     var data = new VertexMorphData();
                     data.VertexIndex = vertexOffset + j;
@@ -185,15 +184,15 @@ public class ModelExporter
                 {
                     morph.Category = MorphCategory.MorphCatMouth;
                 }
-                else if(morph.Name.Contains("EyeBrow_"))
+                else if (morph.Name.Contains("EyeBrow_"))
                 {
                     morph.Category = MorphCategory.MorphCatEyebrow;
                 }
-                else if(morph.Name.Contains("Eye_"))
+                else if (morph.Name.Contains("Eye_"))
                 {
                     morph.Category = MorphCategory.MorphCatEye;
                 }
-                else 
+                else
                 {
                     morph.Category = MorphCategory.MorphCatOther;
                 }
@@ -255,7 +254,7 @@ public class ModelExporter
                 var part = new Part();
                 var mat = new MMDMaterial();
                 part.Material = mat;
-                mat.Name = mat.NameEn = material.name.Replace(" (Instance)","");
+                mat.Name = mat.NameEn = material.name.Replace(" (Instance)", "");
                 mat.DiffuseColor = Color.white;
                 mat.SpecularColor = Color.clear;
                 mat.AmbientColor = Color.white * 0.5f;
@@ -338,12 +337,12 @@ public class ModelExporter
                 var skinbones = smr.bones;
                 var weights = mesh.boneWeights;
                 var bakemesh = new Mesh();
-                smr.BakeMesh(bakemesh,true);
+                smr.BakeMesh(bakemesh, true);
 
                 for (int i = 0; i < vertices.Length; i++)
                 {
                     Vertex vertex = new Vertex();
-                    vertex.Coordinate = root.InverseTransformPoint(smr.transform.TransformPoint(bakemesh.vertices[i])); 
+                    vertex.Coordinate = root.InverseTransformPoint(smr.transform.TransformPoint(bakemesh.vertices[i]));
                     vertex.Normal = normals[i];
                     vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
                     vertex.ExtraUvCoordinate = new Vector4[3]

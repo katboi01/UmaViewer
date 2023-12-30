@@ -20,7 +20,7 @@ public class LiveMemberController : MonoBehaviour
     public bool isError = false;
     private List<SQLiveDataPosition> positions = new List<SQLiveDataPosition>();
     private Dictionary<int, SQLiveDataPosition> posDic = new Dictionary<int, SQLiveDataPosition>();
-    
+
     private GameObject OriginalMember = null;
 
     private GameObject UIManager = null;
@@ -136,7 +136,7 @@ public class LiveMemberController : MonoBehaviour
                         //ショップドレス
                         dress += charas[i];
                     }
-                    else if(dress > 100000 && dress < 500000)
+                    else if (dress > 100000 && dress < 500000)
                     {
                         //SSR衣装(現状エイプリルフールのみ)
                         var sqData = dressManager.GetDressDataFromKeyID(dress);
@@ -145,7 +145,7 @@ public class LiveMemberController : MonoBehaviour
                             dressIcon = sqData.dressIconKey;
                         }
                     }
-                    else if(dress < 100)
+                    else if (dress < 100)
                     {
                         commdress = true;
                     }

@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class UIMusicView : MonoBehaviour
 {

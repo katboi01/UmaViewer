@@ -30,7 +30,7 @@ public class MovieMaterialController : MaterialController
         for (int i = 0; i < materialInfos.Length; i++)
         {
             materials[i] = materialInfos[i]._movieMaterial;
-            if (materialInfos[i]._renderOrder == Define.RenderOrder.Geometry || materialInfos[i]._renderOrder == (Define.RenderOrder)0)
+            if (materialInfos[i]._renderOrder == Define.RenderOrder.Geometry || materialInfos[i]._renderOrder == 0)
             {
                 materialExtensionData.renderQueueOffsets[i] = 2001 + i;
             }

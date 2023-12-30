@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.Audio.CriWareFormats.Common;
-using System;
 
 namespace ClHcaSharp
 {
@@ -28,7 +27,7 @@ namespace ClHcaSharp
         public const int DefaultRandom = 1;
 
         public static readonly float MsStereoRatio = BinaryPrimitives.Int32BitsToSingle(0x3F3504F3);
-        
+
 
     }
 

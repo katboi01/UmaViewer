@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public sealed class UtfHeader {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public sealed class UtfHeader
+    {
 
-        internal UtfHeader() {
+        internal UtfHeader()
+        {
         }
 
         public uint TableSize { get; set; }

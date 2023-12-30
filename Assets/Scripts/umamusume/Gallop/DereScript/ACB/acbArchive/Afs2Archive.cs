@@ -1,27 +1,33 @@
-﻿using System;
+﻿using DereTore.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using DereTore.Common;
 
-namespace DereTore.Exchange.Archive.ACB {
-    public sealed class Afs2Archive : DisposableBase {
+namespace DereTore.Exchange.Archive.ACB
+{
+    public sealed class Afs2Archive : DisposableBase
+    {
 
-        public Afs2Archive(Stream stream, long offset, string fileName, bool disposeStream) {
+        public Afs2Archive(Stream stream, long offset, string fileName, bool disposeStream)
+        {
             _fileName = fileName;
             _stream = stream;
             _streamOffset = offset;
             _disposeStream = disposeStream;
         }
 
-        public void Initialize() {
+        public void Initialize()
+        {
             var stream = _stream;
             var offset = _streamOffset;
             var acbFileName = _fileName;
-            if (!IsAfs2Archive(stream, offset)) {
+            if (!IsAfs2Archive(stream, offset))
+            {
                 throw new FormatException("File '" + acbFileName + "' does not contain a valid AFS2 archive at offset {offset}.");
             }
             var fileCount = (int)stream.PeekUInt32LE(offset + 8);
-            if (fileCount > ushort.MaxValue) {
+            if (fileCount > ushort.MaxValue)
+            {
                 throw new IndexOutOfRangeException("File count " + fileCount + " exceeds maximum possible value (65535).");
             }
             var files = new Dictionary<int, Afs2FileRecord>(fileCount);
@@ -32,16 +38,19 @@ namespace DereTore.Exchange.Archive.ACB {
             _version = version;
             var offsetFieldSize = (int)(version >> 8) & 0xff; // versionBytes[1], always 4?
             uint offsetMask = 0;
-            for (var j = 0; j < offsetFieldSize; j++) {
+            for (var j = 0; j < offsetFieldSize; j++)
+            {
                 offsetMask |= (uint)(0xff << (j * 8));
             }
 
             const int invalidCueId = -1;
             var previousCueId = invalidCueId;
             var fileOffsetFieldBase = 0x10 + fileCount * 2;
-            for (ushort i = 0; i < fileCount; ++i) {
+            for (ushort i = 0; i < fileCount; ++i)
+            {
                 var currentFileOffsetBase = fileOffsetFieldBase + offsetFieldSize * i;
-                var record = new Afs2FileRecord {
+                var record = new Afs2FileRecord
+                {
                     CueId = stream.PeekUInt16LE(offset + (0x10 + 2 * i)),
                     // TODO: Dynamically judge if the field is U32/U16 or else (see offsetFieldSize).
                     FileOffsetRaw = stream.PeekUInt32LE(offset + currentFileOffsetBase)
@@ -49,10 +58,12 @@ namespace DereTore.Exchange.Archive.ACB {
                 record.FileOffsetRaw &= offsetMask;
                 record.FileOffsetRaw += offset;
                 record.FileOffsetAligned = AcbHelper.RoundUpToAlignment(record.FileOffsetRaw, ByteAlignment);
-                if (i == fileCount - 1) {
+                if (i == fileCount - 1)
+                {
                     record.FileLength = stream.PeekUInt32LE(offset + currentFileOffsetBase + offsetFieldSize) + offset - record.FileOffsetAligned;
                 }
-                if (previousCueId != invalidCueId) {
+                if (previousCueId != invalidCueId)
+                {
                     files[previousCueId].FileLength = record.FileOffsetRaw - files[previousCueId].FileOffsetAligned;
                 }
                 files.Add(record.CueId, record);
@@ -60,7 +71,8 @@ namespace DereTore.Exchange.Archive.ACB {
             }
         }
 
-        public static bool IsAfs2Archive(Stream stream, long offset) {
+        public static bool IsAfs2Archive(Stream stream, long offset)
+        {
             var fileSignature = stream.PeekBytes(offset, 4);
             return AcbHelper.AreDataIdentical(fileSignature, Afs2Signature);
         }
@@ -71,13 +83,18 @@ namespace DereTore.Exchange.Archive.ACB {
 
         public Dictionary<int, Afs2FileRecord> Files { get { return _files; } }
 
-        public uint Version { get { return _version; } } 
+        public uint Version { get { return _version; } }
 
-        protected override void Dispose(bool disposing) {
-            if (_disposeStream) {
-                try {
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposeStream)
+            {
+                try
+                {
                     _stream.Dispose();
-                } catch (ObjectDisposedException) {
+                }
+                catch (ObjectDisposedException)
+                {
                 }
             }
         }

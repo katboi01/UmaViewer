@@ -1,15 +1,19 @@
 ﻿using System;
 
-namespace DereTore.Exchange.Audio.HCA {
-    public sealed class HcaException : Exception {
+namespace DereTore.Exchange.Audio.HCA
+{
+    public sealed class HcaException : Exception
+    {
 
         public HcaException(string message, ActionResult actionResult)
-            : base(message) {
+            : base(message)
+        {
             _actionResult = actionResult;
         }
 
         public HcaException(string message, ActionResult actionResult, Exception innerException)
-            : base(message, innerException) {
+            : base(message, innerException)
+        {
             _actionResult = actionResult;
         }
 

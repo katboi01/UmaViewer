@@ -19,7 +19,7 @@ public class UIElementDragger : EventTrigger
     {
         if (dragging)
         {
-            transform.position = new Vector2(Mathf.Clamp(Input.mousePosition.x, 10, Screen.width-10), Mathf.Clamp(Input.mousePosition.y, 10, Screen.height-10));
+            transform.position = new Vector2(Mathf.Clamp(Input.mousePosition.x, 10, Screen.width - 10), Mathf.Clamp(Input.mousePosition.y, 10, Screen.height - 10));
             if (alsoDrag)
             {
                 alsoDrag.position = transform.position - alsoDragOffset;

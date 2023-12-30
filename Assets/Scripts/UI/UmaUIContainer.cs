@@ -9,10 +9,10 @@ public class UmaUIContainer : MonoBehaviour
         TextMesh,
     }
 
-    [SerializeField]TextType TextComponentType = TextType.Text;
+    [SerializeField] TextType TextComponentType = TextType.Text;
     public string Name
     {
-        get 
+        get
         {
             switch (TextComponentType)
             {
@@ -21,15 +21,15 @@ public class UmaUIContainer : MonoBehaviour
                 default: return TextMesh.text;
             }
         }
-        set 
+        set
         {
             switch (TextComponentType)
             {
-                case TextType.Text: 
+                case TextType.Text:
                     Text.text = value;
                     break;
                 case TextType.TextMesh:
-                    TextMesh.text = value; 
+                    TextMesh.text = value;
                     break;
             }
         }

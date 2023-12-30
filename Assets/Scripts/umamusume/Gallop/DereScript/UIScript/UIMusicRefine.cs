@@ -1,7 +1,5 @@
-﻿using System.Collections;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using UnityEngine;
 
 public class UIMusicRefine : MonoBehaviour
 {
@@ -334,7 +332,7 @@ public class UIMusicRefine : MonoBehaviour
     /// </summary>
     public void OnClickClear()
     {
-        if(Cute.isOn && Cool.isOn && Passion.isOn && ALL.isOn && Other.isOn && inputField.text == "")
+        if (Cute.isOn && Cool.isOn && Passion.isOn && ALL.isOn && Other.isOn && inputField.text == "")
         {
             visibleSelect = new bool[] { false, false, false, false, false };
         }

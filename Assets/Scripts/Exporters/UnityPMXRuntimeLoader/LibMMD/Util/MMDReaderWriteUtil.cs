@@ -1,7 +1,7 @@
+using LibMMD.Reader;
 using System;
 using System.IO;
 using System.Text;
-using LibMMD.Reader;
 using UnityEngine;
 
 namespace LibMMD.Util
@@ -36,8 +36,8 @@ namespace LibMMD.Util
             {
                 throw new MMDFileParseException("pmx string length is negative");
             }
-            
-            if(length > 0)
+
+            if (length > 0)
             {
                 var bytes = encoding.GetBytes(str);
                 writer.Write(bytes);

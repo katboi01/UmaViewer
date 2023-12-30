@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Gallop.Live.Cutt
 {
     [System.Serializable]
-    public class LiveTimelineKeyMonitorCameraLookAtData : LiveTimelineKeyCameraLookAtData 
-    { 
+    public class LiveTimelineKeyMonitorCameraLookAtData : LiveTimelineKeyCameraLookAtData
+    {
 
     }
 

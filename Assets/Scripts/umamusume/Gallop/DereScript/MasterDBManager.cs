@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+﻿using Cute;
+using Sqlite3Plugin;
+using Stage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sqlite3Plugin;
 using System.IO;
-using Cute;
-using Stage;
+using UnityEngine;
 
 public class MasterDBManager : MonoBehaviour
 {
@@ -145,7 +145,7 @@ public class MasterDBManager : MonoBehaviour
         {
             if (isLoadDB)
             {
-                if(master3dLive != null && master3DCharaData != null && masterCardData != null)
+                if (master3dLive != null && master3DCharaData != null && masterCardData != null)
                 {
                     return true;
                 }
@@ -225,7 +225,7 @@ public class MasterDBManager : MonoBehaviour
             print(masterPath + "が読み込めません");
         }
     }
-    
+
     public void DeleteMasterDB()
     {
         string str = this.masterPath;
@@ -241,7 +241,7 @@ public class MasterDBManager : MonoBehaviour
                 File.Delete(this.masterPath);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             print("MasterDBを削除できません:" + e);
         }
@@ -519,7 +519,7 @@ public class MasterDBManager : MonoBehaviour
         foreach (var tmp in SQMD)
         {
             SQMusicData data = GetAnotherMusicFromName(tmp.name);
-            if(data != null)
+            if (data != null)
             {
                 returndata.Add(data);
             }
@@ -540,7 +540,7 @@ public class MasterDBManager : MonoBehaviour
         {
             return null;
         }
-        
+
         string sql = string.Format("Select {0} from {1} where {2} order by {3}",
             MusicParam,
             "(music_data inner join live_data on music_data.id = live_data.music_data_id) inner join music_info on music_data.id = music_info.id",
@@ -593,7 +593,7 @@ public class MasterDBManager : MonoBehaviour
         }
         return null;
     }
-    
+
     private SQMusicData GetAnotherMusicFromName(string musicName)
     {
         if (!isLocalSave)
@@ -792,7 +792,7 @@ public class MasterDBManager : MonoBehaviour
         List<SQCharaData> sqcd = new List<SQCharaData>();
 
         string sql = string.Format("select {0} from {1} where {2} order by base_card_id",
-            CharaParam,            
+            CharaParam,
             "chara_data",
             "chara_id >= 20 and chara_id <= 83"
             );
@@ -825,7 +825,7 @@ public class MasterDBManager : MonoBehaviour
         return sqcd;
 
     }
-    
+
     /// <summary>
     /// 共通衣装を取得
     /// </summary>
@@ -943,7 +943,7 @@ public class MasterDBManager : MonoBehaviour
                 return dressdic;
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return GetShopDresses_2();
         }
@@ -1003,7 +1003,7 @@ public class MasterDBManager : MonoBehaviour
                 return dressdic;
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return null;
         }
@@ -1088,7 +1088,7 @@ public class MasterDBManager : MonoBehaviour
         return sqdd;
 
     }
-    
+
     /// <summary>
     /// エイプリルフール衣装
     /// </summary>
@@ -1157,7 +1157,7 @@ public class MasterDBManager : MonoBehaviour
                 data.type = query.GetInt(6);
                 data.baseCardId = query.GetInt(7);
                 data.height = query.GetInt(8);
-                if(data.charaID == 83)
+                if (data.charaID == 83)
                 {
                     data.height = 182;//きらりんロボはいったん182cmにする。拡大はDirectorで直接大きさを弄る
                 }
@@ -1200,7 +1200,7 @@ public class MasterDBManager : MonoBehaviour
         }
         return data;
     }
-    
+
     /// <summary>
     /// 共通衣装を取得
     /// </summary>
@@ -1251,7 +1251,7 @@ public class MasterDBManager : MonoBehaviour
         {
             return null;
         }
-        
+
         string sql = string.Format("SELECT {0} FROM {1}",
             "raw",
             "cyalume_color"

@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
+using UnityEngine;
 using UnityEngine.Playables;
-using System;
 
 namespace RootMotion
 {

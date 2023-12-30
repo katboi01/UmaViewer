@@ -1,30 +1,27 @@
-using Gallop.Live.Cutt;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-	[System.Serializable]
-	public class LiveTimelineKeyFacialToonData : LiveTimelineKeyWithInterpolate
-	{
-		public float CheekPretenseThreshold;
-		public float NosePretenseThreshold;
-		public float CylinderBlend;
-		public float HairNormalBlend;
-		public LiveTimelineDefine.FacialToonLightType UseOriginalDirectionalLight;
-		public Vector3 OriginalDirectionalLightDir;
-		public float EyeToonStep;
-		public float EyeToonFeather;
-	}
+    [System.Serializable]
+    public class LiveTimelineKeyFacialToonData : LiveTimelineKeyWithInterpolate
+    {
+        public float CheekPretenseThreshold;
+        public float NosePretenseThreshold;
+        public float CylinderBlend;
+        public float HairNormalBlend;
+        public LiveTimelineDefine.FacialToonLightType UseOriginalDirectionalLight;
+        public Vector3 OriginalDirectionalLightDir;
+        public float EyeToonStep;
+        public float EyeToonFeather;
+    }
 
-	[System.Serializable]
-	public class LiveTimelineKeyFacialToonDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyFacialToonData>
-	{
+    [System.Serializable]
+    public class LiveTimelineKeyFacialToonDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyFacialToonData>
+    {
 
-	}
+    }
 
-	[System.Serializable]
+    [System.Serializable]
     public class LiveTimelineFacialToonData
     {
         public const int DATA_LIST_SIZE = 20;

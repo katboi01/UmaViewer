@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class LiveDebug : MonoBehaviour
@@ -79,7 +77,7 @@ public class LiveDebug : MonoBehaviour
     {
         if (debugEnable)
         {
-            if(rootObject != null)
+            if (rootObject != null)
             {
                 //ひっくり返す
                 rootObject.SetActive(!rootObject.activeSelf);

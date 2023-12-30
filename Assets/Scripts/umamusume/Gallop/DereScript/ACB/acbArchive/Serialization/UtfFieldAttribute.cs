@@ -1,10 +1,13 @@
 ﻿using System;
 
-namespace DereTore.Exchange.Archive.ACB.Serialization {
+namespace DereTore.Exchange.Archive.ACB.Serialization
+{
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class UtfFieldAttribute : Attribute {
+    public sealed class UtfFieldAttribute : Attribute
+    {
 
-        public UtfFieldAttribute(int order, ColumnStorage storage = ColumnStorage.PerRow, string fieldName = null) {
+        public UtfFieldAttribute(int order, ColumnStorage storage = ColumnStorage.PerRow, string fieldName = null)
+        {
             _Order = order;
             _Storage = storage;
             _FieldName = fieldName;

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.IO;
 using UnityEngine;
 
 
@@ -19,7 +17,7 @@ public class AssetUtil
         PC = 5,
         Android = 13
     };
-    
+
     /// <summary>
     /// プラットフォームをAndroid(13)からPC(5)へ変更する
     /// </summary>

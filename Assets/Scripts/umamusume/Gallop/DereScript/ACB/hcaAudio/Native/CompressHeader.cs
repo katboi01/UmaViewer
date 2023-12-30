@@ -1,65 +1,79 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DereTore.Exchange.Audio.HCA.Native {
+namespace DereTore.Exchange.Audio.HCA.Native
+{
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct CompressHeader {
+    public struct CompressHeader
+    {
 
-        public uint COMP {
+        public uint COMP
+        {
             get { return _comp; }
             set { _comp = value; }
         }
 
-        public ushort BlockSize {
+        public ushort BlockSize
+        {
             get { return _blockSize; }
             set { _blockSize = value; }
         }
 
-        public byte R01 {
+        public byte R01
+        {
             get { return _r01; }
             set { _r01 = value; }
         }
 
-        public byte R02 {
+        public byte R02
+        {
             get { return _r02; }
             set { _r02 = value; }
         }
 
-        public byte R03 {
+        public byte R03
+        {
             get { return _r03; }
             set { _r03 = value; }
         }
 
-        public byte R04 {
+        public byte R04
+        {
             get { return _r04; }
             set { _r04 = value; }
         }
 
-        public byte R05 {
+        public byte R05
+        {
             get { return _r05; }
             set { _r05 = value; }
         }
 
-        public byte R06 {
+        public byte R06
+        {
             get { return _r06; }
             set { _r06 = value; }
         }
 
-        public byte R07 {
+        public byte R07
+        {
             get { return _r07; }
             set { _r07 = value; }
         }
 
-        public byte R08 {
+        public byte R08
+        {
             get { return _r08; }
             set { _r08 = value; }
         }
 
-        public byte Reserved1 {
+        public byte Reserved1
+        {
             get { return _rs1; }
             set { _rs1 = value; }
         }
 
-        public byte Reserved2 {
+        public byte Reserved2
+        {
             get { return _rs2; }
             set { _rs2 = value; }
         }

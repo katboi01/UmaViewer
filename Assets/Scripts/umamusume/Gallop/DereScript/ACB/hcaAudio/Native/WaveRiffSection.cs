@@ -1,8 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DereTore.Exchange.Audio.HCA.Native {
+namespace DereTore.Exchange.Audio.HCA.Native
+{
     [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
-    public struct WaveRiffSection {
+    public struct WaveRiffSection
+    {
 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 4)]
         public byte[] RIFF;
@@ -23,7 +25,8 @@ namespace DereTore.Exchange.Audio.HCA.Native {
         public ushort FmtSamplingSize;
         public ushort FmtBitCount;
 
-        public static WaveRiffSection CreateDefault() {
+        public static WaveRiffSection CreateDefault()
+        {
             var v = default(WaveRiffSection);
             v.RiffSize = 0;
             v.FmtSize = 0x10;

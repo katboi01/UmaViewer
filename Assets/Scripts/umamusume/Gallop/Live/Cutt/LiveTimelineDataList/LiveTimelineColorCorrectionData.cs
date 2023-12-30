@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Gallop.ImageEffect;
+using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {

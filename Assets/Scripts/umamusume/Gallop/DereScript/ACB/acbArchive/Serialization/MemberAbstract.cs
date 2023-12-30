@@ -1,9 +1,12 @@
 ﻿using System.Reflection;
 
-namespace DereTore.Exchange.Archive.ACB.Serialization {
-    internal sealed class MemberAbstract {
+namespace DereTore.Exchange.Archive.ACB.Serialization
+{
+    internal sealed class MemberAbstract
+    {
 
-        internal MemberAbstract(FieldInfo fieldInfo, UtfFieldAttribute fieldAttribute, Afs2ArchiveAttribute archiveAttribute) {
+        internal MemberAbstract(FieldInfo fieldInfo, UtfFieldAttribute fieldAttribute, Afs2ArchiveAttribute archiveAttribute)
+        {
             _FieldInfo = fieldInfo;
             _FieldAttribute = fieldAttribute;
             _ArchiveAttribute = archiveAttribute;

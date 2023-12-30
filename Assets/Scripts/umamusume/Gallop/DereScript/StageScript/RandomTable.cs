@@ -1,6 +1,4 @@
-﻿using System;
-
-public class RandomTable
+﻿public class RandomTable
 {
     public static int DEFAULT_BUCKET_COUNT = 16;
 

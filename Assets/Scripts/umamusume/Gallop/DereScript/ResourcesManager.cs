@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using UnityEngine;
 
 public class ResourcesManager : MonoBehaviour
@@ -109,7 +108,7 @@ public class ResourcesManager : MonoBehaviour
             }
             while (finishedJobs < totalJobs)
             {
-                yield return (object)0;
+                yield return 0;
             }
             yield break;
         }
@@ -129,7 +128,7 @@ public class ResourcesManager : MonoBehaviour
             }
             while (finishedJobs < totalJobs)
             {
-                yield return (object)0;
+                yield return 0;
             }
             yield break;
         }
@@ -155,7 +154,7 @@ public class ResourcesManager : MonoBehaviour
     {
         while (loadSemaphore)
         {
-            yield return (object)null;
+            yield return null;
         }
         SetLoadProcessLock(true);
         List<string> soundAssetList = null;
@@ -193,7 +192,7 @@ public class ResourcesManager : MonoBehaviour
             parallelCorutines.Add(StartCoroutine(ParallelAssetListExec(otherAssetList)));
         }
 
-        yield return (object)new WaitForFixedUpdate();
+        yield return new WaitForFixedUpdate();
         SetLoadProcessLock(false);
         if (callback != null)
         {
@@ -392,7 +391,7 @@ public class ResourcesManager : MonoBehaviour
             foreach (string AssetNames in pathlist)
             {
                 UnityEngine.Object obj = bundle.LoadAsset(AssetNames);
-                if(obj != null)
+                if (obj != null)
                 {
                     registlist.Add(new AssetObject(AssetNames, obj));
 

@@ -1,11 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using Cutt;
-using Stage;
-using Cute;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// menuからviewへ情報を連携する
@@ -68,7 +62,7 @@ public class ViewLauncher : MonoBehaviour
             return filenames;
         }
     }
-    
+
     // Use this for initialization
     void Start()
     {

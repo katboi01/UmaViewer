@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.IO;
-using Newtonsoft.Json.Linq;
-using System;
+using UnityEngine;
 
 public class TextureExporter
 {
@@ -60,7 +57,7 @@ public class TextureExporter
                                 textureNames.Add(dpath);
                             }
                             if (!File.Exists(tex_path))
-                            {   
+                            {
 
                                 mat_texture = duplicateTexture(mat_texture);
 

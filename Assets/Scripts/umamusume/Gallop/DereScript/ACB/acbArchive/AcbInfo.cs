@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public sealed class AcbInfo {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public sealed class AcbInfo
+    {
 
-        internal AcbInfo() {
+        internal AcbInfo()
+        {
         }
 
         public string Name { get; set; }

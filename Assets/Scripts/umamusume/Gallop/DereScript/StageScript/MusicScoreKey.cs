@@ -1,6 +1,4 @@
-﻿using Stage;
-
-public class MusicScoreKey
+﻿public class MusicScoreKey
 {
     public enum eKeyType
     {

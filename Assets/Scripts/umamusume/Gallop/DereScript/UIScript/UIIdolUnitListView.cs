@@ -62,7 +62,7 @@ public class UIIdolUnitListView : MonoBehaviour
         UIManager = GameObject.Find("UIManager");
         //多分ないけど非表示の時のため
         var obj = GameObject.Find("Panel");
-        IdolInfo =  obj.transform.Find("LiveContent/IdolInfo").gameObject;
+        IdolInfo = obj.transform.Find("LiveContent/IdolInfo").gameObject;
 
         CreateUnitButtons();
     }
@@ -82,7 +82,7 @@ public class UIIdolUnitListView : MonoBehaviour
         }
         else
         {
-            foreach(var tmp in unitBtnList)
+            foreach (var tmp in unitBtnList)
             {
                 Destroy(tmp);
             }
@@ -155,7 +155,8 @@ public class UIIdolUnitListView : MonoBehaviour
     // ボタンに機能を付与する
     void AddButtonEvent(Button button, UIUnitPanel uIUnitPanel)
     {
-        button.onClick.AddListener(() => {
+        button.onClick.AddListener(() =>
+        {
             this.OnClick(uIUnitPanel);
             base.gameObject.SetActive(false);
         });
@@ -195,7 +196,7 @@ public class UIIdolUnitListView : MonoBehaviour
 
         SaveManager.IdolSet[] datas = new SaveManager.IdolSet[list.Length];
 
-        for(int i = 0; i < list.Length; i++)
+        for (int i = 0; i < list.Length; i++)
         {
             int place = list[i].transform.GetSiblingIndex();
             datas[place] = list[i].data;

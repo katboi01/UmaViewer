@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Gallop.Live
 {
     public class LiveTimeController
@@ -9,8 +5,8 @@ namespace Gallop.Live
         private readonly float SmoothingTargetDeltaTime; // 0x10
         private readonly float SmoothingDeltaTimeThreshold; // 0x14
         private readonly float SmoothingOvertimeClamp; // 0x18
-	    private bool _isEnabledSmooth; // 0x20
-	    private float _smoothingWorkTime; // 0x28
+        private bool _isEnabledSmooth; // 0x20
+        private float _smoothingWorkTime; // 0x28
         private float _lastMusicTimeWithoutDelay; // 0x2C
         private float _currentTime; // 0x30
         private float _prevTime; // 0x34

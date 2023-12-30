@@ -29,7 +29,7 @@ public class TearController
     private AssetHolder AssetHolder1;
 
     bool intialized;
-    public TearController(int id ,Transform headBone, GameObject tearPrefab_0, GameObject tearPrefab_1, int dir, int currentObject)
+    public TearController(int id, Transform headBone, GameObject tearPrefab_0, GameObject tearPrefab_1, int dir, int currentObject)
     {
         AttachBone_2_L = headBone.transform.Find("Eye_tear_attach_02_L");
         AttachBone_2_R = headBone.transform.Find("Eye_tear_attach_02_R");
@@ -136,7 +136,7 @@ public class TearController
     {
         if (Weight <= 0) return;
 
-        var time = Mathf.Repeat(CurrentAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime,1);
+        var time = Mathf.Repeat(CurrentAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime, 1);
         var width = (int)CurrentAssetHolder._assetTableValue["texture_width"];
         var height = (int)CurrentAssetHolder._assetTableValue["texture_height"];
         var partWidth = (int)CurrentAssetHolder._assetTableValue["texture_part_width"];
@@ -145,14 +145,14 @@ public class TearController
         CurrentMaterial.SetColor("_TexScrollParam", new Color(offset.x, -offset.y, 0, Weight));
     }
 
-    private Vector2 GetTextureOffset(float time,int w,int h,int pw ,int ph)
+    private Vector2 GetTextureOffset(float time, int w, int h, int pw, int ph)
     {
         int wCount = w / pw;
         int hCount = h / ph;
         int index = (int)(time * (wCount * hCount));
-        return new Vector2((index % wCount) / (float)wCount,(index/wCount)/(float)hCount); 
+        return new Vector2((index % wCount) / (float)wCount, (index / wCount) / (float)hCount);
     }
 
-    
-} 
+
+}
 

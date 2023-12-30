@@ -1,6 +1,6 @@
 ﻿
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 namespace HSVPicker
 {

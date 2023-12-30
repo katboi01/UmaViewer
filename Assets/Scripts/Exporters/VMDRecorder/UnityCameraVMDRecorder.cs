@@ -137,12 +137,12 @@ public class UnityCameraVMDRecorder : MonoBehaviour
         LastRotation = vmdRotation;
     }
 
-    public static Vector3 DeltaVector(Vector3 val ,Vector3 lastVal)
+    public static Vector3 DeltaVector(Vector3 val, Vector3 lastVal)
     {
         return new Vector3(DeltaDegree(val.x, lastVal.x), DeltaDegree(val.y, lastVal.y), DeltaDegree(val.z, lastVal.z));
     }
 
-    public static float DeltaDegree(float val,float lastVal)
+    public static float DeltaDegree(float val, float lastVal)
     {
         var deltaVal = val - lastVal;
         if (Mathf.Abs(deltaVal) < 180)
@@ -325,13 +325,13 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     }
 
 
-    public static void SaveLiveCameraVMD(LiveEntry liveEntry,DateTime time, List<LiveCameraFrame> frames, int MultiCameraIndex = -1)
+    public static void SaveLiveCameraVMD(LiveEntry liveEntry, DateTime time, List<LiveCameraFrame> frames, int MultiCameraIndex = -1)
     {
         string directory = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/";
         Directory.CreateDirectory(directory);
         string fileName = $"{directory}LiveCamera_POS.vmd";
         string fovFileName = $"{directory}LiveCamera_FOV.vmd";
-        if(MultiCameraIndex >= 0)
+        if (MultiCameraIndex >= 0)
         {
             fileName = $"{directory}LiveMultiCamera{MultiCameraIndex}_POS.vmd";
             fovFileName = $"{directory}LiveMultiCamera{MultiCameraIndex}_FOV.vmd";
@@ -379,7 +379,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
                     binaryWriter.Write(boneNameBytes, 0, boneNameBytes.Length);
                     binaryWriter.Write(new byte[boneNameLength - boneNameBytes.Length], 0, boneNameLength - boneNameBytes.Length);
 
-                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)(frame.frameIndex/2));
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)(frame.frameIndex / 2));
                     binaryWriter.Write(frameNumberByte, 0, intByteLength);
 
                     Vector3 position = frame.Position * WorldScaleFix;
@@ -472,7 +472,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
 
                 foreach (var frame in fovkeys)
                 {
-                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)frame.frameIndex/2);
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)frame.frameIndex / 2);
                     binaryWriter.Write(frameNumberByte, 0, intByteLength);
 
                     byte[] cameraDistanceByte = BitConverter.GetBytes(0);
@@ -486,7 +486,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
                     byte[] positionZ = BitConverter.GetBytes(position.z);
                     binaryWriter.Write(positionZ, 0, intByteLength);
 
-                    Vector3 rotation = new Vector3(0,180,0) * Mathf.Deg2Rad;
+                    Vector3 rotation = new Vector3(0, 180, 0) * Mathf.Deg2Rad;
                     byte[] rotationX = BitConverter.GetBytes(rotation.x);
                     binaryWriter.Write(rotationX, 0, intByteLength);
                     byte[] rotationY = BitConverter.GetBytes(rotation.y);

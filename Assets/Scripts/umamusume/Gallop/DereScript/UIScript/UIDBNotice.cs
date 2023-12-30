@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using UnityEngine.SceneManagement;
 
-public class UIDBNotice : MonoBehaviour {
+public class UIDBNotice : MonoBehaviour
+{
 
     private void Awake()
     {
@@ -42,11 +42,12 @@ public class UIDBNotice : MonoBehaviour {
     void Start()
     {
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     private void OnDestroy()
     {
@@ -73,10 +74,10 @@ public class UIDBNotice : MonoBehaviour {
     public void ReLoadAllData()
     {
         GameObject UIManager = GameObject.Find("UIManager");
-        if(UIManager != null)
+        if (UIManager != null)
         {
             UIManagerChara uIManagerChara = UIManager.GetComponent<UIManagerChara>();
-            if(uIManagerChara != null) { uIManagerChara.ResetData(); }
+            if (uIManagerChara != null) { uIManagerChara.ResetData(); }
 
             UIManagerDress uIManagerDress = UIManager.GetComponent<UIManagerDress>();
             if (uIManagerDress != null) { uIManagerDress.ResetData(); }
@@ -121,7 +122,7 @@ public class UIDBNotice : MonoBehaviour {
         {
             VersionCheckerMatsurihimeAPI matsurihime = new VersionCheckerMatsurihimeAPI();
             yield return matsurihime.Check();
-            if(matsurihime.version > 0)
+            if (matsurihime.version > 0)
             {
                 filever = matsurihime.version;
             }
@@ -130,8 +131,8 @@ public class UIDBNotice : MonoBehaviour {
         {
             filever = cv.version;
         }
-        
-        if(filever == 0)
+
+        if (filever == 0)
         {
             print("バージョンの取得に失敗しました");
             yield break;
@@ -148,7 +149,7 @@ public class UIDBNotice : MonoBehaviour {
         yield return null;
         yield return null;
         text.text = text.text + "\n" + "下部ボタンから一旦アプリを終了してください";
-        yield return null;        
+        yield return null;
 
         //データソースをいったん全部破棄
         ViewLauncher.instance.Clear();

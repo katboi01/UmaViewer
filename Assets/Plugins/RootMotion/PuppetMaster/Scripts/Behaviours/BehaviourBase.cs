@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.Events;
 
 namespace RootMotion.Dynamics
@@ -70,7 +69,7 @@ namespace RootMotion.Dynamics
         protected virtual void OnMuscleHitBehaviour(MuscleHit hit) { }
         protected virtual void OnMuscleCollisionBehaviour(MuscleCollision collision) { }
         protected virtual void OnMuscleCollisionExitBehaviour(MuscleCollision collision) { }
-        
+
         public BehaviourDelegate OnPostActivate;
         public BehaviourDelegate OnPostInitiate;
         public BehaviourDelegate OnPostFixedUpdate;

@@ -70,7 +70,7 @@ public class MobShadowController : MonoBehaviour
 
             Shader shader = ResourcesManager.instance.GetShader(CONTROL_SHADER);
             _material.shader = shader;
-            
+
             int propertyID = SharedShaderParam.instance.getPropertyID(SharedShaderParam.ShaderProperty.GroupMatrices);
             _material.SetMatrixArray(propertyID, _groupMatrices);
             SetMaterial(_material);
@@ -78,7 +78,7 @@ public class MobShadowController : MonoBehaviour
 
         //設定の読み込み
         int save = SaveManager.GetInt("Mob");
-        if(save != 1)
+        if (save != 1)
         {
             foreach (var tmp in _renderers)
             {

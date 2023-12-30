@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Assets.Scripts.Audio.CriWareFormats.Common
 {
@@ -12,7 +8,7 @@ namespace Assets.Scripts.Audio.CriWareFormats.Common
         {
             byte[] tmp = BitConverter.GetBytes(le);
             Array.Reverse(tmp);
-            return BitConverter.ToUInt16(tmp,0);
+            return BitConverter.ToUInt16(tmp, 0);
         }
 
         internal static int ReverseEndianness(int le)

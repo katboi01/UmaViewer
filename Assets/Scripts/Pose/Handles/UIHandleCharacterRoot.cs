@@ -20,11 +20,11 @@ public class UIHandleCharacterRoot : UIHandle
     {
         base.Init(owner);
 
-        Popup.AddButton("Reset All",        TransformResetAll);
-        Popup.AddButton("Reset Position",   TransformResetPosition);
-        Popup.AddButton("Reset Rotation",   TransformResetRotation);
-        Popup.AddButton("Reset Scale",      TransformResetScale);
-        Popup.AddButton("Reset to T-Pose",  TransformResetAllChildren);
+        Popup.AddButton("Reset All", TransformResetAll);
+        Popup.AddButton("Reset Position", TransformResetPosition);
+        Popup.AddButton("Reset Rotation", TransformResetRotation);
+        Popup.AddButton("Reset Scale", TransformResetScale);
+        Popup.AddButton("Reset to T-Pose", TransformResetAllChildren);
 
         return this;
     }
@@ -33,7 +33,7 @@ public class UIHandleCharacterRoot : UIHandle
     {
         List<HandleManager.RuntimeGizmoUndoData> datas = new List<HandleManager.RuntimeGizmoUndoData>();
 
-        for(int i = 0; i < ChildHandles.Count; i++)
+        for (int i = 0; i < ChildHandles.Count; i++)
         {
             var handle = ChildHandles[i];
             var bone = handle.Target;

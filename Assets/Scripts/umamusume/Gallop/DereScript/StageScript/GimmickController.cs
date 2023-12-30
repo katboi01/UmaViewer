@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Cutt;
+using System.Collections.Generic;
 using UnityEngine;
-using Cutt;
-using System;
 
 public class GimmickController
 {

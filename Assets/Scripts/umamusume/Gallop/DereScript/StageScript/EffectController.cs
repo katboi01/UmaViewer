@@ -408,7 +408,7 @@ public class EffectController : MonoBehaviour
     private bool _bPause;
 
     public Dictionary<int, Effect> dicEffect => _dicEffect;
-    
+
     public bool Initialize()
     {
         _director = Director.instance;

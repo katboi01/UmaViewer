@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using RootMotion.FinalIK;
 
 namespace RootMotion.FinalIK
 {

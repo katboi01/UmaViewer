@@ -4,7 +4,6 @@ using System.IO;
 using uGIF;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
-using UnityEngine.UIElements;
 using Image = uGIF.Image;
 
 public class Screenshot : MonoBehaviour
@@ -108,7 +107,7 @@ public class Screenshot : MonoBehaviour
         }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default,8);
+        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
         var grab_area = new Rect(0, 0, width, height);
 
         RenderTexture.active = render_texture;
@@ -143,13 +142,13 @@ public class Screenshot : MonoBehaviour
         }
         else if (width == 0)
         {
-            float ratio = (float)Screen.width / (float)Screen.height;
-            width = Mathf.RoundToInt((float)height * ratio);
+            float ratio = Screen.width / (float)Screen.height;
+            width = Mathf.RoundToInt(height * ratio);
         }
         else if (height == 0)
         {
-            float ratio = (float)Screen.height / (float)Screen.width;
-            height = Mathf.RoundToInt((float)width * ratio);
+            float ratio = Screen.height / (float)Screen.width;
+            height = Mathf.RoundToInt(width * ratio);
         }
         return new Vector2Int(width, height);
     }

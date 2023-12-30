@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Cutt;
+using System.Collections.Generic;
 using UnityEngine;
-using Cutt;
 
 namespace Stage.Cyalume
 {
@@ -143,7 +143,7 @@ namespace Stage.Cyalume
                         AnimationState animationState = _animation[j][_clipName[j]];
                         animationState.blendMode = AnimationBlendMode.Blend;
                         animationState.wrapMode = WrapMode.Loop;
-                        animationState.time = num - _motionTimeInterval * (float)i;
+                        animationState.time = num - _motionTimeInterval * i;
                         animationState.enabled = true;
                         _animation[j].Sample();
                         animationState.enabled = false;
@@ -310,7 +310,7 @@ namespace Stage.Cyalume
                     animationClip = LoadMotion<AnimationClip>(MOB_MOTION_NAME_SINGLE_DEFAULT);
                 }
                 _clipName[i] = animationClip.name;
-                _animation[i] = _rootObj.transform.Find(string.Format(ANIM_NODE_NAME_FORMAT,i)).gameObject.AddComponent<Animation>();
+                _animation[i] = _rootObj.transform.Find(string.Format(ANIM_NODE_NAME_FORMAT, i)).gameObject.AddComponent<Animation>();
                 _animation[i].playAutomatically = false;
                 _animation[i].AddClip(animationClip, _clipName[i]);
                 _animation[i].Stop();
@@ -390,7 +390,7 @@ namespace Stage.Cyalume
         public void UpdateColorParam(float paletteScrollSection)
         {
             float num = (paletteScrollSection + 0.5f) * 60f / 1024f;
-            _colorPalette = new Vector2(num - (float)(int)num, ((float)((int)num * 256) + 0.5f) / 1024f);
+            _colorPalette = new Vector2(num - (int)num, ((int)num * 256 + 0.5f) / 1024f);
         }
 
         public void UpdateLookAtModeParam(LiveMobCyalume3DLookAtMode lookAtMode)

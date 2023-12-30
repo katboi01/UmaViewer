@@ -13,11 +13,11 @@ public class SerializableBone
     /// <summary> Reference to original bone for runtime. Not saved to file. </summary>
     [NonSerialized] public Transform Bone;
 
-    public SerializableBone(){}
+    public SerializableBone() { }
 
     public SerializableBone(Transform t, bool generateTags = true, List<BoneTags> tags = null)
     {
-        if(tags == null) tags = new List<BoneTags>();
+        if (tags == null) tags = new List<BoneTags>();
 
         if (generateTags)
         {
@@ -30,7 +30,7 @@ public class SerializableBone
                 tags.Add(BoneTags.Right);
             }
 
-            if(t.GetComponentInParent<DynamicBone>() != null)
+            if (t.GetComponentInParent<DynamicBone>() != null)
             {
                 tags.Add(BoneTags.Dynamic);
             }

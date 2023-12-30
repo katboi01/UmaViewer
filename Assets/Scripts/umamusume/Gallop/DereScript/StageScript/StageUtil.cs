@@ -1,10 +1,5 @@
-using Cute;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace Stage
@@ -106,7 +101,7 @@ namespace Stage
         {
             int layers = 0;
             layers |= 1 << (int)StageLayers.AR;
-            
+
             return layers;
             //return 16384;
         }
@@ -135,7 +130,7 @@ namespace Stage
                 default:
                     if (isAllowOver)
                     {
-                        result = Mathf.CeilToInt((float)rarity / 2f);
+                        result = Mathf.CeilToInt(rarity / 2f);
                     }
                     break;
             }
@@ -231,7 +226,7 @@ namespace Stage
             List<MasterDressColorData.DressColorData> listWithCharaIdAndModelTypeOrderByDressIdAsc = masterDressColorData.GetListWithCharaIdAndModelTypeOrderByDressIdAsc(charaId, 1);
             for (int i = 0; i < listWithCharaIdAndModelTypeOrderByDressIdAsc.Count; i++)
             {
-                if (dressId == (int)listWithCharaIdAndModelTypeOrderByDressIdAsc[i].dressId)
+                if (dressId == listWithCharaIdAndModelTypeOrderByDressIdAsc[i].dressId)
                 {
                     result = listWithCharaIdAndModelTypeOrderByDressIdAsc[i].colorId;
                     break;

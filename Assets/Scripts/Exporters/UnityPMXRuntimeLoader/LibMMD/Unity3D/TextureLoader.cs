@@ -1,8 +1,8 @@
+using LibMMD.Material;
+using LibMMD.Unity3D.ImageLoader;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using LibMMD.Material;
-using LibMMD.Unity3D.ImageLoader;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,7 +17,7 @@ namespace LibMMD.Unity3D
         private readonly int _maxTextureSize;
 
         private static readonly HashSet<string> SysToonNames = new HashSet<string>();
-        
+
         private readonly Dictionary<string, Texture> _textureMap = new Dictionary<string, Texture>();
 
         static TextureLoader()
@@ -40,7 +40,7 @@ namespace LibMMD.Unity3D
         {
             return mmdTexture == null ? null : LoadTexture(mmdTexture.TexturePath);
         }
-        
+
         private Texture LoadTexture(string path)
         {
             if (string.IsNullOrEmpty(path))

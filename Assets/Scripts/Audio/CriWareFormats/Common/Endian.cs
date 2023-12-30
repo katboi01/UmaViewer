@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CriWareFormats.Common
+﻿namespace CriWareFormats.Common
 {
     public static class Endian
     {

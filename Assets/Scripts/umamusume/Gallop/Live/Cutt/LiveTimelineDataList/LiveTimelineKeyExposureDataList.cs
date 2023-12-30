@@ -1,14 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Gallop.Live.Cutt
 {
     [System.Serializable]
     public class LiveTimelineKeyExposureData : LiveTimelineKeyWithInterpolate
     {
         public bool IsEnable;
-        public float DepthMask; 
+        public float DepthMask;
         public float Gain;
         public float Lift;
         public float MaskGain;

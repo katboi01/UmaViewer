@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-public class SQDressData
+﻿public class SQDressData
 {
     public static bool isPlus = false;
 
@@ -35,12 +30,12 @@ public class SQDressData
     /// キャラID
     /// </summary>
     public int charaID;
-    
+
     /// <summary>
     /// カード名
     /// </summary>
     public string cardName;
-    
+
     /// <summary>
     /// タイプ
     /// </summary>
@@ -127,7 +122,7 @@ public class SQDressData
         {
             return string.Format(_commonshop, key);
         }
-        else if(key > 7000000)
+        else if (key > 7000000)
         {
             return string.Format(_commonshop, key);
         }

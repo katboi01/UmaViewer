@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 
 /// <summary>
@@ -83,7 +79,7 @@ public class PathHandler : MonoBehaviour
             return ret;
         }
     }
-    
+
     // Use this for initialization
     void Start()
     {

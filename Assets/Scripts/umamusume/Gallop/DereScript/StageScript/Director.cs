@@ -116,8 +116,8 @@ public class Director : MonoBehaviour
             };
             Func<float, RenderTexture> func2 = delegate (float scale)
             {
-                int width2 = (int)((float)width * scale);
-                int height2 = (int)((float)height * scale);
+                int width2 = (int)(width * scale);
+                int height2 = (int)(height * scale);
                 RenderTexture renderTexture = new RenderTexture(width2, height2, 0);
                 if (renderTexture != null)
                 {
@@ -176,7 +176,7 @@ public class Director : MonoBehaviour
 
         public void ResizeScreen(int width, int height)
         {
-            if(_color != null)
+            if (_color != null)
             {
                 _color.Release();
                 _color.width = width;
@@ -1527,7 +1527,7 @@ public class Director : MonoBehaviour
     {
         if (isTimelineControlled)
         {
-            return (float)Mathf.RoundToInt(musicScoreTime * 60f) / 60f;
+            return Mathf.RoundToInt(musicScoreTime * 60f) / 60f;
         }
         return musicScoreTime;
     }
@@ -1770,7 +1770,7 @@ public class Director : MonoBehaviour
             characterObject.AppointSpareCharacter(isSpare: false);
         }
     }
-    
+
 
     public eScoreRank GetCurrentScoreRank()
     {
@@ -2163,7 +2163,7 @@ public class Director : MonoBehaviour
         {
             case MonitorCamera.RenderCallbackType.PreCull:
                 {
-                    _restoreCharacterVisibleFlag = (LiveCharaPositionFlag)0;
+                    _restoreCharacterVisibleFlag = 0;
                     for (int j = 0; j < 15; j++)
                     {
                         LiveCharaPositionFlag liveCharaPositionFlag2 = (LiveCharaPositionFlag)(1 << j);
@@ -2518,8 +2518,8 @@ public class Director : MonoBehaviour
             Director director = instance;
             if (director != null && director.useCalcedCameraRect)
             {
-                num = (int)((float)num * director.mainCameraRect.width);
-                num2 = (int)((float)num2 * director.mainCameraRect.height);
+                num = (int)(num * director.mainCameraRect.width);
+                num2 = (int)(num2 * director.mainCameraRect.height);
             }
             LiveTimelineA2USettings a2uSettings = _liveTimelineControl.data.a2uSettings;
             if (a2uSettings.prefabs != null && a2uSettings.prefabs.Length != 0)
@@ -2541,7 +2541,7 @@ public class Director : MonoBehaviour
     /// <returns></returns>
     private Vector3 MakeCharaInitPos(int i)
     {
-        return new Vector3(((float)(i % 2) - 0.5f) * 2f * (float)Mathf.RoundToInt(i / 2) * 1.5f, 0f, (float)(i / 2) * -0.5f);
+        return new Vector3((i % 2 - 0.5f) * 2f * Mathf.RoundToInt(i / 2) * 1.5f, 0f, i / 2 * -0.5f);
     }
 
     /// <summary>
@@ -2752,7 +2752,7 @@ public class Director : MonoBehaviour
             for (int i = 0; i < motionUseCharaPosition.Count; i++)
             {
                 int charaId = instance.GetCharacterData(motionUseCharaPosition[i] + 1).charaId;
-                if ((int)MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
+                if (MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
                 {
                     flag2 = true;
                 }
@@ -2837,7 +2837,6 @@ public class Director : MonoBehaviour
                 text = _live3DSettings._cuttName;
             }
             InstanciateTimeline($"Cutt/{text}/{text}");
-            Rect rect = default(Rect);
             _liveTimelineControl._limitFovForWidth = false;
             _liveTimelineControl._baseCameraAspectRatio = 1.77777779f;
             _liveTimelineControl._limitFovForWidth = true;
@@ -4246,7 +4245,7 @@ public class Director : MonoBehaviour
             int index = leftHanded.targetCharaList[i];
             bool flag2 = false;
             int charaId = _characterObjects[index].data.charaId;
-            if ((int)MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
+            if (MasterDBManager.instance.masterCharaData.Get(charaId).hand == 3002)
             {
                 flag2 = true;
             }

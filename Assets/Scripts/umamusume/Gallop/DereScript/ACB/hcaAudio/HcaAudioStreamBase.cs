@@ -1,22 +1,28 @@
 ﻿using System;
 using System.IO;
 
-namespace DereTore.Exchange.Audio.HCA {
-    public abstract class HcaAudioStreamBase : Stream {
+namespace DereTore.Exchange.Audio.HCA
+{
+    public abstract class HcaAudioStreamBase : Stream
+    {
 
-        protected HcaAudioStreamBase(Stream sourceStream, DecodeParams decodeParams) {
+        protected HcaAudioStreamBase(Stream sourceStream, DecodeParams decodeParams)
+        {
             _decodeParams = decodeParams;
         }
 
-        public sealed override void Flush() {
+        public sealed override void Flush()
+        {
             throw new NotSupportedException();
         }
 
-        public sealed override void SetLength(long value) {
+        public sealed override void SetLength(long value)
+        {
             throw new NotSupportedException();
         }
 
-        public sealed override void Write(byte[] buffer, int offset, int count) {
+        public sealed override void Write(byte[] buffer, int offset, int count)
+        {
             throw new NotSupportedException();
         }
 
@@ -38,19 +44,27 @@ namespace DereTore.Exchange.Audio.HCA {
 
         public DecodeParams DecodeParams { get { return _decodeParams; } }
 
-        protected bool EnsureNotDisposed() {
-            if (IsDisposed) {
-                if (AllowDisposedOperations) {
+        protected bool EnsureNotDisposed()
+        {
+            if (IsDisposed)
+            {
+                if (AllowDisposedOperations)
+                {
                     return false;
-                } else {
+                }
+                else
+                {
                     throw new ObjectDisposedException(typeof(HcaAudioStream).Name);
                 }
-            } else {
+            }
+            else
+            {
                 return true;
             }
         }
 
-        protected override void Dispose(bool disposing) {
+        protected override void Dispose(bool disposing)
+        {
             _isDisposed = true;
             base.Dispose(disposing);
         }

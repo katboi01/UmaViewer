@@ -1,5 +1,4 @@
-﻿using Stage;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class LyricsManager : MonoBehaviour
 {

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UICharaSort : MonoBehaviour
 {
@@ -65,7 +63,7 @@ public class UICharaSort : MonoBehaviour
     private void Save()
     {
         int nowvalue = radioButton.select;
-        if(initValue != nowvalue)
+        if (initValue != nowvalue)
         {
             radioButton.Save();
         }

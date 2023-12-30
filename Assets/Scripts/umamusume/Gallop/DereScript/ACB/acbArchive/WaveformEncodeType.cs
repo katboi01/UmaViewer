@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    internal enum WaveformEncodeType : byte {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    internal enum WaveformEncodeType : byte
+    {
 
         Adx = 0,
         Hca = 2,

@@ -55,7 +55,7 @@ public class CameraOrbit : MonoBehaviour
     {
         if (HandleManager.InteractionInProgress) return;
 
-        if(CameraMode != CameraModeDropdown.value)
+        if (CameraMode != CameraModeDropdown.value)
         {
             switch (CameraMode) //old
             {
@@ -155,7 +155,7 @@ public class CameraOrbit : MonoBehaviour
         position.y = TargetCenter.y + OrbitCamHeightSlider.value; //set camera height
         transform.position = position;  //set final position of camera at target
         transform.LookAt(target); //look at target position
-        transform.Rotate(0,0,OrbitCamRotationSlider.value);
+        transform.Rotate(0, 0, OrbitCamRotationSlider.value);
         transform.position = target - transform.forward * camDist; //move away from target
     }
 
@@ -194,7 +194,7 @@ public class CameraOrbit : MonoBehaviour
         }
         if (Input.GetMouseButton(1) && FreeCamRight)
         {
-            transform.position += Input.GetAxis("Mouse X") * transform.right  * Time.deltaTime * moveSpeed;
+            transform.position += Input.GetAxis("Mouse X") * transform.right * Time.deltaTime * moveSpeed;
             transform.position += Input.GetAxis("Mouse Y") * transform.up * Time.deltaTime * moveSpeed;
         }
         else

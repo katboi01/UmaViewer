@@ -1,10 +1,10 @@
-﻿using System;
+﻿using MiniJSON; //Dictionaryが扱えるMiniJsonを使用
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using MiniJSON; //Dictionaryが扱えるMiniJsonを使用
 
 public class SaveManager
 {
@@ -271,7 +271,7 @@ public class SaveManager
         private IdolSet idolset = default(IdolSet);
 
         private List<IdolSet> idolSetList = null;
-        
+
         public SaveDataBase(string fileName)
         {
             filepath = fileName;
@@ -280,7 +280,7 @@ public class SaveManager
         }
 
 
-#region IdolSet
+        #region IdolSet
 
         public void SetChara(int place, int value)
         {
@@ -373,7 +373,7 @@ public class SaveManager
                 case 14: idolset.dressIcon14 = value; break;
             }
         }
-        
+
         public int GetChara(int place, int _default)
         {
             int returnvalue = _default;
@@ -477,7 +477,7 @@ public class SaveManager
             }
             return returnvalue;
         }
-        
+
         public IdolSet CurrentUnit
         {
             get
@@ -506,7 +506,7 @@ public class SaveManager
         public void AddUnit(IdolSet idolSet)
         {
             if (idolSetList == null) idolSetList = new List<IdolSet>();
-            
+
             idolSetList.Add(idolSet);
         }
 
@@ -514,7 +514,7 @@ public class SaveManager
         {
             idolset = idolSet;
         }
-#endregion
+        #endregion
 
         public void SetString(string key, string value)
         {
@@ -577,7 +577,7 @@ public class SaveManager
                 Dictionary<string, object> dic = new Dictionary<string, object>(saveDictionary.Count);
                 //ソート
                 var vs1 = saveDictionary.OrderBy((x) => x.Key);
-                foreach(var tmp in vs1)
+                foreach (var tmp in vs1)
                 {
                     dic[tmp.Key] = tmp.Value;
                 }
@@ -700,7 +700,7 @@ public class SaveManager
 
                             //idolset
                             object tmpobj = null;
-                            if (saveDictionary.TryGetValue("idolset",out tmpobj))
+                            if (saveDictionary.TryGetValue("idolset", out tmpobj))
                             {
                                 idolset = DeSerializeIdolSet(tmpobj);
                             }
@@ -759,7 +759,7 @@ public class SaveManager
             for (int i = 0; i < 15; i++)
             {
                 object outobj = null;
-                if(tmpDic.TryGetValue("chara" + i,out outobj))
+                if (tmpDic.TryGetValue("chara" + i, out outobj))
                 {
                     int.TryParse((string)outobj, out charas[i]);
                 }
@@ -843,7 +843,7 @@ public class SaveManager
 
             return returnValue;
         }
-        
+
         /// <summary>
         /// キーに不正がないかチェックします。
         /// </summary>
@@ -854,7 +854,7 @@ public class SaveManager
                 throw new ArgumentException("invalid key!!");
             }
         }
-        
+
     }
 
     /// <summary>

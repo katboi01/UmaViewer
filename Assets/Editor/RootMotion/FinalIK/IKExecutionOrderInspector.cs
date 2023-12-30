@@ -1,27 +1,30 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections;
+﻿using UnityEditor;
+using UnityEngine;
 
-namespace RootMotion.FinalIK {
+namespace RootMotion.FinalIK
+{
 
-	// Custom inspector for IKExecutionOrder
-	[CustomEditor(typeof(IKExecutionOrder))]
-	public class IKExecutionOrderInspector : Editor {
+    // Custom inspector for IKExecutionOrder
+    [CustomEditor(typeof(IKExecutionOrder))]
+    public class IKExecutionOrderInspector : Editor
+    {
 
-		private IKExecutionOrder script { get { return target as IKExecutionOrder; }}
+        private IKExecutionOrder script { get { return target as IKExecutionOrder; } }
 
-		private MonoScript monoScript;
+        private MonoScript monoScript;
 
-		void OnEnable() {
-			if (serializedObject == null) return;
-			
-			// Changing the script execution order
-			if (!Application.isPlaying) {
-				int executionOrder = 9996;
-				monoScript = MonoScript.FromMonoBehaviour(script);
-				int currentExecutionOrder = MonoImporter.GetExecutionOrder(monoScript);
-				if (currentExecutionOrder != executionOrder) MonoImporter.SetExecutionOrder(monoScript, executionOrder);
-			}
-		}
-	}
+        void OnEnable()
+        {
+            if (serializedObject == null) return;
+
+            // Changing the script execution order
+            if (!Application.isPlaying)
+            {
+                int executionOrder = 9996;
+                monoScript = MonoScript.FromMonoBehaviour(script);
+                int currentExecutionOrder = MonoImporter.GetExecutionOrder(monoScript);
+                if (currentExecutionOrder != executionOrder) MonoImporter.SetExecutionOrder(monoScript, executionOrder);
+            }
+        }
+    }
 }

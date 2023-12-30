@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Stage
@@ -138,7 +137,7 @@ namespace Stage
         public static bool IsPartsDress(int dressId)
         {
             MasterDressData.DressData dressData = MasterDBManager.instance.masterDressData.Get(dressId);
-            if (dressData != null && (int)dressData.dressType == 4)
+            if (dressData != null && dressData.dressType == 4)
             {
                 return true;
             }
@@ -227,7 +226,7 @@ namespace Stage
                         {
                             return 201;
                         }
-                        int simpleRarityFromRarity = (int)StageUtil.GetSimpleRarityFromRarity((int)cardData.rarity);
+                        int simpleRarityFromRarity = StageUtil.GetSimpleRarityFromRarity(cardData.rarity);
                         return 100 * (1 + (4 - simpleRarityFromRarity));
                     }
                 }

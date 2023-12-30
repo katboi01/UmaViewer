@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-    
+
     [System.Serializable]
     public class LiveTimelineKeyMobControlData : LiveTimelineKeyWithInterpolate
     {
@@ -20,7 +18,7 @@ namespace Gallop.Live.Cutt
     {
 
     }
-    
+
     [System.Serializable]
     public class LiveTimelineMobControlData : ILiveTimelineGroupDataWithName
     {

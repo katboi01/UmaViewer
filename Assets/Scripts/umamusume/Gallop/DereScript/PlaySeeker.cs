@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class PlaySeeker : MonoBehaviour
 {
@@ -94,7 +92,7 @@ public class PlaySeeker : MonoBehaviour
 
     public void ChangeVisible()
     {
-        if(rootObject != null)
+        if (rootObject != null)
         {
             bool active = rootObject.activeSelf;
             rootObject.SetActive(!active);

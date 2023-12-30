@@ -1,8 +1,5 @@
 ﻿using LibMMD.Unity3D;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -23,7 +20,7 @@ public class PMXModelLoader
         {
             mmdModel = await MMDModel.ImportModel(path, autoShowModel);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             UnityEngine.Debug.Log(ex.Message);
             return null;
@@ -44,23 +41,23 @@ public class PMXModelLoader
 #endif
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             UnityEngine.Debug.Log("アバターの作成に失敗しました");
             UnityEngine.Debug.Log(path);
 
             AvatarMaker avaterMaker = mmdModel.gameObject.GetComponent<AvatarMaker>();
-            #if UNITY_EDITOR
-                        if (avaterMaker != null)
-                        {
-                            GameObject.DestroyImmediate(avaterMaker);
-                        }
-            #else
+#if UNITY_EDITOR
+            if (avaterMaker != null)
+            {
+                GameObject.DestroyImmediate(avaterMaker);
+            }
+#else
                         if (avaterMaker != null)
                         {
                             GameObject.Destroy(avaterMaker);
                         }
-            #endif
+#endif
 
             return mmdModel.transform;
         }
@@ -74,7 +71,7 @@ public class PMXModelLoader
 
     public async static Task<Transform> LoadPMXModel(string path, RuntimeAnimatorController runtimeAnimatorController, bool autoShowModel = true)
     {
-         return await LoadPMXModel(path, runtimeAnimatorController, null, autoShowModel);
+        return await LoadPMXModel(path, runtimeAnimatorController, null, autoShowModel);
     }
 
     public async static Task<Transform> LoadPMXModel(string path, RuntimeAnimatorController runtimeAnimatorController)

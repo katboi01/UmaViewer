@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UIMusicInfo : MonoBehaviour
 {
     private Text title;
     private Text content;
-    
+
     private GameObject eventToggle;
     private GameObject soloToggle;
 
@@ -18,7 +16,7 @@ public class UIMusicInfo : MonoBehaviour
     private Sprite[] frameSprites = null;
 
     private GameObject liveMemberController;
-    
+
     private void Awake()
     {
         LoadFrameSprite();
@@ -33,7 +31,7 @@ public class UIMusicInfo : MonoBehaviour
         eventToggle = base.transform.Find("Header/EventToggle").gameObject;
         soloToggle = base.transform.Find("Header/SoloToggle").gameObject;
 
-        liveMemberController = GameObject.Find("Panel/LiveContent/IdolInfo").gameObject;        
+        liveMemberController = GameObject.Find("Panel/LiveContent/IdolInfo").gameObject;
     }
 
     // Use this for initialization
@@ -90,7 +88,7 @@ public class UIMusicInfo : MonoBehaviour
         }
 
         //エイプリルフール曲だけ
-        if(data.chara_all_flag == 2 && data.music_data_id >1900 && data.music_data_id < 1910)
+        if (data.chara_all_flag == 2 && data.music_data_id > 1900 && data.music_data_id < 1910)
         {
             eventToggle.SetActive(true);
         }

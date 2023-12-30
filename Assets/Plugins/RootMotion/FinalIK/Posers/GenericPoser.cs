@@ -1,118 +1,136 @@
-using UnityEngine;
-using System.Collections;
 using System;
+using UnityEngine;
 
-namespace RootMotion.FinalIK {
-	
-	/// <summary>
-	/// Posing the children of a Transform to match the children of another Transform
-	/// </summary>
-	public class GenericPoser : Poser {
+namespace RootMotion.FinalIK
+{
 
-		/// <summary>
-		/// Mapping a bone to it's target
-		/// </summary>
-		[System.Serializable]
-		public class Map {
-			public Transform bone;
-			public Transform target;
+    /// <summary>
+    /// Posing the children of a Transform to match the children of another Transform
+    /// </summary>
+    public class GenericPoser : Poser
+    {
 
-			private Vector3 defaultLocalPosition;
-			private Quaternion defaultLocalRotation;
+        /// <summary>
+        /// Mapping a bone to it's target
+        /// </summary>
+        [System.Serializable]
+        public class Map
+        {
+            public Transform bone;
+            public Transform target;
 
-			// Custom constructor
-			public Map(Transform bone, Transform target) {
-				this.bone = bone;
-				this.target = target;
+            private Vector3 defaultLocalPosition;
+            private Quaternion defaultLocalRotation;
 
-				StoreDefaultState();
-			}
+            // Custom constructor
+            public Map(Transform bone, Transform target)
+            {
+                this.bone = bone;
+                this.target = target;
 
-			public void StoreDefaultState() {
-				defaultLocalPosition = bone.localPosition;
-				defaultLocalRotation = bone.localRotation;
-			}
+                StoreDefaultState();
+            }
 
-			public void FixTransform() {
-				bone.localPosition = defaultLocalPosition;
-				bone.localRotation = defaultLocalRotation;
-			}
+            public void StoreDefaultState()
+            {
+                defaultLocalPosition = bone.localPosition;
+                defaultLocalRotation = bone.localRotation;
+            }
 
-			// Update mapping
-			public void Update(float localRotationWeight, float localPositionWeight) {
-				bone.localRotation = Quaternion.Lerp(bone.localRotation, target.localRotation, localRotationWeight);
-				bone.localPosition = Vector3.Lerp(bone.localPosition, target.localPosition, localPositionWeight);
-			}
-		}
+            public void FixTransform()
+            {
+                bone.localPosition = defaultLocalPosition;
+                bone.localRotation = defaultLocalRotation;
+            }
 
-		public Map[] maps;
+            // Update mapping
+            public void Update(float localRotationWeight, float localPositionWeight)
+            {
+                bone.localRotation = Quaternion.Lerp(bone.localRotation, target.localRotation, localRotationWeight);
+                bone.localPosition = Vector3.Lerp(bone.localPosition, target.localPosition, localPositionWeight);
+            }
+        }
 
-		/// <summary>
-		/// Finds mapping automatically. This requires for all children of the transform to have unique names. This method is not very memory efficient so try to avoid using it in play mode.
-		/// </summary>
-		[ContextMenu("Auto-Mapping")]
-		public override void AutoMapping() {
-			if (poseRoot == null) {
-				maps = new Map[0];
-				return;
-			}
+        public Map[] maps;
 
-			maps = new Map[0];
+        /// <summary>
+        /// Finds mapping automatically. This requires for all children of the transform to have unique names. This method is not very memory efficient so try to avoid using it in play mode.
+        /// </summary>
+        [ContextMenu("Auto-Mapping")]
+        public override void AutoMapping()
+        {
+            if (poseRoot == null)
+            {
+                maps = new Map[0];
+                return;
+            }
 
-			Transform[] children = (Transform[])transform.GetComponentsInChildren<Transform>();
-			Transform[] poseChildren = (Transform[])poseRoot.GetComponentsInChildren<Transform>();
-			Transform target;
+            maps = new Map[0];
 
-			// Find all the bone to target matches
-			for (int i = 1; i < children.Length; i++) {
-				target = GetTargetNamed(children[i].name, poseChildren);
-				if (target != null) {
-					Array.Resize(ref maps, maps.Length + 1);
-					maps[maps.Length - 1] = new Map(children[i], target);
-				}
-			}
+            Transform[] children = transform.GetComponentsInChildren<Transform>();
+            Transform[] poseChildren = poseRoot.GetComponentsInChildren<Transform>();
+            Transform target;
 
-			StoreDefaultState();
-		}
+            // Find all the bone to target matches
+            for (int i = 1; i < children.Length; i++)
+            {
+                target = GetTargetNamed(children[i].name, poseChildren);
+                if (target != null)
+                {
+                    Array.Resize(ref maps, maps.Length + 1);
+                    maps[maps.Length - 1] = new Map(children[i], target);
+                }
+            }
 
-		protected override void InitiatePoser() {
-			StoreDefaultState();
-		}
+            StoreDefaultState();
+        }
 
-		protected override void UpdatePoser() {
-			if (weight <= 0f) return;
-			if (localPositionWeight <= 0f && localRotationWeight <= 0f) return;
-			if (poseRoot == null) return;
-			
-			// Calculate weights
-			float rW = localRotationWeight * weight;
-			float pW = localPositionWeight * weight;
-			
-			// Lerping the localRotation and the localPosition
-			for (int i = 0; i < maps.Length; i++) maps[i].Update(rW, pW);
-		}
+        protected override void InitiatePoser()
+        {
+            StoreDefaultState();
+        }
 
-		
-		protected override void FixPoserTransforms() {
-			for (int i = 0; i < maps.Length; i++) {
-				maps[i].FixTransform();
-			}
-		}
+        protected override void UpdatePoser()
+        {
+            if (weight <= 0f) return;
+            if (localPositionWeight <= 0f && localRotationWeight <= 0f) return;
+            if (poseRoot == null) return;
 
-		private void StoreDefaultState() {
-			for (int i = 0; i < maps.Length; i++) {
-				maps[i].StoreDefaultState();
-			}
-		}
+            // Calculate weights
+            float rW = localRotationWeight * weight;
+            float pW = localPositionWeight * weight;
 
-		// Returns a Transform from the array that has the specified name
-		private Transform GetTargetNamed(string tName, Transform[] array) {
-			for (int i = 0; i < array.Length; i++) {
-				if (array[i].name == tName) return array[i];
-			}
-			return null;
-		}
+            // Lerping the localRotation and the localPosition
+            for (int i = 0; i < maps.Length; i++) maps[i].Update(rW, pW);
+        }
 
 
-	}
+        protected override void FixPoserTransforms()
+        {
+            for (int i = 0; i < maps.Length; i++)
+            {
+                maps[i].FixTransform();
+            }
+        }
+
+        private void StoreDefaultState()
+        {
+            for (int i = 0; i < maps.Length; i++)
+            {
+                maps[i].StoreDefaultState();
+            }
+        }
+
+        // Returns a Transform from the array that has the specified name
+        private Transform GetTargetNamed(string tName, Transform[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i].name == tName) return array[i];
+            }
+            return null;
+        }
+
+
+    }
 }

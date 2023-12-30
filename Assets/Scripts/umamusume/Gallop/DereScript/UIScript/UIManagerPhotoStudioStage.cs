@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
+using UnityEngine;
 
-public class UIManagerPhotoStudioStage : MonoBehaviour {
+public class UIManagerPhotoStudioStage : MonoBehaviour
+{
 
     /*Prefab*/
     [SerializeField]
@@ -18,9 +18,9 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
     {
         get
         {
-            if(stageDic != null)
+            if (stageDic != null)
             {
-                if(stageDic.Count > 0)
+                if (stageDic.Count > 0)
                 {
                     return true;
                 }
@@ -35,9 +35,10 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
     {
         StartCoroutine(CreateSpriteDic());
     }
-    
+
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
 
     }
 
@@ -108,7 +109,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
 
         stageList.AddRange(MasterDBManager.instance.GetPhotoStudioStageData());
         List<string> bgnames = new List<string>();
-        foreach(var tmp in stageList)
+        foreach (var tmp in stageList)
         {
             //はーつっかえ
             //int musicID = ViewLauncher.instance.master3dLive.GetMusicIDFromBGID(tmp.bg_id);
@@ -126,7 +127,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
         }
         //コルーチンでDLを投げる
         StartCoroutine(AssetManager.instance.DownloadFromFilenamesAsync(bgnames));
-        
+
         //アイコン作成
         foreach (var tmp in stageList)
         {
@@ -144,7 +145,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
     public IEnumerator CreateSprite(int iconID)
     {
         //辞書が存在しない
-        if(iconDic == null)
+        if (iconDic == null)
         {
             iconDic = new Dictionary<int, Sprite>();
         }
@@ -156,7 +157,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
         else
         {
             //先に仮登録
-            iconDic.Add(iconID, null); 
+            iconDic.Add(iconID, null);
         }
 
         string name = string.Format("live_bg2d_bg_live_{0:00}.unity3d", iconID);
@@ -189,7 +190,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
         //既に登録されている
         if (iconDic.ContainsKey(iconID))
         {
-            if(iconDic[iconID] == null)
+            if (iconDic[iconID] == null)
             {
                 iconDic[iconID] = tmpSp;
             }
@@ -219,7 +220,7 @@ public class UIManagerPhotoStudioStage : MonoBehaviour {
     {
         GameObject obj = Instantiate(PhotoStudioStageView);
         GameObject baseObj = GameObject.Find("Canvas");
-        obj.transform.SetParent(baseObj.transform,false);
+        obj.transform.SetParent(baseObj.transform, false);
 
         UIPhotoStudioStageView stageView = obj.GetComponent<UIPhotoStudioStageView>();
         stageView.SetStageList(stageList);

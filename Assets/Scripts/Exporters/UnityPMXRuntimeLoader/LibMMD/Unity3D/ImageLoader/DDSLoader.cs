@@ -106,17 +106,17 @@ namespace LibMMD.Unity3D.ImageLoader
         private const int X8R8G8B8 = (4 << 16) | 4;
 
         // RGBA Masks
-        private static readonly int[] A1R5G5B5Masks = {0x7C00, 0x03E0, 0x001F, 0x8000};
+        private static readonly int[] A1R5G5B5Masks = { 0x7C00, 0x03E0, 0x001F, 0x8000 };
 
-        private static readonly int[] X1R5G5B5Masks = {0x7C00, 0x03E0, 0x001F, 0x0000};
-        private static readonly int[] A4R4G4B4Masks = {0x0F00, 0x00F0, 0x000F, 0xF000};
-        private static readonly int[] X4R4G4B4Masks = {0x0F00, 0x00F0, 0x000F, 0x0000};
-        private static readonly int[] R5G6B5Masks = {0xF800, 0x07E0, 0x001F, 0x0000};
-        private static readonly int[] R8G8B8Masks = {0xFF0000, 0x00FF00, 0x0000FF, 0x000000};
-        private static readonly int[] A8B8G8R8Masks = {0x000000FF, 0x0000FF00, 0x00FF0000, unchecked((int) 0xFF000000)};
-        private static readonly int[] X8B8G8R8Masks = {0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000};
-        private static readonly int[] A8R8G8B8Masks = {0x00FF0000, 0x0000FF00, 0x000000FF, unchecked((int) 0xFF000000)};
-        private static readonly int[] X8R8G8B8Masks = {0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000};
+        private static readonly int[] X1R5G5B5Masks = { 0x7C00, 0x03E0, 0x001F, 0x0000 };
+        private static readonly int[] A4R4G4B4Masks = { 0x0F00, 0x00F0, 0x000F, 0xF000 };
+        private static readonly int[] X4R4G4B4Masks = { 0x0F00, 0x00F0, 0x000F, 0x0000 };
+        private static readonly int[] R5G6B5Masks = { 0xF800, 0x07E0, 0x001F, 0x0000 };
+        private static readonly int[] R8G8B8Masks = { 0xFF0000, 0x00FF00, 0x0000FF, 0x000000 };
+        private static readonly int[] A8B8G8R8Masks = { 0x000000FF, 0x0000FF00, 0x00FF0000, unchecked((int)0xFF000000) };
+        private static readonly int[] X8B8G8R8Masks = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000 };
+        private static readonly int[] A8R8G8B8Masks = { 0x00FF0000, 0x0000FF00, 0x000000FF, unchecked((int)0xFF000000) };
+        private static readonly int[] X8R8G8B8Masks = { 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000 };
 
         // BIT4 = 17 * index;
         private static readonly int[] Bit5 =
@@ -384,7 +384,7 @@ namespace LibMMD.Unity3D.ImageLoader
 
         private static int[] DdsDecodeDxt3(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             var index = offset;
             var w = (width + 3) / 4;
             var h = (height + 3) / 4;
@@ -439,7 +439,7 @@ namespace LibMMD.Unity3D.ImageLoader
 
         private static int[] DdsDecodeDxt5(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             var index = offset;
             var w = (width + 3) / 4;
             var h = (height + 3) / 4;
@@ -522,7 +522,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadX1R5G5B5(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
@@ -540,7 +540,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadA4R4G4B4(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
@@ -558,7 +558,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadX4R4G4B4(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
@@ -576,7 +576,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadR5G6B5(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var rgba = (buffer[index] & 0xFF) | (buffer[index + 1] & 0xFF) << 8;
@@ -594,7 +594,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadR8G8B8(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var b = buffer[index++] & 0xFF;
@@ -610,7 +610,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadA8B8G8R8(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            var pixels = new int [4 * width * height];
+            var pixels = new int[4 * width * height];
             for (var i = 0; i < height * width; i++)
             {
                 var r = buffer[index++] & 0xFF;
@@ -626,7 +626,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadX8B8G8R8(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            int[] pixels = new int [4 * width * height];
+            int[] pixels = new int[4 * width * height];
             for (int i = 0; i < height * width; i++)
             {
                 var r = buffer[index++] & 0xFF;
@@ -643,7 +643,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadA8R8G8B8(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            int[] pixels = new int [4 * width * height];
+            int[] pixels = new int[4 * width * height];
             for (int i = 0; i < height * width; i++)
             {
                 var b = buffer[index++] & 0xFF;
@@ -659,7 +659,7 @@ namespace LibMMD.Unity3D.ImageLoader
         private static int[] DdsReadX8R8G8B8(int width, int height, int offset, byte[] buffer, DdsOrder order)
         {
             var index = offset;
-            int[] pixels = new int [4 * width * height];
+            int[] pixels = new int[4 * width * height];
             for (int i = 0; i < height * width; i++)
             {
                 var b = buffer[index++] & 0xFF;

@@ -1,7 +1,6 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class CircuitLight : Gimmick
 {
@@ -119,7 +118,7 @@ public class CircuitLight : Gimmick
             UpdateScrollDirection(config.direction);
         }
     }
-    
+
     public enum eScroll
     {
         Y,

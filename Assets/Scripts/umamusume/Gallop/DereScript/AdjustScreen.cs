@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -70,7 +69,7 @@ public class AdjustScreen : MonoBehaviour
 
     private IEnumerator LoadRenderTarget()
     {
-        while(_director.renderTarget == null)
+        while (_director.renderTarget == null)
         {
             yield return null;
         }

@@ -1,31 +1,37 @@
+using DereTore.Common;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using DereTore.Common;
 using System.Linq.Expressions;
 
-namespace DereTore.Exchange.Audio.HCA {
-    public sealed class HcaAudioStream : HcaAudioStreamBase {
+namespace DereTore.Exchange.Audio.HCA
+{
+    public sealed class HcaAudioStream : HcaAudioStreamBase
+    {
 
         public static string NameOf<T>(Expression<Func<T>> e)
         {
             return ((MemberExpression)e.Body).Member.Name;
         }
         public HcaAudioStream(Stream sourceStream)
-            : this(sourceStream, DecodeParams.Default) {
+            : this(sourceStream, DecodeParams.Default)
+        {
         }
 
         public HcaAudioStream(Stream sourceStream, AudioParams audioParams)
-            : this(sourceStream, DecodeParams.Default, audioParams) {
+            : this(sourceStream, DecodeParams.Default, audioParams)
+        {
         }
 
         public HcaAudioStream(Stream sourceStream, DecodeParams decodeParams)
-            : this(sourceStream, decodeParams, AudioParams.Default) {
+            : this(sourceStream, decodeParams, AudioParams.Default)
+        {
         }
 
         public HcaAudioStream(Stream sourceStream, DecodeParams decodeParams, AudioParams audioParams)
-            : base(sourceStream, decodeParams) {
+            : base(sourceStream, decodeParams)
+        {
             var decoder = new HcaDecoder(sourceStream, decodeParams);
             _decoder = decoder;
             _audioParams = audioParams;
@@ -38,11 +44,14 @@ namespace DereTore.Exchange.Audio.HCA {
             PrepareDecoding();
         }
 
-        public override long Seek(long offset, SeekOrigin origin) {
-            if (!EnsureNotDisposed()) {
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            if (!EnsureNotDisposed())
+            {
                 return 0;
             }
-            switch (origin) {
+            switch (origin)
+            {
                 case SeekOrigin.Begin:
                     Position = offset;
                     break;
@@ -58,29 +67,37 @@ namespace DereTore.Exchange.Audio.HCA {
             return Position;
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
-            if (!EnsureNotDisposed()) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (!EnsureNotDisposed())
+            {
                 return 0;
             }
-            if (!HasMoreData) {
+            if (!HasMoreData)
+            {
                 return 0;
             }
-            if (offset < 0 || offset >= buffer.Length) {
+            if (offset < 0 || offset >= buffer.Length)
+            {
                 throw new ArgumentOutOfRangeException(NameOf(() => offset));
             }
-            if (count < 0) {
+            if (count < 0)
+            {
                 throw new ArgumentOutOfRangeException(NameOf(() => count));
             }
-            if (count == 0) {
+            if (count == 0)
+            {
                 return 0;
             }
             var hcaInfo = HcaInfo;
             var memoryCache = _memoryCache;
             var position = Position;
             var read = 0;
-            if (position < hcaInfo.DataOffset) {
+            if (position < hcaInfo.DataOffset)
+            {
                 var maxCopy = Math.Min(Math.Min((int)(hcaInfo.DataOffset - position), count), buffer.Length - offset);
-                if (maxCopy == 0) {
+                if (maxCopy == 0)
+                {
                     return 0;
                 }
                 memoryCache.Seek(position, SeekOrigin.Begin);
@@ -88,7 +105,8 @@ namespace DereTore.Exchange.Audio.HCA {
                 count -= maxCopy;
                 offset += maxCopy;
                 position += maxCopy;
-                if (count <= 0 || offset >= buffer.Length) {
+                if (count <= 0 || offset >= buffer.Length)
+                {
                     Position = position;
                     return maxCopy;
                 }
@@ -98,20 +116,26 @@ namespace DereTore.Exchange.Audio.HCA {
             var audioParams = _audioParams;
             var length = Length;
             count = HasLoop && audioParams.InfiniteLoop ? Math.Min(count, buffer.Length - offset) : Math.Min((int)(length - position), count);
-            if (_decodedBlocks.Count < hcaInfo.BlockCount) {
-                if (HasLoop && audioParams.SimulatedLoopCount > 0) {
+            if (_decodedBlocks.Count < hcaInfo.BlockCount)
+            {
+                if (HasLoop && audioParams.SimulatedLoopCount > 0)
+                {
                     EnsureSoundDataDecodedWithLoops(position, count);
-                } else {
+                }
+                else
+                {
                     EnsureSoundDataDecoded(position, count);
                 }
             }
             var headerSize = _headerSize;
             var waveBlockSize = _decoder.GetMinWaveDataBufferSize();
-            while (count > 0) {
+            while (count > 0)
+            {
                 var positionNonLooped = MapPosToNonLoopedWaveStreamPos(position);
                 memoryCache.Seek(positionNonLooped, SeekOrigin.Begin);
                 var shouldRead = Math.Min(count, waveBlockSize - ((int)(positionNonLooped - headerSize) % waveBlockSize));
-                if (shouldRead == 0) {
+                if (shouldRead == 0)
+                {
                     break;
                 }
                 var realRead = memoryCache.Read(buffer, offset, shouldRead);
@@ -127,27 +151,34 @@ namespace DereTore.Exchange.Audio.HCA {
 
         public override bool CanSeek { get { return true; } }
 
-        public override long Length {
-            get {
-                if (!EnsureNotDisposed()) {
+        public override long Length
+        {
+            get
+            {
+                if (!EnsureNotDisposed())
+                {
                     return 0;
                 }
-                if (_length != null) {
+                if (_length != null)
+                {
                     return _length.Value;
                 }
                 var audioParams = _audioParams;
-                if (HasLoop && audioParams.InfiniteLoop) {
+                if (HasLoop && audioParams.InfiniteLoop)
+                {
                     _length = long.MaxValue;
                     return _length.Value;
                 }
                 var hcaInfo = HcaInfo;
                 long totalLength = 0;
-                if (_audioParams.OutputWaveHeader) {
+                if (_audioParams.OutputWaveHeader)
+                {
                     totalLength += _headerSize;
                 }
                 var waveDataBlockSize = _decoder.GetMinWaveDataBufferSize();
                 totalLength += waveDataBlockSize * hcaInfo.BlockCount;
-                if (HasLoop && audioParams.SimulatedLoopCount > 0) {
+                if (HasLoop && audioParams.SimulatedLoopCount > 0)
+                {
                     var loopedBlockCount = hcaInfo.LoopEnd - hcaInfo.LoopStart + 1;
                     totalLength += waveDataBlockSize * loopedBlockCount * audioParams.SimulatedLoopCount;
                 }
@@ -156,13 +187,17 @@ namespace DereTore.Exchange.Audio.HCA {
             }
         }
 
-        public override long Position {
-            get {
+        public override long Position
+        {
+            get
+            {
                 return EnsureNotDisposed() ? _position : 0;
             }
-            set {
+            set
+            {
                 EnsureNotDisposed();
-                if (value < 0 || value > Length) {
+                if (value < 0 || value > Length)
+                {
                     throw new ArgumentOutOfRangeException(NameOf(() => value));
                 }
                 _position = value;
@@ -185,8 +220,10 @@ namespace DereTore.Exchange.Audio.HCA {
             }
         }
 
-        protected override void Dispose(bool disposing) {
-            if (!IsDisposed) {
+        protected override void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
                 _memoryCache.Dispose();
             }
             base.Dispose(disposing);
@@ -200,7 +237,8 @@ namespace DereTore.Exchange.Audio.HCA {
             }
         }
 
-        private void EnsureSoundDataDecoded(long waveDataOffset, int byteCount) {
+        private void EnsureSoundDataDecoded(long waveDataOffset, int byteCount)
+        {
             var decoder = _decoder;
             var headerSize = _headerSize;
             var blockSize = decoder.GetMinWaveDataBufferSize();
@@ -208,12 +246,14 @@ namespace DereTore.Exchange.Audio.HCA {
             var hcaInfo = HcaInfo;
             var endBlockIndex = (uint)((waveDataOffset + byteCount - headerSize) / blockSize);
             endBlockIndex = Math.Min(endBlockIndex, hcaInfo.BlockCount - 1);
-            for (var i = startBlockIndex; i <= endBlockIndex; ++i) {
+            for (var i = startBlockIndex; i <= endBlockIndex; ++i)
+            {
                 EnsureDecodeOneBlock(i);
             }
         }
 
-        private void EnsureSoundDataDecodedWithLoops(long waveDataOffset, int byteCount) {
+        private void EnsureSoundDataDecodedWithLoops(long waveDataOffset, int byteCount)
+        {
             waveDataOffset = MapPosToNonLoopedWaveStreamPos(waveDataOffset);
             var decoder = _decoder;
             var headerSize = _headerSize;
@@ -224,46 +264,59 @@ namespace DereTore.Exchange.Audio.HCA {
             var audioParams = _audioParams;
             var decodedSize = (waveDataOffset - headerSize) / waveBlockSize * waveBlockSize;
             // For those before or in the loop range...
-            if (audioParams.InfiniteLoop || startBlockIndex <= hcaInfo.LoopEnd + (hcaInfo.LoopEnd - hcaInfo.LoopStart + 1) * audioParams.SimulatedLoopCount) {
+            if (audioParams.InfiniteLoop || startBlockIndex <= hcaInfo.LoopEnd + (hcaInfo.LoopEnd - hcaInfo.LoopStart + 1) * audioParams.SimulatedLoopCount)
+            {
                 var blockIndex = startBlockIndex;
                 var executed = false;
-                while (true) {
-                    if (executed && blockIndex == startBlockIndex) {
-                        if (audioParams.InfiniteLoop) {
+                while (true)
+                {
+                    if (executed && blockIndex == startBlockIndex)
+                    {
+                        if (audioParams.InfiniteLoop)
+                        {
                             return;
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
                     }
-                    if (!audioParams.InfiniteLoop && decodedSize >= waveDataEnd) {
+                    if (!audioParams.InfiniteLoop && decodedSize >= waveDataEnd)
+                    {
                         break;
                     }
                     EnsureDecodeOneBlock(blockIndex);
                     decodedSize += waveBlockSize;
                     ++blockIndex;
-                    if (blockIndex > hcaInfo.LoopEnd) {
+                    if (blockIndex > hcaInfo.LoopEnd)
+                    {
                         blockIndex = hcaInfo.LoopStart;
                     }
                     executed = true;
                 }
             }
             // And those following it.
-            if (audioParams.InfiniteLoop) {
+            if (audioParams.InfiniteLoop)
+            {
                 return;
             }
             var endBlockIndex = hcaInfo.LoopEnd + (hcaInfo.LoopEnd - hcaInfo.LoopStart + 1) * audioParams.SimulatedLoopCount;
             var startOfAfterLoopRegion = endBlockIndex * waveBlockSize;
-            if (waveDataEnd >= startOfAfterLoopRegion) {
-                for (var blockIndex = hcaInfo.LoopEnd + 1; blockIndex < hcaInfo.BlockCount && decodedSize < waveDataEnd; ++blockIndex) {
+            if (waveDataEnd >= startOfAfterLoopRegion)
+            {
+                for (var blockIndex = hcaInfo.LoopEnd + 1; blockIndex < hcaInfo.BlockCount && decodedSize < waveDataEnd; ++blockIndex)
+                {
                     EnsureDecodeOneBlock(blockIndex);
                     decodedSize += waveBlockSize;
                 }
             }
         }
 
-        private void EnsureDecodeOneBlock(uint blockIndex) {
+        private void EnsureDecodeOneBlock(uint blockIndex)
+        {
             var decodedBlocks = _decodedBlocks;
-            if (decodedBlocks.ContainsKey(blockIndex)) {
+            if (decodedBlocks.ContainsKey(blockIndex))
+            {
                 return;
             }
             var decodeBuffer = _decodeBuffer;
@@ -276,8 +329,10 @@ namespace DereTore.Exchange.Audio.HCA {
             decodedBlocks.Add(blockIndex, positionInOutputStream);
         }
 
-        private long MapPosToNonLoopedWaveStreamPos(long requestedPosition) {
-            if (!HasLoop) {
+        private long MapPosToNonLoopedWaveStreamPos(long requestedPosition)
+        {
+            if (!HasLoop)
+            {
                 return requestedPosition;
             }
             var hcaInfo = HcaInfo;
@@ -285,19 +340,24 @@ namespace DereTore.Exchange.Audio.HCA {
             var headerSize = _headerSize;
             var relativeDataPosition = requestedPosition - headerSize;
             var endLoopDataPosition = (hcaInfo.LoopEnd + 1) * waveBlockSize;
-            if (relativeDataPosition < endLoopDataPosition) {
+            if (relativeDataPosition < endLoopDataPosition)
+            {
                 return requestedPosition;
             }
             var startLoopDataPosition = hcaInfo.LoopStart * waveBlockSize;
             var loopLength = endLoopDataPosition - startLoopDataPosition;
             var audioParams = _audioParams;
-            if (audioParams.InfiniteLoop) {
+            if (audioParams.InfiniteLoop)
+            {
                 return headerSize + startLoopDataPosition + (relativeDataPosition - startLoopDataPosition) % loopLength;
             }
             var extendedLength = endLoopDataPosition + loopLength * audioParams.SimulatedLoopCount;
-            if (relativeDataPosition < extendedLength) {
+            if (relativeDataPosition < extendedLength)
+            {
                 return headerSize + startLoopDataPosition + (relativeDataPosition - startLoopDataPosition) % loopLength;
-            } else {
+            }
+            else
+            {
                 return headerSize + endLoopDataPosition + (relativeDataPosition - extendedLength);
             }
         }
@@ -310,25 +370,31 @@ namespace DereTore.Exchange.Audio.HCA {
             }
         }
 
-        private void PrepareDecoding() {
+        private void PrepareDecoding()
+        {
             var decoder = _decoder;
             var memoryCache = _memoryCache;
-            if (_audioParams.OutputWaveHeader) {
+            if (_audioParams.OutputWaveHeader)
+            {
                 var waveHeaderBufferSize = decoder.GetMinWaveHeaderBufferSize();
                 var waveHeaderBuffer = new byte[waveHeaderBufferSize];
                 decoder.WriteWaveHeader(waveHeaderBuffer, _audioParams);
                 memoryCache.WriteBytes(waveHeaderBuffer);
                 _headerSize = waveHeaderBufferSize;
-            } else {
+            }
+            else
+            {
                 _headerSize = 0;
             }
             memoryCache.Position = 0;
         }
 
-        private int GetTotalAfterDecodingWaveDataSize() {
+        private int GetTotalAfterDecodingWaveDataSize()
+        {
             var hcaInfo = HcaInfo;
             var totalLength = 0;
-            if (_audioParams.OutputWaveHeader) {
+            if (_audioParams.OutputWaveHeader)
+            {
                 totalLength += _decoder.GetMinWaveHeaderBufferSize();
             }
             totalLength += _decoder.GetMinWaveDataBufferSize() * (int)hcaInfo.BlockCount;

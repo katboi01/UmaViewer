@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Gallop.Live.Cutt
 {
     [System.Serializable]
@@ -11,7 +7,8 @@ namespace Gallop.Live.Cutt
     }
 
     [System.Serializable]
-    public class LiveTimelineKeyParticleDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyParticleData> { 
+    public class LiveTimelineKeyParticleDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyParticleData>
+    {
     }
 
 

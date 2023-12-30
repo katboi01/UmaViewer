@@ -69,7 +69,7 @@ public static class A2U
 
         public int count => _data.Length;
 
-        public float duration => (float)_data.Length * _step;
+        public float duration => _data.Length * _step;
 
         public float step => _step;
 
@@ -93,7 +93,7 @@ public static class A2U
             for (int i = 0; i < count; i++)
             {
                 int num2 = UnityEngine.Random.Range(minInclusive, num + 1);
-                array[i] = (float)num2 * 0.01f;
+                array[i] = num2 * 0.01f;
             }
             _step = step;
             _data = array;
@@ -104,7 +104,7 @@ public static class A2U
             float num = sec / _step;
             int num2 = (int)num % count;
             int num3 = (num2 + 1) % count;
-            float t = num - (float)(int)num;
+            float t = num - (int)num;
             return Mathf.Lerp(_data[num2], _data[num3], t);
         }
 
@@ -112,8 +112,8 @@ public static class A2U
         {
             float num = sec / _step;
             int num2 = (int)num % count;
-            float num3 = num - (float)(int)num;
-            return ((float)num2 + num3) * _step;
+            float num3 = num - (int)num;
+            return (num2 + num3) * _step;
         }
     }
 
@@ -179,7 +179,7 @@ public static class A2U
         {
             if (!isCacheEnabled)
             {
-                return Resources.Load<GameObject>(path) as GameObject;
+                return Resources.Load<GameObject>(path);
                 //return ResourcesManager.instance.LoadObject<GameObject>(path);
             }
             int hashCode = path.GetHashCode();

@@ -4,12 +4,12 @@
 public class DynamicBoneCollider : DynamicBoneColliderBase
 {
 #if UNITY_5_3_OR_NEWER
-	[Tooltip("The radius of the sphere or capsule.")]
+    [Tooltip("The radius of the sphere or capsule.")]
 #endif	
     public float m_Radius = 0.5f;
-	
+
 #if UNITY_5_3_OR_NEWER
-	[Tooltip("The height of the capsule.")]
+    [Tooltip("The height of the capsule.")]
 #endif		
     public float m_Height = 0;
 

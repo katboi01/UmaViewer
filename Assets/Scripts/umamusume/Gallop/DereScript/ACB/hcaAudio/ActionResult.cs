@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Audio.HCA {
-    public enum ActionResult {
+﻿namespace DereTore.Exchange.Audio.HCA
+{
+    public enum ActionResult
+    {
 
         HasMoreData = 1,
         Ok = 0,

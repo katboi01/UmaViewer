@@ -171,7 +171,7 @@ public class fakeShadow : MonoBehaviour
             float num = _maxAlpha - Mathf.Clamp(position.y - y, 0f, _maxAlpha);
             num *= _shadowPower;
             int num2 = (int)(num * 64f);
-            num = (float)num2 * 0.015625f;
+            num = num2 * 0.015625f;
             if (_alpha != num || _color != _prevColor)
             {
                 _alpha = num;

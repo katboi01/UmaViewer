@@ -1,7 +1,10 @@
-﻿namespace DereTore.Exchange.Archive.ACB {
-    public sealed class Afs2FileRecord {
+﻿namespace DereTore.Exchange.Archive.ACB
+{
+    public sealed class Afs2FileRecord
+    {
 
-        internal Afs2FileRecord() {
+        internal Afs2FileRecord()
+        {
         }
 
         public ushort CueId { get; set; }

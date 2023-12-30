@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Cutt;
+﻿using Cutt;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class StageObjectRich : MonoBehaviour

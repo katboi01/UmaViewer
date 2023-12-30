@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Cutt;
+using System;
 using System.Collections.Generic;
-using Cutt;
 using UnityEngine;
 
 public class A2UController : MonoBehaviour
@@ -292,7 +292,7 @@ public class A2UController : MonoBehaviour
         GameObject composition = node._composition;
         DoUpdateCompositionTransform(composition.transform.parent.gameObject, context.position, context.rotationZ, context.scale);
         uint maxFrame = _a2uNodes[num]._maxFrame;
-        float num2 = Mathf.Max(context.startSec, 0f) % (float)maxFrame;
+        float num2 = Mathf.Max(context.startSec, 0f) % maxFrame;
         float speed = Mathf.Max(0f, context.speed);
         _a2uNodes[num]._desc._startSec = num2;
         _a2uNodes[num]._desc._speed = speed;
@@ -369,7 +369,7 @@ public class A2UController : MonoBehaviour
         List<SpritePair> spritePairs = _a2uNodes[nodeIndex]._spritePairs;
         List<SpriteRenderer> sprites = _a2uNodes[nodeIndex]._sprites;
         int num = spritePairs.Count + sprites.Count;
-        uint count = (uint)Mathf.FloorToInt((float)num * Mathf.Clamp(appearanceCount, 0f, 1f) + 0.5f);
+        uint count = (uint)Mathf.FloorToInt(num * Mathf.Clamp(appearanceCount, 0f, 1f) + 0.5f);
         _appearance.Generate(appearanceRandomSeed, (uint)num, count);
         _a2uNodes[nodeIndex]._desc._opacity = desc._opacity;
         _a2uNodes[nodeIndex]._desc._color = desc._color;
@@ -493,7 +493,7 @@ public class A2UController : MonoBehaviour
             }
             else
             {
-                color2.a = sprite.color.a * ((float)(int)_a2uNodes[nodeIndex]._desc._opacity * 0.01f);
+                color2.a = sprite.color.a * (_a2uNodes[nodeIndex]._desc._opacity * 0.01f);
             }
             color2.a *= num;
             sprite.color = color2;
@@ -541,11 +541,11 @@ public class A2UController : MonoBehaviour
 
     private float GetFlickSec(float startSec, float step, int workIndex, int flickCount)
     {
-        float num = startSec + step * (float)workIndex;
+        float num = startSec + step * workIndex;
         float num2 = num / step;
         int num3 = (int)num2 % (flickCount - 1);
-        float num4 = num2 - (float)(int)num2;
-        return _flicker.NormalizeSec(num + ((float)num3 + num4) * step);
+        float num4 = num2 - (int)num2;
+        return _flicker.NormalizeSec(num + (num3 + num4) * step);
     }
 
     private static Vector2 DoFindAddSpriteRendererByDepthFirst(GameObject go, List<SpriteRenderer> outList, List<int> outIds)
@@ -562,7 +562,7 @@ public class A2UController : MonoBehaviour
         return vector / childCount;
     }
 
-    private static void DoFindAddSpriteRendererByDepthFirstImpl(GameObject go,List<SpriteRenderer> outList,List<int> outIds, int number)
+    private static void DoFindAddSpriteRendererByDepthFirstImpl(GameObject go, List<SpriteRenderer> outList, List<int> outIds, int number)
     {
         int childCount = go.transform.childCount;
         if (childCount > 0)

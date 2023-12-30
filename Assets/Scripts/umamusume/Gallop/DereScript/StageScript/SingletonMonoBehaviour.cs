@@ -10,10 +10,10 @@ public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
         get
         {
-            if ((Object)_instance == (Object)null)
+            if (_instance == null)
             {
                 _instance = (T)Object.FindObjectOfType(typeof(T));
-                _ = (Object)_instance == (Object)null;
+                _ = _instance == null;
             }
             return _instance;
         }
@@ -23,15 +23,15 @@ public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 
     public static bool IsInstanceEmpty()
     {
-        return (Object)_instance == (Object)null;
+        return _instance == null;
     }
 
     private void Awake()
     {
-        if ((Object)_instance == (Object)null)
+        if (_instance == null)
         {
             _instance = (T)Object.FindObjectOfType(typeof(T));
-            _ = (Object)_instance == (Object)null;
+            _ = _instance == null;
         }
     }
 }

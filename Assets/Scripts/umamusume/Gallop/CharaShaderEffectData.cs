@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Gallop
 {
     [Serializable]
-    public class CharaShaderEffectData : ScriptableObject 
+    public class CharaShaderEffectData : ScriptableObject
     {
 
         public const int DATA_UTYPE_INDEX = 0;
@@ -26,19 +26,19 @@ namespace Gallop
         private float magicClock = 0;
 
 
-        [SerializeField] 
-        private SettingData[] _settingDataArray; 
+        [SerializeField]
+        private SettingData[] _settingDataArray;
 
         [Serializable]
-        public class SettingData 
+        public class SettingData
         {
-            public EffectType Type; 
-            public Material TargetMaterial; 
-            public int[] ParamArray; 
+            public EffectType Type;
+            public Material TargetMaterial;
+            public int[] ParamArray;
             public AnimationCurve[] ParamCurveArray;
         }
 
-        public enum EffectType 
+        public enum EffectType
         {
             UVScrollEmissive = 0,
             ReflectionMap = 1
@@ -58,7 +58,7 @@ namespace Gallop
             foreach (var settingData in _settingDataArray)
             {
                 if (settingData.TargetMaterial)
-                { 
+                {
                     var mat = settingData.TargetMaterial;
                     if (settingData.Type == EffectType.UVScrollEmissive)
                     {
@@ -74,7 +74,7 @@ namespace Gallop
                         mat.SetVector("_UVEmissiveScroll", new Vector4(_xScroll, _yScroll, 0, 0));
                         mat.SetFloat("_UVEmissivePower", _powerScroll);
                     }
-                        
+
                 }
             }
 
@@ -82,7 +82,7 @@ namespace Gallop
 
         public float calcUV(int index, int value, int curveIndex, AnimationCurve[] ParamCurveArray)
         {
-            switch(index)
+            switch (index)
             {
                 case 0:
                     return value * 0.001f;

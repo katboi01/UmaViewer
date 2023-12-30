@@ -1,9 +1,10 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class UIPhotoStudioStageView : MonoBehaviour {
+public class UIPhotoStudioStageView : MonoBehaviour
+{
 
     [SerializeField]
     private GameObject stageIcon;
@@ -15,15 +16,16 @@ public class UIPhotoStudioStageView : MonoBehaviour {
     private List<GameObject> stageBtnList = new List<GameObject>();
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         base.name = base.name.Replace("(Clone)", "");
         StartCoroutine(CreateStageButtons());
     }
-    
+
     // Update is called once per frame
-    void Update () {
-    
+    void Update()
+    {
+
     }
 
     private IEnumerator CreateStageButtons()
@@ -104,7 +106,8 @@ public class UIPhotoStudioStageView : MonoBehaviour {
     // ボタンに機能を付与する
     void AddButtonEvent(Button button, SQPhotoStudioStageData data)
     {
-        button.onClick.AddListener(() => {
+        button.onClick.AddListener(() =>
+        {
             this.OnClick(data);
             base.gameObject.SetActive(false);
         });

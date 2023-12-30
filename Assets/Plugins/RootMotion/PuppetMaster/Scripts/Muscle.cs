@@ -1,7 +1,5 @@
-using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using System;
+using UnityEngine;
 
 namespace RootMotion.Dynamics
 {
@@ -355,23 +353,23 @@ namespace RootMotion.Dynamics
         /// <summary>
         /// The additional pin joint (optional);
         /// </summary>
-        [SerializeField] [HideInInspector] public ConfigurableJoint additionalPin;
+        [SerializeField][HideInInspector] public ConfigurableJoint additionalPin;
 
         /// <summary>
         /// Target Transform of the additional pin.
         /// </summary>
-        [SerializeField] [HideInInspector] public Transform additionalPinTarget;
+        [SerializeField][HideInInspector] public Transform additionalPinTarget;
 
         /// <summary>
         /// Weight of the additional pin (multiplies this muscle's pin weight).
         /// </summary>
-        [SerializeField] [HideInInspector] public float additionalPinWeight;
+        [SerializeField][HideInInspector] public float additionalPinWeight;
 
         [HideInInspector] public Vector3 mappedVelocity;
         [HideInInspector] public Vector3 mappedAngularVelocity;
         [HideInInspector] public bool isPropMuscle;
 
-        [SerializeField] [HideInInspector] public int index = -1;
+        [SerializeField][HideInInspector] public int index = -1;
 
         /// <summary>
         /// Gets the default sampled rotation offset of the Muscle from it's target. If the muscle's rotation matches with it's target's in the Editor (while not playing) this will return Quaternion.identity.
@@ -505,7 +503,7 @@ namespace RootMotion.Dynamics
             defaultTargetRotRelToMuscle = Quaternion.Inverse(transform.rotation) * target.rotation;
             defaultTargetRotRelToMuscleInverse = Quaternion.Inverse(defaultTargetRotRelToMuscle);
             defaultMuscleRotRelToTarget = QuaTools.FromToRotation(target.rotation, transform.rotation);
-            
+
             Quaternion toJointSpace = Quaternion.LookRotation(forward, up);
             toJointSpaceInverse = Quaternion.Inverse(toJointSpace);
             toJointSpaceDefault = defaultLocalRotation * toJointSpace;
@@ -574,7 +572,7 @@ namespace RootMotion.Dynamics
             targetAnimatedCenterOfMass = rigidbody.worldCenterOfMass;
             targetAnimatedWorldRotation = target.rotation;
             targetAnimatedRotation = targetLocalRotation * localRotationConvert;
-            
+
             Read();
             lastReadTime = Time.time;
             lastWriteTime = Time.time;
@@ -786,7 +784,7 @@ namespace RootMotion.Dynamics
             if (!initiated) return;
             if (joint == null) return;
             if (state.isDisconnected) return;
-      
+
             if (joint.connectedBody == null)
             {
                 transform.localPosition = defaultPosition;
@@ -831,7 +829,7 @@ namespace RootMotion.Dynamics
             if (additionalPin != null) additionalRigidbody.isKinematic = to;
         }
 
-        
+
 
         // Read the target
         public void Read()
@@ -858,7 +856,7 @@ namespace RootMotion.Dynamics
 
             if (additionalPin != null)
             {
-                Vector3 aTAM =V3Tools.TransformPointUnscaled(additionalPinTarget, additionalRigidbody.centerOfMass); // Center of mass is unscaled, so can't use Transform.TransformPoint() here
+                Vector3 aTAM = V3Tools.TransformPointUnscaled(additionalPinTarget, additionalRigidbody.centerOfMass); // Center of mass is unscaled, so can't use Transform.TransformPoint() here
 
                 if (readDeltaTime > 0f)
                 {
@@ -1081,7 +1079,7 @@ namespace RootMotion.Dynamics
         private Vector3 targetAnimatedCenterOfMass;
         private Vector3 additionalPinTargetAnimatedCenterOfMass;
         private Quaternion defaultTargetRotRelToMuscleInverse = Quaternion.identity;
-        
+
         // Add force to the rigidbody to make it match the target position
         private void Pin(float pinWeightMaster, float pinPow, float pinDistanceFalloff, bool angularPinning, float deltaTime)
         {
@@ -1098,7 +1096,7 @@ namespace RootMotion.Dynamics
             if (angularPinning)
             {
                 Vector3 torque = PhysXTools.GetAngularAcceleration(rigidbody.rotation, defaultMuscleRotRelToTarget * targetAnimatedWorldRotation);
-                
+
                 torque -= rigidbody.angularVelocity;
                 torque *= w;
                 rigidbody.AddTorque(torque, ForceMode.VelocityChange);

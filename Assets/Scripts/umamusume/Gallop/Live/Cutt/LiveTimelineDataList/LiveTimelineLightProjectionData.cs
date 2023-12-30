@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
@@ -7,36 +5,36 @@ namespace Gallop.Live.Cutt
     [System.Serializable]
     public class LiveTimelineKeyLightProjectionData : LiveTimelineKeyWithInterpolate
     {
-		[System.Serializable]
-		public class AnimationData
-		{
-			public int TextureId;
-			public int DivisionNumberX;
-			public int DivisionNumberY;
-			public int MaxCut;
-			public float AnimationTime;
-			public Vector2 ScaleUV;
-			public Vector2 OffsetUV;
-		}
+        [System.Serializable]
+        public class AnimationData
+        {
+            public int TextureId;
+            public int DivisionNumberX;
+            public int DivisionNumberY;
+            public int MaxCut;
+            public float AnimationTime;
+            public Vector2 ScaleUV;
+            public Vector2 OffsetUV;
+        }
 
-		public const int UNUSED_ANIMATION_TEXTURE_ID = -1;
-		public bool IsEnable;
-		public int TextureId;
-		public Color Color;
-		public Vector3 Position;
-		public Vector3 Angle;
-		public Vector3 Scale;
-		public bool Orthographic;
-		public float OrthographicSize;
-		public float NearClipPlane;
-		public float FarClipPlane;
-		public float FieldOfView;
-		public float ColorPower;
-		public bool CharacterAttach;
-		public LiveCharaPosition CharacterAttachPosition;
-		public Quaternion Rotation;
-		public LiveTimelineKeyLightProjectionData.AnimationData AnimationParam;
-	}
+        public const int UNUSED_ANIMATION_TEXTURE_ID = -1;
+        public bool IsEnable;
+        public int TextureId;
+        public Color Color;
+        public Vector3 Position;
+        public Vector3 Angle;
+        public Vector3 Scale;
+        public bool Orthographic;
+        public float OrthographicSize;
+        public float NearClipPlane;
+        public float FarClipPlane;
+        public float FieldOfView;
+        public float ColorPower;
+        public bool CharacterAttach;
+        public LiveCharaPosition CharacterAttachPosition;
+        public Quaternion Rotation;
+        public LiveTimelineKeyLightProjectionData.AnimationData AnimationParam;
+    }
 
     [System.Serializable]
     public class LiveTimelineKeyLightProjectionDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyLightProjectionData>

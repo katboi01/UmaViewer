@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterLive3dcharaSpring
 {
@@ -86,12 +82,12 @@ public class MasterLive3dcharaSpring
             List<Live3dcharaSpring> list = new List<Live3dcharaSpring>();
             foreach (KeyValuePair<int, Live3dcharaSpring> item in live3dcharaSpringDic)
             {
-                if ((int)item.Value.musicId == musicId && (int)item.Value.charaId == charaId)
+                if (item.Value.musicId == musicId && item.Value.charaId == charaId)
                 {
                     list.Add(item.Value);
                 }
             }
-            list.Sort((Live3dcharaSpring x, Live3dcharaSpring y) => (int)x.dressId - (int)y.dressId);
+            list.Sort((Live3dcharaSpring x, Live3dcharaSpring y) => x.dressId - y.dressId);
             _dictionaryWithMusicIdAndCharaId.Add(key, list);
         }
         return _dictionaryWithMusicIdAndCharaId[key];

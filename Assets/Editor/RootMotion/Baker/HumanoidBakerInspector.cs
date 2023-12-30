@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace RootMotion
 {
@@ -28,10 +27,10 @@ namespace RootMotion
         {
             serializedObject.Update();
 
-            DrawKeyframeSettings(script as Baker);
+            DrawKeyframeSettings(script);
             DrawHumanoidKeyframeSettings(script);
-            DrawModeSettings(script as Baker);
-            DrawButtons(script as Baker);
+            DrawModeSettings(script);
+            DrawButtons(script);
 
             if (serializedObject.ApplyModifiedProperties())
             {

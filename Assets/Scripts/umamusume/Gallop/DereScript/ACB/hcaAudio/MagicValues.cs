@@ -1,5 +1,7 @@
-﻿namespace DereTore.Exchange.Audio.HCA {
-    public static class MagicValues {
+﻿namespace DereTore.Exchange.Audio.HCA
+{
+    public static class MagicValues
+    {
 
         public static readonly uint HCA = 0x00414348;
 
@@ -23,7 +25,8 @@
 
         public static readonly uint PAD = 0x00646170;
 
-        public static bool IsMagicMatch(uint valueRead, uint valueToCheck) {
+        public static bool IsMagicMatch(uint valueRead, uint valueToCheck)
+        {
             return (valueRead & 0x7f7f7f7f) == valueToCheck;
         }
 

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 namespace RootMotion.Dynamics
 {
@@ -56,7 +55,7 @@ namespace RootMotion.Dynamics
                         onRegainBalance.Trigger(puppetMaster);
                         if (onRegainBalance.switchBehaviour) return;
                     }
-                    
+
                     break;
 
                 // Switching to the UNPINNED state
@@ -69,13 +68,13 @@ namespace RootMotion.Dynamics
                     foreach (Muscle m in puppetMaster.muscles)
                     {
                         if (hasBoosted) m.state.immunity = 0f;
-                        
+
                         if (maxRigidbodyVelocity != Mathf.Infinity)
                         {
                             m.rigidbody.velocity = Vector3.ClampMagnitude(m.rigidbody.velocity, maxRigidbodyVelocity);
                             m.mappedVelocity = Vector3.ClampMagnitude(m.mappedVelocity, maxRigidbodyVelocity);
                         }
-                        
+
                         // Change physic materials
                         SetColliders(m, true);
                     }
@@ -180,7 +179,7 @@ namespace RootMotion.Dynamics
                     MoveTarget(puppetMaster.muscles[0].rigidbody.position + puppetMaster.targetRoot.rotation * getUpOffset);
                     GroundTarget(groundLayers);
                     getUpPosition = puppetMaster.targetRoot.position;
-                    
+
                     getupAnimationBlendWeight = 1f;
                     getUpTargetFixed = false;
 

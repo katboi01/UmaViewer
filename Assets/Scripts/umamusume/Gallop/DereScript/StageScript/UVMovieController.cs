@@ -1,8 +1,7 @@
-﻿using Stage;
+﻿using LitJson;
 using System;
 using System.Text;
 using UnityEngine;
-using LitJson;
 
 /// <summary>
 /// UV動画を管理する
@@ -60,9 +59,9 @@ public class UVMovieController
     private float _PlayStartSec;
 
     private bool _existMaskTex;
-    
+
     private Texture2D[] _MaskTextures;
-    
+
     private Texture2D _maskTexture;
 
     private int _charaId = 0;
@@ -193,8 +192,8 @@ public class UVMovieController
         }
         if (_Textures[0].filterMode != 0)
         {
-            _TexturePixelOffset.x = 1f / ((float)_Textures[0].width * 2f);
-            _TexturePixelOffset.y = 1f / ((float)_Textures[0].height * 2f);
+            _TexturePixelOffset.x = 1f / (_Textures[0].width * 2f);
+            _TexturePixelOffset.y = 1f / (_Textures[0].height * 2f);
             _TexturePixelScale = _TexturePixelOffset * 2f;
         }
         else
@@ -207,7 +206,7 @@ public class UVMovieController
         _FrameInfoSize.y = (float)_UVMovieData.FrameInfo.Size.y;
         _StartOffsetSec = (float)_UVMovieData.FrameInfo.StartOffsetSec;
         _EndOffsetSec = (float)_UVMovieData.FrameInfo.EndOffsetSec;
-        _MoviePlayFrameSec = (float)((double)_UVMovieData.FrameInfo.Count / _UVMovieData.FrameInfo.Fps);
+        _MoviePlayFrameSec = (float)(_UVMovieData.FrameInfo.Count / _UVMovieData.FrameInfo.Fps);
         _StartLoopSec = (float)_UVMovieData.FrameInfo.StartLoopSec;
         _EndLoopSec = (float)_UVMovieData.FrameInfo.EndLoopSec;
         if (_EndLoopSec == 0f)
@@ -216,7 +215,7 @@ public class UVMovieController
         }
         _LoopCount = _UVMovieData.FrameInfo.LoopCount;
         _Fps = (float)_UVMovieData.FrameInfo.Fps;
-        _TotalLoopSec = (float)_LoopCount * (_EndLoopSec - _StartLoopSec);
+        _TotalLoopSec = _LoopCount * (_EndLoopSec - _StartLoopSec);
         _Time = 0f;
         _IsInitlize = true;
     }
@@ -300,8 +299,8 @@ public class UVMovieController
             num3 -= num4 * _UVMovieData.FremePerImage;
             int num5 = num3 % _UVMovieData.FremePerWidth;
             int num6 = num3 / _UVMovieData.FremePerWidth;
-            _FrameOffset.x = (float)num5 * _FrameInfoSize.x;
-            _FrameOffset.y = (float)num6 * _FrameInfoSize.y;
+            _FrameOffset.x = num5 * _FrameInfoSize.x;
+            _FrameOffset.y = num6 * _FrameInfoSize.y;
             _mainTexture = _Textures[num4];
             _mainTextureOffset = _FrameOffset + _TexturePixelOffset;
             _mainTextureScale = _FrameScale - _TexturePixelScale;
@@ -335,7 +334,7 @@ public class UVMovieController
     {
         if (_UVMovieData != null && _UVMovieData.FrameInfo != null)
         {
-            _PlayStartSec = (float)((double)startOffsetFrame / _UVMovieData.FrameInfo.Fps);
+            _PlayStartSec = (float)(startOffsetFrame / _UVMovieData.FrameInfo.Fps);
         }
     }
 }

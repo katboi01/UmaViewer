@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace LZ4
 {
@@ -49,7 +46,7 @@ namespace LZ4
         public int readIntLE()
         {
             m_curPos += 4;
-            return (int)(m_array[m_curPos - 4] | (m_array[m_curPos - 3] << 8) | (m_array[m_curPos - 2] << 16) | (m_array[m_curPos - 1] << 24));
+            return m_array[m_curPos - 4] | (m_array[m_curPos - 3] << 8) | (m_array[m_curPos - 2] << 16) | (m_array[m_curPos - 1] << 24);
         }
 
         public void copyBytes(byte[] dst, int offset, int size)

@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using LibMMD.Material;
 using LibMMD.Model;
 using LibMMD.Reader;
 using LibMMD.Util;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using static LibMMD.Reader.PMXReader;
 
@@ -44,7 +43,7 @@ namespace LibMMD.Writer
             baseEntry.EntryItemName = "Root";
             baseEntry.EntryItemNameEn = "Root";
             baseEntry.IsSpecial = true;
-            baseEntry.Elements = new List<PMXEntryItem.Element>{ baseElement };
+            baseEntry.Elements = new List<PMXEntryItem.Element> { baseElement };
 
             model.Entrys.Insert(0, baseEntry);
 

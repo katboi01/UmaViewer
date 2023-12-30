@@ -1,36 +1,47 @@
-﻿namespace DereTore.Exchange.Audio.HCA {
-    internal static class ChannelTables {
+﻿namespace DereTore.Exchange.Audio.HCA
+{
+    internal static class ChannelTables
+    {
 
-        public static void TranslateTables() {
+        public static void TranslateTables()
+        {
             _decode1ValueSingle = new float[_decode1ValueUInt.Length];
-            for (var i = 0; i < _decode1ValueSingle.Length; ++i) {
+            for (var i = 0; i < _decode1ValueSingle.Length; ++i)
+            {
                 _decode1ValueSingle[i] = HcaHelper.UInt32ToSingleBits(_decode1ValueUInt[i]);
             }
             _decode1ScaleSingle = new float[_decode1ScaleUInt.Length];
-            for (var i = 0; i < _decode1ScaleSingle.Length; ++i) {
+            for (var i = 0; i < _decode1ScaleSingle.Length; ++i)
+            {
                 _decode1ScaleSingle[i] = HcaHelper.UInt32ToSingleBits(_decode1ScaleUInt[i]);
             }
             _decode3ListSingle = new float[_decode3ListUInt[0].Length + _decode3ListUInt[1].Length];
-            for (var i = 0; i < _decode3ListUInt[0].Length; ++i) {
+            for (var i = 0; i < _decode3ListUInt[0].Length; ++i)
+            {
                 _decode3ListSingle[i] = HcaHelper.UInt32ToSingleBits(_decode3ListUInt[0][i]);
             }
-            for (var i = 0; i < _decode3ListUInt[1].Length; ++i) {
+            for (var i = 0; i < _decode3ListUInt[1].Length; ++i)
+            {
                 _decode3ListSingle[i + _decode3ListOffset] = HcaHelper.UInt32ToSingleBits(_decode3ListUInt[1][i]);
             }
             _decode4ListSingle = new float[_decode4ListUInt.Length];
-            for (var i = 0; i < _decode4ListSingle.Length; ++i) {
+            for (var i = 0; i < _decode4ListSingle.Length; ++i)
+            {
                 _decode4ListSingle[i] = HcaHelper.UInt32ToSingleBits(_decode4ListUInt[i]);
             }
             _decode5List1Single = new float[_decode5List1UInt.Length];
-            for (var i = 0; i < _decode5List1Single.Length; ++i) {
+            for (var i = 0; i < _decode5List1Single.Length; ++i)
+            {
                 _decode5List1Single[i] = HcaHelper.UInt32ToSingleBits(_decode5List1UInt[i]);
             }
             _decode5List2Single = new float[_decode5List2UInt.Length];
-            for (var i = 0; i < _decode5List2Single.Length; ++i) {
+            for (var i = 0; i < _decode5List2Single.Length; ++i)
+            {
                 _decode5List2Single[i] = HcaHelper.UInt32ToSingleBits(_decode5List2UInt[i]);
             }
             _decode5List3Single = new float[_decode5List3UInt.Length];
-            for (var i = 0; i < _decode5List3Single.Length; ++i) {
+            for (var i = 0; i < _decode5List3Single.Length; ++i)
+            {
                 _decode5List3Single[i] = HcaHelper.UInt32ToSingleBits(_decode5List3UInt[i]);
             }
         }
@@ -39,25 +50,25 @@
 
         public static float[] Decode1ValueSingle { get { return _decode1ValueSingle; } }
 
-        public static float[] Decode1ScaleSingle  { get { return  _decode1ScaleSingle; } }
+        public static float[] Decode1ScaleSingle { get { return _decode1ScaleSingle; } }
 
-        public static byte[] Decode2List1  { get { return  _decode2List1; } }
+        public static byte[] Decode2List1 { get { return _decode2List1; } }
 
-        public static byte[] Decode2List2  { get { return  _decode2List2; } }
+        public static byte[] Decode2List2 { get { return _decode2List2; } }
 
-        public static float[] Decode2List3  { get { return  _decode2List3; } }
+        public static float[] Decode2List3 { get { return _decode2List3; } }
 
-        public static float[] Decode3ListSingle  { get { return  _decode3ListSingle; } }
+        public static float[] Decode3ListSingle { get { return _decode3ListSingle; } }
 
-        public static int Decode3ListOffset  { get { return  _decode3ListOffset; } }
+        public static int Decode3ListOffset { get { return _decode3ListOffset; } }
 
-        public static float[] Decode4ListSingle  { get { return  _decode4ListSingle; } }
+        public static float[] Decode4ListSingle { get { return _decode4ListSingle; } }
 
-        public static float[] Decode5List1Single  { get { return  _decode5List1Single; } }
+        public static float[] Decode5List1Single { get { return _decode5List1Single; } }
 
-        public static float[] Decode5List2Single  { get { return  _decode5List2Single; } }
+        public static float[] Decode5List2Single { get { return _decode5List2Single; } }
 
-        public static float[] Decode5List3Single  { get { return  _decode5List3Single; } }
+        public static float[] Decode5List3Single { get { return _decode5List3Single; } }
 
         private static readonly byte[] _decode1ScaleList = {
             // v2.0

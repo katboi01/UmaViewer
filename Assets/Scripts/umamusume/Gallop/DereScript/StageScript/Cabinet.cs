@@ -291,7 +291,7 @@ public class Cabinet : ScriptableObject
             string objectName = $"3D/{ASSET_FOLDER_NAME}/{assetName}";
             val = instance.LoadObject<CABINET>(objectName);
         }
-        if ((UnityEngine.Object)val != (UnityEngine.Object)null)
+        if (val != null)
         {
             val.Build();
             _mapCabinet.Add(typeof(CABINET), val);

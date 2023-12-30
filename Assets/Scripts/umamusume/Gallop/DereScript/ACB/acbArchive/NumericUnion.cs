@@ -1,8 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DereTore.Exchange.Archive.ACB {
+namespace DereTore.Exchange.Archive.ACB
+{
     [StructLayout(LayoutKind.Explicit)]
-    public struct NumericUnion {
+    public struct NumericUnion
+    {
 
         [FieldOffset(0)]
         public byte U8;

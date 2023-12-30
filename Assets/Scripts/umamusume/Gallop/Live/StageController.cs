@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -60,7 +59,7 @@ namespace Gallop.Live
         public List<GameObject> _animationObjects;
         public string _borderLightObjectName;
         public string _sunObjectName;
-        public List<GameObject>  _preLiveSkitPrefabs;
+        public List<GameObject> _preLiveSkitPrefabs;
         public List<GameObject> _afterLiveSkitPrefabs;
         public List<AnimationClip> _audienceAnimations;
         public StageController.MipmapBias _mipmapBias;

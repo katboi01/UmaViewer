@@ -1,12 +1,9 @@
-using System;
 using Gallop.ImageEffect;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
 using Gallop.Live.Cutt;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
-using UnityEngine.SocialPlatforms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Gallop.Live
 {
@@ -364,7 +361,7 @@ namespace Gallop.Live
         {
             if (isTimelineControlled)
             {
-                return (float)Mathf.RoundToInt(musicScoreTime * 60f) / 60f;
+                return Mathf.RoundToInt(musicScoreTime * 60f) / 60f;
             }
             return musicScoreTime;
         }
@@ -389,9 +386,9 @@ namespace Gallop.Live
                 int counter = 0;
                 var standPos = characterStandPos.GetComponentsInChildren<Transform>();
                 var count = _liveTimelineControl.data.characterSettings.useHighPolygonModel.Length;
-                for (int i = 0; i < count; i++) 
+                for (int i = 0; i < count; i++)
                 {
-                    if (i < characterStandPos.childCount) 
+                    if (i < characterStandPos.childCount)
                     {
                         var newObj = Instantiate(standPos[i + 1], transform);
                         newObj.gameObject.name = string.Format("CharacterObject{0}", counter);
@@ -655,7 +652,7 @@ namespace Gallop.Live
                 {
                     if (liveMusic.sourceList[0].time > 0.01)
                     {
-                        _liveCurrentTime = (float)liveMusic.sourceList[0].time;
+                        _liveCurrentTime = liveMusic.sourceList[0].time;
                         _syncTime = true;
                     }
                 }
@@ -663,7 +660,7 @@ namespace Gallop.Live
                 {
                     if (IsRecordVMD)
                     {
-                        _liveCurrentTime += (1/60f);
+                        _liveCurrentTime += (1 / 60f);
                         if (liveMusic != null)
                         {
                             UmaViewerAudio.Stop(liveMusic);
@@ -798,7 +795,7 @@ namespace Gallop.Live
 
                 UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames, i);
             }
-        } 
+        }
 
         private void SaveCameraVMD()
         {

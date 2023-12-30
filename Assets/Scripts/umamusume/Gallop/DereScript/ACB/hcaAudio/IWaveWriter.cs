@@ -1,7 +1,9 @@
 ﻿using System.IO;
 
-namespace DereTore.Exchange.Audio.HCA {
-    public interface IWaveWriter {
+namespace DereTore.Exchange.Audio.HCA
+{
+    public interface IWaveWriter
+    {
 
         SamplingMode SamplingMode { get; }
 

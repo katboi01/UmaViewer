@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using Stage;
+﻿using Stage;
 using System;
+using System.Collections.Generic;
 
 public class CharaDirector
 {
@@ -1090,7 +1088,7 @@ public class CharaDirector
 
     private CharaDirectorData appendCharaDirectorData = null;
 
-    private readonly float[] bodyNodeNeckSize = 
+    private readonly float[] bodyNodeNeckSize =
     {
         1.140078f,
         1.314968f,
@@ -1098,7 +1096,7 @@ public class CharaDirector
         1.571387f
     };
 
-    private readonly float[] bodyRootSize = 
+    private readonly float[] bodyRootSize =
     {
         0.8831882f,
         1.018672f,

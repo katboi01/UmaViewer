@@ -1,8 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
+using UnityEngine;
 
-public class MusicManager : MonoBehaviour {
+public class MusicManager : MonoBehaviour
+{
 
     [SerializeField]
     public static int MusicID;
@@ -16,16 +17,16 @@ public class MusicManager : MonoBehaviour {
     {
         get
         {
-            if(isLoadLive && isLoadMusic)
+            if (isLoadLive && isLoadMusic)
             {
                 return true;
             }
             return false;
         }
     }
-    
+
     private float totalLiveLength = 0f;
-    
+
     public bool isStart = false;
     public bool isPause = false;
 
@@ -55,7 +56,7 @@ public class MusicManager : MonoBehaviour {
         {
             audiosource.volume -= 0.01f;
         }
-       
+
         if (isStart)
         {
             //再生が停止している＝ポーズを掛けたor再生時間超過
@@ -81,7 +82,7 @@ public class MusicManager : MonoBehaviour {
             else
             {
                 //音楽が再生中
-                if(Mathf.Abs(currenttimer - audiosource.time) > 0.1f)
+                if (Mathf.Abs(currenttimer - audiosource.time) > 0.1f)
                 {
                     currenttimer = audiosource.time;
                 }
@@ -191,7 +192,7 @@ public class MusicManager : MonoBehaviour {
     /// 音楽をロードする
     /// </summary>
     private IEnumerator loadMusic()
-    {        
+    {
         /*
         while (true)
         {
@@ -238,7 +239,7 @@ public class MusicManager : MonoBehaviour {
     /// </summary>
     private IEnumerator Initialize()
     {
-        while(true)
+        while (true)
         {
             if (ViewLauncher.instance.liveDirector.musicLength != 0f)
             {

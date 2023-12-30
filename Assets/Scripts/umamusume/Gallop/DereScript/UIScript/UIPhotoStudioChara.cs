@@ -9,7 +9,7 @@ public class UIPhotoStudioChara : UIIdolSelect
     int charaIcon = -1;
     int dress = -1;
     int dressIcon = -1;
-    
+
     public GameObject CharaText;
 
     public GameObject DressText;
@@ -18,7 +18,7 @@ public class UIPhotoStudioChara : UIIdolSelect
     void Start()
     {
         base.name = base.name.Replace("(Clone)", "");
-        
+
         //CharaViewの呼び出しに使う番号を付与
         for (int i = 9; i < 10; i++)
         {
@@ -59,7 +59,7 @@ public class UIPhotoStudioChara : UIIdolSelect
         {
             filelist.Add(SQDressData.getIconfilename(dressIcon));
         }
-                //アイコンファイルをDL
+        //アイコンファイルをDL
         StartCoroutine(AssetManager.instance.DownloadFromFilenamesAsync(filelist));
 
         //アイコンに設定
@@ -67,7 +67,7 @@ public class UIPhotoStudioChara : UIIdolSelect
         {
             StartCoroutine(CharaIconSetter(chara, charaIcon, 9));
             StartCoroutine(LoadCharaText(chara));
-        }            
+        }
         if (dress != 0)
         {
             StartCoroutine(DressIconSetter(dress, dressIcon, 9));
@@ -98,18 +98,19 @@ public class UIPhotoStudioChara : UIIdolSelect
         SaveManager.SetDressIcon(9, 0);
         SaveManager.Save();
 
-        chara= 0;
+        chara = 0;
         charaIcon = 0;
         dress = 0;
         dressIcon = 0;
 
         StartCoroutine(CharaIconSetter(-1, -1, 9));
         StartCoroutine(DressIconSetter(-1, -1, 9));
-        
+
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
 
     }
 

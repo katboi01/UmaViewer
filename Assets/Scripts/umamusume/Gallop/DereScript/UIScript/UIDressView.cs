@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class UIDressView : MonoBehaviour
 {
@@ -35,7 +35,7 @@ public class UIDressView : MonoBehaviour
 
         CharaDress = transform.Find("Content/DressList").gameObject;
         AllDress = transform.Find("Content/DressListAppend").gameObject;
-        
+
         content = transform.Find("Content/DressList/Viewport/Content");
         contentAppend = transform.Find("Content/DressListAppend/Viewport/Content");
 
@@ -44,7 +44,7 @@ public class UIDressView : MonoBehaviour
         uIManagerDress = GameObject.Find("UIManager").GetComponent<UIManagerDress>();
 
         OnChangePageToggle();
-                
+
     }
 
     private void WindowSizeSetter()
@@ -136,9 +136,9 @@ public class UIDressView : MonoBehaviour
 
     private void RemoveIcons()
     {
-        if(dressBtnList != null && dressBtnList.Count > 0)
+        if (dressBtnList != null && dressBtnList.Count > 0)
         {
-            foreach(var tmp in dressBtnList)
+            foreach (var tmp in dressBtnList)
             {
                 Destroy(tmp);
             }
@@ -214,7 +214,7 @@ public class UIDressView : MonoBehaviour
 
         List<SQDressData> dressList = new List<SQDressData>();
         //ちひろ、最上、ジュリアは共通衣装選択可能にする
-        if(charaID == 20 || charaID == 313 || charaID == 314)
+        if (charaID == 20 || charaID == 313 || charaID == 314)
         {
             dressList.AddRange(uIManagerDress.GetCommonDresses());
         }
@@ -231,7 +231,7 @@ public class UIDressView : MonoBehaviour
             GameObject btn = Instantiate(dressIcon);
             dressBtnList.Add(btn);
             //並列で実行
-            StartCoroutine(MakeButton(tmp, btn,content));
+            StartCoroutine(MakeButton(tmp, btn, content));
         }
 
     }
@@ -239,7 +239,7 @@ public class UIDressView : MonoBehaviour
     /// <summary>
     /// ボタン生成単体
     /// </summary>
-    private IEnumerator MakeButton(SQDressData data, GameObject buttonObj,Transform parent)
+    private IEnumerator MakeButton(SQDressData data, GameObject buttonObj, Transform parent)
     {
         //keyをオブジェクト名に設定。iconkeyではない
         buttonObj.name = data.activeDressID.ToString();

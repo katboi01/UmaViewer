@@ -43,7 +43,7 @@ public class UIPopupPanel : MonoBehaviour
     public void AddButton(string name, System.Action callback)
     {
         Button b = Instantiate(UmaViewerUI.Instance.HandleManager.Pfb_PopupButton, Content).GetComponent<Button>();
-        b.onClick.AddListener(()=>callback.Invoke());
+        b.onClick.AddListener(() => callback.Invoke());
         b.GetComponentInChildren<TMPro.TMP_Text>().text = name;
     }
 

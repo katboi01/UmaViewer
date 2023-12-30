@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
 namespace HSVPicker
 {
@@ -45,13 +44,13 @@ namespace HSVPicker
             }
         }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
         private void OnValidate()
         {
             label = GetComponent<TMP_Text>();
             UpdateValue();
         }
-    #endif
+#endif
 
         private void ColorChanged(Color color)
         {
@@ -65,7 +64,7 @@ namespace HSVPicker
 
         private void UpdateValue()
         {
-            if(label == null)
+            if (label == null)
                 return;
 
             if (picker == null)

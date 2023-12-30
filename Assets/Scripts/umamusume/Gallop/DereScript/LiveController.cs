@@ -1,11 +1,7 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using Cutt;
-using System;
 using UnityEngine.SceneManagement;
-using System.IO;
+using UnityEngine.UI;
 
 public class LiveController : MonoBehaviour
 {
@@ -73,7 +69,7 @@ public class LiveController : MonoBehaviour
     private GameObject _Music;
     [SerializeField]
     private GameObject _Director;
-        
+
     private MusicManager musicManager;
     private Director director;
 
@@ -85,7 +81,7 @@ public class LiveController : MonoBehaviour
     private LiveDebug liveDebug;
 
     private ScreenShot screenShot;
-    
+
     //自動でメニューへ戻る
     private bool isAutoReturnMenu = false;
     //タイトルを表示
@@ -93,7 +89,7 @@ public class LiveController : MonoBehaviour
 
     //生成が開始されているか
     private bool isStart = false;
-    
+
     private void Awake()
     {
         musicManager = _Music.GetComponent<MusicManager>();
@@ -143,7 +139,7 @@ public class LiveController : MonoBehaviour
             //Escapeキーが押されたら終了
             if (Input.GetButtonDown("ReturnMenu"))
             {
-                StartCoroutine( DestroyViewScene());
+                StartCoroutine(DestroyViewScene());
             }
             else if (Input.GetButtonDown("Pause"))
             {
@@ -271,7 +267,7 @@ public class LiveController : MonoBehaviour
         }
 
         liveTotalTime = musicManager.totalLength;
-        
+
         yield return new WaitForSeconds(0.2f);
 
         yield return Play();
@@ -299,12 +295,12 @@ public class LiveController : MonoBehaviour
     private IEnumerator FadeoutBG()
     {
         Image image = loadingbg.GetComponent<Image>();
-        
-        while(image.color.a > 0)
+
+        while (image.color.a > 0)
         {
             Color color = image.color;
             color.a = color.a - 0.2f;
-            if(color.a < 0)
+            if (color.a < 0)
             {
                 color.a = 0;
             }

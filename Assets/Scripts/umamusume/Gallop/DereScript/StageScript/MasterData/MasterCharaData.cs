@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sqlite3Plugin;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sqlite3Plugin;
 
 public class MasterCharaData
 {
@@ -259,7 +255,7 @@ public class MasterCharaData
                 int key = @int;
 
                 //ちひろ用
-                if(int20 == 4)
+                if (int20 == 4)
                 {
                     int20 = UnityEngine.Random.Range(1, 3);
                 }
@@ -291,7 +287,7 @@ public class MasterCharaData
     {
         CharaData charaData2 = null;
         charaData2 = ((charaData != null || charaId == 0) ? charaData : Get(charaId));
-        if (charaData2 != null && (int)charaData2.specialType == 1)
+        if (charaData2 != null && charaData2.specialType == 1)
         {
             return true;
         }

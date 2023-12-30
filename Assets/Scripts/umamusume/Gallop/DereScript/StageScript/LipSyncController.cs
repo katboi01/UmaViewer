@@ -1,5 +1,4 @@
 ﻿using Cutt;
-using Stage;
 using UnityEngine;
 
 public interface ICharacterFacial
@@ -423,7 +422,7 @@ public class LipSyncController : MonoBehaviour
         _isRepressAutoBlink = false;
         if (updateInfo.eyeNext != null && !updateInfo.eyeNext.IsNop())
         {
-            float num2 = (float)updateInfo.eyeNext.frame / (float)targetFps - currentTime;
+            float num2 = updateInfo.eyeNext.frame / (float)targetFps - currentTime;
             num2 = ((num2 < 0f) ? 0f : num2);
             if (num2 < 1f)
             {

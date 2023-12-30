@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using Gallop;
+﻿using Gallop;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class UmaCharaData
 {
@@ -106,16 +106,16 @@ public class PartEntry
             }
         }
 
-        foreach(var part in PartSettings)
+        foreach (var part in PartSettings)
         {
             if (part.Key != "time" && !part.Key.Contains("_"))
             {
-                if (part.Value.FindAll(v => v > 0).Count > 0) 
+                if (part.Value.FindAll(v => v > 0).Count > 0)
                 {
                     SingerCount += 1;
                 }
             }
-        } 
+        }
     }
 }
 
