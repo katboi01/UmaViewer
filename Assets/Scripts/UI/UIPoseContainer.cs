@@ -88,17 +88,19 @@ public class UIPoseContainer : MonoBehaviour
 
         if (container == null) return;
 
-        var poseData = new PoseData();
-        poseData.Name = NameLabel.text;
-        poseData.Date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        poseData.Character = container.name;
-        poseData.Description = DescriptionLabel.text;
-        poseData.ViewerVersion = Application.version;
-        poseData.Bones = container.SaveBones();
-        poseData.Morphs = container.SaveMorphs(true);
+        var poseData = new PoseData()
+        {
+            Name           = NameLabel.text,
+            Date           = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
+            Character      = container.name,
+            Description    = DescriptionLabel.text,
+            ViewerVersion  = Application.version,
+            Bones          = container.SaveBones(),
+            Morphs         = container.SaveMorphs(true)
+        };
 
         var duplicateContainer = CheckIfContainerExists(poseData.Name);
-        if (duplicateContainer != this)
+        if (duplicateContainer != null && duplicateContainer != this)
         {
             UmaViewerUI.Instance.ShowMessage($"Another save exists with name {poseData.Name}", UIMessageType.Error);
             return;
@@ -129,17 +131,19 @@ public class UIPoseContainer : MonoBehaviour
 
         if (container == null) return;
 
-        var poseData = new PoseData();
-        poseData.Name           = NameLabel.text;
-        poseData.Date           = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        poseData.Character      = container.name;
-        poseData.Description    = DescriptionLabel.text;
-        poseData.ViewerVersion  = Application.version;
-        poseData.Bones          = container.SaveBones();
-        poseData.Morphs         = container.SaveMorphs(true);
+        var poseData = new PoseData()
+        {
+            Name           = NameLabel.text,
+            Date           = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
+            Character      = container.name,
+            Description    = DescriptionLabel.text,
+            ViewerVersion  = Application.version,
+            Bones          = container.SaveBones(),
+            Morphs         = container.SaveMorphs(true)
+        };
 
         var duplicateContainer = CheckIfContainerExists(poseData.Name);
-        if (duplicateContainer != this)
+        if (duplicateContainer != null && duplicateContainer != this)
         {
             UmaViewerUI.Instance.ShowMessage($"Another save exists with name {poseData.Name}", UIMessageType.Error);
             return;
