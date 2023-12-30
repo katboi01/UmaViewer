@@ -20,7 +20,7 @@ public class UIHandleBone : UIHandle
         handle.transform.parent = owner.transform;
         handle.transform.localPosition = Vector3.zero;
         handle.transform.localScale = Vector3.one;
-        handle.Init(owner, boneTags).SetScale(0.8f);
+        handle.Init(owner, boneTags).SetScale(0.65f);
         return handle;
     }
 
