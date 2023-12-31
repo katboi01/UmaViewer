@@ -14,13 +14,6 @@ public class Character3DBase : MonoBehaviour
             Invalid = 4
         }
 
-        public enum eRenderingOrder
-        {
-            Default,
-            A,
-            B,
-            C
-        }
         public static bool IsValidPartsCode(string partsCode)
         {
             bool result = false;

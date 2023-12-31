@@ -1,4 +1,3 @@
-using Gallop.ImageEffect;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -63,8 +62,8 @@ namespace Gallop.Live.Cutt
     [System.Serializable]
     public class LiveTimelineSunShaftsSettings
     {
-        public SunShaftsParam.SunShaftsResolution resolution; // 0x10
-        public SunShaftsParam.SunShaftsScreenBlendMode screenBlendMode; // 0x14
+        //public SunShaftsParam.SunShaftsResolution resolution; // 0x10
+        //public SunShaftsParam.SunShaftsScreenBlendMode screenBlendMode; // 0x14
         public Color sunColor; // 0x18
         public float sunPower; // 0x28
         public float sunCenterBrightness; // 0x2C

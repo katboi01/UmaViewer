@@ -1,4 +1,3 @@
-using Gallop.ImageEffect;
 using Gallop.Live.Cutt;
 using System;
 using System.Collections.Generic;
