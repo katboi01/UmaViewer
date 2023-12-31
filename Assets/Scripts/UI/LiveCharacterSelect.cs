@@ -10,7 +10,7 @@ public class LiveCharacterSelect : MonoBehaviour
     public Image CostumeImage;
     public Text IndexText;
 
-    public void SelectChara(UmaViewerUI ui)
+    public void SelectChara(UmaViewerUI ui) 
     {
         if (!ui) return;
         ui.CurrentSeletChara = this;

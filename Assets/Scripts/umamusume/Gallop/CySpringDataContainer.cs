@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop
@@ -81,7 +82,7 @@ namespace Gallop
             DynamicBones.Clear();
             foreach (CySpringParamDataElement spring in springParam)
             {
-                if (bones.TryGetValue(spring._boneName, out Transform bone))
+                if (bones.TryGetValue(spring._boneName,out Transform bone))
                 {
                     bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
                     var dynamic = bone.gameObject.AddComponent<DynamicBone>();
@@ -110,7 +111,7 @@ namespace Gallop
 
                     foreach (string collisionName in spring._collisionNameList)
                     {
-                        if (colliders.TryGetValue(collisionName, out Transform tmp))
+                        if (colliders.TryGetValue(collisionName,out Transform tmp))
                         {
                             dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                         }
@@ -139,7 +140,7 @@ namespace Gallop
                             tempParticle.m_LimitAngel_Max = Childcollision._limitAngleMax;
                             foreach (string collisionName in Childcollision._collisionNameList)
                             {
-                                if (colliders.TryGetValue(collisionName, out Transform tmp))
+                                if (colliders.TryGetValue(collisionName,out Transform tmp))
                                 {
                                     tempParticle.m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
                                 }
@@ -152,7 +153,7 @@ namespace Gallop
 
         public void EnablePhysics(bool isOn)
         {
-            foreach (DynamicBone dynamic in DynamicBones)
+            foreach(DynamicBone dynamic in DynamicBones)
             {
                 dynamic.enabled = isOn;
             }

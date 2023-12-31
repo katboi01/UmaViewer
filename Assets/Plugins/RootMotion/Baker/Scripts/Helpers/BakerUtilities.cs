@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 namespace RootMotion
 {
@@ -187,7 +188,7 @@ namespace RootMotion
             if (lastQSet) rot = BakerUtilities.EnsureQuaternionContinuity(lastQ, IKTQ.q);
 
             //rot.Normalize();
-
+            
             lastQ = rot;
             lastQSet = true;
 

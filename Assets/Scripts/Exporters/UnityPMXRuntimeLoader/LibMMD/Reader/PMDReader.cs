@@ -1,10 +1,10 @@
-using LibMMD.Material;
-using LibMMD.Model;
-using LibMMD.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using LibMMD.Material;
+using LibMMD.Model;
+using LibMMD.Util;
 using UnityEngine;
 
 namespace LibMMD.Reader
@@ -48,15 +48,15 @@ namespace LibMMD.Reader
             ReadConstraints(reader, model);
             goto PMD_READER_READ_SUCCEED;
 
-        PMD_READER_READ_LEGACY_30:
+            PMD_READER_READ_LEGACY_30:
 
             for (var i = 0; i < model.Parts.Length; ++i)
             {
                 var material = model.Parts[i].Material;
                 material.Toon = MMDTextureUtil.GetGlobalToon(toonTextureIds[i]);
             }
-        PMD_READER_READ_LEGACY_50:
-        PMD_READER_READ_SUCCEED:
+            PMD_READER_READ_LEGACY_50:
+            PMD_READER_READ_SUCCEED:
             model.Normalize();
             return model;
         }
@@ -110,7 +110,7 @@ namespace LibMMD.Reader
                 }
                 rigidBody.CollisionGroup = reader.ReadSByte();
                 rigidBody.CollisionMask = reader.ReadUInt16();
-                rigidBody.Shape = (MMDRigidBody.RigidBodyShape)reader.ReadByte();
+                rigidBody.Shape = (MMDRigidBody.RigidBodyShape) reader.ReadByte();
                 rigidBody.Dimemsions = MMDReaderWriteUtil.ReadVector3(reader);
                 var rbPosition = MMDReaderWriteUtil.ReadVector3(reader);
                 rigidBody.Position = model.Bones[rigidBody.AssociatedBoneIndex].Position + rbPosition;
@@ -124,7 +124,7 @@ namespace LibMMD.Reader
                 var type = reader.ReadByte();
                 if (boneIndex < context.BoneNum)
                 {
-                    rigidBody.Type = (MMDRigidBody.RigidBodyType)type;
+                    rigidBody.Type = (MMDRigidBody.RigidBodyType) type;
                 }
                 else
                 {
@@ -227,7 +227,7 @@ namespace LibMMD.Reader
                 var morph = new Morph();
                 var fp = ReadPmdFacePreamble(reader);
                 morph.Name = fp.Name;
-                morph.Category = (Morph.MorphCategory)fp.FaceType;
+                morph.Category = (Morph.MorphCategory) fp.FaceType;
                 if (morph.Category == Morph.MorphCategory.MorphCatSystem)
                 {
                     baseMorphIndex = i;
@@ -256,9 +256,9 @@ namespace LibMMD.Reader
                     var morph = model.Morphs[i];
                     for (var j = 0; j < morph.MorphDatas.Length; ++j)
                     {
-                        var vertexMorphData = (Morph.VertexMorphData)morph.MorphDatas[j];
+                        var vertexMorphData = (Morph.VertexMorphData) morph.MorphDatas[j];
                         var morphDataVertexIndex = vertexMorphData.VertexIndex;
-                        vertexMorphData.VertexIndex = ((Morph.VertexMorphData)baseMorph.MorphDatas[morphDataVertexIndex])
+                        vertexMorphData.VertexIndex = ((Morph.VertexMorphData) baseMorph.MorphDatas[morphDataVertexIndex])
                             .VertexIndex;
                     }
                 }
@@ -344,7 +344,7 @@ namespace LibMMD.Reader
                 bone.ChildBoneVal.ChildUseId = true;
                 bone.ChildBoneVal.Index = rawBone.ChildId;
                 bone.Rotatable = true;
-                var type = (PmdBoneTypes)rawBone.Type;
+                var type = (PmdBoneTypes) rawBone.Type;
                 bone.HasIk = type == PmdBoneTypes.PmdBoneIk || ikBoneIds.Contains(i);
                 bone.Movable = type == PmdBoneTypes.PmdBoneRotateAndTranslate || bone.HasIk;
                 bone.Visible = type != PmdBoneTypes.PmdBoneIkTo && type != PmdBoneTypes.PmdBoneInvisible &&
@@ -398,8 +398,8 @@ namespace LibMMD.Reader
 
             var loLimit = Vector3.zero;
             var hiLimit = Vector3.zero;
-            loLimit.x = (float)-Math.PI;
-            hiLimit.x = (float)(-0.5f / 180.0f * Math.PI);
+            loLimit.x = (float) -Math.PI;
+            hiLimit.x = (float) (-0.5f / 180.0f * Math.PI);
 
             for (var i = 0; i < boneNum; ++i)
             {

@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static DynamicBone;
+using System;
 using Object = UnityEngine.Object;
 
 [Serializable]
@@ -9,10 +9,10 @@ public class AssetTable
 {
     public Object this[string key]
     {
-        get
+        get 
         {
             var item = list.Find(a => a.Key.Equals(key));
-            if (item != null)
+            if(item != null)
             {
                 return item.Value;
             }
@@ -115,7 +115,7 @@ public class TargetInfomation
 
 
 [Serializable]
-public class ConnectedBoneData
+public class ConnectedBoneData 
 {
     public string Bone1;
     public string Bone2;
@@ -125,9 +125,9 @@ public class ConnectedBoneData
 
 
 [Serializable]
-public class FaceOverrideReplaceDataSet
+public class FaceOverrideReplaceDataSet 
 {
-    public bool IsOnlyBaseReplace;
+    public bool IsOnlyBaseReplace; 
     public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId BaseReplaceFaceType;
     public FaceOverrideReplaceData[] DataArray;
 }
@@ -140,9 +140,9 @@ public class FaceOverrideReplaceData
 }
 
 [Serializable]
-public class FaceOverrideElement
+public class FaceOverrideElement 
 {
-    public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId Index;
-    public float Weight;
+    public Gallop.Live.Cutt.LiveTimelineDefine.FacialEyeId Index; 
+    public float Weight; 
 }
 

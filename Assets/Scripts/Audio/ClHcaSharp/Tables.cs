@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Audio.CriWareFormats.Common;
+using System;
 
 namespace ClHcaSharp
 {

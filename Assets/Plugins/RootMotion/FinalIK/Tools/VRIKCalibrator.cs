@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 namespace RootMotion.FinalIK
 {
@@ -257,7 +258,7 @@ namespace RootMotion.FinalIK
             data.rightFoot = new CalibrationData.Target(ik.solver.rightLeg.target);
             data.leftLegGoal = new CalibrationData.Target(ik.solver.leftLeg.bendGoal);
             data.rightLegGoal = new CalibrationData.Target(ik.solver.rightLeg.bendGoal);
-            data.pelvisTargetRight = rootController != null ? rootController.pelvisTargetRight : Vector3.zero;
+            data.pelvisTargetRight = rootController != null? rootController.pelvisTargetRight: Vector3.zero;
             data.pelvisPositionWeight = ik.solver.spine.pelvisPositionWeight;
             data.pelvisRotationWeight = ik.solver.spine.pelvisRotationWeight;
 

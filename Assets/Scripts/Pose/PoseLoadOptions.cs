@@ -13,13 +13,13 @@ public class PoseLoadOptions
     {
         return new PoseLoadOptions()
         {
-            Root = false,
-            Position = false,
-            Rotation = false,
-            Scale = false,
-            Morphs = false,
-            FaceBones = false,
-            Physics = false
+            Root        = false,
+            Position    = false,
+            Rotation    = false,
+            Scale       = false,
+            Morphs      = false,
+            FaceBones   = false,
+            Physics     = false
         };
     }
 
@@ -27,13 +27,13 @@ public class PoseLoadOptions
     {
         return new PoseLoadOptions()
         {
-            Root = true,
-            Position = true,
-            Rotation = true,
-            Scale = true,
-            Morphs = true,
-            FaceBones = true,
-            Physics = true
+            Root        = true,
+            Position    = true,
+            Rotation    = true,
+            Scale       = true,
+            Morphs      = true,
+            FaceBones   = true,
+            Physics     = true
         };
     }
 }

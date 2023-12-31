@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using static UmaViewerUI;
 
 public class UmaViewerDownload : MonoBehaviour
 {
@@ -15,7 +17,7 @@ public class UmaViewerDownload : MonoBehaviour
         UnityWebRequest www = UnityWebRequest.Get(url);
         www.timeout = 3;
         yield return www.SendWebRequest();
-
+        
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log(www.error);
@@ -27,7 +29,7 @@ public class UmaViewerDownload : MonoBehaviour
         }
     }
 
-    public static void DownloadAssetSync(UmaDatabaseEntry entry, string path, Action<string, UIMessageType> callback = null)
+    public static void DownloadAssetSync(UmaDatabaseEntry entry,string path, Action<string , UIMessageType> callback = null)
     {
         string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
 
@@ -56,7 +58,7 @@ public class UmaViewerDownload : MonoBehaviour
     {
         return $"{GENERIC_BASE_URL}/{hash.Substring(0, 2)}/{hash}";
     }
-
+    
     public static string GetAssetRequestUrl(string hash)
     {
         return $"{ASSET_BASE_URL}/{hash.Substring(0, 2)}/{hash}";

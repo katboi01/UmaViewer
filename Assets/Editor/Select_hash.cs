@@ -1,5 +1,5 @@
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
 
 class SelectAllOfTagHash : ScriptableWizard
 {
@@ -28,7 +28,7 @@ class SelectAllOfTagHash : ScriptableWizard
 
         var children = obj.GetComponentsInChildren<Transform>();
 
-        foreach (var selectChild in children)
+        foreach(var selectChild in children)
         {
             var tempChild = selectChild;
 
@@ -45,7 +45,7 @@ class SelectAllOfTagHash : ScriptableWizard
 
             Debug.Log(string.Format("GameObject:{0}, Hash:{1}", result, (uint)Animator.StringToHash(result)));
         }
-
+        
 
 
     }

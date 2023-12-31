@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -56,7 +57,7 @@ public class UmaViewerGlobalShader : MonoBehaviour
 
     void setGlobal()
     {
-
+        
         //Color
         Shader.SetGlobalColor("_GlobalToonColor", _GlobalToonColor);
         Shader.SetGlobalColor("_Global_FogColor", _Global_FogColor);
@@ -141,8 +142,8 @@ public class UmaViewerGlobalShader : MonoBehaviour
         {
             Shader.SetGlobalFloat("_GlobalCameraFov", 30);
         }
-
+       
     }
 
-
+   
 }

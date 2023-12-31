@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 namespace RootMotion.FinalIK
 {
@@ -86,7 +87,7 @@ namespace RootMotion.FinalIK
             enabled = false;
         }
 
-        #endregion Main Interface
+#endregion Main Interface
 
         /*
 		 * An arbitrary secondary axis that we get by simply switching the axes
@@ -140,7 +141,7 @@ namespace RootMotion.FinalIK
             Warning.Log(message, transform);
         }
 
-        #region Static helper methods for all Rotation Limits
+#region Static helper methods for all Rotation Limits
 
         /*
 		 * Limits rotation to a single degree of freedom (along axis)
@@ -183,6 +184,6 @@ namespace RootMotion.FinalIK
             return Vector3.Angle(v1, v2);
         }
 
-        #endregion
+#endregion
     }
 }

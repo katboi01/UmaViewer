@@ -180,7 +180,7 @@ namespace CriWareFormats
                      schema[i].Flag.HasFlag(ColumnFlag.Undefined))
                     throw new InvalidDataException("Unknown column flag combo found.");
 
-                uint valueSize;
+                uint valueSize; 
                 switch (schema[i].Type)
                 {
                     case ColumnType.Byte:

@@ -1,5 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+using System;
+using RootMotion;
 
 namespace RootMotion.FinalIK
 {
@@ -106,22 +108,22 @@ namespace RootMotion.FinalIK
             /// <summary>
             /// Target position of the hand. Will be overwritten if target is assigned.
             /// </summary>
-            [NonSerialized][HideInInspector] public Vector3 IKPosition;
+            [NonSerialized] [HideInInspector] public Vector3 IKPosition;
 
             /// <summary>
             /// Target rotation of the hand. Will be overwritten if target is assigned.
             /// </summary>
-            [NonSerialized][HideInInspector] public Quaternion IKRotation = Quaternion.identity;
+            [NonSerialized] [HideInInspector] public Quaternion IKRotation = Quaternion.identity;
 
             /// <summary>
             /// The bending direction of the limb. Will be used if bendGoalWeight is greater than 0. Will be overwritten if bendGoal is assigned.
             /// </summary>
-            [NonSerialized][HideInInspector] public Vector3 bendDirection = Vector3.back;
+            [NonSerialized] [HideInInspector] public Vector3 bendDirection = Vector3.back;
 
             /// <summary>
             /// Position offset of the hand. Will be applied on top of hand target position and reset to Vector3.zero after each update.
             /// </summary>
-            [NonSerialized][HideInInspector] public Vector3 handPositionOffset;
+            [NonSerialized] [HideInInspector] public Vector3 handPositionOffset;
 
             // Gets the target position of the hand.
             public Vector3 position { get; private set; }

@@ -14,7 +14,7 @@ namespace LibMMD.Unity3D
         public MMDConfigSwitch EnableDrawSelfShadow;
         public MMDConfigSwitch EnableCastShadow;
         public MMDConfigSwitch EnableEdge;
-
+        
         public static bool DealSwitch(MMDConfigSwitch switchVal, bool configVal)
         {
             switch (switchVal)

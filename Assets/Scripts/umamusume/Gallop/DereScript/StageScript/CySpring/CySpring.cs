@@ -1,6 +1,7 @@
 // CySpring
 using System;
 using System.Collections.Generic;
+using Stage;
 using UnityEngine;
 
 public class CySpring : MonoBehaviour

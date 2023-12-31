@@ -1,49 +1,51 @@
+using Gallop.Live.Cutt;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-    [System.Serializable]
-    public class LiveTimelineKeyFormationOffsetData : LiveTimelineKeyWithInterpolate
-    {
-        private enum IKTargetChara
-        {
-            _1st = 0,
-            _2nd = 1,
-            _3rd = 2,
-            _4th = 3,
-            _5th = 4,
-            _6th = 5,
-            _7th = 6,
-            _8th = 7,
-            _9th = 8,
-            _10th = 9,
-            _11th = 10,
-            _12th = 11,
-            _13th = 12,
-            _14th = 13,
-            _15th = 14,
-            _16th = 15,
-            _17th = 16,
-            _18th = 17
-        }
+	[System.Serializable]
+	public class LiveTimelineKeyFormationOffsetData : LiveTimelineKeyWithInterpolate
+	{
+		private enum IKTargetChara
+		{
+			_1st = 0,
+			_2nd = 1,
+			_3rd = 2,
+			_4th = 3,
+			_5th = 4,
+			_6th = 5,
+			_7th = 6,
+			_8th = 7,
+			_9th = 8,
+			_10th = 9,
+			_11th = 10,
+			_12th = 11,
+			_13th = 12,
+			_14th = 13,
+			_15th = 14,
+			_16th = 15,
+			_17th = 16,
+			_18th = 17
+		}
 
-        public enum IKSystemType
-        {
-            None = 0,
-            HoldHands3p_Center = 1,
-            HoldHands3p_Outside = 2,
-            Limb = 3,
-            MicStand = 4,
-            HoldHandsMix = 5
-        }
+		public enum IKSystemType
+		{
+			None = 0,
+			HoldHands3p_Center = 1,
+			HoldHands3p_Outside = 2,
+			Limb = 3,
+			MicStand = 4,
+			HoldHandsMix = 5
+		}
 
-        public enum IKSystemHoldHandTarget
-        {
-            None = 0,
-            HandAttachL = 1,
-            HandAttachR = 2
-        }
+		public enum IKSystemHoldHandTarget
+		{
+			None = 0,
+			HandAttachL = 1,
+			HandAttachR = 2
+		}
 
         public Vector3 Position;
         public float RotationY;
@@ -100,14 +102,14 @@ namespace Gallop.Live.Cutt
         private int _parentObjectTargetCount;
     }
 
-    [System.Serializable]
-    public class LiveTimelineKeyFormationOffsetDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyFormationOffsetData>
-    {
+	[System.Serializable]
+	public class LiveTimelineKeyFormationOffsetDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyFormationOffsetData>
+	{
 
-    }
+	}
 
-    [System.Serializable]
-    public class LiveTimelineFormationOffsetData
+	[System.Serializable]
+	public class LiveTimelineFormationOffsetData
     {
 
         private const int DATA_LIST_SIZE = 20;
@@ -135,7 +137,7 @@ namespace Gallop.Live.Cutt
 
         public List<LiveTimelineKeyFormationOffsetDataList> Init()
         {
-            return new List<LiveTimelineKeyFormationOffsetDataList> { centerKeys, left1Keys, right1Keys, left2Keys, right2Keys, place06Keys, place07Keys, place08Keys, place09Keys, place10Keys, place11Keys, place12Keys, place13Keys, place14Keys, place15Keys, place16Keys, place17Keys, place18Keys, place19Keys, place20Keys };
+            return new List<LiveTimelineKeyFormationOffsetDataList> { centerKeys, left1Keys , right1Keys, left2Keys, right2Keys, place06Keys, place07Keys, place08Keys, place09Keys, place10Keys, place11Keys, place12Keys, place13Keys, place14Keys, place15Keys, place16Keys, place17Keys, place18Keys, place19Keys, place20Keys };
         }
     }
 }

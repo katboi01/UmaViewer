@@ -76,7 +76,7 @@ public class UIPoseContainer : MonoBehaviour
     public void Init(PoseData data)
     {
         PoseData = data;
-
+        
         NameLabel.text = data.Name;
         DescriptionLabel.text = data.Description;
         InfoLabel.text = $"Version: {data.ViewerVersion}\nCharacter: {data.Character}\nSave date: {data.Date}";
@@ -90,13 +90,13 @@ public class UIPoseContainer : MonoBehaviour
 
         var poseData = new PoseData()
         {
-            Name = NameLabel.text,
-            Date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
-            Character = container.name,
-            Description = DescriptionLabel.text,
-            ViewerVersion = Application.version,
-            Bones = container.SaveBones(),
-            Morphs = container.SaveMorphs(true)
+            Name           = NameLabel.text,
+            Date           = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
+            Character      = container.name,
+            Description    = DescriptionLabel.text,
+            ViewerVersion  = Application.version,
+            Bones          = container.SaveBones(),
+            Morphs         = container.SaveMorphs(true)
         };
 
         var duplicateContainer = CheckIfContainerExists(poseData.Name);
@@ -133,13 +133,13 @@ public class UIPoseContainer : MonoBehaviour
 
         var poseData = new PoseData()
         {
-            Name = NameLabel.text,
-            Date = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
-            Character = container.name,
-            Description = DescriptionLabel.text,
-            ViewerVersion = Application.version,
-            Bones = container.SaveBones(),
-            Morphs = container.SaveMorphs(true)
+            Name           = NameLabel.text,
+            Date           = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"),
+            Character      = container.name,
+            Description    = DescriptionLabel.text,
+            ViewerVersion  = Application.version,
+            Bones          = container.SaveBones(),
+            Morphs         = container.SaveMorphs(true)
         };
 
         var duplicateContainer = CheckIfContainerExists(poseData.Name);
@@ -160,7 +160,7 @@ public class UIPoseContainer : MonoBehaviour
 
             UmaViewerUI.Instance.ShowMessage($"Saved pose: {fullpath}", UIMessageType.Success);
 
-            if (poseData.Name != PoseData.Name)
+            if(poseData.Name != PoseData.Name)
             {
                 //Create new container with new data
                 UIPoseContainer.Create(poseData);
@@ -204,7 +204,7 @@ public class UIPoseContainer : MonoBehaviour
         string fullpath = $"{Application.dataPath}/../Poses/{PoseData.Name}.umaPose";
         fullpath = Path.GetFullPath(fullpath);
 
-        if (File.Exists(fullpath))
+        if(File.Exists(fullpath))
         {
             File.Delete(fullpath);
         }

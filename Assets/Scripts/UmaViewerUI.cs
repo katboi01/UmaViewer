@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -223,7 +224,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             if (ui.Name == Path.GetFileName(entry.Name)) return;
         }
-
+        
         LoadedAssetCount++;
         string filePath = entry.FilePath;
         var container = Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
@@ -369,11 +370,11 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadFacialPanels(FaceDrivenKeyTarget target)
     {
         currentFaceDrivenKeyTarget = target;
-        if (FacialList)
-            foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>(true))
-            {
-                Destroy(ui.gameObject);
-            }
+        if(FacialList)
+        foreach (UmaUIContainer ui in FacialList.GetComponentsInChildren<UmaUIContainer>(true))
+        {
+            Destroy(ui.gameObject);
+        }
 
         if (target == null) return;
         List<FacialMorph> targetMorph = new List<FacialMorph>(target.OtherMorphs);
@@ -498,10 +499,10 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadEmotionPanels(FaceEmotionKeyTarget target)
     {
         if (EmotionList)
-            foreach (UmaUIContainer ui in EmotionList.content.GetComponentsInChildren<UmaUIContainer>())
-            {
-                Destroy(ui.gameObject);
-            }
+        foreach (UmaUIContainer ui in EmotionList.content.GetComponentsInChildren<UmaUIContainer>())
+        {
+            Destroy(ui.gameObject);
+        }
 
         if (target == null) return;
 
@@ -617,7 +618,7 @@ public class UmaViewerUI : MonoBehaviour
             Destroy(LiveSelectList.content.GetChild(i).gameObject);
         }
 
-        if (LiveMode == 1)
+        if(LiveMode == 1)
         {
             currentLive = entry;
             LiveSelectImage.sprite = entry.Icon;
@@ -636,7 +637,7 @@ public class UmaViewerUI : MonoBehaviour
                 });
             }
         }
-        else if (LiveMode == 0)
+        else if(LiveMode == 0)
         {
             currentLive = entry;
             LiveSelectImage.sprite = entry.Icon;
@@ -662,7 +663,7 @@ public class UmaViewerUI : MonoBehaviour
                 });
             }
         }
-
+        
     }
 
     void ListCostumes(CharaEntry chara, bool mini)
@@ -703,8 +704,7 @@ public class UmaViewerUI : MonoBehaviour
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
-                        UmaAssetManager.PreLoadAndRun(list, delegate
-                        {
+                        UmaAssetManager.PreLoadAndRun(list , delegate {
                             StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                         });
                         //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));

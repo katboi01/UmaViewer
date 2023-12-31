@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public static class Texture2DExtension
+public static class Texture2DExtension 
 {
     public static Texture2D CreateReadabeTexture2D(this Texture2D texture2d)
     {

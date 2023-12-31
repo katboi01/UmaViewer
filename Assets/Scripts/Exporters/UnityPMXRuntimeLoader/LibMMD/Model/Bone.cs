@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LibMMD.Model
 {
@@ -140,7 +142,7 @@ namespace LibMMD.Model
                 HasIk = bone.HasIk,
                 AppendRotate = bone.AppendRotate,
                 AppendTranslate = bone.AppendTranslate,
-                RotAxisFixed = bone.RotAxisFixed,
+                RotAxisFixed =  bone.RotAxisFixed,
                 UseLocalAxis = bone.UseLocalAxis,
                 PostPhysics = bone.PostPhysics,
                 ReceiveTransform = bone.ReceiveTransform,
@@ -152,7 +154,7 @@ namespace LibMMD.Model
                 IkInfoVal = IkInfo.CopyOf(bone.IkInfoVal),
             };
         }
-
-
+        
+        
     }
 }

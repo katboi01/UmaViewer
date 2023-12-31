@@ -32,7 +32,7 @@ public class HandleManager : MonoBehaviour
         var camera = Camera.main;
         var poseModeOn = UmaViewerUI.Instance.PoseManager.PoseModeOn;
 
-        foreach (var handle in AllHandles)
+        foreach(var handle in AllHandles)
         {
             handle.ForceDisplayOff(!poseModeOn);
             handle.UpdateManual(camera, EnabledLines);
@@ -47,7 +47,7 @@ public class HandleManager : MonoBehaviour
     public static void RegisterHandle(UIHandle handle)
     {
         var hm = UmaViewerUI.Instance.HandleManager;
-
+        
         if (hm.AllHandles.Contains(handle))
         {
             return;
@@ -72,7 +72,7 @@ public class HandleManager : MonoBehaviour
     {
         var hm = UmaViewerUI.Instance.HandleManager;
 
-        foreach (var handle in hm.AllHandles)
+        foreach(var handle in hm.AllHandles)
         {
             if (handle.Popup.gameObject.activeInHierarchy)
             {

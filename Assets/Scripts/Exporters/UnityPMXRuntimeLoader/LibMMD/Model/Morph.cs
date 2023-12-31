@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using LibMMD.Util;
+using UnityEngine;
 
 namespace LibMMD.Model
 {
@@ -57,8 +59,7 @@ namespace LibMMD.Model
 
         public class MaterialMorphData : MorphData
         {
-            public enum MaterialMorphMethod : byte
-            {
+            public enum MaterialMorphMethod : byte {
                 MorphMatMul = 0x00,
                 MorphMatAdd = 0x01
             }

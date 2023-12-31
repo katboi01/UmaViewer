@@ -1,5 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+using System;
 
 namespace RootMotion
 {
@@ -45,7 +46,7 @@ namespace RootMotion
         void Awake()
         {
             // Find all the child Transforms of the Animator
-            Transform[] childrenAndRoot = root.GetComponentsInChildren<Transform>();
+            Transform[] childrenAndRoot = (Transform[])root.GetComponentsInChildren<Transform>();
 
             children = new BakerTransform[0];
 

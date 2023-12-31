@@ -232,7 +232,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void MergeBone(SkinnedMeshRenderer from, Dictionary<string, Transform> targetBones, ref List<Transform> emptyBones)
     {
-        if (targetBones.TryGetValue(from.rootBone.name, out Transform rootbone))
+        if(targetBones.TryGetValue(from.rootBone.name, out Transform rootbone))
         {
             from.rootBone = rootbone;
             Transform[] tmpBone = new Transform[from.bones.Length];
@@ -408,12 +408,12 @@ public class UmaContainerCharacter : UmaContainer
 
         //Apply UV Animation
 
-        if (HeadShaderEffectData != null)
+        if(HeadShaderEffectData != null)
         {
             HeadShaderEffectData.updateUV(Time.fixedDeltaTime);
         }
 
-        if (BodyShaderEffectData != null)
+        if(BodyShaderEffectData != null)
         {
             BodyShaderEffectData.updateUV(Time.fixedDeltaTime);
         }
@@ -472,7 +472,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadTextures(UmaDatabaseEntry entry)
     {
-        foreach (Texture2D tex2D in entry.GetAll<Texture2D>())
+        foreach(Texture2D tex2D in entry.GetAll<Texture2D>())
         {
             if (entry.Name.Contains("/mini/head"))
             {
@@ -737,7 +737,7 @@ public class UmaContainerCharacter : UmaContainer
                     }
 
                     //Blush Setting
-                    if (r.name.Contains("Cheek"))
+                    if(r.name.Contains("Cheek"))
                     {
                         r.gameObject.SetActive(false);
                         if (IsMob)
@@ -752,14 +752,14 @@ public class UmaContainerCharacter : UmaContainer
                         }
                     }
 
-                    if (Main.AbList.TryGetValue("3d/chara/common/textures/tex_chr_tear00", out var tearEntry))
+                    if(Main.AbList.TryGetValue("3d/chara/common/textures/tex_chr_tear00", out var tearEntry))
                     {
-                        var ab = UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
-                        var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
-                        StaticTear_L = table["tearmesh_l"] as GameObject;
-                        StaticTear_R = table["tearmesh_r"] as GameObject;
-                        StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
-                        StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
+                       var ab =  UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
+                       var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
+                       StaticTear_L = table["tearmesh_l"] as GameObject;
+                       StaticTear_R = table["tearmesh_r"] as GameObject;
+                       StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
+                       StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
                     }
 
                     switch (m.shader.name)
@@ -1297,8 +1297,7 @@ public class UmaContainerCharacter : UmaContainer
             obj.SetActive(false);
 
             var leftObj = Instantiate(obj, eyeLocator_L.transform);
-            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>(true)).ForEach(a =>
-            {
+            new List<Renderer>(leftObj.GetComponentsInChildren<Renderer>(true)).ForEach(a => { 
                 a.material.SetFloat("_StencilMask", id);
                 a.material.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
                 a.material.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
@@ -1312,8 +1311,7 @@ public class UmaContainerCharacter : UmaContainer
                 if (holder._assetTableValue["invert"] > 0)
                     RightObj.transform.localScale = new Vector3(-1, 1, 1);
             }
-            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>(true)).ForEach(a =>
-            {
+            new List<Renderer>(RightObj.GetComponentsInChildren<Renderer>(true)).ForEach(a => { 
                 a.material.SetFloat("_StencilMask", id);
                 a.material.SetFloat("_StencilComp", (float)UnityEngine.Rendering.CompareFunction.Equal);
                 a.material.SetFloat("_StencilOp", (float)UnityEngine.Rendering.StencilOp.Keep);
@@ -1372,13 +1370,13 @@ public class UmaContainerCharacter : UmaContainer
         UIHandleCharacterRoot rootHandle = UIHandleCharacterRoot.CreateAsChild(this);
 
         var humanBones = GetHumanBones();
-        foreach (var bone in humanBones)
+        foreach(var bone in humanBones)
         {
             List<BoneTags> tags = new List<BoneTags>() { BoneTags.Humanoid };
             if (bone.name.EndsWith("_L")) tags.Add(BoneTags.Left);
             if (bone.name.EndsWith("_R")) tags.Add(BoneTags.Right);
 
-            if (bone.name != "Hip")
+            if(bone.name != "Hip")
             {
                 var handle = UIHandleBone.CreateAsChild(bone, tags).WithLineRenderer();
                 rootHandle.ChildHandles.Add(handle);
@@ -1391,9 +1389,9 @@ public class UmaContainerCharacter : UmaContainer
         }
 
         var wrist_L = humanBones.Find(b => b.name == "Wrist_L");
-        foreach (var fingerBone in wrist_L.transform.GetComponentsInChildren<Transform>())
+        foreach(var fingerBone in wrist_L.transform.GetComponentsInChildren<Transform>())
         {
-            if (fingerBone.name.StartsWith("Index") || fingerBone.name.StartsWith("Middle") || fingerBone.name.StartsWith("Ring") || fingerBone.name.StartsWith("Pinky") || fingerBone.name.StartsWith("Thumb"))
+            if(fingerBone.name.StartsWith("Index") || fingerBone.name.StartsWith("Middle") || fingerBone.name.StartsWith("Ring") || fingerBone.name.StartsWith("Pinky") || fingerBone.name.StartsWith("Thumb"))
             {
                 List<BoneTags> tags = new List<BoneTags>() { BoneTags.Left, BoneTags.Finger };
 
@@ -1415,7 +1413,7 @@ public class UmaContainerCharacter : UmaContainer
         }
 
         var allBones = SaveBones();
-        foreach (var bone in allBones.Where(b => b.Tags.Contains(BoneTags.Dynamic)))
+        foreach(var bone in allBones.Where(b => b.Tags.Contains(BoneTags.Dynamic)))
         {
             var handle = UIHandleBone.CreateAsChild(bone.Bone, bone.Tags).SetColor(Color.gray).SetScale(0.15f).WithLineRenderer();
             rootHandle.ChildHandles.Add(handle);
@@ -1433,7 +1431,7 @@ public class UmaContainerCharacter : UmaContainer
 
     private void GatherSerializableBonesRecursive(Transform current, List<SerializableBone> bones, int depth)
     {
-        for (int i = 0; i < current.childCount; i++)
+        for(int i = 0; i < current.childCount; i++)
         {
             GatherSerializableBonesRecursive(current.GetChild(i), bones, depth + 1);
         }
@@ -1442,8 +1440,8 @@ public class UmaContainerCharacter : UmaContainer
         //and generating a list of tags beforehand
         //otherwise getComponentInParent() is called for every bone
         var bone = new SerializableBone(current, true);
-
-        if (depth == 0)
+        
+        if(depth == 0)
         {
             //make it independent from character name
             bone.ParentName = "root";
@@ -1479,7 +1477,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public List<Transform> GetHumanBones()
     {
-        if (_humanoidBones == null)
+        if(_humanoidBones == null)
         {
             var animator = UmaAnimator;
 

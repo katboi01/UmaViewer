@@ -1,8 +1,11 @@
-﻿using Mono.Data.Sqlite;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Mono.Data.Sqlite;
 using System.Data;
+using Assets.Scripts;
 using System.IO;
+using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
 public class UmaDatabaseController
@@ -58,9 +61,9 @@ public class UmaDatabaseController
     {
         try
         {
-            if (Config.Instance.WorkMode == WorkMode.Standalone)
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                if (!File.Exists($@"{Config.Instance.MainPath}\meta_umaviewer")) throw new Exception();
+                if(!File.Exists($@"{Config.Instance.MainPath}\meta_umaviewer")) throw new Exception();
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master_umaviewer.mdb;");
             }
@@ -80,13 +83,13 @@ public class UmaDatabaseController
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
-
+                    
         }
         catch
         {
             CloseAllConnection();
             var msg = $"Database not found at: {Config.Instance.MainPath}";
-            if (Config.Instance.WorkMode == WorkMode.Standalone)
+            if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
                 msg += "\nPlease update the database in the settings panel";
             }
@@ -98,7 +101,7 @@ public class UmaDatabaseController
         }
     }
 
-    static Dictionary<string, UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
+    static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
         sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL";
@@ -117,9 +120,8 @@ public class UmaDatabaseController
                     Prerequisites = sqlite_datareader.GetString(3)
                 };
             }
-            catch (Exception e) { Debug.LogError("Error caught: " + e + entry.Name); }
-            if (entry != null)
-            {
+            catch(Exception e) { Debug.LogError("Error caught: " + e + entry.Name); }
+            if (entry != null) {
 
                 meta.Add(entry.Name, entry);
             }
@@ -201,15 +203,15 @@ public class UmaDatabaseController
 
     public static DataRow ReadMobDressColor(string mobid)
     {
-        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
 
         return results.Count > 0 ? results[0] : null;
     }
 
     public static DataRow ReadMobHairColor(string colorid)
     {
-        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
-        foreach (var data in results)
+        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
+        foreach(var data in results)
         {
             return data;
         }

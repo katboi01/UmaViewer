@@ -1,11 +1,11 @@
-﻿using LibMMD.Model;
-using LibMMD.Reader;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using LibMMD.Model;
+using LibMMD.Reader;
 using UnityEngine;
+using System.Threading.Tasks;
 
 namespace LibMMD.Unity3D
 {

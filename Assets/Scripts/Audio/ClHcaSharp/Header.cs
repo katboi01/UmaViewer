@@ -31,7 +31,7 @@ namespace ClHcaSharp
             BinaryReader binaryReader = new BinaryReader(hcaStream);
             binaryReader.BaseStream.Position = 0;
 
-            BitReader bitReader = new BitReader(binaryReader.ReadBytes(headerSize));
+            BitReader bitReader = new BitReader(binaryReader.ReadBytes((int)headerSize));
 
             if ((bitReader.Peek(32) & Mask) == StringToUInt32("HCA"))
             {
@@ -167,7 +167,7 @@ namespace ClHcaSharp
             {
                 bitReader.Skip(32);
                 int rvaVolumeInt = bitReader.Read(32);
-                hca.RvaVolume = BitConverter.ToSingle(BitConverter.GetBytes(rvaVolumeInt), 0);
+                hca.RvaVolume = BitConverter.ToSingle(BitConverter.GetBytes(rvaVolumeInt),0);
 
                 headerSize -= 8;
             }

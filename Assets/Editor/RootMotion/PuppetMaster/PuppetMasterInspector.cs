@@ -1,5 +1,7 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEditor;
+using System.Collections;
+using System;
 
 namespace RootMotion.Dynamics
 {
@@ -156,8 +158,7 @@ namespace RootMotion.Dynamics
                         if (animatedCharacter == script.transform)
                         {
                             if (PrefabUtility.IsPartOfPrefabInstance(animatedCharacter.gameObject)) PrefabUtility.UnpackPrefabInstance(PrefabUtility.GetNearestPrefabInstanceRoot(animatedCharacter.gameObject), PrefabUnpackMode.Completely, InteractionMode.UserAction);
-                        }
-                        else
+                        } else
                         {
                             if (PrefabUtility.IsPartOfPrefabInstance(script.gameObject)) PrefabUtility.UnpackPrefabInstance(PrefabUtility.GetNearestPrefabInstanceRoot(script.gameObject), PrefabUnpackMode.Completely, InteractionMode.UserAction);
                         }
@@ -396,7 +397,7 @@ namespace RootMotion.Dynamics
 
         private bool IsRagdoll()
         {
-            Rigidbody[] rigidbodies = script.gameObject.GetComponentsInChildren<Rigidbody>();
+            Rigidbody[] rigidbodies = (Rigidbody[])script.gameObject.GetComponentsInChildren<Rigidbody>();
             foreach (Rigidbody r in rigidbodies)
             {
                 if (r != script.GetComponent<Rigidbody>()) return true;

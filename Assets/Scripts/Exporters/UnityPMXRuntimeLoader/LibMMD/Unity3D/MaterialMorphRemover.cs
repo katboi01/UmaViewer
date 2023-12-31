@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LibMMD.Unity3D
 {
@@ -12,7 +14,7 @@ namespace LibMMD.Unity3D
                 {
                     material.shader = Shader.Find("Custom/VoidShader");
                 }
-            }
+            }    
         }
     }
 }

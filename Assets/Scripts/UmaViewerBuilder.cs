@@ -555,9 +555,9 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
             string body = $"3d/chara/mini/body/mbdy{costumeIdShort}/pfb_mbdy{costumeId}_0";
-            Main.AbList.TryGetValue(body, out asset);
+            Main.AbList.TryGetValue(body,out asset);
         }
-        else Main.AbList.TryGetValue($"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}", out asset);
+        else Main.AbList.TryGetValue($"3d/chara/mini/body/mbdy{id}_{costumeId}/pfb_mbdy{id}_{costumeId}",out asset);
         if (asset == null)
         {
             Debug.LogError("No body, can't load!");
@@ -617,7 +617,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         string head = $"3d/chara/mini/head/mchr0001_00/pfb_mchr0001_00_face0";
-        Main.AbList.TryGetValue(head, out asset);
+        Main.AbList.TryGetValue(head,out asset);
         if (asset != null)
         {
             //Load Head Textures
@@ -640,7 +640,7 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.Position = umaContainer.transform.Find("Position");
         umaContainer.SetupBoneHandles();
 
-        if (Main.AbList.TryGetValue($"3d/motion/mini/event/body/chara/chr{id}_00/anm_min_eve_chr{id}_00_idle01_loop", out asset))
+        if (Main.AbList.TryGetValue($"3d/motion/mini/event/body/chara/chr{id}_00/anm_min_eve_chr{id}_00_idle01_loop",out asset))
         {
             umaContainer.LoadAnimation(asset);
         }
@@ -678,16 +678,16 @@ public class UmaViewerBuilder : MonoBehaviour
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
                 mController.Initialize();
-
+                
                 characters.ForEach(a =>
                 {
                     if (a.CharaEntry == null || a.CostumeId == "")
                     {
-                        a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count / 2)];
+                        a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count/2)];
                         a.CostumeId = "0002_00_00";
                     }
                 });//fill empty
-
+                
 
                 LoadLiveUma(characters);
 
@@ -841,7 +841,7 @@ public class UmaViewerBuilder : MonoBehaviour
     {
         Instantiate(UmaViewerMain.Instance.AbList[path].Get<GameObject>(), SetParent);
     }
-
+   
     public void SetPreviewCamera(AnimationClip clip)
     {
         if (clip)

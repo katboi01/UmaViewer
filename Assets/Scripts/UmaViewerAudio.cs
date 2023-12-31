@@ -1,6 +1,9 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking.Types;
 
 public class UmaViewerAudio
 {
@@ -37,7 +40,7 @@ public class UmaViewerAudio
         List<AudioSource> sourceList = new List<AudioSource>();
 
         List<AudioClip> sounds = UmaViewerBuilder.LoadAudio(soundInfo.awb);
-        foreach (var clip in sounds)
+        foreach(var clip in sounds)
         {
             AudioSource source = sourceRoot.AddComponent<AudioSource>();
             source.clip = clip;
@@ -60,7 +63,7 @@ public class UmaViewerAudio
 
     public static void Play(CuteAudioSource sourceList)
     {
-        foreach (var source in sourceList.sourceList)
+        foreach(var source in sourceList.sourceList)
         {
             source.Play();
         }
@@ -122,10 +125,9 @@ public class UmaViewerAudio
         {
             string partName = liveVocal[i].tag;
 
-            if (partInfo.PartSettings.ContainsKey(partName))
-            {
+            if (partInfo.PartSettings.ContainsKey(partName)){
                 liveVocal[i].enable = partInfo.PartSettings[partName][targetIndex] > 0;
-
+                
                 if (partInfo.PartSettings.ContainsKey(partName + "_vol"))
                 {
                     var volume = partInfo.PartSettings[partName + "_vol"][targetIndex];
@@ -137,12 +139,12 @@ public class UmaViewerAudio
                     var pan = partInfo.PartSettings[partName + "_pan"][targetIndex];
                     liveVocal[i].pan = (pan == 999 ? 0 : pan);
                 }
-
+               
             }
         }
 
 
-        foreach (var cute in liveVocal)
+        foreach(var cute in liveVocal)
         {
             ApplyMainVolume(cute);
         }

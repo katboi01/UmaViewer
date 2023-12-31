@@ -1,7 +1,14 @@
 using Gallop;
 using Gallop.Live.Cutt;
+using RootMotion.Dynamics;
+using RootMotion.FinalIK;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class UmaContainer : MonoBehaviour
 {
@@ -26,19 +33,19 @@ public class UmaContainer : MonoBehaviour
         public Material Mat;
         public UmaUIContainer Toggle;
         public Dictionary<Renderer, List<int>> Renderers;
-
+    
         public void ToggleMaterials(bool value)
         {
-            foreach (var rend in Renderers)
+            foreach(var rend in Renderers)
             {
                 Debug.Log(rend.Key.name);
                 Material[] mat = new Material[rend.Key.sharedMaterials.Length];
-                for (int i = 0; i < mat.Length; i++)
+                for(int i = 0; i < mat.Length; i++)
                 {
                     //if material slot is not in list, keep current material
                     //if material slot in list and toggle is on - assign original
                     //if material slot in list and toggle is off - assign invisible
-                    mat[i] = rend.Value.Contains(i) ? (value ? Mat : UmaViewerBuilder.Instance.TransMaterialCharas) : rend.Key.sharedMaterials[i];
+                    mat[i] = rend.Value.Contains(i) ? (value? Mat : UmaViewerBuilder.Instance.TransMaterialCharas ): rend.Key.sharedMaterials[i];
                 }
 
                 rend.Key.sharedMaterials = mat;

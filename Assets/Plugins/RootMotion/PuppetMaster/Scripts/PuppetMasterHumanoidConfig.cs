@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 namespace RootMotion.Dynamics
 {
@@ -10,7 +11,7 @@ namespace RootMotion.Dynamics
         [System.Serializable]
         public class HumanoidMuscle
         {
-            [SerializeField][HideInInspector] public string name;
+            [SerializeField] [HideInInspector] public string name;
             public HumanBodyBones bone;
             public Muscle.Props props;
         }

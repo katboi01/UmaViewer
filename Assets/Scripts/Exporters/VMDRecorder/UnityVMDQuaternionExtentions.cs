@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public static class UnityVMDQuaternionExtentions
+public static class UnityVMDQuaternionExtentions 
 {
     public static Quaternion PlusRotation(this Quaternion q1, Quaternion q2)
     {

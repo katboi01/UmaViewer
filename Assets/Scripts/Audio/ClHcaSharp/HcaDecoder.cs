@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 using static ClHcaSharp.Constants;
 using static ClHcaSharp.Header;
 using static ClHcaSharp.Tables;
@@ -87,7 +88,7 @@ namespace ClHcaSharp
 
                 if (status + 14 > bitsMax)
                     return -1;
-                //throw new Exception("BitReader error.");
+                    //throw new Exception("BitReader error.");
 
                 byteStart = (status / 8) + (status % 8 > 0 ? 0x01 : 0);
 
@@ -180,7 +181,7 @@ namespace ClHcaSharp
             }
         }
 
-        public float[] ReadSamples16()
+        public float[]  ReadSamples16()
         {
             List<float> data = new List<float>();
             for (int subframe = 0; subframe < Subframes; subframe++)
@@ -305,7 +306,7 @@ namespace ClHcaSharp
 
                 if (csCount > SamplesPerSubframe)
                     return;
-                //throw new InvalidDataException("Invalid scale count.");
+                    //throw new InvalidDataException("Invalid scale count.");
             }
 
             if (deltaBits >= 6)
@@ -332,7 +333,7 @@ namespace ClHcaSharp
                         int scaleFactorTest = value + (delta - (expectedDelta >> 1));
                         if (scaleFactorTest < 0 || scaleFactorTest >= 64)
                             return;
-                        //throw new InvalidDataException("Invalid scale factor.");
+                            //throw new InvalidDataException("Invalid scale factor.");
 
                         value = (byte)(value - (expectedDelta >> 1) + delta);
                         value = (byte)(value & 0x3F);
@@ -406,7 +407,7 @@ namespace ClHcaSharp
                                     value = (byte)(value - (bMax >> 1) + delta);
                                     if (value > 15)
                                         return;
-                                    //throw new InvalidDataException("Intensity value out of range.");
+                                        //throw new InvalidDataException("Intensity value out of range.");
                                 }
 
                                 channel.Intensity[i] = value;

@@ -1,10 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 
-namespace HSVPicker
+namespace HSVPicker 
 {
 
-    #region ColorUtilities
+#region ColorUtilities
 
     public static class HSVUtil
     {
@@ -133,12 +133,12 @@ namespace HSVPicker
     }
 
 
-    #endregion ColorUtilities
+#endregion ColorUtilities
 
 
-    // Describes a color in terms of
-    // Hue, Saturation, and Value (brightness)
-    #region HsvColor
+// Describes a color in terms of
+// Hue, Saturation, and Value (brightness)
+#region HsvColor
     public struct HsvColor
     {
         /// <summary>
@@ -173,36 +173,36 @@ namespace HSVPicker
             {
                 return (float)S;
             }
-            set
-            {
-                S = value;
-            }
-        }
-
-        public float normalizedV
+        set
         {
-            get
-            {
-                return (float)V;
-            }
-            set
-            {
-                V = value;
-            }
-        }
-
-        public HsvColor(double h, double s, double v)
-        {
-            this.H = h;
-            this.S = s;
-            this.V = v;
-        }
-
-        public override string ToString()
-        {
-            return "{" + H.ToString("f2") + "," + S.ToString("f2") + "," + V.ToString("f2") + "}";
+            S = (double)value;
         }
     }
+
+    public float normalizedV
+    {
+        get
+        {
+            return (float)V;
+        }
+        set
+        {
+            V = (double)value;
+        }
+    }
+
+    public HsvColor(double h, double s, double v)
+    {
+        this.H = h;
+        this.S = s;
+        this.V = v;
+    }
+
+    public override string ToString()
+    {
+        return "{" + H.ToString("f2") + "," + S.ToString("f2") + "," + V.ToString("f2") + "}";
+    }
+}
     #endregion HsvColor
 
 

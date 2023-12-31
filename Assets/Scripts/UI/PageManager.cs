@@ -1,7 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Gallop;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class PageManager : MonoBehaviour
 {
@@ -35,8 +43,8 @@ public class PageManager : MonoBehaviour
         totalPage = 0;
         currentPage = 0;
         PageText.text = "";
-        if (SearchText)
-            SearchText.text = "";
+        if(SearchText)
+        SearchText.text = "";
         SearchText.interactable = false;
         SubEntries = null;
         Entries = null;
@@ -51,29 +59,29 @@ public class PageManager : MonoBehaviour
         PageText.text = "";
         ((Text)PageText.placeholder).text = $"{currentPage + 1} / {totalPage}";
         var start = ShowCount * index;
-        for (int i = 0; i < ShowCount; i++)
+        for (int i = 0;i< ShowCount; i++)
         {
             if (start + i >= entries.Count) break;
             var entry = entries[start + i];
             var container = Instantiate(ContainerPrefab, ScrollRect.content).GetComponent<UmaUIContainer>();
             container.Name = container.name = entry.Name;
-            if (entry.FontSize > 0)
+            if (entry.FontSize > 0) 
             {
                 container.FontSize = entry.FontSize;
             }
-            if (entry.Sprite != null)
+            if(entry.Sprite != null)
             {
                 container.Image.sprite = entry.Sprite;
                 container.Image.enabled = true;
             }
-            container.Button.onClick.AddListener(() => { entry.OnClick(container); });
+            container.Button.onClick.AddListener(()=> { entry.OnClick(container); });
         }
     }
 
     public void JumpToPage(string index)
     {
         PageText.text = "";
-        if (totalPage == 0 || index == "") return;
+        if (totalPage == 0|| index == "") return;
         currentPage = Mathf.Clamp(int.Parse(index) - 1, 0, totalPage - 1);
         LoadPage(currentPage);
     }
@@ -82,7 +90,7 @@ public class PageManager : MonoBehaviour
     {
         Clear();
         if (Entries == null) return;
-        if (val == "")
+        if(val == "")
         {
             Initialize(Entries, ScrollRect);
         }

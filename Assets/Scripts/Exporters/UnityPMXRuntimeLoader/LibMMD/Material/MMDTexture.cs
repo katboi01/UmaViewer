@@ -1,4 +1,6 @@
-﻿namespace LibMMD.Material
+﻿using System;
+
+namespace LibMMD.Material
 {
     public class MMDTexture
     {
@@ -19,7 +21,7 @@
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((MMDTexture)obj);
+            return Equals((MMDTexture) obj);
         }
 
         public override int GetHashCode()
@@ -29,8 +31,8 @@
 
         private MMDTexture()
         {
-
+            
         }
-
+     
     }
 }

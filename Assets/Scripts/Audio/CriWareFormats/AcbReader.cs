@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CriWareFormats.Common;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CriWareFormats

@@ -1,7 +1,8 @@
-using System;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using System.Collections;
+using System;
+using System.Reflection;
 
 namespace RootMotion.FinalIK
 {

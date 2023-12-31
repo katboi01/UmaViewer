@@ -1,8 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UnityEngine;
+using static RootMotion.FinalIK.IKSolverVR;
+using System.Linq;
+using System.IO;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
 {
@@ -71,7 +75,7 @@ namespace Gallop.Live.Cutt
         private MultiCamera[] _multiCamera;
 
         private bool _isMultiCameraEnable;
-
+        
         private bool _isNowAlterUpdate;
 
         private float _oldFrame;
@@ -231,7 +235,7 @@ namespace Gallop.Live.Cutt
             //}
         }
 
-        public void InitCharaMotionSequence(int[] motionSequence)
+        public void InitCharaMotionSequence(int[] motionSequence) 
         {
             //Create Animation
             foreach (var obj in Director.instance.charaObjs)
@@ -269,7 +273,7 @@ namespace Gallop.Live.Cutt
                     _motionSequenceArray[i].Initialize(Director.instance.charaObjs[i], i, motionSequence[i], this);
                 }
             }
-            else if (Director.instance.liveMode == 0)
+            else if(Director.instance.liveMode == 0)
             {
                 List<AnimationClip> Anims = new List<AnimationClip>();
                 //Get MotionList
@@ -292,7 +296,7 @@ namespace Gallop.Live.Cutt
                     _motionSequenceArray[i].Initialize(Director.instance.charaObjs[i], i, motionSequence[i], this, Anims);
                 }
             }
-
+  
         }
 
         public void AlterUpdate(float liveTime)
@@ -326,22 +330,22 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CameraRoll(workSheet, _currentFrame);
             AlterUpdate_MultiCamera(workSheet, _currentFrame);
             _isNowAlterUpdate = false;
-
+            
             if (IsRecordVMD)
             {
                 var currentFrame = Mathf.RoundToInt(_currentFrame);
                 var oldFrame = Mathf.RoundToInt(_oldFrame);
                 CacheCamera cacheCamera = GetCamera(workSheet.targetCameraIndex);
-                if ((oldFrame == currentFrame && currentFrame > 0) || cacheCamera == null) return;
+                if ((oldFrame == currentFrame && currentFrame > 0)|| cacheCamera == null) return;
 
                 LiveCameraFrame lastframe = RecordFrames.Count > 0 ? RecordFrames[RecordFrames.Count - 1] : null;
-
+                
                 var transform = cacheCamera.cacheTransform;
                 var camera = cacheCamera.camera;
                 LiveCameraFrame frame = new LiveCameraFrame(currentFrame, transform, camera.fieldOfView, lastframe);
                 RecordFrames.Add(frame);
 
-                for (int i = 0; i < MultiRecordFrames.Count; i++)
+                for (int i = 0; i < MultiRecordFrames.Count; i++) 
                 {
                     var MulFrame = MultiRecordFrames[i];
                     LiveCameraFrame lastMulframe = MulFrame.Count > 0 ? MulFrame[MulFrame.Count - 1] : null;
@@ -379,7 +383,7 @@ namespace Gallop.Live.Cutt
             }
 
             var otherFacialDataList = data.worksheetList[0].other4FacialArray;
-            for (int i = 0; i < otherFacialDataList.Length && i < Director.instance.characterCount - 1; i++)
+            for(int i = 0; i < otherFacialDataList.Length && i < Director.instance.characterCount - 1; i++)
             {
                 SetupFacialUpdateInfo_Mouth(ref updateInfo, otherFacialDataList[i].mouthKeys, liveTime);
                 SetupFacialUpdateInfo_Eye(ref updateInfo, otherFacialDataList[i].eyeKeys, liveTime);
@@ -387,7 +391,7 @@ namespace Gallop.Live.Cutt
                 SetupFacialUpdateInfo_Ear(ref updateInfo, otherFacialDataList[i].earKeys, liveTime);
                 SetupFacialUpdateInfo_EyeTrack(ref updateInfo, otherFacialDataList[i].eyeTrackKeys, liveTime);
                 SetupFacialUpdateInfo_Effect(ref updateInfo, otherFacialDataList[i].effectKeys, liveTime);
-                this.OnUpdateFacial(updateInfo, liveTime, i + 1);
+                this.OnUpdateFacial(updateInfo, liveTime, i+1);
             }
         }
 
@@ -563,7 +567,7 @@ namespace Gallop.Live.Cutt
         private static float LinearInterpolateKeyframes(LiveTimelineKey from, LiveTimelineKey to, float curFrame)
         {
             int num = to.frame - from.frame;
-            return Mathf.Clamp01((curFrame - from.frame) / num);
+            return Mathf.Clamp01((curFrame - (float)from.frame) / (float)num);
         }
 
         private static float CurveInterpolateKeyframes(LiveTimelineKey from, LiveTimelineKey to, float curFrame)
@@ -579,7 +583,7 @@ namespace Gallop.Live.Cutt
                 return 0f;
             }
             int num = to.frame - from.frame;
-            float time = Mathf.Clamp01((curFrame - from.frame) / num);
+            float time = Mathf.Clamp01((curFrame - (float)from.frame) / (float)num);
             return liveTimelineKeyWithInterpolate2.curve.Evaluate(time);
         }
 
@@ -596,7 +600,7 @@ namespace Gallop.Live.Cutt
                 return 0f;
             }
             int num = to.frame - from.frame;
-            return LiveTimelineEasing.GetValue(liveTimelineKeyWithInterpolate2.easingType, curFrame - from.frame, 0f, 1f, num);
+            return LiveTimelineEasing.GetValue(liveTimelineKeyWithInterpolate2.easingType, curFrame - (float)from.frame, 0f, 1f, (float)num);
         }
 
         public void LateUpdateFormationOffset_Transform(int targetIndex, LiveTimelineKeyIndex curKeyIndex, float time)
@@ -607,7 +611,7 @@ namespace Gallop.Live.Cutt
             var chara = Director.instance.CharaContainerScript[targetIndex];
             if (!chara) return;
 
-            if (chara.LiveVisible != curKey.visible)
+            if(chara.LiveVisible != curKey.visible)
             {
                 chara.Materials.ForEach(m =>
                 {
@@ -619,11 +623,11 @@ namespace Gallop.Live.Cutt
                 });
                 chara.LiveVisible = curKey.visible;
             }
-
+            
 
             if (curKey.visible || IsRecordVMD)
             {
-                if (nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
+                if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
                     chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
@@ -959,7 +963,7 @@ namespace Gallop.Live.Cutt
                 bool flag = num > 1;
                 if (flag)
                 {
-                    retPos /= num;
+                    retPos /= (float)num;
                 }
                 /*
                 if ((uint)(parts - 11) <= 2u)
@@ -1315,7 +1319,7 @@ namespace Gallop.Live.Cutt
             }
             return true;
         }
-
+        
         private void AlterUpdate_CameraFov(LiveTimelineWorkSheet sheet, float currentFrame)
         {
             if (sheet.cameraFovKeys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !sheet.cameraFovKeys.EnablePlayModeTimeline(_playMode))
@@ -1348,7 +1352,7 @@ namespace Gallop.Live.Cutt
             }
             if (_limitFovForWidth)
             {
-                float num2 = camera.camera.pixelWidth / (float)camera.camera.pixelHeight;
+                float num2 = (float)camera.camera.pixelWidth / (float)camera.camera.pixelHeight;
                 if (num2 > _baseCameraAspectRatio)
                 {
                     float num3 = num2 / _baseCameraAspectRatio;
@@ -1455,10 +1459,10 @@ namespace Gallop.Live.Cutt
                 // camera.enabled = liveTimelineKeyMultiCameraPositionData.enableMultiCamera;
                 if (liveTimelineKeyMultiCameraPositionData.enableMultiCamera)
                 {
-
+                    
                     _isMultiCameraEnable = true;
                     //camera.cullingMask = 0x10000000 | liveTimelineKeyMultiCameraPositionData.GetCullingMask();
-
+                    
                     float zAngle;
                     float fieldOfView;
                     Vector3 maskOffset;
@@ -1479,7 +1483,7 @@ namespace Gallop.Live.Cutt
                         zAngle = liveTimelineKeyMultiCameraPositionData.roll;
                     }
 
-
+                    
 
                     camera.nearClipPlane = liveTimelineKeyMultiCameraPositionData.nearClip;
                     camera.farClipPlane = liveTimelineKeyMultiCameraPositionData.farClip;
@@ -1494,7 +1498,7 @@ namespace Gallop.Live.Cutt
                     if (_multiCamera[i].maskIndex >= 0)
                     {
                         _multiCamera[i].MaskOffset = maskOffset;
-                        _multiCamera[i].MaskRoll = maskRoll;
+                        _multiCamera[i].MaskRoll= maskRoll;
                         //_multiCamera[i].maskScale = maskScale;
                     }
                 }
@@ -1553,8 +1557,8 @@ namespace Gallop.Live.Cutt
             if (_multiCameraCache != null)
             {
                 AlterUpdate_MultiCameraPosition(sheet, currentFrame);
-                if (_isMultiCameraEnable)
-                    AlterUpdate_MultiCameraLookAt(sheet, currentFrame);
+                if(_isMultiCameraEnable)
+                AlterUpdate_MultiCameraLookAt(sheet, currentFrame);
             }
         }
 

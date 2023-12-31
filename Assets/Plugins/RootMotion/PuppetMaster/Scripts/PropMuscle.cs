@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 namespace RootMotion.Dynamics
 {
@@ -8,7 +9,7 @@ namespace RootMotion.Dynamics
     /// </summary>
     public class PropMuscle : MonoBehaviour
     {
-        [SerializeField][HideInInspector] public PuppetMaster puppetMaster;
+        [SerializeField] [HideInInspector] public PuppetMaster puppetMaster;
 
         [Tooltip("The PuppetMasterProp currently held by this Prop Muscle. To pick up a prop, just assign it as propMuscle.currentProp. To drop, set propMuscle.currentProp to null. Replacing this value with another prop drops any previously held props.")]
         /// <summary>
@@ -43,7 +44,7 @@ namespace RootMotion.Dynamics
         /// </summary>
         /// <param name="prop"></param>
         public delegate void PropDelegate(PuppetMasterProp prop);
-
+        
         /// <summary>
         /// Called after a prop has been picked up by this PropMuscle.
         /// </summary>

@@ -1,4 +1,6 @@
-﻿public enum ColorValues
+﻿using UnityEngine;
+
+public enum ColorValues
 {
     R,
     G,

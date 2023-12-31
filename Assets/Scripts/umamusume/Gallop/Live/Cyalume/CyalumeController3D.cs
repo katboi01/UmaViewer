@@ -1,6 +1,7 @@
-using Gallop.Cyalume;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Gallop.Cyalume;
 
 namespace Gallop.Live.Cyalume
 {
@@ -16,7 +17,7 @@ namespace Gallop.Live.Cyalume
         {
             InitializeCyalume();
             gameObject.GetComponent<CyalumeController3D>().enabled = true;
-
+            
         }
 
         private void Update()
@@ -24,7 +25,7 @@ namespace Gallop.Live.Cyalume
             if (passedtime >= intervaltime)
             {
                 y_offset += (float)0.03125;
-                if (y_offset >= 1.0f)
+                if(y_offset >= 1.0f)
                 {
                     y_offset = 0.0f;
                 }
@@ -44,8 +45,7 @@ namespace Gallop.Live.Cyalume
             foreach (StringObjectPair obj in CyalumeObject)
             {
                 GameObject tempObj = Instantiate((GameObject)obj.Value, transform);
-                if (obj.Value.name.Contains("cyalume"))
-                {
+                if (obj.Value.name.Contains("cyalume")){
                     CyalumeObj = tempObj;
                     CyalumeMaterial = gameObject.GetComponentInChildren<MeshRenderer>().sharedMaterial;
                 }

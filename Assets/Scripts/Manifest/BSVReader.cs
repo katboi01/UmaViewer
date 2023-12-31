@@ -57,7 +57,7 @@ public class BSVReader
         var arraySegment = new ArraySegment<byte>(buf, offset, bytes);
         offset += bytes;
         ulong n = 0;
-        for (int i = arraySegment.Offset; i < arraySegment.Offset + arraySegment.Count; i++)
+        for(int i = arraySegment.Offset; i < arraySegment.Offset+arraySegment.Count; i++)
         {
             n = n << 8;
             n |= arraySegment.Array[i];
@@ -67,7 +67,7 @@ public class BSVReader
     public static ArraySegment<byte> ReadText(byte[] buf, ref int offset)
     {
         int start = offset;
-        while (offset < buf.Length && buf[offset] != 0)
+        while (offset < buf.Length &&buf[offset] != 0)
         {
             offset++;
         }
@@ -102,11 +102,11 @@ public class BSVReader
         return subArray;
     }
 
-    internal static IBSVReader Init(string path, bool isCompressed, ReadMode mode = ReadMode.Memory)
+    internal static IBSVReader Init(string path, bool isCompressed,ReadMode mode = ReadMode.Memory)
     {
         try
         {
-            byte[] input = isCompressed ? LZ4Util.DecompressFromFile(path) : File.ReadAllBytes(path);
+            byte[] input = isCompressed? LZ4Util.DecompressFromFile(path): File.ReadAllBytes(path);
 
             if (mode == ReadMode.Stream)
             {

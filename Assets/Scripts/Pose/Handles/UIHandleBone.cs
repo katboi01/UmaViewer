@@ -31,11 +31,11 @@ public class UIHandleBone : UIHandle
         base.Init(owner);
         if (Tags.Contains(BoneTags.Left)) SetColor(Color.green);
         if (Tags.Contains(BoneTags.Right)) SetColor(Color.blue);
-
-        Popup.AddButton("Reset All", TransformResetAll);
-        Popup.AddButton("Reset Position", TransformResetPosition);
-        Popup.AddButton("Reset Rotation", TransformResetRotation);
-        Popup.AddButton("Reset Scale", TransformResetScale);
+        
+        Popup.AddButton("Reset All",        TransformResetAll);
+        Popup.AddButton("Reset Position",   TransformResetPosition);
+        Popup.AddButton("Reset Rotation",   TransformResetRotation);
+        Popup.AddButton("Reset Scale",      TransformResetScale);
 
         return this;
     }

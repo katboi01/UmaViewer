@@ -1,7 +1,7 @@
 ﻿namespace LibMMD.Util
 {
     using UnityEngine;
-
+ 
     public static class MatrixExtensions
     {
         public static Quaternion ExtractRotation(this Matrix4x4 matrix)
@@ -10,15 +10,15 @@
             forward.x = matrix.m02;
             forward.y = matrix.m12;
             forward.z = matrix.m22;
-
+ 
             Vector3 upwards;
             upwards.x = matrix.m01;
             upwards.y = matrix.m11;
             upwards.z = matrix.m21;
-
+ 
             return Quaternion.LookRotation(forward, upwards);
         }
-
+ 
         public static Vector3 ExtractPosition(this Matrix4x4 matrix)
         {
             Vector3 position;
@@ -27,7 +27,7 @@
             position.z = matrix.m23;
             return position;
         }
-
+ 
         public static Vector3 ExtractScale(this Matrix4x4 matrix)
         {
             Vector3 scale;

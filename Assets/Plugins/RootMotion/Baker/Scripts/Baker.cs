@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using UnityEngine.Playables;
 
 #if UNITY_EDITOR
@@ -112,8 +113,8 @@ namespace RootMotion
         public bool isBaking { get; private set; }
         public float bakingProgress { get; private set; }
 
-        [SerializeField][HideInInspector] public Animator animator;
-        [SerializeField][HideInInspector] public PlayableDirector director;
+        [SerializeField] [HideInInspector] public Animator animator;
+        [SerializeField] [HideInInspector] public PlayableDirector director;
 
         protected abstract Transform GetCharacterRoot();
         protected abstract void OnStartBaking();
@@ -288,7 +289,7 @@ namespace RootMotion
                     }
 
                     clipFrames = (int)(clipLength * (frameRate));
-                    clipFrameInterval = clipLength / clipFrames;
+                    clipFrameInterval = clipLength / (float)(clipFrames);
                     setKeyframes = true;
 
                     // Stop clip baking if the clip is finished, start baking the next clip if possible
@@ -346,7 +347,7 @@ namespace RootMotion
 
                 OnSetKeyframes(Time.time - startBakingTime, false);
 
-                nextKeyframeTime = Time.time + (1f / frameRate);
+                nextKeyframeTime = Time.time + (1f / (float)frameRate);
             }
 
         }
@@ -464,7 +465,7 @@ namespace RootMotion
             ClearBakedClips();
         }
 
-        protected virtual void SetClipSettings(AnimationClip clip, AnimationClipSettings settings) { }
+        protected virtual void SetClipSettings(AnimationClip clip, AnimationClipSettings settings) {}
 
         private string GetFullPath(int clipIndex)
         {

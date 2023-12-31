@@ -1,10 +1,12 @@
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using System;
+using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -16,7 +18,7 @@ public class UmaViewerMain : MonoBehaviour
     public List<CharaEntry> MobCharacters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
     public List<CostumeEntry> Costumes = new List<CostumeEntry>();
-    public Dictionary<string, UmaDatabaseEntry> AbList = new Dictionary<string, UmaDatabaseEntry>();
+    public Dictionary<string,UmaDatabaseEntry> AbList = new Dictionary<string, UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbMotions = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbSounds = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbChara = new List<UmaDatabaseEntry>();
@@ -101,7 +103,7 @@ public class UmaViewerMain : MonoBehaviour
         yield return null;
         foreach (var item in MobCharaData)
         {
-            if (Convert.ToInt32(item["use_live"]) == 0)
+            if (Convert.ToInt32(item["use_live"]) == 0) 
             {
                 continue;
             }
@@ -110,7 +112,7 @@ public class UmaViewerMain : MonoBehaviour
             var name = mobNames.ContainsKey(id) ? mobNames[id] : "";
             MobCharacters.Add(new CharaEntry()
             {
-                Name = string.IsNullOrEmpty(name) ? $"Mob_{id}" : name,
+                Name = string.IsNullOrEmpty(name)? $"Mob_{id}" : name,
                 Icon = UmaViewerBuilder.Instance.LoadMobCharaIcon(id.ToString()),
                 Id = id,
                 IsMob = true
@@ -123,7 +125,7 @@ public class UmaViewerMain : MonoBehaviour
         {
             var costume = new CostumeEntry();
             var name = Path.GetFileName(item.Name);
-            costume.Id = name.Replace("dress_", "");
+            costume.Id = name.Replace("dress_","");
             costume.Icon = Builder.LoadSprite(item);
             Costumes.Add(costume);
         }
@@ -131,7 +133,7 @@ public class UmaViewerMain : MonoBehaviour
         var DressData = UmaDatabaseController.Instance.DressData;
         foreach (var data in DressData)
         {
-            var costume = Costumes.FirstOrDefault(a => a.Id.Split('_')[0].Contains(data["id"].ToString()));
+            var costume = Costumes.FirstOrDefault(a => a.Id.Split('_')[0].Contains(data["id"].ToString()) );
             if (costume != null)
             {
                 costume.CharaId = Convert.ToInt32(data["chara_id"]);
@@ -170,7 +172,7 @@ public class UmaViewerMain : MonoBehaviour
                                 MemberCount = membercount,
                                 DefaultDress = defaultdress,
                                 Icon = UmaViewerBuilder.Instance.LoadLiveIcon(musicId)
-                            });
+                            }); 
                         }
                     }
                 }
@@ -196,12 +198,12 @@ public class UmaViewerMain : MonoBehaviour
 
         //Load Shader First
         var shaders = UmaAssetManager.LoadAssetBundle(AbList["shader"], true);
-        Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>());
+        Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>()); 
     }
 
     public void ChangeAA(int val)
     {
-
+        
     }
 
 
