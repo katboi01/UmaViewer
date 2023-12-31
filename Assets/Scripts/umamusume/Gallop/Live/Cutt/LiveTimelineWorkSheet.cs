@@ -1,7 +1,5 @@
-using Gallop.Live.Cutt;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
@@ -68,24 +66,6 @@ namespace Gallop.Live.Cutt
         Back = 262136,
         Other = 262142,
         All = 262143
-    }
-    
-    public enum LiveCameraLookAtCharaParts
-    {
-        Face,
-        Waist,
-        LeftHandWrist,
-        RightHandAttach,
-        Chest,
-        Foot,
-        ConstHeightFace,
-        ConstHeightWaist,
-        ConstHeightChest,
-        RightHandWrist,
-        LeftHandAttach,
-        AxisLockedFace,
-        AxisLockedChest,
-        AxisLockedWaist
     }
 
     public enum LiveCameraCharaParts
@@ -204,7 +184,7 @@ namespace Gallop.Live.Cutt
         //TO DO -> binary search algorithm
         public LiveTimelineKeyIndex FindCurrentKey(float currentTime)
         {
-            if(thisList.Count > 0)
+            if (thisList.Count > 0)
             {
                 int ret = BinarySearchKey(0, thisList.Count - 1, currentTime);
                 if (ret == -1)
@@ -251,7 +231,7 @@ namespace Gallop.Live.Cutt
             }
             else
             {
-                if(frame >= thisList[mid].frame)
+                if (frame >= thisList[mid].frame)
                 {
                     return BinarySearchKey(mid + 1, high, time);
                 }
@@ -259,7 +239,7 @@ namespace Gallop.Live.Cutt
                 {
                     return BinarySearchKey(low, mid - 1, time);
                 }
-            } 
+            }
         }
 
         public LiveTimelineKeyIndex FindCurrentKeyLinear(float currentTime)
@@ -616,20 +596,6 @@ namespace Gallop.Live.Cutt
         public LiveTimelineKeyAttribute attribute;
     }
 
-
-    [System.Serializable]
-    public class LiveTimelineKeyTimescaleData : LiveTimelineKey
-    {
-        public float Timescale;
-    }
-
-    [System.Serializable]
-    public class LiveTimelineKeyTimescaleDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyTimescaleData>
-    {
-
-    }
-
-
     [System.Serializable]
     public abstract class LiveTimelineKeyWithInterpolate : LiveTimelineKey
     {
@@ -909,115 +875,24 @@ namespace Gallop.Live.Cutt
         public float TotalTimeLength;
         public bool Lyrics;
         public LiveTimelineDefine.SheetIndex SheetType;
-        [SerializeField] public LiveTimelineKeyTimescaleDataList timescaleKeys;
         [SerializeField] public LiveTimelineKeyCameraPositionDataList cameraPosKeys;
+        [SerializeField] public List<LiveTimelineMultiCameraPositionData> multiCameraPosKeys;
+        [SerializeField] public List<LiveTimelineMultiCameraLookAtData> multiCameraLookAtKeys;
 
         //[SerializeField]用于该类在别的脚本里定义的时候
         [SerializeField] public LiveTimelineKeyCameraLookAtDataList cameraLookAtKeys;
         [SerializeField] public LiveTimelineKeyCameraFovDataList cameraFovKeys;
         [SerializeField] public LiveTimelineKeyCameraRollDataList cameraRollKeys;
-        [SerializeField] public LiveTimelineKeyCameraMotionDataList cameraMotionKeys;
-        [SerializeField] public LiveTimelineKeyHandShakeCameraDataList handShakeCameraKeys;
-        [SerializeField] public LiveTimelineKeyEventDataList eventKeys;
 
         [SerializeField] public List<LiveTimelineCharaMotSeqData> charaMotSeqList;
-        [SerializeField] public List<LiveTimelineBgColor1Data> bgColor1List;
-        [SerializeField] public List<LiveTimelineBgColor2Data> bgColor2List;
-        [SerializeField] public List<LiveTimelineMonitorControlData> monitorControlList;
-        [SerializeField] public List<LiveTimelineAnimationData> animationList;
-        [SerializeField] public List<LiveTimelineTextureAnimationData> textureAnimationList;
-        [SerializeField] public List<LiveTimelineTransformData> transformList;
-        [SerializeField] public List<LiveTimelineRendererData> rendererList;
-        [SerializeField] public List<LiveTimelineObjectData> objectList;
-        [SerializeField] public List<LiveTimelineWaveObjectData> waveObjectList;
-        [SerializeField] public List<LiveTimelineAudienceData> audienceList;
-        [SerializeField] public List<LiveTimelinePropsData> propsList;
-        [SerializeField] public List<LiveTimelinePropsAttachData> propsAttachList;
 
         [SerializeField] public LiveTimelineKeyCameraSwitcherDataList cameraSwitcherKeys;
         [SerializeField] public LiveTimelineKeyLipSyncDataList ripSyncKeys;
         [SerializeField] public LiveTimelineKeyLipSyncDataList ripSync2Keys;
-        [SerializeField] public LiveTimelineKeyPostEffectDOFDataList postEffectDOFKeys;
-        [SerializeField] public LiveTimelineKeyPostEffectBloomDiffusionDataList postEffectBloomDiffusionKeys;
-        [SerializeField] public LiveTimelineKeyRadialBlurDataList radialBlurKeys;
-        [SerializeField] public LiveTimelineKeyPostFilmDataList postFilmKeys;
-        [SerializeField] public LiveTimelineKeyPostFilmDataList postFilm2Keys;
-        [SerializeField] public LiveTimelineKeyPostFilmDataList postFilm3Keys;
-        [SerializeField] public LiveTimelineKeyFluctuationDataList FluctuationKeys;
-        [SerializeField] public LiveTimelineKeyVortexDataList VortexKeys;
-        [SerializeField] public LiveTimelineKeyFadeDataList fadeKeys;
-        [SerializeField] public LiveTimelineKeyCameraLayerDataList cameraLayerKeys;
-
-        [SerializeField] public List<LiveTimelineProjectorData> projecterList;
 
         [SerializeField] public LiveTimelineFacialData facial1Set;
-        [SerializeField] public LiveTimelineKeyFacialEyeTrackDataList other4EyeTrackKeys;
-        [SerializeField] public LiveTimelineKeyToneCurveDataList ToneCurveKeys;
-        [SerializeField] public LiveTimelineKeyExposureDataList ExposureKeys;
         [SerializeField] public LiveTimelineFacialData[] other4FacialArray;
-        [SerializeField] public LiveTimelineKeyFacialNoiseDataList facialNoiseKeys;
-        [SerializeField] public LiveTimelineKeyCharaMotionNoiseDataList charaMotionNoiseKeys;
         [SerializeField] public LiveTimelineFormationOffsetData formationOffsetSet;
-
-        [SerializeField] public List<LiveTimelineVolumeLightData> volumeLightKeys;
-        [SerializeField] public List<LiveTimelineHdrBloomData> hdrBloomKeys;
-        [SerializeField] public List<LiveTimelineParticleData> particleList;
-        [SerializeField] public List<LiveTimelineParticleGroupData> particleGroupList;
-        [SerializeField] public List<LiveTimelineWashLightData> WashLightList;
-        [SerializeField] public List<LiveTimelineLaserData> laserList;
-        [SerializeField] public List<LiveTimelineBlinkLightData> blinkLightList;
-        [SerializeField] public List<LiveTimelineUVScrollLightData> uvScrollLightList;
-
-        [SerializeField] public LiveTimelineFacialToonData facialToonSet;
-
-        [SerializeField] public List<LiveTimelineGlobalLightData> globalLightDataLists;
-        [SerializeField] public List<LiveTimelineGlobalFogData> globalFogDataLists;
-        [SerializeField] public List<LiveTimelineColorCorrectionData> colorCorrectionDataLists;
-        [SerializeField] public List<LiveTimelineLightShaftsData> lightShaftsKeysLine;
-        [SerializeField] public List<LiveTimelineMonitorCameraPositionData> monitorCameraPosKeys;
-        [SerializeField] public List<LiveTimelineMonitorCameraLookAtData> monitorCameraLookAtKeys;
-        [SerializeField] public List<LiveTimelineMultiCameraPositionData> multiCameraPosKeys;
-        [SerializeField] public List<LiveTimelineMultiCameraLookAtData> multiCameraLookAtKeys;
-        [SerializeField] public List<LiveTimelineLensFlareData> lensFlareList;
-        [SerializeField] public List<LiveTimelineEnvironmentData> environmentDataLists;
-        [SerializeField] public List<LiveTimelineSweatLocatorData> sweatLocatorList;
-        [SerializeField] public List<LiveTimelineEffectData> effectList;
-
-        [SerializeField] public LiveTimelineKeyTiltShiftDataList tiltShiftKeys;
-        [SerializeField] public LiveTimelineKeyFlashPlayerDataList flashPlayerKeys;
-        [SerializeField] public LiveTimelineKeyTitleDataList titleKeys;
-
-        [SerializeField] public List<LiveTimelineSpotlight3dData> spotlight3dList;
-        [SerializeField] public List<LiveTimelineCharaNodeData> CharaNodeDataList;
-        [SerializeField] public List<LiveTimelineNodeScaleData> nodeScaleList;
-
-        [SerializeField] public LiveTimelineKeyCharaFootLightDataList charaFootLightKeys;
-
-        [SerializeField] public List<LiveTimelineChromaticAberrationData> chromaticAberrationList;
-        [SerializeField] public List<LiveTimelineLightProjectionData> lightProjectionList;
-        [SerializeField] public List<LiveTimelineBillboardData> billboardList;
-        [SerializeField] public List<LiveTimelineMultiCameraPostFilmData> postFilm1MultiCameraKeys;
-        [SerializeField] public List<LiveTimelineMultiCameraPostEffectBloomDiffusionData> postEffectBloomDiffusionMultiCameraKeys;
-        [SerializeField] public List<LiveTimelineMultiCameraColorCorrectionData> multiCameraColorCorrectionDataLists;
-        [SerializeField] public List<LiveTimelineMultiCameraTiltShiftData> multiCameraTiltShiftDataLists;
-        [SerializeField] public List<LiveTimelineMultiCameraRadialBlurData> multiCameraRadialBlurDataLists;
-        [SerializeField] public List<LiveTimelineMultiCameraPostEffectDOFData> postEffectDOFMultiCameraKeys;
-        [SerializeField] public List<LiveTimelineAdditionalLight> AdditionalLightList;
-
-        [SerializeField] public LiveTimelineKeyMultiLightShadowDataList MultiLightShadowKeys;
-
-        [SerializeField] public List<LiveTimelineMobControlData> MobControlKeys;
-        [SerializeField] public List<LiveTimelineCyalumeControlData> CyalumeControlKeys;
-
-        [SerializeField] public LiveTimelineCharaWindData charaWind;
-        [SerializeField] public LiveTimelineCharaPartsData CharaPartsKeys;
-
-        [SerializeField] public List<LiveTimelineCharaCollisionData> CharaCollisionDataList;
-        [SerializeField] public List<LiveTimelineEyeCameraPositionData> EyeCameraPosList;
-        [SerializeField] public List<LiveTimelineEyeCameraLookAtData> EyeCameraLookAtList;
-
-
-
 
         /*
 		//终于可以调用AB包了，虽然后面发现没什么用...说不定什么时候能用到
@@ -1064,7 +939,7 @@ namespace Gallop.Live.Cutt
         }
 
         public static bool hasFlag(this LiveTimelineKeyAttribute This, LiveTimelineKeyAttribute bit)
-        {
+    {
             return (This & bit) != 0;
         }
     }
