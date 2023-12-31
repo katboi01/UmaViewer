@@ -16,46 +16,4 @@ namespace Gallop.Live.Cutt
     {
         public string name;
     }
-
-    [System.Serializable]
-    public class LiveTimelineKeyBgColor1Data : LiveTimelineKeyWithInterpolate
-    {
-        public Color color;
-        public float power;
-        public float scale;
-        public int flags;
-        public Color toonDarkColor;
-        public Color toonBrightColor;
-        public float vertexColorToonPower;
-        public float outlineWidthPower;
-        public Color outlineColor;
-        public ModelController.OutlineColorBlend outlineColorBlend;
-        public LiveDefine.LightBlendMode LightBlendMode;
-        public bool IsProjector;
-        public LiveTimelineKeyLoopType loopType;
-        public int loopCount;
-        public int loopExecutedCount;
-        public int loopIntervalFrame;
-        public bool isPasteLoopUnit;
-        public bool isChangeLoopInterpolate;
-        public float f32;
-        public LiveTimelineKeyLoopType _loopType;
-        public int _loopCount;
-        public int _loopExecutedCount;
-        public int _loopIntervalFrame;
-        public bool _isChangeLoopInterpolate;
-    }
-
-    [System.Serializable]
-    public class LiveTimelineKeyBgColor1DataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyBgColor1Data>
-    {
-
-    }
-
-    [System.Serializable]
-    public class LiveTimelineBgColor1Data : ILiveTimelineGroupDataWithName
-    {
-        private const string default_name = "BgColor1";
-        public LiveTimelineKeyBgColor1DataList keys;
-    }
 }
