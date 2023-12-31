@@ -443,8 +443,6 @@ public class Director : MonoBehaviour
 
     private RandomTable<float> _randomTable = new RandomTable<float>();
 
-    private LyricsManager _lyricsManager;
-
     private PropsManager _propsManager = new PropsManager();
 
     private StageController _stageController;
@@ -1155,10 +1153,6 @@ public class Director : MonoBehaviour
             if (_cameraLookAt != null && isTimelineControlled)
             {
                 _cameraLookAt.AlterUpdate();
-            }
-            if (_lyricsManager != null)
-            {
-                _lyricsManager.UpdateTime(instance.musicScoreTime);
             }
         }
     }
@@ -3209,14 +3203,6 @@ public class Director : MonoBehaviour
         ApplyShaderQualityLevel();
         CheckSwitchSheetCharacter(_liveTimelineControl);
         CheckSwitchSheetAltCharacter(_liveTimelineControl, null);
-        if (_isBootDirect)
-        {
-            _lyricsManager = LyricsManager.getCompornent();
-            if (_lyricsManager != null)
-            {
-                _lyricsManager.CreateLyricsObject(_live3DSettings._id);
-            }
-        }
     }
 
     private void ShaderWarmup()

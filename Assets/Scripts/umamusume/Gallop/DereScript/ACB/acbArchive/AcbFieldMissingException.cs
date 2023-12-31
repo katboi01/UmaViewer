@@ -10,10 +10,5 @@ namespace DereTore.Exchange.Archive.ACB
         {
         }
 
-        public AcbFieldMissingException(string fieldName, Exception innerException)
-            : base("Missing" + fieldName + "field.", innerException)
-        {
-        }
-
     }
 }

@@ -64,6 +64,7 @@ public class AssetManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        throw new Exception();
         Init();
     }
 
@@ -161,7 +162,7 @@ public class AssetManager : MonoBehaviour
     {
         if (DLProgress != null)
         {
-            DLProgress.GetComponent<UIDLProgress>().SetText(DLProgressText);
+            Debug.Log(DLProgressText);
         }
     }
 
