@@ -1,5 +1,4 @@
-﻿using Stage;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MultiCamera : MonoBehaviour
 {
@@ -62,7 +61,7 @@ public class MultiCamera : MonoBehaviour
         if (!(_camera == null))
         {
             _camera.depth = cameraDepth;
-            _camera.cullingMask = StageUtil.Background3dAllLayers() | StageUtil.CharaAllLayers();
+            _camera.cullingMask = Stage.StageUtil.Background3dAllLayers() | Stage.StageUtil.CharaAllLayers();
             _camera.clearFlags = CameraClearFlags.Depth;
             _camera.allowHDR = false;
             _camera.SetTargetBuffers(colorBuffer.colorBuffer, depthBuffer.depthBuffer);

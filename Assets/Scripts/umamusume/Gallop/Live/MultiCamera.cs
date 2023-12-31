@@ -52,13 +52,6 @@ namespace Gallop.Live
             _maskIndex = -1;
         }
 
-        public void AttachMask(ref MultiCameraManager.MaskInfo maskInfo, int maskIndex)
-        {
-            _maskIndex = maskIndex;
-            _maskTransform = maskInfo.transform;
-            _maskRenderer = maskInfo.renderer;
-        }
-
         public void Initialize()
         {
             if (!(_camera != null))

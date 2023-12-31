@@ -1,5 +1,4 @@
-﻿using Cutt;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class MultiCameraManager : MonoBehaviour
@@ -118,48 +117,5 @@ public class MultiCameraManager : MonoBehaviour
     {
         ReleaseMask();
         Release();
-    }
-
-    public void LoadMaskResource(LiveTimelineMultiCameraMaskSettings setting)
-    {
-        ReleaseMask();
-        Material material = null;
-        material = ResourcesManager.instance.LoadObject(MultiCameraMaskMaterialPath) as Material;
-        _multiCameraMask = new MaskInfo[setting.maskNum];
-        for (int i = 0; i < setting.maskNum; i++)
-        {
-            string objectName = string.Format(MultiCameraMaskPath, setting.maskData[i].objectName);
-            GameObject gameObject = ResourcesManager.instance.LoadObject(objectName) as GameObject;
-            if (gameObject == null)
-            {
-                continue;
-            }
-            _multiCameraMask[i].gameObj = Object.Instantiate(gameObject);
-            _multiCameraMask[i].transform = _multiCameraMask[i].gameObj.transform;
-            _multiCameraMask[i].transform.SetParent(base.transform, worldPositionStays: false);
-            Renderer[] componentsInChildren = _multiCameraMask[i].gameObj.GetComponentsInChildren<Renderer>();
-            _multiCameraMask[i].renderer = componentsInChildren;
-            Renderer[] array = componentsInChildren;
-            foreach (Renderer renderer in array)
-            {
-                renderer.enabled = false;
-                renderer.sortingOrder = SortingOrder;
-                if (material != null)
-                {
-                    renderer.sharedMaterial = material;
-                }
-            }
-        }
-    }
-
-    public static string[] MakeAssetBundleList(LiveTimelineMultiCameraMaskSettings setting)
-    {
-        string[] array = new string[setting.maskNum + 1];
-        array[0] = MultiCameraMaterialAssetBundleName;
-        for (int i = 1; i < setting.maskNum + 1; i++)
-        {
-            array[i] = string.Format(MultiCameraAssetBundleName, setting.maskData[i - 1].objectName);
-        }
-        return array;
     }
 }
