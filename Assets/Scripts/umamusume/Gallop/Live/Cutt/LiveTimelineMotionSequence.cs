@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static RootMotion.Demos.CharacterMeleeDemo.Action;
 
 namespace Gallop.Live.Cutt
 {

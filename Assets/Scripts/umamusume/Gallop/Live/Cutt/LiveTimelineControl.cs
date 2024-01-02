@@ -74,8 +74,6 @@ namespace Gallop.Live.Cutt
 
         private MultiCamera[] _multiCamera;
 
-        private MultiCameraManager _multiCameraManager;
-
         private bool _isMultiCameraEnable;
         
         private bool _isNowAlterUpdate;
