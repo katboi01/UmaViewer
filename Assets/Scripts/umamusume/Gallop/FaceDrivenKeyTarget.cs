@@ -1,12 +1,11 @@
 using Gallop.Live.Cutt;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static DynamicBone;
 using static Gallop.DrivenKeyComponent;
-using static Gallop.FaceDrivenKeyTarget;
 using static Gallop.Live.Cutt.LiveTimelineDefine;
-using static RootMotion.FinalIK.FBBIKHeadEffector;
 
 namespace Gallop
 {
@@ -32,6 +31,7 @@ namespace Gallop
         public List<FacialMorph> EyeMorphs = new List<FacialMorph>();
         public List<FacialMorph> MouthMorphs = new List<FacialMorph>();
         public List<FacialOtherMorph> OtherMorphs = new List<FacialOtherMorph>();
+        public List<FacialMorph> AllMorphs => EarMorphs.Concat(EyeBrowMorphs).Concat(EyeMorphs).Concat(MouthMorphs).Concat(OtherMorphs).ToList();
 
         public Transform DrivenKeyLocator;
         public Transform EyeballCtrl_L_Locator, EyeballCtrl_R_Locator, EyeballCtrl_All_Locator;

@@ -1,15 +1,13 @@
 using Gallop;
-using Gallop.Live.Cutt;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using static SerializableBone;
 
 public class UmaContainerCharacter : UmaContainer
 {
@@ -86,6 +84,7 @@ public class UmaContainerCharacter : UmaContainer
     private Collider dragCollider;
     private BipedIK IK;
     private PuppetMaster PuppetMaster;
+    private List<Transform> _humanoidBones;
 
     public void Initialize(bool smile)
     {
@@ -281,6 +280,11 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
+    public void SetPuppetMasterMode(PuppetMaster.Mode mode)
+    {
+        PuppetMaster.mode = mode;
+    }
+
     public void SetDynamicBoneEnable(bool isOn)
     {
         if (IsMini) return;
@@ -307,121 +311,120 @@ public class UmaContainerCharacter : UmaContainer
 
     public void SetFaceOverrideData(bool isOn)
     {
-        FaceOverrideData.SetEnable(isOn);
+        FaceOverrideData?.SetEnable(isOn);
     }
 
     private void FixedUpdate()
     {
-        if (!IsMini)
+        if (IsMini) return;
+
+        if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
         {
-            if (TrackTarget && EnableEyeTracking && !isAnimatorControl)
+            if (IK && !IK.enabled)
             {
-                if (IK && !IK.enabled)
+                IK.enabled = true;
+                if (PuppetMaster.mode != PuppetMaster.Mode.Active)
                 {
-                    IK.enabled = true;
-                    if (PuppetMaster.mode != PuppetMaster.Mode.Active)
-                    {
-                        PuppetMaster.mode = PuppetMaster.Mode.Active;
-                    }
+                    SetPuppetMasterMode(PuppetMaster.Mode.Active);
                 }
+            }
 
-                var finalRotation = FaceDrivenKeyTarget.GetEyeTrackRotation(TrackTarget.transform.position);
-                FaceDrivenKeyTarget.SetEyeTrack(finalRotation);
+            var finalRotation = FaceDrivenKeyTarget.GetEyeTrackRotation(TrackTarget.transform.position);
+            FaceDrivenKeyTarget.SetEyeTrack(finalRotation);
 
-                var cam = Camera.main;
-                var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
-                var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
-                var worldPos = cam.ScreenToWorldPoint(mousePos);
+            var cam = Camera.main;
+            var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
+            var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
+            var worldPos = cam.ScreenToWorldPoint(mousePos);
 
-                //Hold D key to Drag Body
-                if (Input.GetKey(KeyCode.D))
-                {
-                    if (dragCollider && dragCollider.attachedRigidbody)
-                    {
-                        if (PuppetMaster)
-                        {
-                            PuppetMaster.pinWeight = 0.75f;
-                            PuppetMaster.muscleWeight = 0.25f;
-                        }
-                        dragCollider.attachedRigidbody.isKinematic = true;
-                        dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
-                        //LookAt Mouse when Dragging
-                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, dragCollider.transform.position, Time.fixedDeltaTime * 3);
-                    }
-                    else
-                    {
-                        if (Physics.Raycast(cam.ScreenPointToRay(mousePos), out RaycastHit hit))
-                        {
-                            dragCollider = hit.collider;
-                            dragStartPos = (hit.point - hit.collider.transform.position);
-                            dragdistance = cam.transform.InverseTransformPoint(hit.point).magnitude;
-                        }
-                        //LookAt Camera
-                        TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                    }
-                }
-                else
+            //Hold D key to Drag Body
+            if (Input.GetKey(KeyCode.D))
+            {
+                if (dragCollider && dragCollider.attachedRigidbody)
                 {
                     if (PuppetMaster)
                     {
-                        PuppetMaster.pinWeight = 1;
-                        PuppetMaster.muscleWeight = 1;
+                        PuppetMaster.pinWeight = 0.75f;
+                        PuppetMaster.muscleWeight = 0.25f;
+                    }
+                    dragCollider.attachedRigidbody.isKinematic = true;
+                    dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
+                    //LookAt Mouse when Dragging
+                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, dragCollider.transform.position, Time.fixedDeltaTime * 3);
+                }
+                else
+                {
+                    if (Physics.Raycast(cam.ScreenPointToRay(mousePos), out RaycastHit hit))
+                    {
+                        dragCollider = hit.collider;
+                        dragStartPos = (hit.point - hit.collider.transform.position);
+                        dragdistance = cam.transform.InverseTransformPoint(hit.point).magnitude;
                     }
                     //LookAt Camera
                     TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                    if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
-                    dragCollider = null;
                 }
             }
             else
             {
-                if (IK && IK.enabled)
+                if (PuppetMaster)
                 {
-                    IK.enabled = false;
-                    if (PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
-                    {
-                        PuppetMaster.mode = PuppetMaster.Mode.Kinematic;
-                    }
+                    PuppetMaster.pinWeight = 1;
+                    PuppetMaster.muscleWeight = 1;
+                }
+                //LookAt Camera
+                TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
+                if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
+                dragCollider = null;
+            }
+        }
+        else
+        {
+            if (IK && IK.enabled)
+            {
+                IK.enabled = false;
+                if (PuppetMaster && PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
+                {
+                    SetPuppetMasterMode(PuppetMaster.Mode.Kinematic);
                 }
             }
+        }
 
+        if (isAnimatorControl)
+        {
+            FaceDrivenKeyTarget.ProcessLocator();
+        }
+
+        if (FaceMaterial)
+        {
             if (isAnimatorControl)
             {
-                FaceDrivenKeyTarget.ProcessLocator();
-            }
+                FaceMaterial.SetVector("_FaceForward", Vector3.zero);
+                FaceMaterial.SetVector("_FaceUp", Vector3.zero);
+                FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
 
-            if (FaceMaterial)
+            }
+            else
             {
-                if (isAnimatorControl)
-                {
-                    FaceMaterial.SetVector("_FaceForward", Vector3.zero);
-                    FaceMaterial.SetVector("_FaceUp", Vector3.zero);
-                    FaceMaterial.SetVector("_FaceCenterPos", Vector3.zero);
-
-                }
-                else
-                {
-                    //Used to calculate facial shadows
-                    FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
-                    FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
-                    FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
-                }
-                FaceMaterial.SetMatrix("_faceShadowHeadMat", HeadBone.transform.worldToLocalMatrix);
+                //Used to calculate facial shadows
+                FaceMaterial.SetVector("_FaceForward", HeadBone.transform.forward);
+                FaceMaterial.SetVector("_FaceUp", HeadBone.transform.up);
+                FaceMaterial.SetVector("_FaceCenterPos", HeadBone.transform.position);
             }
+            FaceMaterial.SetMatrix("_faceShadowHeadMat", HeadBone.transform.worldToLocalMatrix);
+        }
 
-            TearControllers.ForEach(a => a.UpdateOffset());
+        TearControllers.ForEach(a => a.UpdateOffset());
 
-            //Apply UV Animation
+        //Apply UV Animation
 
-            if(HeadShaderEffectData != null)
-            {
-                HeadShaderEffectData.updateUV(Time.fixedDeltaTime);
-            }
+        if(HeadShaderEffectData != null)
+        {
+            HeadShaderEffectData.updateUV(Time.fixedDeltaTime);
+        }
 
-            if(BodyShaderEffectData != null)
-            {
-                BodyShaderEffectData.updateUV(Time.fixedDeltaTime);
-            }
+        if(BodyShaderEffectData != null)
+        {
+            BodyShaderEffectData.updateUV(Time.fixedDeltaTime);
         }
     }
 
@@ -788,6 +791,7 @@ public class UmaContainerCharacter : UmaContainer
                             break;
                         case "Gallop/3D/Chara/ToonMayu":
                             m.shader = UmaAssetManager.EyebrowShader;
+                            m.renderQueue += 1; //fix eyebrows disappearing sometimes
                             break;
                         default:
                             Debug.Log(m.shader.name);
@@ -1368,5 +1372,197 @@ public class UmaContainerCharacter : UmaContainer
         emotionDriven.FaceDrivenKeyTarget = faceDriven;
         emotionDriven.FaceEmotionKey = UmaDatabaseController.Instance.FaceTypeData;
         emotionDriven.Initialize();
+    }
+
+    public void SetupBoneHandles()
+    {
+        if (IsLive) return;
+        UIHandleCharacterRoot rootHandle = UIHandleCharacterRoot.CreateAsChild(this);
+
+        var humanBones = GetHumanBones();
+        foreach(var bone in humanBones)
+        {
+            List<BoneTags> tags = new List<BoneTags>() { BoneTags.Humanoid };
+            if (bone.name.EndsWith("_L")) tags.Add(BoneTags.Left);
+            if (bone.name.EndsWith("_R")) tags.Add(BoneTags.Right);
+
+            if(bone.name != "Hip")
+            {
+                var handle = UIHandleBone.CreateAsChild(bone, tags).WithLineRenderer();
+                rootHandle.ChildHandles.Add(handle);
+            }
+            else
+            {
+                var handle = UIHandleBone.CreateAsChild(bone, tags);
+                rootHandle.ChildHandles.Add(handle);
+            }
+        }
+
+        var wrist_L = humanBones.Find(b => b.name == "Wrist_L");
+        foreach(var fingerBone in wrist_L.transform.GetComponentsInChildren<Transform>())
+        {
+            if(fingerBone.name.StartsWith("Index") || fingerBone.name.StartsWith("Middle") || fingerBone.name.StartsWith("Ring") || fingerBone.name.StartsWith("Pinky") || fingerBone.name.StartsWith("Thumb"))
+            {
+                List<BoneTags> tags = new List<BoneTags>() { BoneTags.Left, BoneTags.Finger };
+
+                var handle = UIHandleBone.CreateAsChild(fingerBone, tags).SetScale(0.25f).WithLineRenderer();
+                rootHandle.ChildHandles.Add(handle);
+            }
+        }
+
+        var wrist_R = humanBones.Find(b => b.name == "Wrist_R");
+        foreach (var fingerBone in wrist_R.transform.GetComponentsInChildren<Transform>())
+        {
+            if (fingerBone.name.StartsWith("Index") || fingerBone.name.StartsWith("Middle") || fingerBone.name.StartsWith("Ring") || fingerBone.name.StartsWith("Pinky") || fingerBone.name.StartsWith("Thumb"))
+            {
+                List<BoneTags> tags = new List<BoneTags>() { BoneTags.Right, BoneTags.Finger };
+
+                var handle = UIHandleBone.CreateAsChild(fingerBone, tags).SetScale(0.25f).WithLineRenderer();
+                rootHandle.ChildHandles.Add(handle);
+            }
+        }
+
+        var allBones = SaveBones();
+        foreach(var bone in allBones.Where(b => b.Tags.Contains(BoneTags.Dynamic)))
+        {
+            var handle = UIHandleBone.CreateAsChild(bone.Bone, bone.Tags).SetColor(Color.gray).SetScale(0.15f).WithLineRenderer();
+            rootHandle.ChildHandles.Add(handle);
+        }
+    }
+
+    public List<SerializableBone> SaveBones()
+    {
+        var boneList = new List<SerializableBone>();
+
+        GatherSerializableBonesRecursive(Position, boneList, 0);
+
+        return boneList;
+    }
+
+    private void GatherSerializableBonesRecursive(Transform current, List<SerializableBone> bones, int depth)
+    {
+        for(int i = 0; i < current.childCount; i++)
+        {
+            GatherSerializableBonesRecursive(current.GetChild(i), bones, depth + 1);
+        }
+
+        //this can be optimized by keeping track if the bone is dynamic
+        //and generating a list of tags beforehand
+        //otherwise getComponentInParent() is called for every bone
+        var bone = new SerializableBone(current, true);
+        
+        if(depth == 0)
+        {
+            //make it independent from character name
+            bone.ParentName = "root";
+        }
+
+        bones.Add(bone);
+    }
+
+    public bool LoadBones(PoseData data, PoseLoadOptions options)
+    {
+        var currentBones = SaveBones();
+
+        foreach (var bone in currentBones)
+        {
+            if (!options.Root && bone.ParentName == "root") continue;
+            if (!options.Physics && bone.Tags.Contains(BoneTags.Dynamic)) continue;
+
+            if (bone.Bone == null)
+            {
+                Debug.LogError($"Target bone {bone.Name} does not reference a bone in the scene.");
+                continue;
+            }
+
+            var savedBone = data.Bones.FirstOrDefault(b => b.Name == bone.Name && b.ParentName == bone.ParentName);
+            if (savedBone == null) continue;
+
+            savedBone.Transform.ApplyTo(bone.Bone, options);
+        }
+
+        //could add a 'bone not found' threshold for returning false
+        return true;
+    }
+
+    public List<Transform> GetHumanBones()
+    {
+        if(_humanoidBones == null)
+        {
+            var animator = UmaAnimator;
+
+            List<Transform> list = new List<Transform>(animator.gameObject.GetComponentsInChildren<Transform>());
+
+            _humanoidBones = new List<Transform>()
+            {
+                list.Find(t => t.name.Equals("Hip")),
+                list.Find(t => t.name.Equals("Waist")),
+                list.Find(t => t.name.Equals("Spine")),
+                list.Find(t => t.name.Equals("Chest")),
+                list.Find(t => t.name.Equals("Neck")),
+                list.Find(t => t.name.Equals("Head")),
+
+                list.Find(t => t.name.Equals("Shoulder_L")),
+                list.Find(t => t.name.Equals("Arm_L")),
+                list.Find(t => t.name.Equals("Elbow_L")),
+                list.Find(t => t.name.Equals("Wrist_L")),
+
+                list.Find(t => t.name.Equals("Shoulder_R")),
+                list.Find(t => t.name.Equals("Arm_R")),
+                list.Find(t => t.name.Equals("Elbow_R")),
+                list.Find(t => t.name.Equals("Wrist_R")),
+
+                list.Find(t => t.name.Equals("Thigh_L")),
+                list.Find(t => t.name.Equals("Knee_L")),
+                list.Find(t => t.name.Equals("Ankle_L")),
+                list.Find(t => t.name.Equals("Toe_L")),
+
+                list.Find(t => t.name.Equals("Thigh_R")),
+                list.Find(t => t.name.Equals("Knee_R")),
+                list.Find(t => t.name.Equals("Ankle_R")),
+                list.Find(t => t.name.Equals("Toe_R"))
+            };
+        }
+
+        return _humanoidBones.Where(b => b != null).ToList();
+    }
+
+    public List<SerializableMorph> SaveMorphs(bool changedOnly)
+    {
+        if (FaceDrivenKeyTarget == null)
+        {
+            return new List<SerializableMorph>();
+        }
+
+        if (changedOnly)
+        {
+            return FaceDrivenKeyTarget.AllMorphs.Where(morph => morph.weight != 0).Select(morph => new SerializableMorph(morph)).ToList();
+        }
+        else
+        {
+            return FaceDrivenKeyTarget.AllMorphs.Select(morph => new SerializableMorph(morph)).ToList();
+        }
+    }
+
+    public bool LoadMorphs(PoseData data)
+    {
+        var currentMorphs = SaveMorphs(false);
+
+        foreach (var morph in currentMorphs)
+        {
+            var savedMorph = data.Morphs.FirstOrDefault(b => b.Name == morph.Name);
+            if (savedMorph == null)
+            {
+                morph.Morph.weight = 0;
+            }
+            else
+            {
+                savedMorph.ApplyTo(this, morph.Morph, false);
+            }
+        }
+
+        this.FaceDrivenKeyTarget.ChangeMorph();
+
+        return true;
     }
 }
