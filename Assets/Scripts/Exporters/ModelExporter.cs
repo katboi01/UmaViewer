@@ -20,6 +20,7 @@ public class ModelExporter
     public static void ExportModel(UmaContainerCharacter container, string path)
     {
         container.SetDynamicBoneEnable(false);
+        container.EnablePhysics = false;
         container.UmaFaceAnimator?.Rebind();
         container.UmaAnimator?.Rebind();
         container.EnableEyeTracking = false;
@@ -98,10 +99,12 @@ public class ModelExporter
         if (!container.FaceDrivenKeyTarget) return;
         SkinnedMeshRenderer faceMesh = null;
         SkinnedMeshRenderer eyebrowMesh = null;
+        SkinnedMeshRenderer earMesh = null;
         foreach (SkinnedMeshRenderer s in container.GetComponentsInChildren<SkinnedMeshRenderer>())
         {
-            if (s.name.Contains("Face")) faceMesh = s;
-            else if (s.name.Contains("Mayu")) eyebrowMesh = s;
+            if (s.name.Contains("M_Face")) faceMesh = s;
+            else if (s.name.Contains("M_Mayu")) eyebrowMesh = s;
+            else if (s.name.Contains("M_Hair")) earMesh = s;
         }
 
         var facial = container.FaceDrivenKeyTarget;
@@ -137,6 +140,13 @@ public class ModelExporter
             Mesh baseEyeBrowMesh = new Mesh();
             eyebrowMesh.BakeMesh(baseEyeBrowMesh);
             addBlendShapePart(eyebrowMesh, facial.EyeBrowMorphs, baseEyeBrowMesh);
+        }
+
+        if (earMesh)
+        {
+            Mesh baseEarMesh = new Mesh();
+            earMesh.BakeMesh(baseEarMesh);
+            addBlendShapePart(earMesh, facial.EarMorphs, baseEarMesh);
         }
             
         facial.ClearAllWeights();
