@@ -52,6 +52,7 @@ public class SerializableBone
         Dynamic,
         Humanoid,
         Finger,
-        Face
+        Face,
+        IK,
     }
 }

@@ -1,4 +1,7 @@
 using Newtonsoft.Json;
+using RootMotion;
+using RootMotion.Dynamics;
+using RootMotion.FinalIK;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,6 +37,8 @@ public class PoseManager : MonoBehaviour
 
     public GameObject HandleCanvas;
     public GameObject HelpPanel;
+
+    public FullBodyBipedIK PoseIK;
 
     private void Update()
     {
@@ -115,8 +120,9 @@ public class PoseManager : MonoBehaviour
         ui.SetDynamicBoneEnable(false);
         HandleCanvas.SetActive(true);
 
-        if (builder.CurrentUMAContainer != null && builder.CurrentUMAContainer.UmaAnimator != null)
+        if (builder.CurrentUMAContainer && builder.CurrentUMAContainer.UmaAnimator)
         {
+            PoseIK = builder.CurrentUMAContainer.CreatePoseIK();
             builder.CurrentUMAContainer.UmaAnimator.enabled = false;
         }
 
@@ -138,6 +144,11 @@ public class PoseManager : MonoBehaviour
         if (builder.CurrentUMAContainer != null && builder.CurrentUMAContainer.UmaAnimator != null)
         {
             builder.CurrentUMAContainer.UmaAnimator.enabled = true;
+        }
+
+        if (PoseIK)
+        {
+            Destroy(PoseIK);
         }
 
         PoseModeOn = false;

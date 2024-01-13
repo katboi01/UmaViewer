@@ -11,8 +11,9 @@ public class HandleManager : MonoBehaviour
 
     public Material LineRendererMaterial;
 
-    public List<BoneTags> EnabledHandles = new List<BoneTags>() { BoneTags.Humanoid };
+    public List<BoneTags> EnabledHandles { get => IKMode ? IKHandles : enabledHandles; }
     public bool EnabledLines = true;
+    public bool IKMode = false;
 
     public static bool InteractionInProgress;
 
@@ -20,6 +21,9 @@ public class HandleManager : MonoBehaviour
 
     public static System.Action<RuntimeGizmoUndoData> RegisterRuntimeGizmoUndoAction;
     public static System.Action<List<RuntimeGizmoUndoData>> RegisterRuntimeGizmoUndoActions;
+
+    private List<BoneTags> enabledHandles = new List<BoneTags>() { BoneTags.Humanoid };
+    private List<BoneTags> IKHandles = new List<BoneTags>() { BoneTags.IK };
 
     public struct RuntimeGizmoUndoData
     {
@@ -32,10 +36,40 @@ public class HandleManager : MonoBehaviour
         var camera = Camera.main;
         var poseModeOn = UmaViewerUI.Instance.PoseManager.PoseModeOn;
 
-        foreach(var handle in AllHandles)
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            IKMode = !IKMode;
+            if (IKMode)
+            {
+                var ik = UmaViewerUI.Instance.PoseManager.PoseIK;
+                if (ik)
+                {
+                    foreach (var effector in ik.solver.effectors)
+                    {
+                        if (effector.target)
+                        {
+                            effector.target.localPosition = Vector3.zero;
+                            effector.target.localRotation = Quaternion.identity;
+                        }
+                    }
+                    ik.solver.StoreDefaultLocalState();
+                    ik.enabled = true;
+                }
+            }
+            else
+            {
+                var ik = UmaViewerUI.Instance.PoseManager.PoseIK;
+                if (ik)
+                {
+                    ik.enabled = false;
+                }
+            }
+        };
+
+        foreach (var handle in AllHandles)
         {
             handle.ForceDisplayOff(!poseModeOn);
-            handle.UpdateManual(camera, EnabledLines);
+            handle.UpdateManual(camera, EnabledLines && !IKMode);
 
             if (handle.Popup.gameObject.activeInHierarchy)
             {
@@ -85,13 +119,13 @@ public class HandleManager : MonoBehaviour
     public void ToggleBonesVisible(string tag)
     {
         var enumTag = (BoneTags)System.Enum.Parse(typeof(BoneTags), tag);
-        if (EnabledHandles.Contains(enumTag))
+        if (enabledHandles.Contains(enumTag))
         {
-            EnabledHandles.Remove(enumTag);
+            enabledHandles.Remove(enumTag);
         }
         else
         {
-            EnabledHandles.Add(enumTag);
+            enabledHandles.Add(enumTag);
         }
     }
 
