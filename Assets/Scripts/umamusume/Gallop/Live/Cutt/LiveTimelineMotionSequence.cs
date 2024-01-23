@@ -105,12 +105,12 @@ namespace Gallop.Live.Cutt
                 LiveTimelineKeyIndex curKey = LiveTimelineControl.AlterUpdate_Key(_currentKey, currentTime);
 
                 _curIndex = curKey.index;
+                LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
+                AnimationClip anim = arg.clip;
 
                 if ((curKey != null && _curIndex != -1 && _curIndex != _prevIndex) || Director.instance.sliderControl.is_Touched || Director.instance._syncTime == false || director.IsRecordVMD)
                 {
-                    LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
-
-                    AnimationClip anim = arg.clip;
+                    
                     double start;
                     if(arg.isMotionHeadFrameAll)
                     {
@@ -124,11 +124,27 @@ namespace Gallop.Live.Cutt
 
                     _tempAnim.wrapMode = (arg.loop ? WrapMode.Loop : WrapMode.Default);
                     _tempAnim[anim.name].time = (float)(start + interval);
+                    
+                    if (Mathf.Abs(_prevFrameAnimationTime - currentTime) < 0.01f)
+                    {   
+                        if (_tempAnim.IsPlaying(anim.name)) 
+                        {
+                            _tempAnim.Stop();
+                        }
+                    }
+                    else
+                    {
+                        _tempAnim.Play(anim.name);
+                    }
+                }
+                else if (!_tempAnim.IsPlaying(anim.name))
+                {
                     _tempAnim.Play(anim.name);
                 }
 
                 _prevIndex = _curIndex;            
             }
+            _prevFrameAnimationTime = currentTime;
         }
     }
 }
