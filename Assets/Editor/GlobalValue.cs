@@ -17,6 +17,9 @@ public class GlobalValue : EditorWindow
     Color _GlobalDirtToonColor;
     Color _GlobalRimColor = new Color(1, 1, 1, 0);
     Color _GlobalDirtColor;
+    Color _Global_LightmapColor = Color.white;
+    Color _Global_LightmapDensityAddColor = Color.clear;
+    Color _Global_LightmapModulateColor = Color.white;
     Color _RimColor2;
     List<Vector4> _MainParam = new List<Vector4>();
     Vector4 _MainParam_0;
@@ -86,6 +89,9 @@ public class GlobalValue : EditorWindow
         _GlobalDirtToonColor = EditorGUILayout.ColorField("_GlobalDirtToonColor", _GlobalDirtToonColor);
         _GlobalRimColor = EditorGUILayout.ColorField("±ßÔµ¹âÑÕÉ«", _GlobalRimColor);
         _GlobalDirtColor = EditorGUILayout.ColorField("_GlobalDirtColor", _GlobalDirtColor);
+        _Global_LightmapColor = EditorGUILayout.ColorField("_Global_LightmapColor", _Global_LightmapColor);
+        _Global_LightmapDensityAddColor = EditorGUILayout.ColorField("_Global_LightmapDensityAddColor", _Global_LightmapDensityAddColor);
+        _Global_LightmapModulateColor = EditorGUILayout.ColorField("_Global_LightmapModulateColor", _Global_LightmapModulateColor);
         _RimColor2 = EditorGUILayout.ColorField("_RimColor2", _RimColor2);
 
         _AmbientColor = EditorGUILayout.ColorField("_AmbientColor", _AmbientColor);
@@ -129,6 +135,9 @@ public class GlobalValue : EditorWindow
         Shader.SetGlobalColor("_GlobalDirtToonColor", _GlobalDirtToonColor);
         Shader.SetGlobalColor("_GlobalRimColor", _GlobalRimColor);
         Shader.SetGlobalColor("_GlobalDirtColor", _GlobalDirtColor);
+        Shader.SetGlobalColor("_Global_LightmapColor", _Global_LightmapColor);
+        Shader.SetGlobalColor("_Global_LightmapDensityAddColor", _Global_LightmapDensityAddColor);
+        Shader.SetGlobalColor("_Global_LightmapModulateColor", _Global_LightmapModulateColor);
         Shader.SetGlobalColor("_RimColor2", _RimColor2);
         //Float
         Shader.SetGlobalFloat("_Global_MaxDensity", _Global_MaxDensity);
