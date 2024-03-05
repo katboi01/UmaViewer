@@ -179,5 +179,6 @@ public enum UmaFileType
     transferevent,
     teambuilding,
     challengematch,
-    collectevent
+    collectevent,
+    ratingrace
 }

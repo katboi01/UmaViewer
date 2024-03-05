@@ -304,7 +304,8 @@ public class ManifestDB
 
     public IEnumerator DownloadManifest(string hash)
     {
-        UnityWebRequest www = UnityWebRequest.Get(UmaViewerDownload.GetManifestRequestUrl(hash));
+        var url = UmaViewerDownload.GetManifestRequestUrl(hash);
+        UnityWebRequest www = UnityWebRequest.Get(url);
         www.timeout = 15;
         yield return www.SendWebRequest();
         if (www.result == UnityWebRequest.Result.Success)
@@ -313,7 +314,7 @@ public class ManifestDB
         }
         else
         {
-            Debug.LogError("Download Manifest Failed :" + www.error);
+            Debug.LogError($"Download Manifest Failed :{url} {www.error}");
             callback?.Invoke($"Download Manifest Failed :{www.error}", UIMessageType.Error);
             isError = true;
             yield break;

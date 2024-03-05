@@ -17,6 +17,9 @@ public class UmaViewerGlobalShader : MonoBehaviour
     public Color _GlobalDirtToonColor;
     public Color _GlobalRimColor = new Color(1, 1, 1, 0);
     public Color _GlobalDirtColor;
+    public Color _Global_LightmapColor = Color.white;
+    public Color _Global_LightmapDensityAddColor = Color.clear;
+    public Color _Global_LightmapModulateColor = Color.white;
     public Color _RimColor2;
     List<Vector4> _MainParam = new List<Vector4>();
     public Vector4 _MainParam_0;
@@ -65,6 +68,9 @@ public class UmaViewerGlobalShader : MonoBehaviour
         Shader.SetGlobalColor("_GlobalDirtToonColor", _GlobalDirtToonColor);
         Shader.SetGlobalColor("_GlobalRimColor", _GlobalRimColor);
         Shader.SetGlobalColor("_GlobalDirtColor", _GlobalDirtColor);
+        Shader.SetGlobalColor("_Global_LightmapColor", _Global_LightmapColor);
+        Shader.SetGlobalColor("_Global_LightmapDensityAddColor", _Global_LightmapDensityAddColor);
+        Shader.SetGlobalColor("_Global_LightmapModulateColor", _Global_LightmapModulateColor);
         Shader.SetGlobalColor("_RimColor2", _RimColor2);
         //Float
         Shader.SetGlobalFloat("_Global_MaxDensity", _Global_MaxDensity);

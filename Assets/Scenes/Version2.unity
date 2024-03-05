@@ -25079,6 +25079,7 @@ MonoBehaviour:
   SavedPoses: []
   HandleCanvas: {fileID: 580437086}
   HelpPanel: {fileID: 745782920}
+  PoseIK: {fileID: 0}
 --- !u!4 &776305455
 Transform:
   m_ObjectHideFlags: 0
@@ -43221,8 +43222,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "H - show/hide this\n\nUndo:\t\tCtrl + Z\nRedo:\t\tCtrl + Y\n\nMove only:
-    \tCtrl + W\nRotate only: Ctrl + E\nScale only: \tCtrl + R\nAll:\t \tCtrl + Y"
+  m_text: "H - show/hide this\n\nUndo:\t\tCtrl + Z\nRedo:\t\tCtrl + Y\n\nIK Mode:     
+    Space\nMove only: \tCtrl + W\nRotate only: Ctrl + E\nScale only: \tCtrl + R\nAll:\t
+    \tCtrl + Y"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -45983,7 +45985,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1468470379
 Animator:
-  serializedVersion: 5
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -45996,12 +45998,10 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1476177399
 GameObject:
   m_ObjectHideFlags: 0
@@ -47983,8 +47983,8 @@ MonoBehaviour:
     type: 3}
   LineRendererMaterial: {fileID: 2100000, guid: 61428e99656e4544aa16be34cad7a789,
     type: 2}
-  EnabledHandles: 03000000
   EnabledLines: 1
+  IKMode: 0
 --- !u!4 &1561038521
 Transform:
   m_ObjectHideFlags: 0

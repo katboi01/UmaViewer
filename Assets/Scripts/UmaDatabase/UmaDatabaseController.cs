@@ -112,15 +112,36 @@ public class UmaDatabaseController
             UmaDatabaseEntry entry = null;
             try
             {
-                entry = new UmaDatabaseEntry
+                var typestr = sqlite_datareader.GetString(0);
+                if (Enum.TryParse<UmaFileType>(typestr, false, out var type))
                 {
-                    Type = (UmaFileType)Enum.Parse(typeof(UmaFileType), sqlite_datareader.GetString(0)),
-                    Name = sqlite_datareader.GetString(1),
-                    Url = sqlite_datareader.GetString(2),
-                    Prerequisites = sqlite_datareader.GetString(3)
-                };
+                    var name = sqlite_datareader.GetString(1);
+                    var url = sqlite_datareader.GetString(2);
+                    var prerequisites = sqlite_datareader.GetString(3);
+                    
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        throw new Exception($"Invalid entry name {name} or URL {url}");
+                    }
+
+                    entry = new UmaDatabaseEntry
+                    {
+                        Type = type,
+                        Name = name,
+                        Url = url,
+                        Prerequisites = prerequisites
+                    };
+                }
+                else
+                {
+                    Debug.LogWarning($"Unrecognized EntryType Enum Value :{typestr}");
+                }
             }
-            catch(Exception e) { Debug.LogError("Error caught: " + e + entry.Name); }
+            catch(Exception e) 
+            { 
+                Debug.LogError($"Error caught while reading Entry : \n {e}"); 
+            }
+            
             if (entry != null) {
 
                 meta.Add(entry.Name, entry);

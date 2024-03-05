@@ -1,4 +1,5 @@
 using Gallop;
+using RootMotion;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
 using System;
@@ -85,6 +86,7 @@ public class UmaContainerCharacter : UmaContainer
     private BipedIK IK;
     private PuppetMaster PuppetMaster;
     private List<Transform> _humanoidBones;
+    private UIHandleCharacterRoot handleRoot;
 
     public void Initialize(bool smile)
     {
@@ -295,6 +297,15 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
+    public void ResetDynamicBone()
+    {
+        if (IsMini) return;
+        foreach (CySpringDataContainer cySpring in cySpringDataContainers)
+        {
+            cySpring.ResetPhysics();
+        }
+    }
+
     public void SetEyeTracking(bool isOn)
     {
         EnableEyeTracking = isOn;
@@ -468,6 +479,46 @@ public class UmaContainerCharacter : UmaContainer
         PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
         PuppetMaster.solverIterationCount = 3;
         PuppetMaster.FlattenHierarchy();
+    }
+
+    public FullBodyBipedIK CreatePoseIK()
+    {
+        var container = this;
+        BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(UmaAnimator);
+        BipedReferences pr = new BipedReferences();
+        var ik = container.gameObject.AddComponent<FullBodyBipedIK>();
+
+        pr.root = r.root;
+        pr.pelvis = r.hips;
+        pr.spine = new Transform[] { r.spine, r.chest };
+        pr.leftThigh = r.leftUpperLeg;
+        pr.leftCalf = r.leftLowerLeg;
+        pr.leftFoot = r.leftFoot;
+        pr.rightThigh = r.rightUpperLeg;
+        pr.rightCalf = r.rightLowerLeg;
+        pr.rightFoot = r.rightFoot;
+        pr.leftUpperArm = r.leftUpperArm;
+        pr.leftForearm = r.leftLowerArm;
+        pr.leftHand = r.leftHand;
+        pr.rightUpperArm = r.rightUpperArm;
+        pr.rightForearm = r.rightLowerArm;
+        pr.rightHand = r.rightHand;
+        pr.head = r.head;
+        ik.SetReferences(pr, r.hips);
+
+        foreach (var effector in ik.solver.effectors)
+        {
+            var handle = handleRoot.ChildHandles.Find(h => h.Owner.transform.parent == effector.bone && (h as UIHandleBone).Tags.Contains(BoneTags.IK));
+            if (handle)
+            {
+                effector.target = handle.Owner.transform;
+                effector.positionWeight = 1;
+                effector.rotationWeight = 1;
+            }
+        }
+
+        ik.enabled = false;
+        return ik;
     }
 
     public void LoadTextures(UmaDatabaseEntry entry)
@@ -1125,6 +1176,7 @@ public class UmaContainerCharacter : UmaContainer
 
                 if (clip.name.Contains("_cti_crd"))
                 {
+                    ResetDynamicBone();
                     var dir = Path.GetDirectoryName(clip.name).Replace("\\", "/");
                     string[] param = Path.GetFileName(clip.name).Split('_');
                     if (param.Length > 4)
@@ -1370,13 +1422,25 @@ public class UmaContainerCharacter : UmaContainer
         UIHandleCharacterRoot rootHandle = UIHandleCharacterRoot.CreateAsChild(this);
 
         var humanBones = GetHumanBones();
-        foreach(var bone in humanBones)
+        var ikNames = new[] { "Hip", "Wrist_L", "Wrist_R", "Ankle_L", "Ankle_R" };
+        foreach (var bone in humanBones)
         {
             List<BoneTags> tags = new List<BoneTags>() { BoneTags.Humanoid };
             if (bone.name.EndsWith("_L")) tags.Add(BoneTags.Left);
             if (bone.name.EndsWith("_R")) tags.Add(BoneTags.Right);
 
-            if(bone.name != "Hip")
+            if (ikNames.Any(x => x == bone.name))
+            {
+                var go = new GameObject(bone.name + "_IK_Handle");
+                go.transform.parent = bone.transform;
+                go.transform.localPosition = Vector3.zero;
+                go.transform.rotation = bone.transform.rotation;
+                go.transform.localScale = Vector3.one;
+                var handle = UIHandleBone.CreateAsChild(go, new List<BoneTags>() { BoneTags.IK });
+                rootHandle.ChildHandles.Add(handle);
+            }
+
+            if (bone.name != "Hip")
             {
                 var handle = UIHandleBone.CreateAsChild(bone, tags).WithLineRenderer();
                 rootHandle.ChildHandles.Add(handle);
@@ -1418,6 +1482,8 @@ public class UmaContainerCharacter : UmaContainer
             var handle = UIHandleBone.CreateAsChild(bone.Bone, bone.Tags).SetColor(Color.gray).SetScale(0.15f).WithLineRenderer();
             rootHandle.ChildHandles.Add(handle);
         }
+
+        handleRoot = rootHandle;
     }
 
     public List<SerializableBone> SaveBones()

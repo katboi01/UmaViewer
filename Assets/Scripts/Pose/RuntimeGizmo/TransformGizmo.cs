@@ -157,7 +157,7 @@ namespace RuntimeGizmos
                 UndoRedoManager.Insert(commandGroup);
             };
 
-            PoseManager.SetTooltip(0, $"H - show/hide this\r\n\r\nUndo:\t\t{ActionKey} + {UndoAction}\r\nRedo:\t\t{ActionKey} + {RedoAction}\r\n\r\nMove only: \t{changeModeHotkey} + {SetMoveType}\r\nRotate only: {changeModeHotkey} + {SetRotateType}\r\nScale only: \t{changeModeHotkey} + {SetScaleType}\r\nAll:\t \t{changeModeHotkey} + {SetAllTransformType}");
+            PoseManager.SetTooltip(0, $"H - show/hide this\r\n\r\nUndo:\t\t{ActionKey} + {UndoAction}\r\nRedo:\t\t{ActionKey} + {RedoAction}\r\n\r\nIK Mode: \t{KeyCode.Space}\r\nMove only: \t{changeModeHotkey} + {SetMoveType}\r\nRotate only: {changeModeHotkey} + {SetRotateType}\r\nScale only: \t{changeModeHotkey} + {SetScaleType}\r\nAll:\t \t{changeModeHotkey} + {SetAllTransformType}");
             PoseManager.SetTooltip(1, $"\r\n\r\nSpace Toggle:\t{changeModeHotkey} + {SetSpaceToggle}\r\nPivot Toggle:\t{changeModeHotkey} + {SetPivotModeToggle}\r\nScale type toggle: \t{changeModeHotkey} + {SetScaleTypeToggle}\r\nCenter type toggle:{changeModeHotkey} + {SetCenterTypeToggle}");
         }
 

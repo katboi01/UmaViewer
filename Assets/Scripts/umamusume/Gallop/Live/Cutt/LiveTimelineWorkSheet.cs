@@ -4,13 +4,21 @@ using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
+    [Flags]
     public enum LiveTimelineKeyAttribute
     {
         Disable = 1,
         CameraDelayEnable = 2,
         CameraDelayInherit = 4,
-        KeyCommonBitMask = 32768
-    }
+        KeyCommonBitMask = 32768,
+        kAttrCheek = 65536,
+        kAttrTeary = 131072,
+        kAttrTearful = 262144,
+        kAttrTeardrop = 524288,
+        kAttrMangame = 2097152,
+        kAttrFaceShadow = 4194304,
+        kAttrFaceShadowVisible = 8388608,
+}
 
     public enum LiveTimelineKeyDataListAttr
     {
