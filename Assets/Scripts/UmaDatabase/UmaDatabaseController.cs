@@ -134,7 +134,7 @@ public class UmaDatabaseController
                 }
                 else
                 {
-                    throw new Exception($"Unrecognized EntryType Enum Value :{typestr}");
+                    Debug.LogWarning($"Unrecognized EntryType Enum Value :{typestr}");
                 }
             }
             catch(Exception e) 
