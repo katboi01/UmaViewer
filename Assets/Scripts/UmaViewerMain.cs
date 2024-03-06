@@ -29,6 +29,7 @@ public class UmaViewerMain : MonoBehaviour
     {
         Instance = this;
         new Config();
+        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 120;
 
         AbList = UmaDatabaseController.Instance.MetaEntries;

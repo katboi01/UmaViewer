@@ -973,9 +973,9 @@ namespace Gallop
                     MangaMorph.BindProperties[1].Value = 1;
                 }
 
-                var tearyEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrTeary) > 0;
-                var tearytype = tearyEnable ? info.tearyType : 0;
-                StaticTearMorph.BindProperties.ForEach(p => p.Value = tearytype);
+                var tearfulEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrTearful) > 0;
+                var tearfultype = tearfulEnable ? info.tearyType : 0;
+                StaticTearMorph.BindProperties.ForEach(p => p.Value = tearfultype);
 
                 var shaderEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrFaceShadowVisible) > 0;
                 if (shaderEnable)

@@ -907,7 +907,7 @@ public class UmaContainerCharacter : UmaContainer
         var textures = TailTextures;
         foreach (Renderer r in Tail.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
                 m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
                 m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
