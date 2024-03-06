@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using static PageManager;
 using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
@@ -123,11 +125,11 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerCostumePrefab;
     public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
-    public GameObject UmaContainerAssetsPrefab;
     public UmaUIContainer UmaContainerTogglePrefab;
 
-    private int LoadedAssetCount = 0;
-    [SerializeField] private RectTransform LoadedAssetsPanel;
+    private Dictionary<string, Entry> LoadedAssetEntries = new Dictionary<string, Entry>();
+    public PageManager LoadedAssetPageCtrl;
+    public ScrollRect LoadedAssetScrollRect;
 
     public Color UIColor1, UIColor2;
 
@@ -156,14 +158,16 @@ public class UmaViewerUI : MonoBehaviour
         AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
         AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
     }
+
     private void Start()
     {
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
+        LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
-
+        
         PoseManager.LoadLocalPoseFiles();
     }
 
@@ -219,29 +223,42 @@ public class UmaViewerUI : MonoBehaviour
 
     public void LoadedAssetsAdd(UmaDatabaseEntry entry)
     {
-        if (!LoadedAssetsPanel) return;
-        foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
-        {
-            if (ui.Name == Path.GetFileName(entry.Name)) return;
-        }
-        
-        LoadedAssetCount++;
+        if (!LoadedAssetPageCtrl) return;
+        if (LoadedAssetEntries.ContainsKey(entry.Name)) return;
+        var file_name = Path.GetFileName(entry.Name);
         string filePath = entry.FilePath;
-        var container = Instantiate(UmaContainerAssetsPrefab, LoadedAssetsPanel).GetComponent<UmaUIContainer>();
-        container.Name = Path.GetFileName(entry.Name);
-        container.Button.onClick.AddListener(() => { Process.Start("explorer.exe", "/select," + filePath); });
-        LoadedAssetsPanel.sizeDelta = new Vector2(0, LoadedAssetCount * 35);
+        var assetentry = new Entry()
+        {
+            Name = file_name,
+            FontSize = 18,
+            OnClick = (container) =>
+            {
+                Process.Start("explorer.exe", "/select," + filePath);
+            }
+        };  
+        LoadedAssetEntries.Add(entry.Name, assetentry);
+        LoadedAssetPageCtrl.AddEntries(assetentry);
     }
 
     public void LoadedAssetsClear()
     {
-        if (!LoadedAssetsPanel) return;
-        LoadedAssetCount = 0;
-        foreach (UmaUIContainer ui in LoadedAssetsPanel.GetComponentsInChildren<UmaUIContainer>())
+        LoadedAssetEntries.Clear();
+        LoadedAssetPageCtrl.ResetCtrl();
+        LoadedAssetPageCtrl.Initialize(LoadedAssetEntries.Values.ToList(), LoadedAssetScrollRect);
+    }
+
+    public void CopyAllLoadedAssetsPath()
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach(var entry in LoadedAssetEntries.Keys)
         {
-            Destroy(ui.gameObject);
+            if (Main.AbList.TryGetValue(entry, out var asset))
+            {
+                sb.AppendLine(asset.FilePath);
+            }
         }
-        LoadedAssetsPanel.sizeDelta = Vector2.zero;
+        GUIUtility.systemCopyBuffer = sb.ToString();
+        ShowMessage($"{LoadedAssetEntries.Count} Path copied", UIMessageType.Success);
     }
 
     public void LoadModelPanels()

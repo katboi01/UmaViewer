@@ -22,6 +22,7 @@ public class PageManager : MonoBehaviour
     private int currentPage = 0;
     private List<Entry> Entries;
     private List<Entry> SubEntries;
+
     public void Initialize(List<Entry> entries, ScrollRect scrollRect)
     {
         ScrollRect = scrollRect;
@@ -35,6 +36,28 @@ public class PageManager : MonoBehaviour
             currentPage = 0;
             LoadPage(currentPage);
             SearchText.interactable = true;
+        }
+        else
+        {
+            Clear();
+        }
+    }
+
+    public void AddEntries(Entry entry)
+    {
+        if (!ScrollRect) return;
+
+        if (SearchText)
+            SearchText.text = "";
+        Entries.Add(entry);
+        totalPage = Mathf.CeilToInt(Entries.Count / (float)ShowCount);
+        if (currentPage == totalPage - 1)
+        {
+            LoadPage(currentPage);
+        }
+        else
+        {
+            ((Text)PageText.placeholder).text = $"{currentPage + 1} / {totalPage}";
         }
     }
 
