@@ -883,6 +883,11 @@ public class UmaContainerCharacter : UmaContainer
                     m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("ctrl")));
                     m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("area")));
                     SetMaskColor(m, MobHeadColor, "hair", true);
+                    if (IsMob)
+                    {
+                        var cutoff = CharaData["hair_cutoff"].ToString(); 
+                        m.SetFloat("_Cutoff", int.Parse(cutoff) / 10000f); //Not entirely correct, but effective
+                    }
                 }
 
                 switch (m.shader.name)
