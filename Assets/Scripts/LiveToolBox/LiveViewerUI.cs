@@ -56,6 +56,7 @@ public class LiveViewerUI : MonoBehaviour
 
     public void SetFrameRate(int fps)
     {
+        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = int.Parse(FrameRateDropDown.options[fps].text);
     }
 

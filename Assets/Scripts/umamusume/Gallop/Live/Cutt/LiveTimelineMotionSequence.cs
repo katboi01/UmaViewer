@@ -125,7 +125,7 @@ namespace Gallop.Live.Cutt
                     _tempAnim.wrapMode = (arg.loop ? WrapMode.Loop : WrapMode.Default);
                     _tempAnim[anim.name].time = (float)(start + interval);
                     
-                    if (Mathf.Abs(_prevFrameAnimationTime - currentTime) < 0.01f)
+                    if (Mathf.Abs(_prevFrameAnimationTime - currentTime) < 0.01f && Director.instance.sliderControl.is_Touched)
                     {   
                         if (_tempAnim.IsPlaying(anim.name)) 
                         {

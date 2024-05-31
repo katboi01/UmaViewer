@@ -17,7 +17,7 @@ public class UmaDatabaseEntry
         get
         {
             var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
-            if (!File.Exists(path) && Config.Instance.WorkMode == WorkMode.Standalone)
+            if (Config.Instance.WorkMode == WorkMode.Standalone && !File.Exists(path))
             {
                 DownloadAsset(this);
             }

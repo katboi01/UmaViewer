@@ -330,7 +330,7 @@ public class UmaViewerBuilder : MonoBehaviour
         hairid = charaData["chara_hair_model"].ToString();
         personality = charaData["default_personality"].ToString();
         skin = charaData["chara_skin_color"].ToString();
-        height = "0";
+        height = "1";
         socks = charaData["socks"].ToString();
         bust = charaData["chara_bust_size"].ToString();
         sex = charaData["sex"].ToString();
