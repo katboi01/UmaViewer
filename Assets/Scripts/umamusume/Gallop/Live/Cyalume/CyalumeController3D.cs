@@ -20,22 +20,21 @@ namespace Gallop.Live.Cyalume
             
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
+            if (CyalumeMaterial == null)
+                return;
             if (passedtime >= intervaltime)
             {
                 y_offset += (float)0.03125;
-                if(y_offset >= 1.0f)
+                if (y_offset >= 1.0f)
                 {
                     y_offset = 0.0f;
                 }
                 CyalumeMaterial.SetTextureOffset("_MainTex", new Vector2(0, y_offset));
                 passedtime = 0;
             }
-            passedtime += Time.deltaTime;
-            //Debug.Log(CyalumeMaterial);
-            //Debug.Log(passedtime);
-
+            passedtime += Time.fixedDeltaTime;
         }
 
         public void InitializeCyalume()
@@ -47,7 +46,7 @@ namespace Gallop.Live.Cyalume
                 GameObject tempObj = Instantiate((GameObject)obj.Value, transform);
                 if (obj.Value.name.Contains("cyalume")){
                     CyalumeObj = tempObj;
-                    CyalumeMaterial = gameObject.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+                    CyalumeMaterial = gameObject.GetComponentInChildren<MeshRenderer>().material;
                 }
             }
         }

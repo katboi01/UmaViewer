@@ -15,7 +15,7 @@ public class CameraOrbit : MonoBehaviour
     public GameObject CameraTargetHelper;
     public Vector3 TargetCenter;
 
-    EventSystem eventSystem;
+    public EventSystem eventSystem;
     bool controlOn;
 
 
@@ -44,8 +44,6 @@ public class CameraOrbit : MonoBehaviour
     {
         OrbitCamZoomSlider.minValue = camDistMin;
         OrbitCamZoomSlider.maxValue = camDistMax;
-
-        eventSystem = EventSystem.current;
 
         lookRotation = transform.localRotation;
         instance = this;

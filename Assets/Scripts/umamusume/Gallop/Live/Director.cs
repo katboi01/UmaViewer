@@ -62,6 +62,8 @@ namespace Gallop.Live
 
         public bool IsRecordVMD;
 
+        public bool RequireStage = true;
+
         public Transform MainCameraTransform => _mainCameraTransform;
 
         private Transform _mainCameraTransform;
@@ -97,9 +99,12 @@ namespace Gallop.Live
             {
                 _instance = this;
                 Debug.Log(string.Format(CUTT_PATH, live.MusicId));
-                Debug.Log(live.BackGroundId);
                 Builder.LoadAssetPath(string.Format(CUTT_PATH, live.MusicId), transform);
-                Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
+                if (RequireStage)
+                {
+                    Debug.Log(live.BackGroundId);
+                    Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
+                }
 
                 //Make CharacterObject
 
@@ -128,6 +133,7 @@ namespace Gallop.Live
 
                 //Get live parts info
                 UmaDatabaseEntry partAsset = UmaViewerMain.Instance.AbList[string.Format(LIVE_PART_PATH, live.MusicId)];
+                UmaViewerAudio.LastAudioPartIndex = -1;
 
                 Debug.Log(partAsset.Name);
 
@@ -352,7 +358,7 @@ namespace Gallop.Live
             _liveTimelineControl.AlterUpdate(_liveCurrentTime);
             if (!_soloMode)
             {
-                UmaViewerAudio.AlterUpdate(_liveCurrentTime, partInfo, liveVocal);
+                UmaViewerAudio.AlterUpdate(_liveCurrentTime, partInfo, liveVocal, sliderControl.is_Outed);
             }
         }
 

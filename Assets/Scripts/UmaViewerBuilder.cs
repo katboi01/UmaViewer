@@ -76,7 +76,6 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLiveUma(List<LiveCharacterSelect> characters)
     {
-        UmaAssetManager.UnloadAllBundle();
         for (int i = 0; i < characters.Count; i++)
         {
             if (characters[i].CharaEntry.Name != "")
@@ -666,6 +665,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
                 mController.live = live;
                 mController.IsRecordVMD = UI.isRecordVMD;
+                mController.RequireStage = UI.isRequireStage;
 
                 List<GameObject> transferObjs = new List<GameObject>() {
                     MainLive,
@@ -735,8 +735,19 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    public void PlaySound(UmaDatabaseEntry SongAwb, int subindex = -1)
+    public void loadLivePreviewSound(int songid)
     {
+        string nameVar = $"snd_bgm_live_{songid}_preview_02";
+        UmaDatabaseEntry previewAwb = Main.AbSounds.FirstOrDefault(a => a.Name.Contains(nameVar) && a.Name.EndsWith("awb"));
+        if (previewAwb != null)
+        {
+            PlaySound(previewAwb, volume : 0.4f, loop : true);
+        }
+    }
+
+    public void PlaySound(UmaDatabaseEntry SongAwb, int subindex = -1, float volume = 1, bool loop = false)
+    {
+        CurrentLyrics.Clear();
         if (CurrentAudioSources.Count > 0)
         {
             var tmp = CurrentAudioSources[0];
@@ -748,17 +759,17 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             foreach (AudioClip clip in LoadAudio(SongAwb))
             {
-                AddAudioSource(clip);
+                AddAudioSource(clip, volume, loop);
             }
         }
         else
         {
-            AddAudioSource(LoadAudio(SongAwb)[subindex]);
+            AddAudioSource(LoadAudio(SongAwb)[subindex], volume, loop);
         }
 
     }
 
-    private void AddAudioSource(AudioClip clip)
+    private void AddAudioSource(AudioClip clip, float volume = 1, bool loop = false)
     {
         AudioSource source;
         if (CurrentAudioSources.Count > 0)
@@ -771,6 +782,8 @@ public class UmaViewerBuilder : MonoBehaviour
         }
         CurrentAudioSources.Add(source);
         source.clip = clip;
+        source.volume = volume;
+        source.loop = loop;
         source.Play();
     }
 
