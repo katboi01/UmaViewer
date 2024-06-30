@@ -151,7 +151,13 @@ public class UmaViewerAudio
         if (LastAudioPartIndex == targetIndex) return;
         LastAudioPartIndex = targetIndex;
 
-        var volume_rate = partInfo.PartSettings["volume_rate"][targetIndex];
+
+        float volume_rate = 1;
+        if (partInfo.PartSettings.ContainsKey("volume_rate"))
+        {
+            volume_rate = partInfo.PartSettings["volume_rate"][targetIndex];
+        }
+        
         if (volume_rate == 999) //chorus
         {
             var activeVocal = new List<CuteAudioSource>();

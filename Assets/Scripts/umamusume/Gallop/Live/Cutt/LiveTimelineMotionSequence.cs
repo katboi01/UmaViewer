@@ -75,6 +75,8 @@ namespace Gallop.Live.Cutt
                     _tempAnim.AddClip(key.clip, key.clip.name);
                 }
             }
+            _tempAnim.wrapMode = WrapMode.Clamp;
+            _tempAnim.enabled = false;
         }
 
         public void AlterUpdate(float currentTime)
@@ -108,39 +110,24 @@ namespace Gallop.Live.Cutt
                 LiveTimelineKeyCharaMotionData arg = curKey.key as LiveTimelineKeyCharaMotionData;
                 AnimationClip anim = arg.clip;
 
-                if ((curKey != null && _curIndex != -1 && _curIndex != _prevIndex) || Director.instance.sliderControl.is_Touched || Director.instance._syncTime == false || director.IsRecordVMD)
+                double start;
+                if (arg.isMotionHeadFrameAll)
                 {
-                    
-                    double start;
-                    if(arg.isMotionHeadFrameAll)
-                    {
-                        start = (double)arg.motionHeadFrame / 60;
-                    }
-                    else
-                    {
-                        start = (double)arg.motionHeadFrameSeparetes[charaIndex] / 60;
-                    }
-                    double interval = currentTime - (double)arg.frame / 60;
+                    start = (double)arg.motionHeadFrame / 60;
+                }
+                else
+                {
+                    start = (double)arg.motionHeadFrameSeparetes[charaIndex] / 60;
+                }
+                double interval = (currentTime - arg.FrameSecond) * arg.playSpeed;
+                float currentAnimationTime = (float)(start + interval);
 
-                    _tempAnim.wrapMode = (arg.loop ? WrapMode.Loop : WrapMode.Default);
-                    _tempAnim[anim.name].time = (float)(start + interval);
-                    
-                    if (Mathf.Abs(_prevFrameAnimationTime - currentTime) < 0.01f && Director.instance.sliderControl.is_Touched)
-                    {   
-                        if (_tempAnim.IsPlaying(anim.name)) 
-                        {
-                            _tempAnim.Stop();
-                        }
-                    }
-                    else
-                    {
-                        _tempAnim.Play(anim.name);
-                    }
-                }
-                else if (!_tempAnim.IsPlaying(anim.name))
-                {
-                    _tempAnim.Play(anim.name);
-                }
+                var state = _tempAnim[anim.name];
+                state.enabled = true;
+                state.weight = 1;
+                state.time = arg.loop ? Mathf.Repeat(currentAnimationTime, state.length) : currentAnimationTime;
+                _tempAnim.Sample();
+                state.enabled = false;
 
                 _prevIndex = _curIndex;            
             }

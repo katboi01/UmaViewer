@@ -87,7 +87,6 @@ namespace Gallop
                     bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
                     var dynamic = bone.gameObject.AddComponent<DynamicBone>();
                     dynamic.m_Root = bone;
-                    dynamic.m_UpdateMode = DynamicBone.UpdateMode.Normal;
                     dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30 / spring._gravity), 0);
                     dynamic.m_LimitAngel_Min = spring._limitAngleMin;
                     dynamic.m_LimitAngel_Max = spring._limitAngleMax;

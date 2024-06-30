@@ -678,7 +678,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
                 mController.Initialize();
-                
+
                 characters.ForEach(a =>
                 {
                     if (a.CharaEntry == null || a.CostumeId == "")
@@ -687,8 +687,18 @@ public class UmaViewerBuilder : MonoBehaviour
                         a.CostumeId = "0002_00_00";
                     }
                 });//fill empty
-                
 
+                var actual_member_count = mController._liveTimelineControl.data.worksheetList[0].charaMotSeqList.Count;
+                if (actual_member_count > characters.Count)
+                {
+                    Debug.LogWarning($"actual member count is {actual_member_count} current {characters.Count}");
+                    var actual_characters = new List<LiveCharacterSelect>();
+                    for (int i = 0; i < actual_member_count; i++)
+                    {
+                        actual_characters.Add(characters[i % characters.Count]);
+                    }
+                    characters = actual_characters;
+                }
                 LoadLiveUma(characters);
 
                 var Lyrics = LoadLiveLyrics(live.MusicId);
