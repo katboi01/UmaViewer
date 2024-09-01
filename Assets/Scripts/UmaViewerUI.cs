@@ -10,6 +10,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Networking.Types;
 using UnityEngine.UI;
 using static PageManager;
 using Debug = UnityEngine.Debug;
@@ -142,6 +143,7 @@ public class UmaViewerUI : MonoBehaviour
     [Header("Live")]
     public bool LiveTime = false;
     public bool isRecordVMD;
+    public bool isRequireStage = true;
     public Dropdown LiveRecoedToggle;
     public int LiveMode = 1;
 
@@ -152,7 +154,7 @@ public class UmaViewerUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        AudioPlayButton.onClick.AddListener(AudioPause);
+        AudioPlayButton.onClick.AddListener(PauseAudio);
         AudioSlider.onValueChanged.AddListener(AudioProgressChange);
         AnimationPlayButton.onClick.AddListener(AnimationPause);
         AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
@@ -243,8 +245,11 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadedAssetsClear()
     {
         LoadedAssetEntries.Clear();
-        LoadedAssetPageCtrl.ResetCtrl();
-        LoadedAssetPageCtrl.Initialize(LoadedAssetEntries.Values.ToList(), LoadedAssetScrollRect);
+        if (LoadedAssetPageCtrl)
+        {
+            LoadedAssetPageCtrl.ResetCtrl();
+            LoadedAssetPageCtrl.Initialize(LoadedAssetEntries.Values.ToList(), LoadedAssetScrollRect);
+        }
     }
 
     public void CopyAllLoadedAssetsPath()
@@ -555,7 +560,7 @@ public class UmaViewerUI : MonoBehaviour
 
         foreach (var live in Main.Lives.OrderBy(c => c.MusicId))
         {
-            createContainer(live, UmaContainerLivePrefab, LiveList, () => ShowLiveSelectPannel(live));
+            createContainer(live, UmaContainerLivePrefab, LiveList, () => ShowLiveSelectPanel(live));
             createContainer(live, UmaContainerLivePrefab, LiveSoundList, () => ListLiveSounds(live.MusicId));
         }
     }
@@ -627,9 +632,10 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    void ShowLiveSelectPannel(LiveEntry entry)
+    void ShowLiveSelectPanel(LiveEntry entry)
     {
         LiveSelectPannel.SetActive(true);
+        Builder.loadLivePreviewSound(entry.MusicId);
         for (int i = LiveSelectList.content.childCount - 1; i >= 0; i--)
         {
             Destroy(LiveSelectList.content.GetChild(i).gameObject);
@@ -649,7 +655,7 @@ public class UmaViewerUI : MonoBehaviour
                     chara.SelectChara(this);
                     foreach (var t in LiveSelectList.content.GetComponentsInChildren<LiveCharacterSelect>())
                     {
-                        t.GetComponentInChildren<Text>().color = (t == chara ? Color.white : Color.black);
+                        t.GetComponentInChildren<Text>().color = (t == chara ? Color.green : Color.black);
                     }
                 });
             }
@@ -1090,7 +1096,7 @@ public class UmaViewerUI : MonoBehaviour
         Builder.CurrentUMAContainer?.SetFaceOverrideData(isOn);
     }
 
-    public void AudioPause()
+    public void PauseAudio()
     {
         var sources = Builder.CurrentAudioSources;
         if (sources.Count > 0)
@@ -1115,15 +1121,25 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    public void StopAudio()
+    {
+        var sources = Builder.CurrentAudioSources;
+        foreach (AudioSource source in sources)
+        {
+            source.Stop();
+        }
+    }
+
     public void AudioProgressChange(float val)
     {
         if (Builder.CurrentAudioSources.Count > 0)
         {
+            var time = Builder.CurrentAudioSources[0].clip.length * val;
             foreach (AudioSource source in Builder.CurrentAudioSources)
             {
                 if (source.clip)
                 {
-                    source.time = source.clip.length * val;
+                    source.time = Mathf.Clamp(time, 0, source.clip.length);
                 }
             }
         }
@@ -1395,6 +1411,8 @@ public class UmaViewerUI : MonoBehaviour
     }
 
     public void SetLiveRecordMode(bool val) { isRecordVMD = val; }
+
+    public void SetLiveRequireStage(bool val) { isRequireStage = val; }
 
     public void ShowMessage(string msg, UIMessageType type)
     {

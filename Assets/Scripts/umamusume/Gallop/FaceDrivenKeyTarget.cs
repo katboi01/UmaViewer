@@ -1242,7 +1242,7 @@ namespace Gallop
         public static float CalcMorphWeight(float time, int speed, int interFrame, InterpolateType interType, LiveTimelineKey curKey, LiveTimelineKey nextKey)
         {
 
-            float keyTime = (float)curKey.frame / 60;
+            float keyTime = (float)curKey.FrameSecond;
 
             switch (speed)
             {

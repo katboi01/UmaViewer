@@ -254,7 +254,7 @@ namespace Gallop.Live.Cutt
         {
             for (int i = thisList.Count - 1; i >= 0; i--)
             {
-                if (currentTime >= (double)thisList[i].frame / 60)
+                if (currentTime >= thisList[i].FrameSecond)
                 {
                     thisTimeKeyIndex.index = i;
                     thisTimeKeyIndex.key = thisList[i];
@@ -285,7 +285,7 @@ namespace Gallop.Live.Cutt
         {
             if (thisTimeKeyIndex.nextKey != null)
             {
-                if (currentTime >= (double)thisTimeKeyIndex.nextKey.frame / 60)
+                if (currentTime >= thisTimeKeyIndex.nextKey.FrameSecond)
                 {
                     thisTimeKeyIndex.index++;
                     thisTimeKeyIndex.key = thisList[thisTimeKeyIndex.index];
@@ -602,6 +602,19 @@ namespace Gallop.Live.Cutt
     {
         public int frame;
         public LiveTimelineKeyAttribute attribute;
+
+        private double _framesecond = -999;
+
+        public double FrameSecond { 
+            get{
+                if (_framesecond == -999)
+                {
+                    _framesecond = (double)frame / 60;
+                }
+                return _framesecond;
+               }
+           set => _framesecond = value; 
+        }
     }
 
     [System.Serializable]

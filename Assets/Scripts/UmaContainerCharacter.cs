@@ -160,9 +160,9 @@ public class UmaContainerCharacter : UmaContainer
         //Materials
         foreach (var rend in gameObject.GetComponentsInChildren<Renderer>())
         {
-            for (int i = 0; i < rend.sharedMaterials.Length; i++)
+            for (int i = 0; i < rend.materials.Length; i++)
             {
-                Material mat = rend.sharedMaterials[i];
+                Material mat = rend.materials[i];
 
                 var matHlp = Materials.FirstOrDefault(m => m.Mat == mat);
                 if (matHlp == null)
@@ -572,7 +572,7 @@ public class UmaContainerCharacter : UmaContainer
 
             foreach (Renderer r in Body.GetComponentsInChildren<Renderer>())
             {
-                foreach (Material m in r.sharedMaterials)
+                foreach (Material m in r.materials)
                 {
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
 
@@ -615,7 +615,7 @@ public class UmaContainerCharacter : UmaContainer
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
                             case "0001":
-                                switch (r.sharedMaterials.ToList().IndexOf(m))
+                                switch (r.materials.ToList().IndexOf(m))
                                 {
                                     case 0:
                                         mainTex = $"tex_bdy{costumeIdShort}_00_waku0_diff";
@@ -681,7 +681,7 @@ public class UmaContainerCharacter : UmaContainer
         {
             foreach (Renderer r in Body.GetComponentsInChildren<Renderer>())
             {
-                foreach (Material m in r.sharedMaterials)
+                foreach (Material m in r.materials)
                 {
                     //BodyAlapha's shader need to change manually.
                     if (m.name.Contains("bdy") && m.name.Contains("Alpha"))
@@ -721,7 +721,7 @@ public class UmaContainerCharacter : UmaContainer
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
                 if (head.name.Contains("mchr"))
                 {
@@ -866,7 +866,7 @@ public class UmaContainerCharacter : UmaContainer
         var textures = MobHeadTextures;
         foreach (Renderer r in hair.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
 
                 //Glasses's shader need to change manually.
