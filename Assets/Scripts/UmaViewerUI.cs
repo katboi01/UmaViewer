@@ -1,5 +1,7 @@
 using Gallop;
+#if !UNITY_ANDROID || UNITY_EDITOR
 using SFB;
+#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -171,6 +173,9 @@ public class UmaViewerUI : MonoBehaviour
         UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
         
         PoseManager.LoadLocalPoseFiles();
+#if UNITY_ANDROID && !UNITY_EDITOR
+        canvasScaler.referenceResolution = new Vector2(1280, 720);
+#endif
     }
 
     private void OnDestroy()
@@ -1394,6 +1399,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void ChangeDataPath()
     {
+        #if !UNITY_ANDROID || UNITY_EDITOR
         var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", Config.Instance.MainPath, false);
         if (path != null && path.Length > 0 && !string.IsNullOrEmpty(path[0]))
         {
@@ -1403,6 +1409,7 @@ public class UmaViewerUI : MonoBehaviour
                 Config.Instance.UpdateConfig();
             }
         }
+        #endif
     }
 
     public void ChangeOutlineWidth(float val)
@@ -1430,6 +1437,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void ExportModel()
     {
+        #if !UNITY_ANDROID || UNITY_EDITOR
         var container = Builder.CurrentUMAContainer;
         if (container)
         {
@@ -1440,6 +1448,7 @@ public class UmaViewerUI : MonoBehaviour
                 ModelExporter.ExportModel(container, path);
             }
         }
+        #endif
     }
 
     public void ToggleVisible(GameObject go)

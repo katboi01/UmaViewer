@@ -90,6 +90,14 @@ public class Config
         Version = Application.version;
 
         MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
+        if (Application.isMobilePlatform)
+        {
+            WorkMode = WorkMode.Standalone;
+            MainPath = Application.persistentDataPath;
+            Instance = this;
+            return;
+        }
+
         if (!File.Exists(configPath))
         {
             File.WriteAllText(configPath, JsonUtility.ToJson(this, true));

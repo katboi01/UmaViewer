@@ -121,6 +121,10 @@ public class UmaViewerGlobalShader : MonoBehaviour
         Shader.SetGlobalFloatArray("_DirtRate", _DirtRate);
 
         Shader.SetGlobalColor("_AmbientColor", _AmbientColor);
+        #if UNITY_ANDROID
+        Shader.SetGlobalFloat("_GlobalFarClipLog", 1f);
+        Shader.SetGlobalFloat("_GlobalVertexDepthLinear", 1f);
+        #endif
     }
 
 

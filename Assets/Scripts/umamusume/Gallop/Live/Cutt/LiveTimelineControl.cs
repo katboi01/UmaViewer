@@ -5,7 +5,6 @@ using UnityEngine;
 using static RootMotion.FinalIK.IKSolverVR;
 using System.Linq;
 using System.IO;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
