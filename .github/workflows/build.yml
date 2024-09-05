@@ -45,6 +45,7 @@ jobs:
         run: zip -r UmaViewer_${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}/*
 
       - name: Create Release
+        if: matrix.targetPlatform == 'StandaloneWindows64'
         id: create_release
         uses: actions/create-release@v1
         env:
