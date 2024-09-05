@@ -21,8 +21,8 @@ jobs:
         unityVersion:
           - 2020.3.24f1
         targetPlatform:
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - Android # Build an Android APK.
+          - StandaloneWindows64 # Build a Windows 64-bit standalone
 
     steps:
       - uses: actions/checkout@v2
@@ -69,13 +69,13 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload Android Release Asset
-        if: matrix.targetPlatform == 'Android'
+        if: matrix.targetPlatform == 'StandaloneWindows64'
         id: upload-android-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/${{ matrix.targetPlatform }}/UmaViewer.apk
+          asset_path: ./build/Android/UmaViewer.apk
           asset_name: UmaViewer.apk
           asset_content_type: application/vnd.android.package-archive
