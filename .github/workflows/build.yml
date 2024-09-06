@@ -7,10 +7,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  buildPlayer:
+  buildForPlatform:
     name: build Player
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
@@ -23,12 +22,11 @@ jobs:
         targetPlatform:
           - Android # Build an Android APK.
           - StandaloneWindows64 # Build a Windows 64-bit standalone
-
     steps:
       - uses: actions/checkout@v2
         with:
           lfs: true
-          
+
       - uses: game-ci/unity-builder@v2
         env:
             UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -44,8 +42,25 @@ jobs:
         if: matrix.targetPlatform == 'StandaloneWindows64'
         run: zip -r UmaViewer_${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}/*
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}/*
+
+  createRelease:
+    needs: buildForPlatform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: build/
+
       - name: Create Release
-        if: matrix.targetPlatform == 'StandaloneWindows64'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -57,25 +72,21 @@ jobs:
           prerelease: false
 
       - name: Upload Windows Release Asset
-        if: matrix.targetPlatform == 'StandaloneWindows64'
-        id: upload-windows-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./UmaViewer_${{ matrix.targetPlatform }}.zip
+          asset_path: ./build/Build-StandaloneWindows64/UmaViewer_StandaloneWindows64.zip
           asset_name: UmaViewer.zip
           asset_content_type: application/zip
 
       - name: Upload Android Release Asset
-        if: matrix.targetPlatform == 'StandaloneWindows64'
-        id: upload-android-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/Android/UmaViewer.apk
+          asset_path: ./build/Build-Android/UmaViewer.apk
           asset_name: UmaViewer.apk
           asset_content_type: application/vnd.android.package-archive
