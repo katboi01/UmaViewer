@@ -39,7 +39,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
             name: Build
             path: build
