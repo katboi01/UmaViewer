@@ -646,13 +646,7 @@ public class UmaContainerCharacter : UmaContainer
                                 tripleMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_base";
                                 optionMap = $"tex_bdy{costumeIdShort}_00_0_{bust}_ctrl";
                                 break;
-                            case "0006":
-                                mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
-                                toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
-                                tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
-                                optionMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_ctrl";
-                                break;
-                            case "0009":
+                            case "0006": case "0009": case "0015":
                                 mainTex = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_diff";
                                 toonMap = $"tex_bdy{costumeIdLong}_{skin}_{bust}_{"00"}_shad_c";
                                 tripleMap = $"tex_bdy{costumeIdLong}_0_{bust}_00_base";
