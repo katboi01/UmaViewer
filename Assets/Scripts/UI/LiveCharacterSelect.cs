@@ -6,7 +6,6 @@ public class LiveCharacterSelect : MonoBehaviour
     public CharaEntry CharaEntry;
     public string CostumeId;
     public Image CharaImage;
-    public Image BackGroundImage;
     public Image CostumeImage;
     public Text IndexText;
 
@@ -22,9 +21,8 @@ public class LiveCharacterSelect : MonoBehaviour
     {
         CharaEntry = charaentry;
         CostumeId = costumeId;
+        CharaImage.enabled = true;
         CharaImage.sprite = charaentry.Icon;
-        BackGroundImage.enabled = true;
-        BackGroundImage.sprite = charaentry.Icon;
         CostumeImage.sprite = costumeSprite;
     }
 }
