@@ -1,5 +1,6 @@
 ﻿using CriWareFormats;
 using Gallop;
+using Gallop.Live;
 using NAudio.Wave;
 using System;
 using System.Collections;
@@ -658,35 +659,38 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void LoadLive(LiveEntry live, List<LiveCharacterSelect> characters)
     {
-        UmaSceneController.LoadScene("LiveScene",
-            delegate ()
+        characters.ForEach(a =>
+        {
+            if (a.CharaEntry == null || a.CostumeId == "")
+            {
+                a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count / 2)];
+                a.CostumeId = "0002_00_00";
+            }
+        });//fill empty
+
+        UmaAssetManager.PreLoadAndRun(Director.GetLiveAllVoiceEntry(live.MusicId, characters), 
+        delegate
+        {
+            UmaSceneController.LoadScene("LiveScene",
+            delegate
             {
                 GameObject MainLive = Instantiate(LiveControllerPrefab);
-                Gallop.Live.Director mController = MainLive.GetComponentInChildren<Gallop.Live.Director>();
+                Director mController = MainLive.GetComponentInChildren<Director>();
                 mController.live = live;
                 mController.IsRecordVMD = UI.isRecordVMD;
                 mController.RequireStage = UI.isRequireStage;
 
                 List<GameObject> transferObjs = new List<GameObject>() {
-                    MainLive,
-                    GameObject.Find("ViewerMain"),
-                    GameObject.Find("Directional Light"),
-                    GameObject.Find("GlobalShaderController"),
-                    GameObject.Find("AudioManager")
+                            MainLive,
+                            GameObject.Find("ViewerMain"),
+                            GameObject.Find("Directional Light"),
+                            GameObject.Find("GlobalShaderController"),
+                            GameObject.Find("AudioManager")
                 };
 
                 // Move the GameObject (you attach this in the Inspector) to the newly loaded Scene
                 transferObjs.ForEach(o => SceneManager.MoveGameObjectToScene(o, SceneManager.GetSceneByName("LiveScene")));
                 mController.Initialize();
-
-                characters.ForEach(a =>
-                {
-                    if (a.CharaEntry == null || a.CostumeId == "")
-                    {
-                        a.CharaEntry = Main.Characters[Random.Range(0, Main.Characters.Count/2)];
-                        a.CostumeId = "0002_00_00";
-                    }
-                });//fill empty
 
                 var actual_member_count = mController._liveTimelineControl.data.worksheetList[0].charaMotSeqList.Count;
                 if (actual_member_count > characters.Count)
@@ -707,15 +711,15 @@ public class UmaViewerBuilder : MonoBehaviour
                     LiveViewerUI.Instance.CurrentLyrics = Lyrics;
                 }
             },
-            delegate ()
+            delegate
             {
-                Gallop.Live.Director.instance.InitializeUI();
-                Gallop.Live.Director.instance.InitializeTimeline(characters, UI.LiveMode);
-                Gallop.Live.Director.instance.InitializeMusic(live.MusicId, characters);
-                Gallop.Live.Director.instance.Play();
+                Director.instance.InitializeUI();
+                Director.instance.InitializeTimeline(characters, UI.LiveMode);
+                Director.instance.InitializeMusic(live.MusicId, characters);
+                Director.instance.Play();
                 LiveViewerUI.Instance.RecordingUI.SetActive(Gallop.Live.Director.instance.IsRecordVMD);
-            }
-        );
+            });
+        });
     }
 
     //Use decrypt function

@@ -17,7 +17,7 @@ public class UmaDatabaseEntry
     {
         get
         {
-            if (Config.Instance.WorkMode == WorkMode.Standalone && !File.Exists(Path))
+            if ((Config.Instance.WorkMode == WorkMode.Standalone || !IsAssetBundle) && !File.Exists(Path))
             {
                 DownloadAsset(this);
             }
@@ -30,6 +30,14 @@ public class UmaDatabaseEntry
         get
         {
             return $"{Config.Instance.MainPath}/dat/{Url.Substring(0, 2)}/{Url}";
+        }
+    }
+
+    public bool IsAssetBundle
+    {
+        get
+        {
+            return string.IsNullOrEmpty(System.IO.Path.GetExtension(Name));
         }
     }
 

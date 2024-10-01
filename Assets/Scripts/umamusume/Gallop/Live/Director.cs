@@ -376,7 +376,11 @@ namespace Gallop.Live
 
                 if (_syncTime == false)
                 {
-                    if (liveMusic.sourceList[0].time > 0.01)
+                    if(liveMusic.sourceList.Count == 0)
+                    {
+                        _syncTime = true;
+                    }
+                    else if (liveMusic.sourceList[0].time > 0.01)
                     {
                         _liveCurrentTime = liveMusic.sourceList[0].time;
                         _syncTime = true;
@@ -544,6 +548,44 @@ namespace Gallop.Live
             });
 
             UnityCameraVMDRecorder.SaveLiveCameraVMD(live, ExitTime, frames);
+        }
+
+        public static List<UmaDatabaseEntry> GetLiveAllVoiceEntry(int songid, List<LiveCharacterSelect> characters)
+        {
+            List<UmaDatabaseEntry> entryList = new List <UmaDatabaseEntry>();
+            for (int i = 0; i < characters.Count; i++)
+            {
+                if (characters[i].CharaEntry.Name != "")
+                {
+                    var charaid = characters[i].CharaEntry.Id;
+
+                    var entry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(VOCAL_PATH, songid, charaid)) && a.Name.EndsWith("awb"));
+                    if (entry == null)
+                    {
+                        List<UmaDatabaseEntry> entries = new List<UmaDatabaseEntry>();
+                        foreach (var random in UmaViewerMain.Instance.AbSounds.Where(a => (a.Name.Contains(string.Format(RANDOM_VOCAL_PATH, songid)) && a.Name.EndsWith("awb"))))
+                        {
+                            entries.Add(random);
+                        }
+                        if (entries.Count > 0)
+                        {
+                            entry = entries[UnityEngine.Random.Range(0, entries.Count - 1)];
+                        }
+                    }
+
+                    if (entry != null)
+                    {
+                        entryList.Add(entry);
+                    }
+                }
+            }
+
+            var bgEntry = UmaViewerMain.Instance.AbSounds.FirstOrDefault(a => a.Name.Contains(string.Format(SONG_PATH, songid)) && a.Name.EndsWith("awb"));
+            if (bgEntry != null)
+            {
+                entryList.Add(bgEntry);
+            }
+            return entryList;
         }
     }
 
