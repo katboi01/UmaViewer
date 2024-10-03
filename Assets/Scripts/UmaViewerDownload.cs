@@ -69,8 +69,11 @@ public class UmaViewerDownload : MonoBehaviour
         foreach (var entry in entrys)
         {
             yield return downloadWaitUntil;
-            callback?.Invoke(count, entrys.Count, "DownLoading");
-            count++;
+            if(count % 10 == 0)
+            {
+                callback?.Invoke(count, entrys.Count, "DownLoading");
+                count++;
+            }
             CurrentCoroutinesCount++;
             semaphore.WaitAsync();
             downloadCoroutines.Add(Instance.StartCoroutine(DownloadTask(entry)));
@@ -79,7 +82,7 @@ public class UmaViewerDownload : MonoBehaviour
 
     public static IEnumerator DownloadTask(UmaDatabaseEntry entry)
     {
-        if (!File.Exists(entry.Path) && Config.Instance.WorkMode == WorkMode.Standalone)
+        if (!File.Exists(entry.Path))
         {
             string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
             using (UnityWebRequest www = UnityWebRequest.Get(baseurl))
@@ -120,7 +123,7 @@ public class UmaViewerDownload : MonoBehaviour
 
     public static async Task DownloadTask(UmaDatabaseEntry entry, SemaphoreSlim semaphore)
     {
-        if (!File.Exists(entry.Path) && Config.Instance.WorkMode == WorkMode.Standalone)
+        if (!File.Exists(entry.Path))
         {
             string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
             using UnityWebRequest www = UnityWebRequest.Get(baseurl);

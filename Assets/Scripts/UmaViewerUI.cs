@@ -1412,6 +1412,20 @@ public class UmaViewerUI : MonoBehaviour
         #endif
     }
 
+    public void OpenConfig()
+    {
+        #if !UNITY_ANDROID || UNITY_EDITOR
+        if (File.Exists(Config.configPath))
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = Config.configPath,
+                UseShellExecute = true
+            });
+        }
+        #endif
+    }
+
     public void ChangeOutlineWidth(float val)
     {
         Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
@@ -1423,6 +1437,7 @@ public class UmaViewerUI : MonoBehaviour
 
     public void ShowMessage(string msg, UIMessageType type)
     {
+        if (!MessageText) return;
         MessageText.text += type switch
         {
             UIMessageType.Error => string.Format("<color=red>{0}</color>\n", msg),

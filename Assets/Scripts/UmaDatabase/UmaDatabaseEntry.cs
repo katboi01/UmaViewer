@@ -17,7 +17,7 @@ public class UmaDatabaseEntry
     {
         get
         {
-            if ((Config.Instance.WorkMode == WorkMode.Standalone || !IsAssetBundle) && !File.Exists(Path))
+            if (Config.Instance.DownloadMissingResources && !File.Exists(Path))
             {
                 DownloadAsset(this);
             }
