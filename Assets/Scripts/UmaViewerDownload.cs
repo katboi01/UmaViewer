@@ -65,14 +65,14 @@ public class UmaViewerDownload : MonoBehaviour
     public static IEnumerator DownloadAssets(List<UmaDatabaseEntry> entrys, Action<int, int, string> callback = null)
     {
         callback?.Invoke(0, entrys.Count, "DownLoading");
-        var count = 0;
-        foreach (var entry in entrys)
+        var percent_num = entrys.Count / 100;
+        for(int i = 0; i < entrys.Count; i++)
         {
+            var entry = entrys[i];
             yield return downloadWaitUntil;
-            if(count % 10 == 0)
+            if(i % percent_num == 0)
             {
-                callback?.Invoke(count, entrys.Count, "DownLoading");
-                count++;
+                callback?.Invoke(i, entrys.Count, "DownLoading");
             }
             CurrentCoroutinesCount++;
             semaphore.WaitAsync();

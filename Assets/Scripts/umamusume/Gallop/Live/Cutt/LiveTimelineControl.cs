@@ -354,7 +354,7 @@ namespace Gallop.Live.Cutt
                     MulFrame.Add(mulframe);
                 }
 
-                if (currentFrame % 2 == 0) RecordUma?.Invoke();
+                if (currentFrame % 2 == 0) RecordUma?.Invoke(); //Set 30 FPS
             }
         }
 

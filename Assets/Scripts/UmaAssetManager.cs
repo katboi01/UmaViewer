@@ -54,6 +54,7 @@ public class UmaAssetManager : MonoBehaviour
             SearchAB(Main, entry, ref result);
         }
 
+        var percent_num = result.Count / 100;
         for (int i = 0; i < result.Count; i++)
         {   
             var entry = result[i];
@@ -66,7 +67,7 @@ public class UmaAssetManager : MonoBehaviour
             else
             {
                 var exist = LoadAB(result[i]);
-                if (!exist)
+                if (!exist && i % percent_num == 0)
                 {
                     OnLoadProgressChange?.Invoke(i, result.Count, null);
                     yield return null;
