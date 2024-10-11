@@ -1,11 +1,8 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Mono.Data.Sqlite;
 using System.Data;
-using Assets.Scripts;
 using System.IO;
-using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
 public class UmaDatabaseController
@@ -26,12 +23,6 @@ public class UmaDatabaseController
             return instance;
         }
     }
-    /// <summary>
-    /// https://prd-storage-umamusume.akamaized.net/dl/resources/
-    /// </summary>
-    public static string ServerUrl = "https://prd-storage-umamusume.akamaized.net/dl/resources/";
-    /// <summary> Android/assetbundles/ </summary>
-    public static string AssetUrl = "Windows/assetbundles/";
     /// <summary> 3d/chara/body/ </summary>
     public static string BodyPath = "3d/chara/body/";
     /// <summary> 3d/chara/head/ </summary>
