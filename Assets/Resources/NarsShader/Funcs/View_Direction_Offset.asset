@@ -12,3 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78b2425a2284af743826c689403a4924, type: 3}
   m_Name: View_Direction_Offset
   m_EditorClassIdentifier: 
+  m_functionInfo: "// Made with Amplify Shader Editor v1.9.2\n// Available at the
+    Unity Asset Store - http://u3d.as/y3X \n/*ASEBEGIN\nVersion=19200\nNode;AmplifyShaderEditor.SimpleMultiplyOpNode;369;3144.834,4831.834;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;-1;False;1;FLOAT;0\nNode;AmplifyShaderEditor.RadiansOpNode;378;3307.603,4858.271;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0\nNode;AmplifyShaderEditor.WireNode;381;2628.787,5272.055;Inherit;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.NormalizeNode;384;3767.766,4366.329;Inherit;False;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.WorldPosInputsNode;390;2180.397,4934.364;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3\nNode;AmplifyShaderEditor.FunctionInput;297;2966.908,4825.527;Inherit;False;Yaw;1;2;False;1;0;FLOAT;0;False;1;FLOAT;0\nNode;AmplifyShaderEditor.FunctionInput;296;3165.27,4437.029;Inherit;False;Pitch;1;1;False;1;0;FLOAT;0;False;1;FLOAT;0\nNode;AmplifyShaderEditor.SimpleSubtractOpNode;388;4397.638,4943.644;Inherit;False;2;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.RotateAboutAxisNode;387;4038.786,4555.428;Inherit;False;True;4;0;FLOAT3;0,1,0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,1;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.NormalizeNode;389;4629.431,4933.75;Inherit;False;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.WireNode;386;4311.789,5246.17;Inherit;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.RadiansOpNode;382;3746.993,4507.66;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0\nNode;AmplifyShaderEditor.SimpleMultiplyOpNode;377;3530.694,4458.626;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;1;False;1;FLOAT;0\nNode;AmplifyShaderEditor.NormalizeNode;376;3236.959,4741.025;Inherit;False;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.CustomExpressionNode;375;3596.97,4366.211;Inherit;False;return
+    UNITY_MATRIX_V[0]@;3;Create;0;View Matrix [0];True;False;0;;False;0;1;FLOAT3;0\nNode;AmplifyShaderEditor.CustomExpressionNode;373;3013.945,4740.818;Inherit;False;return
+    UNITY_MATRIX_V[1]@;3;Create;0;View Matrix [1];True;False;0;;False;0;1;FLOAT3;0\nNode;AmplifyShaderEditor.WireNode;383;2636.787,4605.055;Inherit;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.FunctionInput;295;2975.552,4976.986;Inherit;False;View
+    Position;3;0;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.SimpleAddOpNode;380;2447.651,4904.878;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.RotateAboutAxisNode;385;3549.403,4859.913;Inherit;False;False;4;0;FLOAT3;0,1,0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;1;FLOAT3;0\nNode;AmplifyShaderEditor.FunctionOutput;0;4849.276,4931.584;Inherit;False;True;-1;Adjusted
+    Position;0;False;1;0;FLOAT3;0,0,0;False;1;FLOAT3;0\nWireConnection;369;0;297;0\nWireConnection;378;0;369;0\nWireConnection;381;0;380;0\nWireConnection;384;0;375;0\nWireConnection;388;0;387;0\nWireConnection;388;1;386;0\nWireConnection;387;0;384;0\nWireConnection;387;1;382;0\nWireConnection;387;2;383;0\nWireConnection;387;3;385;0\nWireConnection;389;0;388;0\nWireConnection;386;0;381;0\nWireConnection;382;0;377;0\nWireConnection;377;0;296;0\nWireConnection;376;0;373;0\nWireConnection;383;0;380;0\nWireConnection;380;1;390;0\nWireConnection;385;0;376;0\nWireConnection;385;1;378;0\nWireConnection;385;2;380;0\nWireConnection;385;3;295;0\nWireConnection;0;0;389;0\nASEEND*/\n//CHKSM=2A6EB84456027344554B4175EC043F7E63172A2A"
+  m_functionName: 
+  m_description: 
+  m_additionalIncludes:
+    m_additionalIncludes: []
+    m_outsideIncludes: []
+  m_additionalPragmas:
+    m_additionalPragmas: []
+    m_outsidePragmas: []
+  m_additionalDirectives:
+    m_validData: 0
+    m_isDirty: 0
+    m_moduleName: ' Additional Directives'
+    m_independentModule: 1
+    m_customEdited: 0
+    m_additionalDirectives: []
+    m_shaderFunctionDirectives: []
+    m_nativeDirectives: []
+    m_nativeDirectivesIndex: -1
+    m_nativeDirectivesFoldout: 0
+    m_directivesSaveItems: []
+  m_nodeCategory: 0
+  m_headerStyle: 0
+  m_headerColor: {r: 1, g: 0.4, b: 0, a: 1}
+  m_customNodeCategory: Arc System Works
+  m_previewPosition: 0
+  m_hidden: 0
+  m_url: 
