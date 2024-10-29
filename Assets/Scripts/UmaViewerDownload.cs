@@ -11,11 +11,11 @@ using System.Threading;
 public class UmaViewerDownload : MonoBehaviour
 {
     public static string MANIFEST_ROOT_URL = "https://prd-storage-app-umamusume.akamaized.net/dl/resources/Manifest";
-    public static string GENERIC_BASE_URL = "https://prd-storage-umamusume.akamaized.net/dl/resources/Generic";
+    public static string GENERIC_BASE_URL = "https://prd-storage-game-umamusume.akamaized.net/dl/resources/Generic";
 #if UNITY_ANDROID && !UNITY_EDITOR
-    public static string ASSET_BASE_URL = "https://prd-storage-umamusume.akamaized.net/dl/resources/Android/assetbundles/";
+    public static string ASSET_BASE_URL = "https://prd-storage-game-umamusume.akamaized.net/dl/resources/Android/assetbundles/";
 #else
-    public static string ASSET_BASE_URL = "https://prd-storage-umamusume.akamaized.net/dl/resources/Windows/assetbundles/";
+    public static string ASSET_BASE_URL = "https://prd-storage-game-umamusume.akamaized.net/dl/resources/Windows/assetbundles/";
 #endif
 
     private const int maxConcurrentDownloads = 30;

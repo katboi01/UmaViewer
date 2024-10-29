@@ -803,8 +803,11 @@ public class UmaContainerCharacter : UmaContainer
                        var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
                        StaticTear_L = table["tearmesh_l"] as GameObject;
                        StaticTear_R = table["tearmesh_r"] as GameObject;
-                       StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
-                       StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
+                       if (StaticTear_L && StaticTear_R)
+                       {
+                            StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
+                            StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
+                       }
                     }
 
                     switch (m.shader.name)

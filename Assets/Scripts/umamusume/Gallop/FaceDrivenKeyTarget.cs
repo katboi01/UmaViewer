@@ -954,37 +954,49 @@ namespace Gallop
             if (updateInfo_.effect != null)
             {
                 var info = updateInfo_.effect;
-                var cheektype = info.cheekType;
-                for (int i = 0; i < CheekMorph.BindProperties.Count; i++)
+                if (CheekMorph != null)
                 {
-                    CheekMorph.BindProperties[i].Value = (cheektype - 1 == i ? 1 : 0);
+                    var cheektype = info.cheekType;
+                    for (int i = 0; i < CheekMorph.BindProperties.Count; i++)
+                    {
+                        CheekMorph.BindProperties[i].Value = (cheektype - 1 == i ? 1 : 0);
+                    }
                 }
 
-                var mangatype = info.mangameIndex;
-                if (mangatype == 0)
+                if (MangaMorph != null)
                 {
-                    HasManga = false;
-                    MangaMorph.BindProperties[1].Value = mangatype;
-                }
-                else
-                {
-                    HasManga = true;
-                    MangaMorph.BindProperties[0].Value = mangatype - 1;
-                    MangaMorph.BindProperties[1].Value = 1;
+                    var mangatype = info.mangameIndex;
+                    if (mangatype == 0)
+                    {
+                        HasManga = false;
+                        MangaMorph.BindProperties[1].Value = mangatype;
+                    }
+                    else
+                    {
+                        HasManga = true;
+                        MangaMorph.BindProperties[0].Value = mangatype - 1;
+                        MangaMorph.BindProperties[1].Value = 1;
+                    }
                 }
 
-                var tearfulEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrTearful) > 0;
-                var tearfultype = tearfulEnable ? info.tearyType : 0;
-                StaticTearMorph.BindProperties.ForEach(p => p.Value = tearfultype);
-
-                var shaderEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrFaceShadowVisible) > 0;
-                if (shaderEnable)
+                if (StaticTearMorph != null)
                 {
-                    ShadeMorph.BindProperties[0].Value = Mathf.MoveTowards(ShadeMorph.BindProperties[0].Value, 1, Time.deltaTime * 2);
+                    var tearfulEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrTearful) > 0;
+                    var tearfultype = tearfulEnable ? info.tearyType : 0;
+                    StaticTearMorph.BindProperties.ForEach(p => p.Value = tearfultype);
                 }
-                else
+
+                if (ShadeMorph != null)
                 {
-                    ShadeMorph.BindProperties[0].Value = 0;
+                    var shaderEnable = ((int)info.attribute & LiveTimelineKeyFacialEffectData.kAttrFaceShadowVisible) > 0;
+                    if (shaderEnable)
+                    {
+                        ShadeMorph.BindProperties[0].Value = Mathf.MoveTowards(ShadeMorph.BindProperties[0].Value, 1, Time.deltaTime * 2);
+                    }
+                    else
+                    {
+                        ShadeMorph.BindProperties[0].Value = 0;
+                    }
                 }
                 ChangeMorphEffect();
             }
