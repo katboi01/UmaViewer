@@ -747,7 +747,9 @@ public class UmaViewerUI : MonoBehaviour
         foreach (var entry in Main.AbChara.Where(a => a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
         {
             string id = Path.GetFileName(entry.Name);
-            id = id.Split('_')[1].Substring(mini ? 4 : 3) + "_" + id.Split('_')[2] + "_" + id.Split('_')[3];
+            string[] split = id.Split('_');
+            if (split.Length < 4) continue; //prevents error for mini umas
+            id = split[1].Substring(mini ? 4 : 3) + "_" + split[2] + "_" + split[3];
             if (!costumes.Contains(id))
             {
                 costumes.Add(id);
