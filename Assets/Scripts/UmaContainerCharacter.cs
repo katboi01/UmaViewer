@@ -873,7 +873,6 @@ public class UmaContainerCharacter : UmaContainer
                 {
                     m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("diff")));
                     m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("shad_c")));
-                    m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("base")));
                     m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("ctrl")));
                     m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("area")));
                     SetMaskColor(m, MobHeadColor, "hair", true);
@@ -881,6 +880,11 @@ public class UmaContainerCharacter : UmaContainer
                     {
                         var cutoff = CharaData["hair_cutoff"].ToString(); 
                         m.SetFloat("_Cutoff", int.Parse(cutoff) / 10000f); //Not entirely correct, but effective
+                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith(CharaData["sex"].ToString() + "_base")));
+                    }
+                    else
+                    {
+                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("base")));
                     }
                 }
 
