@@ -12,6 +12,9 @@ public class Config
     public string LanguageTip = "Affects Uma names on the list. Language options: 0 - En, 1 - Jp";
     public Language Language = Language.En;
 
+    public string DownloadMissingResourcesTip = "true/false. automatically download missing files, which may require a VPN.";
+    public bool DownloadMissingResources = true;
+
     public string MainPathTip = "Path to game folder, eg. D:/Backup/Cygames/umamusume";
     public string MainPath = "";
 
@@ -86,10 +89,18 @@ public class Config
 
     public Config()
     {
-        //TODO: Updating config file
         Version = Application.version;
 
         MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
+        if (Application.isMobilePlatform)
+        {
+            WorkMode = WorkMode.Standalone;
+            DownloadMissingResources = true;
+            MainPath = Application.persistentDataPath;
+            Instance = this;
+            return;
+        }
+
         if (!File.Exists(configPath))
         {
             File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
@@ -99,6 +110,7 @@ public class Config
             try
             {
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(configPath), this);
+                File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
             }
             catch (Exception ex)
             {

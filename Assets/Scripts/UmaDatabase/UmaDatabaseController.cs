@@ -54,15 +54,15 @@ public class UmaDatabaseController
         {
             if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                if(!File.Exists($@"{Config.Instance.MainPath}\meta_umaviewer")) throw new Exception();
-                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta_umaviewer;");
-                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master_umaviewer.mdb;");
+                if(!File.Exists($@"{Config.Instance.MainPath}/meta_umaviewer")) throw new Exception();
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/meta_umaviewer;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master_umaviewer.mdb;");
             }
             else
             {
-                if (!File.Exists($@"{Config.Instance.MainPath}\meta")) throw new Exception();
-                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\meta;");
-                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}\master\master.mdb;");
+                if (!File.Exists($@"{Config.Instance.MainPath}/meta")) throw new Exception();
+                metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/meta;");
+                masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master.mdb;");
             }
 
             metaDb.Open();
@@ -133,7 +133,7 @@ public class UmaDatabaseController
                 Debug.LogError($"Error caught while reading Entry : \n {e}"); 
             }
             
-            if (entry != null) {
+            if (entry != null && !meta.ContainsKey(entry.Name)) {
 
                 meta.Add(entry.Name, entry);
             }
@@ -160,9 +160,17 @@ public class UmaDatabaseController
             sqlite_cmd.CommandText = sql;
             using var sqlite_datareader = sqlite_cmd.ExecuteReader();
             var result = new DataTable();
-            result.Load(sqlite_datareader);
-            foreach (DataRow row in result.Rows)
+            for (int i = 0; i < sqlite_datareader.FieldCount; i++)
             {
+                result.Columns.Add(sqlite_datareader.GetName(i), sqlite_datareader.GetFieldType(i));
+            }
+            while (sqlite_datareader.Read())
+            {
+                DataRow row = result.NewRow();
+                for (int i = 0; i < sqlite_datareader.FieldCount; i++)
+                {
+                    row[i] = sqlite_datareader[i];
+                }
                 dr.Add(row);
             }
         }

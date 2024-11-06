@@ -379,7 +379,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
                     binaryWriter.Write(boneNameBytes, 0, boneNameBytes.Length);
                     binaryWriter.Write(new byte[boneNameLength - boneNameBytes.Length], 0, boneNameLength - boneNameBytes.Length);
 
-                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)(frame.frameIndex/2));
+                    byte[] frameNumberByte = BitConverter.GetBytes((ulong)(frame.frameIndex / 2)); //Set 30 FPS
                     binaryWriter.Write(frameNumberByte, 0, intByteLength);
 
                     Vector3 position = frame.Position * WorldScaleFix;

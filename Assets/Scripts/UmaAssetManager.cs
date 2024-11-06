@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 
 public class UmaAssetManager : MonoBehaviour
@@ -55,13 +54,24 @@ public class UmaAssetManager : MonoBehaviour
             SearchAB(Main, entry, ref result);
         }
 
+        var percent_num = result.Count / 100;
         for (int i = 0; i < result.Count; i++)
-        {
-            var exist = LoadAB(result[i]);
-            if (!exist)
+        {   
+            var entry = result[i];
+            if (!entry.IsAssetBundle)
             {
+                var file = entry.FilePath;  // trigger download
                 OnLoadProgressChange?.Invoke(i, result.Count, null);
                 yield return null;
+            }
+            else
+            {
+                var exist = LoadAB(result[i]);
+                if (!exist && i % percent_num == 0)
+                {
+                    OnLoadProgressChange?.Invoke(i, result.Count, null);
+                    yield return null;
+                }
             }
         }
 

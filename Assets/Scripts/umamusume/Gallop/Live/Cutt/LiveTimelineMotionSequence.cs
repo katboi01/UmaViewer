@@ -72,7 +72,10 @@ namespace Gallop.Live.Cutt
             {
                 foreach (var key in _currentKey.thisList)
                 {
-                    _tempAnim.AddClip(key.clip, key.clip.name);
+                   if(key.clip != null)
+                   {
+                        _tempAnim.AddClip(key.clip, key.clip.name);
+                   }
                 }
             }
             _tempAnim.wrapMode = WrapMode.Clamp;
@@ -122,13 +125,15 @@ namespace Gallop.Live.Cutt
                 double interval = (currentTime - arg.FrameSecond) * arg.playSpeed;
                 float currentAnimationTime = (float)(start + interval);
 
-                var state = _tempAnim[anim.name];
-                state.enabled = true;
-                state.weight = 1;
-                state.time = arg.loop ? Mathf.Repeat(currentAnimationTime, state.length) : currentAnimationTime;
-                _tempAnim.Sample();
-                state.enabled = false;
-
+                if (anim)
+                {
+                    var state = _tempAnim[anim.name];
+                    state.enabled = true;
+                    state.weight = 1;
+                    state.time = arg.loop ? Mathf.Repeat(currentAnimationTime, state.length) : currentAnimationTime;
+                    _tempAnim.Sample();
+                    state.enabled = false;
+                }
                 _prevIndex = _curIndex;            
             }
             _prevFrameAnimationTime = currentTime;

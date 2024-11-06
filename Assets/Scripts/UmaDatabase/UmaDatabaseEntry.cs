@@ -2,7 +2,8 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
+using System;
+using Object = UnityEngine.Object;
 
 public class UmaDatabaseEntry
 {
@@ -16,12 +17,27 @@ public class UmaDatabaseEntry
     {
         get
         {
-            var path = $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}";
-            if (Config.Instance.WorkMode == WorkMode.Standalone && !File.Exists(path))
+            if (Config.Instance.DownloadMissingResources && !File.Exists(Path))
             {
                 DownloadAsset(this);
             }
-            return path;
+            return Path;
+        }
+    }
+
+    public string Path
+    {
+        get
+        {
+            return $"{Config.Instance.MainPath}/dat/{Url.Substring(0, 2)}/{Url}";
+        }
+    }
+
+    public bool IsAssetBundle
+    {
+        get
+        {
+            return string.IsNullOrEmpty(System.IO.Path.GetExtension(Name));
         }
     }
 
@@ -42,8 +58,7 @@ public class UmaDatabaseEntry
     //TODO Make it async
     public static void DownloadAsset(UmaDatabaseEntry entry)
     {
-        var path = $"{Config.Instance.MainPath}\\dat\\{entry.Url.Substring(0, 2)}\\{entry.Url}";
-        UmaViewerDownload.DownloadAssetSync(entry, path, delegate (string msg, UIMessageType type)
+        UmaViewerDownload.DownloadAssetSync(entry, delegate (string msg, UIMessageType type)
         {
             UmaViewerUI.Instance.ShowMessage(msg, type);
         });

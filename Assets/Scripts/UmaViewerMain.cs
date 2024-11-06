@@ -33,6 +33,7 @@ public class UmaViewerMain : MonoBehaviour
         Application.targetFrameRate = 120;
 
         AbList = UmaDatabaseController.Instance.MetaEntries;
+        if (AbList == null) return;
         var chara_3d = AbList.Where(ab => ab.Value.Type == UmaFileType._3d_cutt).Select(ab => ab.Value).ToList();
         AbChara = chara_3d.FindAll(ab => ab.Name.StartsWith(UmaDatabaseController.CharaPath));
         AbMotions = chara_3d.FindAll(ab => ab.Name.StartsWith(UmaDatabaseController.MotionPath));
@@ -44,9 +45,16 @@ public class UmaViewerMain : MonoBehaviour
 
     private IEnumerator Start()
     {
+        if (AbList == null) yield break;
         Dictionary<int, string> enNames = new Dictionary<int, string>();
         Dictionary<int, string> mobNames = new Dictionary<int, string>();
         var loadingUI = UmaSceneController.instance;
+
+        if(Config.Instance.WorkMode == WorkMode.Standalone && AbList != null)
+        {
+            var ablist = new List<UmaDatabaseEntry>(AbList.Values);
+            yield return UmaViewerDownload.DownloadAssets(ablist, UmaSceneController.instance.LoadingProgressChange);
+        }
 
         //Main chara names (En only)
         if (Config.Instance.Language == Language.En)

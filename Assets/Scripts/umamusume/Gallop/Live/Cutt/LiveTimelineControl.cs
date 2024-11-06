@@ -5,7 +5,6 @@ using UnityEngine;
 using static RootMotion.FinalIK.IKSolverVR;
 using System.Linq;
 using System.IO;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
@@ -355,7 +354,7 @@ namespace Gallop.Live.Cutt
                     MulFrame.Add(mulframe);
                 }
 
-                if (currentFrame % 2 == 0) RecordUma?.Invoke();
+                if (currentFrame % 2 == 0) RecordUma?.Invoke(); //Set 30 FPS
             }
         }
 

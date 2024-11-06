@@ -17,7 +17,7 @@ public class ManifestDB
     private bool isError;
     public ManifestDB()
     {
-        string DBPath = $"{Config.Instance.MainPath}\\meta_umaviewer";
+        string DBPath = $"{Config.Instance.MainPath}/meta_umaviewer";
         ManifestDB.DBPath = DBPath;
         if (!File.Exists(DBPath))
         {
@@ -186,7 +186,7 @@ public class ManifestDB
             yield break;
         }
 
-        var masterPath = $"{Path.GetDirectoryName(DBPath)}\\master\\master_umaviewer.mdb";
+        var masterPath = $"{Path.GetDirectoryName(DBPath)}/master/master_umaviewer.mdb";
         var masterDir = Path.GetDirectoryName(masterPath);
 
         callback?.Invoke($"Checking master.mdb", UIMessageType.Default);
@@ -344,10 +344,6 @@ public class ManifestDB
                 return entry;
             }
             else if (Encoding.UTF8.GetString(entry.name) == "Android" && Application.platform == RuntimePlatform.Android)
-            {
-                return entry;
-            }
-            else
             {
                 return entry;
             }
