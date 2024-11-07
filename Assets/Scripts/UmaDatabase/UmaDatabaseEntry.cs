@@ -29,7 +29,7 @@ public class UmaDatabaseEntry
     {
         get
         {
-            return $"{Config.Instance.MainPath}/dat/{Url.Substring(0, 2)}/{Url}";
+            return $"{Config.Instance.MainPath}\\dat\\{Url.Substring(0, 2)}\\{Url}"; //"\\" is consistent with Directory.GetFiles()
         }
     }
 
