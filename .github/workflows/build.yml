@@ -1,4 +1,4 @@
-name: Build Windows Player and Android APK
+name: Build Windows Player
 
 on: 
   push:
@@ -7,9 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  buildForPlatform:
-    name: build Player
+  buildWindowsPlayer:
+    name: build Windows Player
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -20,13 +21,13 @@ jobs:
         unityVersion:
           - 2020.3.24f1
         targetPlatform:
-          - Android # Build an Android APK.
-          - StandaloneWindows64 # Build a Windows 64-bit standalone
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+    
     steps:
       - uses: actions/checkout@v2
         with:
           lfs: true
-
+          
       - uses: game-ci/unity-builder@v2
         env:
             UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -37,36 +38,14 @@ jobs:
           projectPath: ${{ matrix.projectPath }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          
+      - uses: actions/upload-artifact@v4
+        with:
+            name: Build
+            path: build
 
       - name: Zip Binary
-        if: matrix.targetPlatform == 'StandaloneWindows64'
         run: zip -r UmaViewer_${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}/*
-
-      - name: Upload Artifact for Android
-        if: matrix.targetPlatform == 'Android'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}/*
-      
-      - name: Upload Artifact for Windows
-        if: matrix.targetPlatform == 'StandaloneWindows64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: UmaViewer_StandaloneWindows64.zip
-
-  createRelease:
-    needs: buildForPlatform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: build/
 
       - name: Create Release
         id: create_release
@@ -79,22 +58,13 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Windows Release Asset
+      - name: Upload Release Asset
+        id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/Build-StandaloneWindows64/UmaViewer_StandaloneWindows64.zip
+          asset_path: ./UmaViewer_${{ matrix.targetPlatform }}.zip
           asset_name: UmaViewer.zip
-          asset_content_type: application/zip
-
-      - name: Upload Android Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/Build-Android/UmaViewer.apk
-          asset_name: UmaViewer.apk
-          asset_content_type: application/vnd.android.package-archive
+          asset_content_type: application/zip 
