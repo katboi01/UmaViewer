@@ -7,7 +7,6 @@ using UnityEngine.Networking;
 using static UmaViewerUI;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Linq;
 
 public class UmaViewerDownload : MonoBehaviour
 {
@@ -63,18 +62,17 @@ public class UmaViewerDownload : MonoBehaviour
         }
     }
   
-    public static IEnumerator DownloadAssets(List<UmaDatabaseEntry> entries, Action<int, int, string> callback = null)
+    public static IEnumerator DownloadAssets(List<UmaDatabaseEntry> entrys, Action<int, int, string> callback = null)
     {
-        entries = RemoveExistingFilesFromList(entries);
-        callback?.Invoke(0, entries.Count, "DownLoading");
-        var percent_num = entries.Count / 100;
-        for(int i = 0; i < entries.Count; i++)
+        callback?.Invoke(0, entrys.Count, "DownLoading");
+        var percent_num = entrys.Count / 100;
+        for(int i = 0; i < entrys.Count; i++)
         {
-            var entry = entries[i];
+            var entry = entrys[i];
             yield return downloadWaitUntil;
             if(i % percent_num == 0)
             {
-                callback?.Invoke(i, entries.Count, "DownLoading");
+                callback?.Invoke(i, entrys.Count, "DownLoading");
             }
             CurrentCoroutinesCount++;
             semaphore.WaitAsync();
@@ -158,13 +156,5 @@ public class UmaViewerDownload : MonoBehaviour
     public static string GetAssetRequestUrl(string hash)
     {
         return $"{ASSET_BASE_URL}/{hash.Substring(0, 2)}/{hash}";
-    }
-
-    private static List<UmaDatabaseEntry> RemoveExistingFilesFromList(List<UmaDatabaseEntry> entries)
-    {
-        //dictionary is used for best performance
-        var localFiles = Directory.GetFiles($"{Config.Instance.MainPath.Replace("/","\\")}\\dat\\", "*", SearchOption.AllDirectories).ToDictionary(file => file, file => true);
-        entries = entries.Where(entry => !localFiles.ContainsKey(entry.Path)).ToList();
-        return entries;
     }
 }
