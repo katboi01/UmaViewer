@@ -54,6 +54,11 @@ public class UmaAssetManager : MonoBehaviour
             SearchAB(Main, entry, ref result);
         }
 
+        if (Config.Instance.WorkMode == WorkMode.Standalone)
+        {
+            yield return UmaViewerDownload.DownloadAssets(result.ToList(), UmaSceneController.instance.LoadingProgressChange);
+        }
+
         var percent_num = result.Count / 100;
         for (int i = 0; i < result.Count; i++)
         {   
@@ -101,7 +106,7 @@ public class UmaAssetManager : MonoBehaviour
 
     private static bool LoadAB(UmaDatabaseEntry entry, bool neverUnload = false)
     {
-        string filePath = entry.FilePath;
+        string filePath = entry.FilePath; //downloads the file
         if (Exist(entry.Name))
         {
             return true;
