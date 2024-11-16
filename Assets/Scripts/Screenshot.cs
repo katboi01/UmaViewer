@@ -26,9 +26,15 @@ public class Screenshot : MonoBehaviour
         height = height == -1 ? Screen.height : height;
         var image = GrabFrame(camera, width, height, UmaViewerUI.Instance.SSTransparent.isOn);
 
-        string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string fileDirectory = Application.persistentDataPath + "/../Screenshots/";
+#else
+        string fileDirectory = Application.dataPath + "/../Screenshots/";
+#endif
+
+        string fileName = fileDirectory + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
         byte[] pngShot = ImageConversion.EncodeToPNG(image);
-        Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
+        Directory.CreateDirectory(fileDirectory);
         //fixes "/../" in path
         var fullpath = Path.GetFullPath($"{fileName}.png");
         File.WriteAllBytes(fullpath, pngShot);
