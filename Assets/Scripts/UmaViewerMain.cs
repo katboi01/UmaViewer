@@ -49,22 +49,27 @@ public class UmaViewerMain : MonoBehaviour
         var UmaCharaData = UmaDatabaseController.Instance.CharaData;
         var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
         var loadingUI = UmaSceneController.instance;
-        Dictionary<int, string> enNames = new Dictionary<int, string>();
+
+        Dictionary<int, string> enUmaNames = new Dictionary<int, string>();
         Dictionary<int, string> mobNames = new Dictionary<int, string>();
 
         //Main chara names (En only)
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
         if (Config.Instance.Language == Language.En)
         {
-            loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Character Data");
-            yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
+            var translationsUrl = "https://raw.githubusercontent.com/Hachimi-Hachimi/tl-en/refs/heads/main/localized_data/text_data_dict.json";
+            yield return UmaViewerDownload.DownloadText(translationsUrl, txt =>
             {
                 if (string.IsNullOrEmpty(txt)) return;
-                foreach (var item in JArray.Parse(txt))
+                try
                 {
-                    if (!enNames.ContainsKey((int)item["charaId"]))
-                    {
-                        enNames.Add((int)item["charaId"], item["charaNameEnglish"].ToString());
-                    }
+                    var translations = JObject.Parse(txt);
+                    enUmaNames = translations["6"].ToObject<Dictionary<int, string>>();
+                    mobNames = translations["59"].ToObject<Dictionary<int, string>>();
+                }
+                catch
+                {
+                    UI.ShowMessage("Loading Translations failed", UIMessageType.Error);
                 }
             });
         }
@@ -76,9 +81,11 @@ public class UmaViewerMain : MonoBehaviour
             if (string.IsNullOrEmpty(txt)) return;
             foreach (var item in JArray.Parse(txt))
             {
-                if (!mobNames.ContainsKey((int)item["mobId"]))
+                //names missing from translation are added
+                int mobId = (int)item["mobId"];
+                if (!mobNames.ContainsKey(mobId))
                 {
-                    mobNames.Add((int)item["mobId"], Config.Instance.Language == Language.Jp ? item["mobName"].ToString() : item["mobNameEnglish"].ToString());
+                    mobNames.Add(mobId, item["mobName"].ToString());
                 }
             }
         });
@@ -103,7 +110,7 @@ public class UmaViewerMain : MonoBehaviour
                 Characters.Add(new CharaEntry()
                 {
                     Name = item["charaname"].ToString(),
-                    EnName = enNames.ContainsKey(id) ? enNames[id] : "",
+                    EnName = enUmaNames.ContainsKey(id) ? enUmaNames[id] : "",
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id,
                     ThemeColor = "#" + item["ui_nameplate_color_1"].ToString()
