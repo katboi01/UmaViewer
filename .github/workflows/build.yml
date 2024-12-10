@@ -18,7 +18,7 @@ jobs:
         projectPath:
           - ./
         unityVersion:
-          - 2020.3.24f1
+          - 2020.3.48f1
         targetPlatform:
           - Android # Build an Android APK.
           - StandaloneWindows64 # Build a Windows 64-bit standalone
@@ -95,6 +95,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/Build-Android/UmaViewer_Android.apk
+          asset_path: ./build/Build-Android/UmaViewer.apk
           asset_name: UmaViewer_Unstable.apk
           asset_content_type: application/vnd.android.package-archive
