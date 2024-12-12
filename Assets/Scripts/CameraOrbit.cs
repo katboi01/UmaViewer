@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ public class CameraOrbit : MonoBehaviour
     [Header("Light")]
     public GameObject Light;
 
-    public Dropdown CameraModeDropdown;
+    public TMP_Dropdown CameraModeDropdown;
 
     public GameObject CameraTargetHelper;
     public Vector3 TargetCenter;

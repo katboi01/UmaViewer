@@ -120,6 +120,7 @@ public class UmaViewerUI : MonoBehaviour
     public Button UpdateDBButton;
     public TMP_Dropdown WorkModeDropdown;
     public TMP_Dropdown LanguageDropdown;
+    public TMP_Dropdown AntialiasingDropdown;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -167,6 +168,8 @@ public class UmaViewerUI : MonoBehaviour
     {
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
+        AntialiasingDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
+        ChangeAntiAliasing(Config.Instance.AntiAliasing);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
@@ -1386,7 +1389,21 @@ public class UmaViewerUI : MonoBehaviour
         if ((int)Config.Instance.Language != lang)
         {
             Config.Instance.Language = (Language)lang;
-            Config.Instance.UpdateConfig();
+            Config.Instance.UpdateConfig(true);
+        }
+    }
+
+    /// <summary> Converts values 1-4 to valid AA values </summary>
+    public void ChangeAntiAliasing(int value)
+    {
+        int[] aaValues = { 0, 2, 4, 8 };
+
+        QualitySettings.antiAliasing = aaValues[value];
+
+        if (Config.Instance.AntiAliasing != value)
+        {
+            Config.Instance.AntiAliasing = value;
+            Config.Instance.UpdateConfig(false);
         }
     }
 
@@ -1395,7 +1412,7 @@ public class UmaViewerUI : MonoBehaviour
         if ((int)Config.Instance.WorkMode != mode)
         {
             Config.Instance.WorkMode = (WorkMode)mode;
-            Config.Instance.UpdateConfig();
+            Config.Instance.UpdateConfig(true);
         }
     }
 
@@ -1408,7 +1425,7 @@ public class UmaViewerUI : MonoBehaviour
             if (path[0] != Config.Instance.MainPath)
             {
                 Config.Instance.MainPath = path[0];
-                Config.Instance.UpdateConfig();
+                Config.Instance.UpdateConfig(true);
             }
         }
         #endif

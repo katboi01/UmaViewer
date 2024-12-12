@@ -114,7 +114,8 @@ public class Screenshot : MonoBehaviour
         }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default,8);
+        int aaLevel = QualitySettings.antiAliasing == 0? 1 : QualitySettings.antiAliasing; //RT uses '1' for no antialiasing
+        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default, aaLevel);
         var grab_area = new Rect(0, 0, width, height);
 
         RenderTexture.active = render_texture;
