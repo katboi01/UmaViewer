@@ -236,7 +236,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!LoadedAssetPageCtrl) return;
         if (LoadedAssetEntries.ContainsKey(entry.Name)) return;
         var file_name = Path.GetFileName(entry.Name);
-        string filePath = entry.FilePath;
+        string filePath = entry.FilePath.Replace("/", "\\");
         var assetentry = new Entry()
         {
             Name = file_name,
