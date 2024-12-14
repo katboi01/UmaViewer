@@ -148,7 +148,7 @@ public class UmaDatabaseController
 
     static List<DataRow> ReadMobCharaMaster(SqliteConnection conn)
     {
-        return ReadMaster(conn, "SELECT * FROM mob_data");
+        return ReadMaster(conn, "SELECT * FROM mob_data M,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 59) T WHERE M.mob_id like T.charaid");
     }
 
     static List<DataRow> ReadMaster(SqliteConnection conn, string sql)

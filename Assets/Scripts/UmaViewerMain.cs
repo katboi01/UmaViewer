@@ -23,6 +23,13 @@ public class UmaViewerMain : MonoBehaviour
     public List<UmaDatabaseEntry> AbEffect = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> CostumeList = new List<UmaDatabaseEntry>();
 
+    public Dictionary<TranslationTables, Dictionary<int, string>> Translations = new Dictionary<TranslationTables, Dictionary<int, string>>() 
+    { 
+        {TranslationTables.UmaNames, new Dictionary<int,string>() },
+        //{TranslationTables.Costumes, new Dictionary<int,string>() }, //unused (can't correlate costume model IDs with names without more info from the database)
+        {TranslationTables.MobNames, new Dictionary<int,string>() },
+    };
+
     private void Awake()
     {
         Instance = this;
@@ -45,15 +52,12 @@ public class UmaViewerMain : MonoBehaviour
     {
         if (AbList == null) yield break;
         int loadingStep = 0;
-        int loadingStepsTotal = 11;
+        int loadingStepsTotal = 10;
         var UmaCharaData = UmaDatabaseController.Instance.CharaData;
         var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
         var loadingUI = UmaSceneController.instance;
 
-        Dictionary<int, string> enUmaNames = new Dictionary<int, string>();
-        Dictionary<int, string> mobNames = new Dictionary<int, string>();
-
-        //Main chara names (En only)
+        //EN Translations
         loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
         if (Config.Instance.Language == Language.En)
         {
@@ -64,8 +68,9 @@ public class UmaViewerMain : MonoBehaviour
                 try
                 {
                     var translations = JObject.Parse(txt);
-                    enUmaNames = translations["6"].ToObject<Dictionary<int, string>>();
-                    mobNames = translations["59"].ToObject<Dictionary<int, string>>();
+                    //Translations[TranslationTables.Costumes] = translations[((int)TranslationTables.Costumes).ToString()].ToObject<Dictionary<int, string>>();
+                    Translations[TranslationTables.UmaNames] = translations[((int)TranslationTables.UmaNames).ToString()].ToObject<Dictionary<int, string>>();
+                    Translations[TranslationTables.MobNames] = translations[((int)TranslationTables.MobNames).ToString()].ToObject<Dictionary<int, string>>();
                 }
                 catch
                 {
@@ -73,22 +78,6 @@ public class UmaViewerMain : MonoBehaviour
                 }
             });
         }
-
-        //Mob names (EN & JP)
-        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Mob Data");
-        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
-        {
-            if (string.IsNullOrEmpty(txt)) return;
-            foreach (var item in JArray.Parse(txt))
-            {
-                //names missing from translation are added
-                int mobId = (int)item["mobId"];
-                if (!mobNames.ContainsKey(mobId))
-                {
-                    mobNames.Add(mobId, item["mobName"].ToString());
-                }
-            }
-        });
 
         if (Config.Instance.WorkMode == WorkMode.Standalone)
         {
@@ -110,7 +99,7 @@ public class UmaViewerMain : MonoBehaviour
                 Characters.Add(new CharaEntry()
                 {
                     Name = item["charaname"].ToString(),
-                    EnName = enUmaNames.ContainsKey(id) ? enUmaNames[id] : "",
+                    EnName = Translations[TranslationTables.UmaNames].ContainsKey(id) ? Translations[TranslationTables.UmaNames][id] : "",
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id,
                     ThemeColor = "#" + item["ui_nameplate_color_1"].ToString()
@@ -128,10 +117,10 @@ public class UmaViewerMain : MonoBehaviour
             }
 
             var id = Convert.ToInt32(item["mob_id"]);
-            var name = mobNames.ContainsKey(id) ? mobNames[id] : "";
             MobCharacters.Add(new CharaEntry()
             {
-                Name = string.IsNullOrEmpty(name)? $"Mob_{id}" : name,
+                Name = item["charaname"].ToString(),
+                EnName = Translations[TranslationTables.MobNames].ContainsKey(id) ? Translations[TranslationTables.MobNames][id] : "",
                 Icon = UmaViewerBuilder.Instance.LoadMobCharaIcon(id.ToString()),
                 Id = id,
                 IsMob = true

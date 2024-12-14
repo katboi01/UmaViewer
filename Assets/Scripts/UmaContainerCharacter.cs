@@ -134,6 +134,18 @@ public class UmaContainerCharacter : UmaContainer
             Head.SetActive(false); //for debugging
         }
 
+        //MergeHair
+        if (IsMini && Hair)
+        {
+            var hairskin = Hair.GetComponentInChildren<SkinnedMeshRenderer>();
+            MergeBone(hairskin, bodyBones, ref emptyBones);
+            while (Hair.transform.childCount > 0)
+            {
+                var child = Hair.transform.GetChild(0);
+                child.SetParent(transform);
+            }
+            Hair.SetActive(false); //for debugging
+        }
 
         //MergeTail
         if (Tail)
@@ -717,11 +729,12 @@ public class UmaContainerCharacter : UmaContainer
         {
             foreach (Material m in r.sharedMaterials)
             {
+                //only for mini umas
                 if (head.name.Contains("mchr"))
                 {
                     if (r.name.Contains("Hair"))
                     {
-                        Tail = head;
+                        Hair = head;
                     }
                     if (r.name == "M_Face")
                     {
