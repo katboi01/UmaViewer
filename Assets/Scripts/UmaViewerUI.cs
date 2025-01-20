@@ -12,7 +12,6 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Networking.Types;
 using UnityEngine.UI;
 using static PageManager;
 using Debug = UnityEngine.Debug;

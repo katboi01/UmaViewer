@@ -18,7 +18,7 @@ jobs:
         projectPath:
           - ./
         unityVersion:
-          - 2020.3.48f1
+          - 2022.3.56f1
         targetPlatform:
           - Android # Build an Android APK.
           - StandaloneWindows64 # Build a Windows 64-bit standalone
