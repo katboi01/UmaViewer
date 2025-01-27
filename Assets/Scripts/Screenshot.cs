@@ -104,13 +104,14 @@ public class Screenshot : MonoBehaviour
 
         cam.cullingMask = ~LayerMask.GetMask("UI");
         if (gifBackground)
-        {
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color32(0, 0, 0, 0);
-        }
-        else if (transparent)
-        {
-            cam.clearFlags = CameraClearFlags.Depth;
+{
+    cam.clearFlags = CameraClearFlags.SolidColor;
+    cam.backgroundColor = new Color32(0, 0, 0, 0);
+}
+else if (transparent)
+{
+    cam.clearFlags = CameraClearFlags.Depth;
+}
         }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
