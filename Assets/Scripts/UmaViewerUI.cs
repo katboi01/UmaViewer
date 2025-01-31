@@ -168,7 +168,6 @@ public class UmaViewerUI : MonoBehaviour
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         AntialiasingDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
-        ChangeAntiAliasing(Config.Instance.AntiAliasing);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
@@ -178,6 +177,7 @@ public class UmaViewerUI : MonoBehaviour
 #if UNITY_ANDROID && !UNITY_EDITOR
         canvasScaler.referenceResolution = new Vector2(1280, 720);
 #endif
+        StartCoroutine(ApplyGraphicsSettings());
     }
 
     private void OnDestroy()
@@ -188,7 +188,6 @@ public class UmaViewerUI : MonoBehaviour
 
     private void Update()
     {
-
         if (Builder.CurrentAudioSources.Count > 0 && Builder.CurrentAudioSources[0])
         {
             AudioSource MianSource = Builder.CurrentAudioSources[0];
@@ -219,6 +218,13 @@ public class UmaViewerUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>Some settings may not be saved when set in Start()</summary>
+    private IEnumerator ApplyGraphicsSettings()
+    {
+        yield return 0;
+        ChangeAntiAliasing(Config.Instance.AntiAliasing);
     }
 
     public void HighlightChildImage(Transform mainObject, UmaUIContainer child)
