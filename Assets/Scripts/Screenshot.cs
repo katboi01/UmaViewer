@@ -77,7 +77,7 @@ public class Screenshot : MonoBehaviour
             UmaViewerUI.Instance.GifSlider.value = (float)frame / clipFrameCount;
             UmaViewerUI.Instance.AnimationProgressChange((float)frame / clipFrameCount);
             yield return new WaitForEndOfFrame();
-            var tex = GrabFrame(camera, width, height, transparent, transparent);
+            var tex = GrabFrame(camera, width, height, transparent);
             CaptureToGIFCustom.Instance.Frames.Add(new Image(tex));
             Destroy(tex);
             frame++;
@@ -92,7 +92,7 @@ public class Screenshot : MonoBehaviour
         UmaViewerUI.Instance.GifSlider.value = 1;
     }
 
-    public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true, bool gifBackground = false)
+    public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true)
     {
         var dimensions = GetResolution(width, height);
         width = dimensions.x;
@@ -103,14 +103,10 @@ public class Screenshot : MonoBehaviour
         Color oldBG = cam.backgroundColor;
 
         cam.cullingMask = ~LayerMask.GetMask("UI");
-        if (gifBackground)
+        if (transparent)
         {
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color32(0, 0, 0, 0);
-        }
-        else if (transparent)
-        {
-            cam.clearFlags = CameraClearFlags.Depth;
         }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
