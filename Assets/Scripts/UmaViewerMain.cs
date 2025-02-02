@@ -5,8 +5,6 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
-using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -24,6 +22,13 @@ public class UmaViewerMain : MonoBehaviour
     public List<UmaDatabaseEntry> AbChara = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> AbEffect = new List<UmaDatabaseEntry>();
     public List<UmaDatabaseEntry> CostumeList = new List<UmaDatabaseEntry>();
+
+    public Dictionary<TranslationTables, Dictionary<int, string>> Translations = new Dictionary<TranslationTables, Dictionary<int, string>>() 
+    { 
+        {TranslationTables.UmaNames, new Dictionary<int,string>() },
+        //{TranslationTables.Costumes, new Dictionary<int,string>() }, //unused (can't correlate costume model IDs with names without more info from the database)
+        {TranslationTables.MobNames, new Dictionary<int,string>() },
+    };
 
     private void Awake()
     {
@@ -46,50 +51,45 @@ public class UmaViewerMain : MonoBehaviour
     private IEnumerator Start()
     {
         if (AbList == null) yield break;
-        Dictionary<int, string> enNames = new Dictionary<int, string>();
-        Dictionary<int, string> mobNames = new Dictionary<int, string>();
+        int loadingStep = 0;
+        int loadingStepsTotal = 10;
+        var UmaCharaData = UmaDatabaseController.Instance.CharaData;
+        var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
         var loadingUI = UmaSceneController.instance;
 
-        if(Config.Instance.WorkMode == WorkMode.Standalone && AbList != null)
-        {
-            var ablist = new List<UmaDatabaseEntry>(AbList.Values);
-            yield return UmaViewerDownload.DownloadAssets(ablist, UmaSceneController.instance.LoadingProgressChange);
-        }
-
-        //Main chara names (En only)
+        //EN Translations
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
         if (Config.Instance.Language == Language.En)
         {
-            loadingUI.LoadingProgressChange(0, 11, "Downloading Character Data");
-            yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicCharaDataInfo", txt =>
+            var translationsUrl = "https://raw.githubusercontent.com/Hachimi-Hachimi/tl-en/refs/heads/main/localized_data/text_data_dict.json";
+            yield return UmaViewerDownload.DownloadText(translationsUrl, txt =>
             {
                 if (string.IsNullOrEmpty(txt)) return;
-                foreach (var item in JArray.Parse(txt))
+                try
                 {
-                    if (!enNames.ContainsKey((int)item["charaId"]))
-                    {
-                        enNames.Add((int)item["charaId"], item["charaNameEnglish"].ToString());
-                    }
+                    var translations = JObject.Parse(txt);
+                    //Translations[TranslationTables.Costumes] = translations[((int)TranslationTables.Costumes).ToString()].ToObject<Dictionary<int, string>>();
+                    Translations[TranslationTables.UmaNames] = translations[((int)TranslationTables.UmaNames).ToString()].ToObject<Dictionary<int, string>>();
+                    Translations[TranslationTables.MobNames] = translations[((int)TranslationTables.MobNames).ToString()].ToObject<Dictionary<int, string>>();
+                }
+                catch
+                {
+                    UI.ShowMessage("Loading Translations failed", UIMessageType.Error);
                 }
             });
         }
 
-        //Mob names (EN & JP)
-        loadingUI.LoadingProgressChange(1, 11, "Downloading Mob Data");
-        yield return UmaViewerDownload.DownloadText("https://www.tracenacademy.com/api/BasicMobDataInfo", txt =>
+        if (Config.Instance.WorkMode == WorkMode.Standalone)
         {
-            if (string.IsNullOrEmpty(txt)) return;
-            foreach (var item in JArray.Parse(txt))
-            {
-                if (!mobNames.ContainsKey((int)item["mobId"]))
-                {
-                    mobNames.Add((int)item["mobId"], Config.Instance.Language == Language.Jp ? item["mobName"].ToString() : item["mobNameEnglish"].ToString());
-                }
-            }
-        });
+            var umaIcons = UmaCharaData.Select(item => AbList.TryGetValue($"chara/chr{item["id"]}/chr_icon_{item["id"]}", out UmaDatabaseEntry entry) ? entry : null).Where(entry => entry != null);
+            var mobIcons = MobCharaData.Select(item => AbList.TryGetValue($"mob/mob_chr_icon_{item["mob_id"]}_000001_01", out UmaDatabaseEntry entry) ? entry : null).Where(entry => entry != null);
+            var costumeIcons = CostumeList;
+            List<UmaDatabaseEntry> filesToDownload = umaIcons.Concat(mobIcons).Concat(costumeIcons).ToList();
+            yield return UmaViewerDownload.DownloadAssets(filesToDownload, UmaSceneController.instance.LoadingProgressChange);
+            filesToDownload.Clear();
+        }
 
-
-        var UmaCharaData = UmaDatabaseController.Instance.CharaData;
-        loadingUI.LoadingProgressChange(2, 11, "Loading Character Data");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading Character Data");
         yield return null;
         foreach (var item in UmaCharaData)
         {
@@ -99,7 +99,7 @@ public class UmaViewerMain : MonoBehaviour
                 Characters.Add(new CharaEntry()
                 {
                     Name = item["charaname"].ToString(),
-                    EnName = enNames.ContainsKey(id) ? enNames[id] : "",
+                    EnName = Translations[TranslationTables.UmaNames].ContainsKey(id) ? Translations[TranslationTables.UmaNames][id] : "",
                     Icon = UmaViewerBuilder.Instance.LoadCharaIcon(id.ToString()),
                     Id = id,
                     ThemeColor = "#" + item["ui_nameplate_color_1"].ToString()
@@ -107,8 +107,7 @@ public class UmaViewerMain : MonoBehaviour
             }
         }
 
-        var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
-        loadingUI.LoadingProgressChange(3, 11, "Loading Mob Data");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading Mob Data");
         yield return null;
         foreach (var item in MobCharaData)
         {
@@ -118,17 +117,17 @@ public class UmaViewerMain : MonoBehaviour
             }
 
             var id = Convert.ToInt32(item["mob_id"]);
-            var name = mobNames.ContainsKey(id) ? mobNames[id] : "";
             MobCharacters.Add(new CharaEntry()
             {
-                Name = string.IsNullOrEmpty(name)? $"Mob_{id}" : name,
+                Name = item["charaname"].ToString(),
+                EnName = Translations[TranslationTables.MobNames].ContainsKey(id) ? Translations[TranslationTables.MobNames][id] : "",
                 Icon = UmaViewerBuilder.Instance.LoadMobCharaIcon(id.ToString()),
                 Id = id,
                 IsMob = true
             });
         }
 
-        loadingUI.LoadingProgressChange(4, 11, "Loading Costumes Data");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading Costumes Data");
         yield return null;
         foreach (var item in CostumeList)
         {
@@ -152,7 +151,7 @@ public class UmaViewerMain : MonoBehaviour
             }
         }
 
-        loadingUI.LoadingProgressChange(5, 11, "Loading Live Data");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading Live Data");
         yield return null;
         var asset = AbList["livesettings"];
         if (asset != null)
@@ -188,19 +187,19 @@ public class UmaViewerMain : MonoBehaviour
             }
         }
 
-        loadingUI.LoadingProgressChange(6, 11, "Loading UI");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading UI");
         yield return null;
         UI.LoadModelPanels();
-        loadingUI.LoadingProgressChange(7, 11, "Loading UI");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading UI");
         yield return null;
         UI.LoadMiniModelPanels();
-        loadingUI.LoadingProgressChange(8, 11, "Loading UI");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading UI");
         yield return null;
         UI.LoadPropPanel();
-        loadingUI.LoadingProgressChange(9, 11, "Loading UI");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading UI");
         yield return null;
         UI.LoadMapPanel();
-        loadingUI.LoadingProgressChange(10, 11, "Loading UI");
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading UI");
         yield return null;
         UI.LoadLivePanels();
         loadingUI.LoadingProgressChange(-1, -1);
@@ -209,12 +208,6 @@ public class UmaViewerMain : MonoBehaviour
         var shaders = UmaAssetManager.LoadAssetBundle(AbList["shader"], true);
         Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>()); 
     }
-
-    public void ChangeAA(int val)
-    {
-        
-    }
-
 
     public void OpenUrl(string url)
     {

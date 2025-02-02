@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using static UmaViewerUI;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Linq;
 
 public class UmaViewerDownload : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class UmaViewerDownload : MonoBehaviour
     private static List<Coroutine> downloadCoroutines = new List<Coroutine>();
     private static int CurrentCoroutinesCount = 0;
     private static WaitUntil downloadWaitUntil = new WaitUntil(() => CurrentCoroutinesCount < maxConcurrentDownloads);
+    private static WaitUntil downloadWaitUntilComplete = new WaitUntil(() => CurrentCoroutinesCount == 0);
     private static List<Task> downloadTasks = new List<Task>();
 
     public static IEnumerator DownloadText(string url, System.Action<string> callback)
@@ -62,52 +64,48 @@ public class UmaViewerDownload : MonoBehaviour
         }
     }
   
-    public static IEnumerator DownloadAssets(List<UmaDatabaseEntry> entrys, Action<int, int, string> callback = null)
+    public static IEnumerator DownloadAssets(List<UmaDatabaseEntry> entries, Action<int, int, string> callback = null)
     {
-        callback?.Invoke(0, entrys.Count, "DownLoading");
-        var percent_num = entrys.Count / 100;
-        for(int i = 0; i < entrys.Count; i++)
+        entries = entries.Where(e => !File.Exists(e.Path)).ToList();
+        if (entries.Count == 0) yield break;
+        callback?.Invoke(0, entries.Count, "DownLoading");
+        var percent_num = entries.Count / 100;
+        for(int i = 0; i < entries.Count; i++)
         {
-            var entry = entrys[i];
+            var entry = entries[i];
             yield return downloadWaitUntil;
             if(i % percent_num == 0)
             {
-                callback?.Invoke(i, entrys.Count, "DownLoading");
+                callback?.Invoke(i, entries.Count, "DownLoading");
             }
             CurrentCoroutinesCount++;
             semaphore.WaitAsync();
             downloadCoroutines.Add(Instance.StartCoroutine(DownloadTask(entry)));
         }
+
+        yield return downloadWaitUntilComplete;
     }
 
     public static IEnumerator DownloadTask(UmaDatabaseEntry entry)
     {
-        if (!File.Exists(entry.Path))
+        string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
+        using (UnityWebRequest www = UnityWebRequest.Get(baseurl))
         {
-            string baseurl = (string.IsNullOrEmpty(Path.GetExtension(entry.Name)) ? GetAssetRequestUrl(entry.Url) : GetGenericRequestUrl(entry.Url));
-            using (UnityWebRequest www = UnityWebRequest.Get(baseurl))
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                yield return www.SendWebRequest();
-                if (www.result != UnityWebRequest.Result.Success)
+                if (Instance)
                 {
-                    if (Instance)
-                    {
-                        Instance.ShowMessage($"Failed to download resources : {www.error}", UIMessageType.Error);
-                    }
-                }
-                else
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(entry.Path));
-                    File.WriteAllBytes(entry.Path, www.downloadHandler.data);
-                    CurrentCoroutinesCount--;
+                    Instance.ShowMessage($"Failed to download resources : {www.error}", UIMessageType.Error);
                 }
             }
+            else
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(entry.Path));
+                File.WriteAllBytes(entry.Path, www.downloadHandler.data);
+            }
         }
-        else
-        {
-            CurrentCoroutinesCount--;
-        }
-        
+        CurrentCoroutinesCount--;
     }
 
     public static async void DownloadAssets(IEnumerable<UmaDatabaseEntry> entrys)

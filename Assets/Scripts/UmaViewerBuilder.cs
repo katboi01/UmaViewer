@@ -542,6 +542,7 @@ public class UmaViewerBuilder : MonoBehaviour
         DataRow charaData = umaContainer.CharaData;
         umaContainer.IsMini = true;
         bool isGeneric = umaContainer.IsGeneric = costumeId.Length >= 4;
+        int tailId = Convert.ToInt32(charaData["tail_model_id"]);
         string skin = charaData["skin"].ToString(),
                height = charaData["height"].ToString(),
                socks = charaData["socks"].ToString(),
@@ -612,7 +613,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
             }
 
-            //Load Hair
+            //Load Hair (don't know why loadhead is used)
             umaContainer.LoadHead(asset);
         }
 
@@ -627,6 +628,32 @@ public class UmaViewerBuilder : MonoBehaviour
             }
             //Load Head
             umaContainer.LoadHead(asset);
+        }
+
+        if (tailId != 0)
+        {
+            string tailName = $"mtail{tailId.ToString().PadLeft(4, '0')}_00";
+            string tailPath = $"3d/chara/mini/tail/{tailName}/";
+            string tailPfb = tailPath + $"pfb_{tailName}";
+            asset = null;
+            Main.AbList.TryGetValue(tailPfb, out asset);
+            if (asset != null)
+            {
+                foreach (var asset2 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{id.ToString().PadLeft(4,'0')}")))
+                {
+                    umaContainer.LoadTextures(asset2);
+                }
+
+                umaContainer.LoadTail(asset);
+
+                //Load Physics
+                var asset1 = Main.AbList[$"{tailPath}clothes/pfb_{tailName}_cloth00"];
+                umaContainer.LoadPhysics(asset1);
+            }
+            else
+            {
+                Debug.Log("no tail");
+            }
         }
 
         umaContainer.MergeModel();

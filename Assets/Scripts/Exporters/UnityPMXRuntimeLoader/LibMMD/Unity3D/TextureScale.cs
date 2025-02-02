@@ -96,7 +96,7 @@ namespace LibMMD.Unity3D
 				}
 			}
 
-			tex.Resize(newWidth, newHeight);
+			tex.Reinitialize(newWidth, newHeight);
 			tex.SetPixels(_newColors);
 			tex.Apply();
 		}

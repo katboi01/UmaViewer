@@ -182,3 +182,10 @@ public enum UmaFileType
     collectevent,
     ratingrace
 }
+
+public enum TranslationTables
+{
+    Costumes = 5,
+    UmaNames = 6,
+    MobNames = 59,
+}

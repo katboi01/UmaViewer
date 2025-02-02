@@ -26,9 +26,15 @@ public class Screenshot : MonoBehaviour
         height = height == -1 ? Screen.height : height;
         var image = GrabFrame(camera, width, height, UmaViewerUI.Instance.SSTransparent.isOn);
 
-        string fileName = Application.dataPath + "/../Screenshots/" + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string fileDirectory = Application.persistentDataPath + "/../Screenshots/";
+#else
+        string fileDirectory = Application.dataPath + "/../Screenshots/";
+#endif
+
+        string fileName = fileDirectory + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
         byte[] pngShot = ImageConversion.EncodeToPNG(image);
-        Directory.CreateDirectory(Application.dataPath + "/../Screenshots");
+        Directory.CreateDirectory(fileDirectory);
         //fixes "/../" in path
         var fullpath = Path.GetFullPath($"{fileName}.png");
         File.WriteAllBytes(fullpath, pngShot);
@@ -71,7 +77,7 @@ public class Screenshot : MonoBehaviour
             UmaViewerUI.Instance.GifSlider.value = (float)frame / clipFrameCount;
             UmaViewerUI.Instance.AnimationProgressChange((float)frame / clipFrameCount);
             yield return new WaitForEndOfFrame();
-            var tex = GrabFrame(camera, width, height, transparent, transparent);
+            var tex = GrabFrame(camera, width, height, transparent);
             CaptureToGIFCustom.Instance.Frames.Add(new Image(tex));
             Destroy(tex);
             frame++;
@@ -86,7 +92,7 @@ public class Screenshot : MonoBehaviour
         UmaViewerUI.Instance.GifSlider.value = 1;
     }
 
-    public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true, bool gifBackground = false)
+    public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true)
     {
         var dimensions = GetResolution(width, height);
         width = dimensions.x;
@@ -97,18 +103,15 @@ public class Screenshot : MonoBehaviour
         Color oldBG = cam.backgroundColor;
 
         cam.cullingMask = ~LayerMask.GetMask("UI");
-        if (gifBackground)
+        if (transparent)
         {
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color32(0, 0, 0, 0);
         }
-        else if (transparent)
-        {
-            cam.clearFlags = CameraClearFlags.Depth;
-        }
 
         var tex_color = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default,8);
+        int aaLevel = QualitySettings.antiAliasing == 0? 1 : QualitySettings.antiAliasing; //RT uses '1' for no antialiasing
+        var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32,RenderTextureReadWrite.Default, aaLevel);
         var grab_area = new Rect(0, 0, width, height);
 
         RenderTexture.active = render_texture;

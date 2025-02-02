@@ -12,7 +12,6 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Networking.Types;
 using UnityEngine.UI;
 using static PageManager;
 using Debug = UnityEngine.Debug;
@@ -120,6 +119,7 @@ public class UmaViewerUI : MonoBehaviour
     public Button UpdateDBButton;
     public TMP_Dropdown WorkModeDropdown;
     public TMP_Dropdown LanguageDropdown;
+    public TMP_Dropdown AntialiasingDropdown;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -167,6 +167,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
+        AntialiasingDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
@@ -176,6 +177,7 @@ public class UmaViewerUI : MonoBehaviour
 #if UNITY_ANDROID && !UNITY_EDITOR
         canvasScaler.referenceResolution = new Vector2(1280, 720);
 #endif
+        StartCoroutine(ApplyGraphicsSettings());
     }
 
     private void OnDestroy()
@@ -186,7 +188,6 @@ public class UmaViewerUI : MonoBehaviour
 
     private void Update()
     {
-
         if (Builder.CurrentAudioSources.Count > 0 && Builder.CurrentAudioSources[0])
         {
             AudioSource MianSource = Builder.CurrentAudioSources[0];
@@ -219,6 +220,13 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
+    /// <summary>Some settings may not be saved when set in Start()</summary>
+    private IEnumerator ApplyGraphicsSettings()
+    {
+        yield return 0;
+        ChangeAntiAliasing(Config.Instance.AntiAliasing);
+    }
+
     public void HighlightChildImage(Transform mainObject, UmaUIContainer child)
     {
         foreach (var t in mainObject.GetComponentsInChildren<UmaUIContainer>())
@@ -233,7 +241,7 @@ public class UmaViewerUI : MonoBehaviour
         if (!LoadedAssetPageCtrl) return;
         if (LoadedAssetEntries.ContainsKey(entry.Name)) return;
         var file_name = Path.GetFileName(entry.Name);
-        string filePath = entry.FilePath;
+        string filePath = entry.FilePath.Replace("/", "\\");
         var assetentry = new Entry()
         {
             Name = file_name,
@@ -752,7 +760,9 @@ public class UmaViewerUI : MonoBehaviour
         foreach (var entry in Main.AbChara.Where(a => a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
         {
             string id = Path.GetFileName(entry.Name);
-            id = id.Split('_')[1].Substring(mini ? 4 : 3) + "_" + id.Split('_')[2] + "_" + id.Split('_')[3];
+            string[] split = id.Split('_');
+            if (split.Length < 4) continue; //prevents error for mini umas
+            id = split[1].Substring(mini ? 4 : 3) + "_" + split[2] + "_" + split[3];
             if (!costumes.Contains(id))
             {
                 costumes.Add(id);
@@ -1384,7 +1394,21 @@ public class UmaViewerUI : MonoBehaviour
         if ((int)Config.Instance.Language != lang)
         {
             Config.Instance.Language = (Language)lang;
-            Config.Instance.UpdateConfig();
+            Config.Instance.UpdateConfig(true);
+        }
+    }
+
+    /// <summary> Converts values 1-4 to valid AA values </summary>
+    public void ChangeAntiAliasing(int value)
+    {
+        int[] aaValues = { 0, 2, 4, 8 };
+
+        QualitySettings.antiAliasing = aaValues[value];
+
+        if (Config.Instance.AntiAliasing != value)
+        {
+            Config.Instance.AntiAliasing = value;
+            Config.Instance.UpdateConfig(false);
         }
     }
 
@@ -1393,7 +1417,7 @@ public class UmaViewerUI : MonoBehaviour
         if ((int)Config.Instance.WorkMode != mode)
         {
             Config.Instance.WorkMode = (WorkMode)mode;
-            Config.Instance.UpdateConfig();
+            Config.Instance.UpdateConfig(true);
         }
     }
 
@@ -1406,7 +1430,7 @@ public class UmaViewerUI : MonoBehaviour
             if (path[0] != Config.Instance.MainPath)
             {
                 Config.Instance.MainPath = path[0];
-                Config.Instance.UpdateConfig();
+                Config.Instance.UpdateConfig(true);
             }
         }
         #endif

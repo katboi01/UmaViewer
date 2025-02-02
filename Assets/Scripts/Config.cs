@@ -21,8 +21,11 @@ public class Config
     public string WorkModeTip = "Affects how application work, options: 0 - work with game client, 1 - work without game client(slow), Database needs to be updated manually";
     public WorkMode WorkMode = WorkMode.Default;
 
-    public string VmdKeyReductionLevelTip = " Affects the recording quality: 1 = record every frame, 2 = record every two frames, and so on.";
+    public string VmdKeyReductionLevelTip = "Affects the recording quality: 1 = record every frame, 2 = record every two frames, and so on.";
     public int VmdKeyReductionLevel = 2;
+
+    public string AntiAliasingTip = "Display, screenshot antialiasing level. 0 - no AA, 1 - 2x MSAA, 2 - 4x MSAA, 3 - 8x MSAA";
+    public int AntiAliasing = 2;
 
     public string VmdMorphConvertSettingTip = "The mapping of MMD mprphs to UMA mprphs during VMD recording, multiple UMA expression weights will be combined (not exceeding 1)";
     public List<MorphConvertConfig> VmdMorphConvertSetting = new List<MorphConvertConfig>
@@ -122,10 +125,13 @@ public class Config
         Instance = this;
     }
 
-    public void UpdateConfig()
+    public void UpdateConfig(bool requireRestart)
     {
         File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
-        UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.", UIMessageType.Default);
+        if (requireRestart)
+        {
+            UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.", UIMessageType.Default);
+        }
     }
 }
 
