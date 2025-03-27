@@ -38,6 +38,7 @@ public class ModelExporter
         writer.Close();
         fileStream.Close();
 
+        ClearBlendShape(container);
         UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
     }
 
@@ -151,6 +152,19 @@ public class ModelExporter
             
         facial.ClearAllWeights();
         facial.ChangeMorph();
+    }
+
+    private static void ClearBlendShape(UmaContainerCharacter container)
+    {
+        if (!container.FaceDrivenKeyTarget) return;
+        //assuming base meshes do not have any blend shapes
+        foreach (SkinnedMeshRenderer s in container.GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
+            if (s.name.Contains("M_Face") || s.name.Contains("M_Mayu") || s.name.Contains("M_Hair"))
+            {
+                s.sharedMesh.ClearBlendShapes();
+            }
+        }
     }
 
     private static Morph[] ReadMorph(List<Renderer> renderers)

@@ -69,7 +69,7 @@ public class UmaViewerDownload : MonoBehaviour
         entries = entries.Where(e => !File.Exists(e.Path)).ToList();
         if (entries.Count == 0) yield break;
         callback?.Invoke(0, entries.Count, "DownLoading");
-        var percent_num = entries.Count / 100;
+        var percent_num = (float)entries.Count / 100;
         for(int i = 0; i < entries.Count; i++)
         {
             var entry = entries[i];

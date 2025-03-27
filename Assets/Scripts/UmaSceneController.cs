@@ -76,7 +76,7 @@ public class UmaSceneController:MonoBehaviour
         {
             LoadingProgressPanel.SetActive(false);
         }
-        else
+        else if (target > 0)
         {
             LoadingProgressPanel.SetActive(true);
             LoadingProgressSlider.value = (float)curren / target;
