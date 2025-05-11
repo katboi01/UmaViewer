@@ -1,10 +1,8 @@
 using Gallop.Live.Cutt;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.MaterialProperty;
 
 namespace Gallop.Live
 {
