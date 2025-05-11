@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
 {
@@ -603,6 +604,8 @@ namespace Gallop.Live.Cutt
         public int frame;
         public LiveTimelineKeyAttribute attribute;
 
+        public LiveTimelineKeyDataType dataType;
+
         private double _framesecond = -999;
 
         public double FrameSecond { 
@@ -914,6 +917,11 @@ namespace Gallop.Live.Cutt
         [SerializeField] public LiveTimelineFacialData facial1Set;
         [SerializeField] public LiveTimelineFacialData[] other4FacialArray;
         [SerializeField] public LiveTimelineFormationOffsetData formationOffsetSet;
+
+        [SerializeField] public List<LiveTimelineGlobalLightData> globalLightDataLists;
+        [SerializeField] public List<LiveTimelineBgColor1Data> bgColor1List;
+        [SerializeField] public List<LiveTimelineBgColor2Data> bgColor2List;
+
 
         /*
 		//终于可以调用AB包了，虽然后面发现没什么用...说不定什么时候能用到

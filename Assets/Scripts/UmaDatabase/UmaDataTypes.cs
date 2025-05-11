@@ -180,7 +180,8 @@ public enum UmaFileType
     teambuilding,
     challengematch,
     collectevent,
-    ratingrace
+    ratingrace,
+    jobs
 }
 
 public enum TranslationTables

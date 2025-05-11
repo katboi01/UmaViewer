@@ -1,14 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
 {
-    public class LiveTimelineDefine : MonoBehaviour
-    {
-        public enum FacialId
-        {
-            Base = 1001,
+	public class LiveTimelineDefine : MonoBehaviour
+	{
+		public enum FacialId
+		{
+			Base = 1001,
 			WinkR = 1002,
 			WinkL = 1003,
 			EyeHalfA = 1004,
@@ -405,6 +406,150 @@ namespace Gallop.Live.Cutt
 			Up = 1,
 			Down = 2
 		}
-	}
+
+        public enum OutlineColorBlend
+        {
+			Blend = 0,
+			Multiply = 1,
+			Max = 2
+		}
+
+        public enum LightBlendMode
+        {
+			Addition = 0,
+			Multiply = 1,
+            SoftAddition = 2,
+            AlphaBlend = 3,
+            Multiply0 = 4,
+            Multiply2x = 5,
+        }
+
+        public enum ColorType
+        {
+			Main = 0,
+			Sub = 1,
+            Training1 = 2,
+            Training2 = 3,
+            Border = 4,
+            Num1 = 5,
+            Num2 = 6,
+            Turn = 7,
+            Wipe1 = 8,
+            Wipe2 = 9,
+            Wipe3 = 10,
+            Speech1 = 11,
+            Nameplate1 = 12,
+            Nameplate2 = 13,
+            Speech2 = 14
+        }
+
+		public enum LiveTimelineKeyDataType
+        {
+            Timescale = 0,
+            CameraPos = 1,
+            CameraLookAt = 2,
+            CameraFov = 3,
+            CameraRoll = 4,
+            HandShakeCamera = 5,
+            Event = 6,
+            CharaMotionSequence = 7,
+            BgColor1 = 8,
+            BgColor2 = 9,
+            MonitorControl = 10,
+            CameraSwitcher = 11,
+            LipSync = 12,
+            PostEffectDOF = 13,
+            PostEffectBloomDiffusion = 14,
+            RadialBlur = 15,
+            CameraLayer = 16,
+            Projector = 17,
+            FacialFace = 18,
+            FacialMouth = 19,
+            FacialCheek = 20,
+            FacialEye = 21,
+            FacialEyebrow = 22,
+            FacialEyeTrack = 23,
+            FacialEar = 24,
+            FacialEffect = 25,
+            FacialNoise = 26,
+            CharaMotionNoise = 27,
+            FormationOffset = 28,
+            Animation = 29,
+            TextureAnimation = 30,
+            Transform = 31,
+            Renderer = 32,
+            Object = 33,
+            Audience = 34,
+            Props = 35,
+            PropsAttach = 36,
+            VolumeLight = 37,
+            HdrBloom = 38,
+            PostFilm = 39,
+            Fade = 40,
+            Particle = 41,
+            ParticleGroup = 42,
+            WashLight = 43,
+            Laser = 44,
+            BlinkLight = 45,
+            UVScrollLight = 46,
+            FacialToon = 47,
+            GlobalLight = 48,
+            GlobalFog = 49,
+            LightShafts = 50,
+            MonitorCameraPos = 51,
+            MonitorCameraLookAt = 52,
+            MultiCameraPos = 53,
+            MultiCameraLookAt = 54,
+            EyeCameraPos = 55,
+            EyeCameraLookAt = 56,
+            LensFlare = 57,
+            Environment = 58,
+            SweatLocator = 59,
+            Effect = 60,
+            ColorCorrection = 61,
+            PreColorCorrection = 62,
+            TiltShift = 63,
+            A2U = 64,
+            A2UConfig = 65,
+            FlashPlayer = 66,
+            Title = 67,
+            Spotlight3d = 68,
+            CharaNode = 69,
+            NodeScale = 70,
+            Fluctuation = 71,
+            CharaFootLight = 72,
+            ChromaticAberration = 73,
+            LightProjection = 74,
+            Billboard = 75,
+            MultiCameraPostFilm = 76,
+            MultiCameraPostEffectBloomDiffusion = 77,
+            MultiCameraColorCorrection = 78,
+            MultiCameraTiltShift = 79,
+            MultiCameraRadialBlur = 80,
+            MultiCameraPostEffectDOF = 81,
+            AdditionalLight = 82,
+            MultiLightShadow = 83,
+            MobControl = 84,
+            CyalumeControl = 85,
+            CameraMotion = 86,
+            WaveObject = 87,
+            CharaWind = 88,
+            CharaParts = 89,
+            CameraCutNo = 90,
+            ToneCurve = 91,
+            Exposure = 92,
+            Vortex = 93,
+            CharaCollision = 94,
+            TransmittedLight = 95,
+            TransmittedLightMask = 96,
+            Voice = 97,
+            LipSyncPatternRange = 98,
+            LipSyncPattern = 99,
+            LensDistortion = 100,
+            CharaNodeOffset = 101,
+            TransparentCamera = 102,
+            Max = 103
+        }
+    }
 }
 

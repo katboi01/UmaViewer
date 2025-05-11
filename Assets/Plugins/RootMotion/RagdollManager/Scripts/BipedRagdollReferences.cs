@@ -211,36 +211,44 @@ namespace RootMotion.Dynamics {
 		public static BipedRagdollReferences FromAvatar(Animator animator) {
 			BipedRagdollReferences r = new BipedRagdollReferences();
 
-			if (!animator.isHuman) {
-				List<Transform> list = new List<Transform>(animator.gameObject.GetComponentsInChildren<Transform>());
-				list.Find(t => t.name.Equals("Position"));
+			if (!animator.isHuman)
+            {
+                Dictionary<string, Transform> transformDict = new Dictionary<string, Transform>();
+                foreach (Transform t in animator.gameObject.GetComponentsInChildren<Transform>())
+                {
+                    if(!transformDict.ContainsKey(t.name))
+                    {
+                        transformDict[t.name] = t;
+                    }
+                }
 
-				r.root = list.Find(t => t.name.Equals("Position"));
+                r.root = transformDict.ContainsKey("Position") ? transformDict["Position"] : null;
 
-				r.hips = list.Find(t => t.name.Equals("Hip"));
-				r.spine = list.Find(t => t.name.Equals("Spine"));
-				r.chest = list.Find(t => t.name.Equals("Chest"));
-				r.head = list.Find(t => t.name.Equals("Head"));
+                r.hips = transformDict.ContainsKey("Hip") ? transformDict["Hip"] : null;
+                r.spine = transformDict.ContainsKey("Spine") ? transformDict["Spine"] : null;
+                r.chest = transformDict.ContainsKey("Chest") ? transformDict["Chest"] : null;
+                r.head = transformDict.ContainsKey("Head") ? transformDict["Head"] : null;
 
-				r.leftUpperArm = list.Find(t => t.name.Equals("Arm_L"));
-				r.leftLowerArm = list.Find(t => t.name.Equals("Elbow_L"));
-				r.leftHand = list.Find(t => t.name.Equals("Wrist_L"));
+                r.leftUpperArm = transformDict.ContainsKey("Arm_L") ? transformDict["Arm_L"] : null;
+                r.leftLowerArm = transformDict.ContainsKey("Elbow_L") ? transformDict["Elbow_L"] : null;
+                r.leftHand = transformDict.ContainsKey("Wrist_L") ? transformDict["Wrist_L"] : null;
 
-				r.rightUpperArm = list.Find(t => t.name.Equals("Arm_R"));
-				r.rightLowerArm = list.Find(t => t.name.Equals("Elbow_R"));
-				r.rightHand = list.Find(t => t.name.Equals("Wrist_R"));
+                r.rightUpperArm = transformDict.ContainsKey("Arm_R") ? transformDict["Arm_R"] : null;
+                r.rightLowerArm = transformDict.ContainsKey("Elbow_R") ? transformDict["Elbow_R"] : null;
+                r.rightHand = transformDict.ContainsKey("Wrist_R") ? transformDict["Wrist_R"] : null;
 
-				r.leftUpperLeg = list.Find(t => t.name.Equals("Thigh_L"));
-				r.leftLowerLeg = list.Find(t => t.name.Equals("Knee_L"));
-				r.leftFoot = list.Find(t => t.name.Equals("Ankle_L"));
+                r.leftUpperLeg = transformDict.ContainsKey("Thigh_L") ? transformDict["Thigh_L"] : null;
+                r.leftLowerLeg = transformDict.ContainsKey("Knee_L") ? transformDict["Knee_L"] : null;
+                r.leftFoot = transformDict.ContainsKey("Ankle_L") ? transformDict["Ankle_L"] : null;
 
-				r.rightUpperLeg = list.Find(t => t.name.Equals("Thigh_R"));
-				r.rightLowerLeg = list.Find(t => t.name.Equals("Knee_R"));
-				r.rightFoot = list.Find(t => t.name.Equals("Ankle_R"));
-				return r;
-			}
+                r.rightUpperLeg = transformDict.ContainsKey("Thigh_R") ? transformDict["Thigh_R"] : null;
+                r.rightLowerLeg = transformDict.ContainsKey("Knee_R") ? transformDict["Knee_R"] : null;
+                r.rightFoot = transformDict.ContainsKey("Ankle_R") ? transformDict["Ankle_R"] : null;
 
-			r.root = animator.transform;
+                return r;
+            }
+
+            r.root = animator.transform;
 
 			r.hips = animator.GetBoneTransform(HumanBodyBones.Hips);
 			r.spine = animator.GetBoneTransform(HumanBodyBones.Spine);

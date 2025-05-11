@@ -242,24 +242,44 @@ namespace RootMotion.Dynamics {
 		
 		// Returns the Muscle.Group of the specified bone Transform (only if using the Humanoid rig)
 		private static Muscle.Group FindGroup(Animator animator, Transform t) {
-			if (!animator.isHuman) return Muscle.Group.Hips;
-			if (t == animator.GetBoneTransform(HumanBodyBones.Chest)) return Muscle.Group.Spine;
-			if (t == animator.GetBoneTransform(HumanBodyBones.Head)) return Muscle.Group.Head;
-			if (t == animator.GetBoneTransform(HumanBodyBones.Hips)) return Muscle.Group.Hips;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftFoot)) return Muscle.Group.Foot;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftHand)) return Muscle.Group.Hand;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftLowerArm)) return Muscle.Group.Arm;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg)) return Muscle.Group.Leg;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftUpperArm)) return Muscle.Group.Arm;
-			if (t == animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg)) return Muscle.Group.Leg;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightFoot)) return Muscle.Group.Foot;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightHand)) return Muscle.Group.Hand;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightLowerArm)) return Muscle.Group.Arm;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightLowerLeg)) return Muscle.Group.Leg;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightUpperArm)) return Muscle.Group.Arm;
-			if (t == animator.GetBoneTransform(HumanBodyBones.RightUpperLeg)) return Muscle.Group.Leg;
-			return Muscle.Group.Spine;
-		}
+			if (animator.isHuman) {
+                if (t == animator.GetBoneTransform(HumanBodyBones.Chest)) return Muscle.Group.Spine;
+                if (t == animator.GetBoneTransform(HumanBodyBones.Head)) return Muscle.Group.Head;
+                if (t == animator.GetBoneTransform(HumanBodyBones.Hips)) return Muscle.Group.Hips;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftFoot)) return Muscle.Group.Foot;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftHand)) return Muscle.Group.Hand;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftLowerArm)) return Muscle.Group.Arm;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg)) return Muscle.Group.Leg;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftUpperArm)) return Muscle.Group.Arm;
+                if (t == animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg)) return Muscle.Group.Leg;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightFoot)) return Muscle.Group.Foot;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightHand)) return Muscle.Group.Hand;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightLowerArm)) return Muscle.Group.Arm;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightLowerLeg)) return Muscle.Group.Leg;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightUpperArm)) return Muscle.Group.Arm;
+                if (t == animator.GetBoneTransform(HumanBodyBones.RightUpperLeg)) return Muscle.Group.Leg;
+            }
+            else
+			{
+                if (t.name.Equals("Hip")) return Muscle.Group.Hips;
+                if (t.name.Equals("Spine")) return Muscle.Group.Spine;
+                if (t.name.Equals("Chest")) return Muscle.Group.Spine;
+                if (t.name.Equals("Head")) return Muscle.Group.Head;
+                if (t.name.Equals("Arm_L")) return Muscle.Group.Arm;
+                if (t.name.Equals("Elbow_L")) return Muscle.Group.Arm;
+                if (t.name.Equals("Wrist_L")) return Muscle.Group.Hand;
+                if (t.name.Equals("Arm_R")) return Muscle.Group.Arm;
+                if (t.name.Equals("Elbow_R")) return Muscle.Group.Arm;
+                if (t.name.Equals("Wrist_R")) return Muscle.Group.Hand;
+                if (t.name.Equals("Thigh_L")) return Muscle.Group.Leg;
+                if (t.name.Equals("Knee_L")) return Muscle.Group.Leg;
+                if (t.name.Equals("Ankle_L")) return Muscle.Group.Foot;
+                if (t.name.Equals("Thigh_R")) return Muscle.Group.Leg;
+                if (t.name.Equals("Knee_R")) return Muscle.Group.Leg;
+                if (t.name.Equals("Ankle_R")) return Muscle.Group.Foot;
+            }
+            return Muscle.Group.Spine;
+        }
 		
 		// Removes all bones that don't have a Rigidbody or a Collider attached because they are not part of the simulation
 		private void RemoveUnnecessaryBones() {

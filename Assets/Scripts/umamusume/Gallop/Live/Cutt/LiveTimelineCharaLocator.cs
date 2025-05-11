@@ -13,6 +13,8 @@ namespace Gallop.Live.Cutt
 
         public Dictionary<string, Transform> Bones;
 
+        private LiveCharaPosition _liveCharaStandingPosition;
+
         public LiveTimelineCharaLocator(UmaContainerCharacter umaContainer)
         {
             UmaContainer = umaContainer;
@@ -36,7 +38,7 @@ namespace Gallop.Live.Cutt
 
         public bool liveCharaVisible { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public LiveCharaPosition liveCharaStandingPosition { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public LiveCharaPosition liveCharaStandingPosition { get => _liveCharaStandingPosition; set => _liveCharaStandingPosition = value; }
 
         public Vector3 liveCharaInitialPosition { get => _liveCharaInitialPosition; set => _liveCharaInitialPosition = value; }
 
