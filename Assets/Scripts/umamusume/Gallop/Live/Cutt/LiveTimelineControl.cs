@@ -1586,11 +1586,18 @@ namespace Gallop.Live.Cutt
                 {
                     LiveTimelineKeyGlobalLightData lightData = curKey as LiveTimelineKeyGlobalLightData;
                     LiveTimelineKeyGlobalLightData lightData2 = nextKey as LiveTimelineKeyGlobalLightData;
+                    Quaternion quaternion = Quaternion.identity;
+                    if (lightData.cameraFollow)
+                    {
+                        quaternion = GetCamera(sheet.targetCameraIndex).cacheTransform.rotation;
+                    }
                     updateInfo.flags = lightData.flags;
                     if (lightData2 != null && lightData2.interpolateType != 0)
                     {
                         float ratio = CalculateInterpolationValue(lightData, lightData2, currentFrame);
-                        updateInfo.lightRotation = Quaternion.Euler(LerpWithoutClamp(lightData.lightDir, lightData2.lightDir, ratio));
+                        Quaternion a = Quaternion.Euler(lightData.lightDir);
+                        Quaternion b = Quaternion.Euler(lightData2.lightDir);
+                        updateInfo.lightRotation = Quaternion.Lerp(a, b, ratio) * quaternion;
                         updateInfo.globalRimShadowRate = LerpWithoutClamp(lightData.globalRimShadowRate, lightData2.globalRimShadowRate, ratio);
                         updateInfo.rimColor = Color.Lerp(lightData.rimColor, lightData2.rimColor, ratio);
                         updateInfo.rimStep = LerpWithoutClamp(lightData.rimStep, lightData2.rimStep, ratio);
@@ -1609,7 +1616,7 @@ namespace Gallop.Live.Cutt
                     }
                     else
                     {
-                        updateInfo.lightRotation = Quaternion.Euler(lightData.lightDir);
+                        updateInfo.lightRotation = Quaternion.Euler(lightData.lightDir) * quaternion;
                         updateInfo.globalRimShadowRate = lightData.globalRimShadowRate;
                         updateInfo.rimColor = lightData.rimColor;
                         updateInfo.rimStep = lightData.rimStep;

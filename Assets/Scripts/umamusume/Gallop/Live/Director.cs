@@ -199,7 +199,7 @@ namespace Gallop.Live
 
             _liveTimelineControl.OnUpdateGlobalLight += delegate (GlobalLightUpdateInfo updateInfo)
             {
-                var tmpPos = updateInfo.lightRotation * Vector3.forward;
+                var tmpPos = -(updateInfo.lightRotation * Vector3.forward).normalized;
                 foreach (var locator in _liveTimelineControl.liveCharactorLocators)
                 {
                     if (locator != null && updateInfo.flags.hasFlag(locator.liveCharaStandingPosition) && locator is LiveTimelineCharaLocator charaLocator)
