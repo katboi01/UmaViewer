@@ -368,7 +368,7 @@ namespace Gallop.Live.Cutt
         {
             foreach (var motion in _motionSequenceArray)
             {
-                motion.AlterUpdate(liveTime);
+                motion.AlterUpdate(liveTime, data.worksheetList[0].timescaleKeys);
             }
         }
 

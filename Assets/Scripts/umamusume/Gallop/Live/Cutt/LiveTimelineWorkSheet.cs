@@ -628,9 +628,14 @@ namespace Gallop.Live.Cutt
         public LiveTimelineEasing.Type easingType;
     }
 
+    [Serializable]
+    public class LiveTimelineKeyTimescaleData : LiveTimelineKey
+    {
+        public float Timescale;
+    }
 
-    //正在处理这里
-    [System.Serializable]
+//正在处理这里
+[System.Serializable]
     public class LiveTimelineKeyCameraPositionData : LiveTimelineKeyWithInterpolate
     {
         public LiveCameraPositionType setType;
@@ -877,6 +882,12 @@ namespace Gallop.Live.Cutt
 
     public delegate void CameraPosUpdateInfoDelegate(ref CameraPosUpdateInfo updateInfo);
 
+    [Serializable]
+    public class LiveTimelineKeyTimescaleDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyTimescaleData>
+    {
+        public bool _isCheckSameFrame;
+    }
+
     [System.Serializable]
     public class LiveTimelineKeyCameraPositionDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyCameraPositionData>
     {
@@ -899,6 +910,7 @@ namespace Gallop.Live.Cutt
         public float TotalTimeLength;
         public bool Lyrics;
         public LiveTimelineDefine.SheetIndex SheetType;
+        [SerializeField] public LiveTimelineKeyTimescaleDataList timescaleKeys;
         [SerializeField] public LiveTimelineKeyCameraPositionDataList cameraPosKeys;
         [SerializeField] public List<LiveTimelineMultiCameraPositionData> multiCameraPosKeys;
         [SerializeField] public List<LiveTimelineMultiCameraLookAtData> multiCameraLookAtKeys;
