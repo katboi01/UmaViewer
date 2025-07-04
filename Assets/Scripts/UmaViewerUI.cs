@@ -12,6 +12,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static PageManager;
 using Debug = UnityEngine.Debug;
@@ -117,6 +118,7 @@ public class UmaViewerUI : MonoBehaviour
     public Button GifButton;
     public Button VMDButton;
     public Button UpdateDBButton;
+    public TMP_Dropdown RegionDropdown;
     public TMP_Dropdown WorkModeDropdown;
     public TMP_Dropdown LanguageDropdown;
     public TMP_Dropdown AntialiasingDropdown;
@@ -166,6 +168,7 @@ public class UmaViewerUI : MonoBehaviour
     private void Start()
     {
         WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
+        RegionDropdown.SetValueWithoutNotify((int)Config.Instance.Region);
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         AntialiasingDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
@@ -225,6 +228,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         yield return 0;
         ChangeAntiAliasing(Config.Instance.AntiAliasing);
+        GraphicsSettings.renderPipelineAsset = Config.Instance.Region == Region.Global ? null : UmaViewerMain.Instance.DefaultRenderPipeline;
     }
 
     public void HighlightChildImage(Transform mainObject, UmaUIContainer child)
@@ -1395,6 +1399,16 @@ public class UmaViewerUI : MonoBehaviour
         {
             Config.Instance.Language = (Language)lang;
             Config.Instance.UpdateConfig(true);
+        }
+    }
+
+    public void ChangeRegion(int region)
+    {
+        if ((int)Config.Instance.Region != region)
+        {
+            Config.Instance.Region = (Region)region;
+            Config.Instance.UpdateConfig(false);
+            StartCoroutine(ApplyGraphicsSettings());
         }
     }
 

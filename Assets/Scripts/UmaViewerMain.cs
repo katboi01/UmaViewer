@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using UnityEngine.Rendering;
 
 public class UmaViewerMain : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class UmaViewerMain : MonoBehaviour
     private UmaViewerUI UI => UmaViewerUI.Instance;
     private UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
 
+    public RenderPipelineAsset DefaultRenderPipeline;
     public List<CharaEntry> Characters = new List<CharaEntry>();
     public List<CharaEntry> MobCharacters = new List<CharaEntry>();
     public List<LiveEntry> Lives = new List<LiveEntry>();
