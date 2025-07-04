@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static RootMotion.FinalIK.IKSolverVR;
 using System.Linq;
 using System.IO;
-using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
 {
@@ -54,6 +51,12 @@ namespace Gallop.Live.Cutt
         public event Action<FacialDataUpdateInfo, float, int> OnUpdateFacial;
 
         public event Action<int> OnUpdateCameraSwitcher;
+
+        public event Action<GlobalLightUpdateInfo> OnUpdateGlobalLight;
+
+        public event Action<BgColor1UpdateInfo> OnUpdateBgColor1;
+
+        public event Action<BgColor2UpdateInfo> OnUpdateBgColor2;
 
         private static Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> fnGetCameraPosValue = GetCameraPosValue;
 
@@ -328,6 +331,9 @@ namespace Gallop.Live.Cutt
             AlterUpdate_CameraFov(workSheet, _currentFrame);
             AlterUpdate_CameraRoll(workSheet, _currentFrame);
             AlterUpdate_MultiCamera(workSheet, _currentFrame);
+            AlterUpdate_GlobalLight(workSheet, _currentFrame);
+            AlterUpdate_BgColor1(workSheet, _currentFrame);
+
             _isNowAlterUpdate = false;
             
             if (IsRecordVMD)
@@ -1558,6 +1564,126 @@ namespace Gallop.Live.Cutt
                 AlterUpdate_MultiCameraPosition(sheet, currentFrame);
                 if(_isMultiCameraEnable)
                 AlterUpdate_MultiCameraLookAt(sheet, currentFrame);
+            }
+        }
+
+        private void AlterUpdate_GlobalLight(LiveTimelineWorkSheet sheet, float currentFrame) {
+            GlobalLightUpdateInfo updateInfo = default;
+            int count = sheet.globalLightDataLists.Count;
+            for(int i = 0; i < count; i++)
+            {
+                LiveTimelineKeyGlobalLightDataList keys = sheet.globalLightDataLists[i].keys;
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
+                {
+                    continue;
+                }
+                else if (sheet.globalLightDataLists[i].name != "GlobalLight") 
+                {
+                    continue;
+                }
+                FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
+                if (curKey != null)
+                {
+                    LiveTimelineKeyGlobalLightData lightData = curKey as LiveTimelineKeyGlobalLightData;
+                    LiveTimelineKeyGlobalLightData lightData2 = nextKey as LiveTimelineKeyGlobalLightData;
+                    Quaternion quaternion = Quaternion.identity;
+                    if (lightData.cameraFollow)
+                    {
+                        quaternion = GetCamera(sheet.targetCameraIndex).cacheTransform.rotation;
+                    }
+                    updateInfo.flags = lightData.flags;
+                    if (lightData2 != null && lightData2.interpolateType != 0)
+                    {
+                        float ratio = CalculateInterpolationValue(lightData, lightData2, currentFrame);
+                        Quaternion a = Quaternion.Euler(lightData.lightDir);
+                        Quaternion b = Quaternion.Euler(lightData2.lightDir);
+                        updateInfo.lightRotation = Quaternion.Lerp(a, b, ratio) * quaternion;
+                        updateInfo.globalRimShadowRate = LerpWithoutClamp(lightData.globalRimShadowRate, lightData2.globalRimShadowRate, ratio);
+                        updateInfo.rimColor = Color.Lerp(lightData.rimColor, lightData2.rimColor, ratio);
+                        updateInfo.rimStep = LerpWithoutClamp(lightData.rimStep, lightData2.rimStep, ratio);
+                        updateInfo.rimFeather = LerpWithoutClamp(lightData.rimFeather, lightData2.rimFeather, ratio);
+                        updateInfo.rimSpecRate = LerpWithoutClamp(lightData.rimSpecRate, lightData2.rimSpecRate, ratio);
+                        updateInfo.flags = lightData2.flags;
+                        updateInfo.RimHorizonOffset = LerpWithoutClamp(lightData.RimHorizonOffset, lightData2.RimHorizonOffset, ratio);
+                        updateInfo.RimVerticalOffset = LerpWithoutClamp(lightData.RimVerticalOffset, lightData2.RimVerticalOffset, ratio);
+                        updateInfo.RimHorizonOffset2 = LerpWithoutClamp(lightData.RimHorizonOffset2, lightData2.RimHorizonOffset2, ratio);
+                        updateInfo.RimVerticalOffset2 = LerpWithoutClamp(lightData.RimVerticalOffset2, lightData2.RimVerticalOffset2, ratio);
+                        updateInfo.rimColor2 = Color.Lerp(lightData.rimColor2, lightData2.rimColor2, ratio);
+                        updateInfo.rimStep2 = LerpWithoutClamp(lightData.rimStep2, lightData2.rimStep2, ratio);
+                        updateInfo.rimFeather2 = LerpWithoutClamp(lightData.rimFeather2, lightData2.rimFeather2, ratio);
+                        updateInfo.rimSpecRate2 = LerpWithoutClamp(lightData.rimSpecRate2, lightData2.rimSpecRate2, ratio);
+                        updateInfo.globalRimShadowRate2 = LerpWithoutClamp(lightData.globalRimShadowRate2, lightData2.globalRimShadowRate2, ratio);
+                    }
+                    else
+                    {
+                        updateInfo.lightRotation = Quaternion.Euler(lightData.lightDir) * quaternion;
+                        updateInfo.globalRimShadowRate = lightData.globalRimShadowRate;
+                        updateInfo.rimColor = lightData.rimColor;
+                        updateInfo.rimStep = lightData.rimStep;
+                        updateInfo.rimFeather = lightData.rimFeather;
+                        updateInfo.rimSpecRate = lightData.rimSpecRate;
+                        updateInfo.flags = lightData.flags;
+                        updateInfo.RimHorizonOffset = lightData.RimHorizonOffset;
+                        updateInfo.RimVerticalOffset = lightData.RimVerticalOffset;
+                        updateInfo.RimHorizonOffset2 = lightData.RimHorizonOffset2;
+                        updateInfo.RimVerticalOffset2 = lightData.RimVerticalOffset2;
+                        updateInfo.rimColor2 = lightData.rimColor2;
+                        updateInfo.rimStep2 = lightData.rimStep2;
+                        updateInfo.rimFeather2 = lightData.rimFeather2;
+                        updateInfo.rimSpecRate2 = lightData.rimSpecRate2;
+                        updateInfo.globalRimShadowRate2 = lightData.globalRimShadowRate2;
+                    }
+                    OnUpdateGlobalLight.Invoke(updateInfo);
+                }
+            }
+        }
+
+        private HashSet<string> validBgColorNames = new HashSet<string> { "CharaCenter", "CharaLeft", "CharaRight", "CharaColor" };
+
+        private void AlterUpdate_BgColor1(LiveTimelineWorkSheet sheet, float currentFrame) {
+            int count = sheet.bgColor1List.Count;
+            
+            for (int i = 0; i < count; i++)
+            {
+                LiveTimelineKeyBgColor1DataList keys = sheet.bgColor1List[i].keys;
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
+                {
+                    continue;
+                }
+                else if (!validBgColorNames.Contains(sheet.bgColor1List[i].name))
+                {
+                    continue;
+                }
+                FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
+                if (curKey == null)
+                {
+                    continue;
+                }
+                BgColor1UpdateInfo updateInfo = default;
+                LiveTimelineKeyBgColor1Data bgColorData = curKey as LiveTimelineKeyBgColor1Data;
+                LiveTimelineKeyBgColor1Data bgColorData2 = nextKey as LiveTimelineKeyBgColor1Data;
+                if (bgColorData2 != null && bgColorData2.interpolateType != 0)
+                {
+                    float t = CalculateInterpolationValue(bgColorData, bgColorData2, currentFrame);
+                    updateInfo.flags = bgColorData.flags;
+                    updateInfo.color = Color.Lerp(bgColorData.color, bgColorData2.color, t);
+                    updateInfo.toonDarkColor = Color.Lerp(bgColorData.toonDarkColor, bgColorData2.toonDarkColor, t);
+                    updateInfo.toonBrightColor = Color.Lerp(bgColorData.toonBrightColor, bgColorData2.toonBrightColor, t);
+                    updateInfo.outlineColor = Color.Lerp(bgColorData.outlineColor, bgColorData2.outlineColor, t);
+                    updateInfo.outlineColorBlend = bgColorData.outlineColorBlend;
+                    updateInfo.Saturation = LerpWithoutClamp(bgColorData.Saturation, bgColorData2.Saturation, t);
+                }
+                else
+                {
+                    updateInfo.flags = bgColorData.flags;
+                    updateInfo.color = bgColorData.color;
+                    updateInfo.toonDarkColor = bgColorData.toonDarkColor;
+                    updateInfo.toonBrightColor = bgColorData.toonBrightColor;
+                    updateInfo.outlineColor = bgColorData.outlineColor;
+                    updateInfo.outlineColorBlend = bgColorData.outlineColorBlend;
+                    updateInfo.Saturation = bgColorData.Saturation;
+                }
+                OnUpdateBgColor1.Invoke(updateInfo);
             }
         }
 

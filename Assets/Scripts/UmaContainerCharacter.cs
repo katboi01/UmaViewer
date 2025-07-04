@@ -170,7 +170,8 @@ public class UmaContainerCharacter : UmaContainer
         UmaAnimator.runtimeAnimatorController = OverrideController;
 
         //Materials
-        foreach (var rend in gameObject.GetComponentsInChildren<Renderer>())
+        Renderers = gameObject.GetComponentsInChildren<Renderer>().ToList();
+        foreach (var rend in Renderers)
         {
             for (int i = 0; i < rend.sharedMaterials.Length; i++)
             {
@@ -458,6 +459,7 @@ public class UmaContainerCharacter : UmaContainer
         var animator = UmaAnimator;
         BipedRagdollReferences r = BipedRagdollReferences.FromAvatar(animator);
         BipedRagdollCreator.Options options = BipedRagdollCreator.AutodetectOptions(r);
+        options.spine = true;
 
         var ik = container.gameObject.AddComponent<BipedIK>();
         ik.references.root = container.transform;

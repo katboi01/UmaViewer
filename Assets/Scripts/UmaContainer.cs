@@ -23,6 +23,7 @@ public class UmaContainer : MonoBehaviour
     public CharaShaderEffectData HeadShaderEffectData;
     public CharaShaderEffectData BodyShaderEffectData;
     public List<MaterialHelper> Materials = new List<MaterialHelper>();
+    public List<Renderer> Renderers = new List<Renderer>();
 
     protected UmaViewerBuilder Builder => UmaViewerBuilder.Instance;
     protected UmaViewerMain Main => UmaViewerMain.Instance;
