@@ -61,7 +61,7 @@ namespace Gallop.Live.Cutt
             float num = 1f - t;
             float num2 = t * t * t * t;
             float num3 = 4f * t * t * t * num;
-            float num4 = 4f * t * t * num * num;
+            float num4 = 6f * t * t * num * num;
             float num5 = 4f * t * num * num * num;
             float num6 = num * num * num * num;
             v3.x = num2 * end.x + num3 * cp3.x + num4 * cp2.x + num5 * cp1.x + num6 * start.x;
@@ -74,8 +74,8 @@ namespace Gallop.Live.Cutt
             float num = 1f - t;
             float num2 = t * t * t * t * t;
             float num3 = 5f * t * t * t * t * num;
-            float num4 = 5f * t * t * t * num * num;
-            float num5 = 5f * t * t * num * num * num;
+            float num4 = 10f * t * t * t * num * num;
+            float num5 = 10f * t * t * num * num * num;
             float num6 = 5f * t * num * num * num * num;
             float num7 = num * num * num * num * num;
             v3.x = num2 * end.x + num3 * cp4.x + num4 * cp3.x + num5 * cp2.x + num6 * cp1.x + num7 * start.x;
