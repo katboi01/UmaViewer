@@ -934,6 +934,8 @@ namespace Gallop.Live.Cutt
         [SerializeField] public List<LiveTimelineBgColor1Data> bgColor1List;
         [SerializeField] public List<LiveTimelineBgColor2Data> bgColor2List;
 
+        [SerializeField] public List<LiveTimelineTransformData> transformList;
+        [SerializeField] public List<LiveTimelineObjectData> objectList;
 
         /*
 		//终于可以调用AB包了，虽然后面发现没什么用...说不定什么时候能用到

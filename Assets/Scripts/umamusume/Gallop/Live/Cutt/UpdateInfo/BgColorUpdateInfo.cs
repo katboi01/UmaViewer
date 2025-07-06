@@ -41,6 +41,8 @@ namespace Gallop.Live.Cutt
         public float BlinkLightBrightnessPower; // 0xcc
     }
 
+    public delegate void BgColor1UpdateInfoDelegate(ref BgColor1UpdateInfo updateInfo);
+
     public struct BgColor2UpdateInfo
     {
         // Fields
@@ -50,4 +52,6 @@ namespace Gallop.Live.Cutt
         public float value; // 0x34
         public int rndValueIdx; // 0x38
     }
+
+    public delegate void BgColor2UpdateInfoDelegate(ref BgColor2UpdateInfo updateInfo);
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Gallop.Live.Cutt
 {
@@ -52,11 +53,15 @@ namespace Gallop.Live.Cutt
 
         public event Action<int> OnUpdateCameraSwitcher;
 
-        public event Action<GlobalLightUpdateInfo> OnUpdateGlobalLight;
+        public event GlobalLightUpdateInfoDelegate OnUpdateGlobalLight;
 
-        public event Action<BgColor1UpdateInfo> OnUpdateBgColor1;
+        public event BgColor1UpdateInfoDelegate OnUpdateBgColor1;
 
-        public event Action<BgColor2UpdateInfo> OnUpdateBgColor2;
+        public event BgColor2UpdateInfoDelegate OnUpdateBgColor2;
+
+        public event TransformUpdateInfoDelegate OnUpdateTransform;
+
+        public event ObjectUpdateInfoDelegate OnUpdateObject;
 
         private static Func<LiveTimelineKeyCameraPositionData, LiveTimelineControl, FindTimelineConfig, Vector3> fnGetCameraPosValue = GetCameraPosValue;
 
@@ -102,6 +107,8 @@ namespace Gallop.Live.Cutt
         public List<LiveCameraFrame> RecordFrames = new List<LiveCameraFrame>();
         public List<List<LiveCameraFrame>> MultiRecordFrames = new List<List<LiveCameraFrame>>();
         public event Action RecordUma;
+
+        public Dictionary<string, GameObject> StageObjectMap = new Dictionary<string, GameObject>();
 
         public float currentLiveTime
         {
@@ -333,6 +340,8 @@ namespace Gallop.Live.Cutt
             AlterUpdate_MultiCamera(workSheet, _currentFrame);
             AlterUpdate_GlobalLight(workSheet, _currentFrame);
             AlterUpdate_BgColor1(workSheet, _currentFrame);
+            AlterUpdate_TransformControl(workSheet, _currentFrame);
+            AlterUpdate_ObjectControl(workSheet, _currentFrame);
 
             _isNowAlterUpdate = false;
             
@@ -632,7 +641,23 @@ namespace Gallop.Live.Cutt
 
             if (curKey.visible || IsRecordVMD)
             {
-                if(nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
+                if (!string.IsNullOrEmpty(curKey.ParentObjectName))
+                {
+                    var parent_transform = curKey.GetParentObjectTransform(this);
+                    if (parent_transform)
+                    {
+                        if (chara.transform.parent != parent_transform)
+                        {
+                            chara.transform.SetParent(parent_transform);
+                        }
+                    }
+                }
+                else if (chara.transform.parent)
+                {
+                    chara.transform.SetParent(null);
+                }
+
+                if (nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
                 {
                     float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
                     chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
@@ -1633,7 +1658,7 @@ namespace Gallop.Live.Cutt
                         updateInfo.rimSpecRate2 = lightData.rimSpecRate2;
                         updateInfo.globalRimShadowRate2 = lightData.globalRimShadowRate2;
                     }
-                    OnUpdateGlobalLight.Invoke(updateInfo);
+                    OnUpdateGlobalLight.Invoke(ref updateInfo);
                 }
             }
         }
@@ -1683,7 +1708,90 @@ namespace Gallop.Live.Cutt
                     updateInfo.outlineColorBlend = bgColorData.outlineColorBlend;
                     updateInfo.Saturation = bgColorData.Saturation;
                 }
-                OnUpdateBgColor1.Invoke(updateInfo);
+                OnUpdateBgColor1.Invoke(ref updateInfo);
+            }
+        }
+
+        private void AlterUpdate_TransformControl(LiveTimelineWorkSheet sheet, float currentFrame) 
+        {
+            int count = sheet.transformList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var keys = sheet.transformList[i].keys;
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
+                {
+                    continue;
+                }
+                FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
+                if (curKey == null)
+                {
+                    continue;
+                }
+                TransformUpdateInfo updateInfo = default;
+                updateInfo.data = sheet.transformList[i];
+                LiveTimelineKeyTransformData transformData = curKey as LiveTimelineKeyTransformData;
+                LiveTimelineKeyTransformData transformData2 = nextKey as LiveTimelineKeyTransformData;
+                if (transformData2 != null && transformData2.interpolateType != 0)
+                {
+                    float t = CalculateInterpolationValue(transformData, transformData2, currentFrame);
+                    updateInfo.updateData.position = Vector3.Lerp(transformData.position, transformData2.position, t);
+                    updateInfo.updateData.rotation = Quaternion.Lerp(Quaternion.Euler(transformData.rotate), Quaternion.Euler(transformData2.rotate), t);
+                    updateInfo.updateData.scale = Vector3.Lerp(transformData.scale, transformData2.scale, t);
+                }
+                else
+                {
+                    updateInfo.updateData.position = transformData.position;
+                    updateInfo.updateData.rotation = Quaternion.Euler(transformData.rotate);
+                    updateInfo.updateData.scale = transformData.scale;
+                }
+                OnUpdateTransform.Invoke(ref updateInfo);
+            }
+        }
+
+        private void AlterUpdate_ObjectControl(LiveTimelineWorkSheet sheet, float currentFrame)
+        {
+            int count = sheet.objectList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var keys = sheet.objectList[i].keys;
+                if (keys.HasAttribute(LiveTimelineKeyDataListAttr.Disable) || !keys.EnablePlayModeTimeline(_playMode))
+                {
+                    continue;
+                }
+                else if (!StageObjectMap.ContainsKey(sheet.objectList[i].name))
+                {
+                    continue;
+                }
+                FindTimelineKey(out var curKey, out var nextKey, keys, currentFrame);
+                if (curKey == null)
+                {
+                    continue;
+                }
+                ObjectUpdateInfo updateInfo = default;
+                LiveTimelineKeyObjectData objectData = curKey as LiveTimelineKeyObjectData;
+                LiveTimelineKeyObjectData objectData2 = nextKey as LiveTimelineKeyObjectData;
+                if (objectData2 != null && objectData2.interpolateType != 0)
+                {
+                    float t = CalculateInterpolationValue(objectData, objectData2, currentFrame);
+                    updateInfo.updateData.position = Vector3.Lerp(objectData.position, objectData2.position, t);
+                    updateInfo.updateData.rotation = Quaternion.Lerp(Quaternion.Euler(objectData.rotate), Quaternion.Euler(objectData2.rotate), t);
+                    updateInfo.updateData.scale = Vector3.Lerp(objectData.scale, objectData2.scale, t);
+                }
+                else
+                {
+                    updateInfo.updateData.position = objectData.position;
+                    updateInfo.updateData.rotation = Quaternion.Euler(objectData.rotate);
+                    updateInfo.updateData.scale = objectData.scale;
+                }
+                updateInfo.data = sheet.objectList[i];
+                updateInfo.renderEnable = objectData.renderEnable;
+                updateInfo.AttachTarget = objectData.AttachTarget;
+                updateInfo.CharacterPosition = objectData.CharacterPosition;
+                updateInfo.MultiCameraIndex = objectData.MultiCameraIndex;
+                updateInfo.OffsetType = objectData.OffsetValueType;
+                updateInfo.LayerType = objectData.LayerTypeValue;
+                updateInfo.IsLayerTypeRecursively = objectData.IsLayerTypeRecursively;
+                OnUpdateObject.Invoke(ref updateInfo);
             }
         }
 

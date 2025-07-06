@@ -26,4 +26,5 @@ namespace Gallop.Live.Cutt
         public float globalRimShadowRate2; // 0x70
     }
 
+    public delegate void GlobalLightUpdateInfoDelegate(ref GlobalLightUpdateInfo updateInfo);
 }

@@ -104,6 +104,7 @@ namespace Gallop.Live
                 {
                     Debug.Log(live.BackGroundId);
                     Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
+                    _liveTimelineControl.StageObjectMap = _stageController.StageObjectMap;
                 }
 
                 //Make CharacterObject
@@ -197,7 +198,7 @@ namespace Gallop.Live
                 }
             };
 
-            _liveTimelineControl.OnUpdateGlobalLight += delegate (GlobalLightUpdateInfo updateInfo)
+            _liveTimelineControl.OnUpdateGlobalLight += delegate (ref GlobalLightUpdateInfo updateInfo)
             {
                 var tmpPos = -(updateInfo.lightRotation * Vector3.forward).normalized;
                 foreach (var locator in _liveTimelineControl.liveCharactorLocators)
@@ -236,7 +237,7 @@ namespace Gallop.Live
                 }
             };
 
-            _liveTimelineControl.OnUpdateBgColor1 += delegate (BgColor1UpdateInfo updateInfo)
+            _liveTimelineControl.OnUpdateBgColor1 += delegate (ref BgColor1UpdateInfo updateInfo)
             {
                 foreach (var locator in _liveTimelineControl.liveCharactorLocators)
                 {
