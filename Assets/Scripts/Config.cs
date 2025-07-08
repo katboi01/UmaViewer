@@ -12,6 +12,9 @@ public class Config
     public string LanguageTip = "Affects Uma names on the list. Language options: 0 - En, 1 - Jp";
     public Language Language = Language.En;
 
+    public string RegionTip = "Game region. Region options: 0 - Global, 1 - Japan";
+    public Region Region = Region.Jp;
+
     public string DownloadMissingResourcesTip = "true/false. automatically download missing files, which may require a VPN.";
     public bool DownloadMissingResources = true;
 
@@ -138,6 +141,12 @@ public class Config
 public enum Language
 {
     En,
+    Jp
+}
+
+public enum Region
+{
+    Global,
     Jp
 }
 
