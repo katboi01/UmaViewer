@@ -25,6 +25,8 @@ public class UmaDatabaseController
     }
     /// <summary> 3d/chara/body/ </summary>
     public static string BodyPath = "3d/chara/body/";
+    /// <summary> 3d/chara/mini/body/ </summary>
+    public static string MiniBodyPath = "3d/chara/mini/body/";
     /// <summary> 3d/chara/head/ </summary>
     public static string HeadPath = "3d/chara/head/";
     /// <summary> 3d/motion/ </summary>

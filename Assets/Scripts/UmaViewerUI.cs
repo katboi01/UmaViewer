@@ -30,6 +30,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect MobCharactersList;
     public PageManager MobCharactersPageCtrl;
     public ScrollRect CostumeList;
+    public ScrollRect HeadCostumeList;
     public ScrollRect MobCostumeList;
     public ScrollRect AnimationSetList;
     public ScrollRect AnimationList;
@@ -143,6 +144,7 @@ public class UmaViewerUI : MonoBehaviour
     public bool DynamicBoneEnable = true;
     public bool EnableEyeTracking = true;
     public bool EnableFaceOverride = true;
+    public string CurrentHeadCostumeId = string.Empty;
 
     [Header("Live")]
     public bool LiveTime = false;
@@ -717,20 +719,22 @@ public class UmaViewerUI : MonoBehaviour
         Action<CharaEntry> action = delegate (CharaEntry achara)
         {
             string nameVar = mini ? $"pfb_mbdy{achara.Id}" : $"pfb_bdy{achara.Id}";
-            foreach (var entry in Main.AbList.Where(a => !a.Key.Contains("clothes") && a.Key.Contains(nameVar)))
+            string bodyPath = mini ? UmaDatabaseController.MiniBodyPath : UmaDatabaseController.BodyPath;
+            foreach (var entry in Main.AbChara.Where(a => a.Name.StartsWith(bodyPath) && !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
             {
                 var container = Instantiate(UmaContainerCostumePrefab, costumeList.content).GetComponent<UmaUIContainer>();
-                string[] split = entry.Key.Split('_');
+                string[] split = entry.Name.Split('_');
                 string costumeId = split[split.Length - 1];
                 var dressdata = Main.Costumes.FirstOrDefault(a => (a.CharaId == achara.Id && a.BodyTypeSub == int.Parse(costumeId)));
                 container.Name = container.name = GetCostumeName(costumeId, (dressdata == null ? costumeId : dressdata.DressName));
                 container.Image.sprite = (dressdata == null ? CostumeIconDefault : dressdata.Icon);
                 container.Image.enabled = true;
+                container.Id = costumeId;
                 container.Button.onClick.AddListener(() =>
                 {
                     if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
                     {
-                        CurrentSeletChara.SetValue(achara, costumeId, container.Image.sprite);
+                        CurrentSeletChara.SetValue(achara, costumeId, container.Image.sprite, CurrentHeadCostumeId);
                     }
                     else
                     {
@@ -745,7 +749,7 @@ public class UmaViewerUI : MonoBehaviour
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
                         UmaAssetManager.PreLoadAndRun(list , delegate {
-                            StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
+                            StartCoroutine(Builder.LoadUma(achara, costumeId, mini, CurrentHeadCostumeId));
                         });
                         //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
                     }
@@ -761,7 +765,8 @@ public class UmaViewerUI : MonoBehaviour
         //Common costumes
         List<string> costumes = new List<string>();
         var nameVar = mini ? "pfb_mbdy0" : $"pfb_bdy0";
-        foreach (var entry in Main.AbChara.Where(a => a.Name.Contains("/body/") && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
+        string bodyPath = mini ? UmaDatabaseController.MiniBodyPath : UmaDatabaseController.BodyPath;
+        foreach (var entry in Main.AbChara.Where(a => a.Name.StartsWith(bodyPath) && !a.Name.Contains("/clothes/") && a.Name.Contains(nameVar)))
         {
             string id = Path.GetFileName(entry.Name);
             string[] split = id.Split('_');
@@ -780,11 +785,12 @@ public class UmaViewerUI : MonoBehaviour
                 container.Name = container.name = GetCostumeName(id, (dressdata == null ? id : dressdata.DressName));
                 container.Image.sprite = (dressdata == null ? CostumeIconDefault : dressdata.Icon);
                 container.Image.enabled = true;
+                container.Id = costumeId;
                 container.Button.onClick.AddListener(() =>
                 {
                     if (LiveSelectPannel.activeInHierarchy && CurrentSeletChara)
                     {
-                        CurrentSeletChara.SetValue(chara, costumeId, container.Image.sprite);
+                        CurrentSeletChara.SetValue(chara, costumeId, container.Image.sprite, CurrentHeadCostumeId);
                     }
                     else
                     {
@@ -802,8 +808,61 @@ public class UmaViewerUI : MonoBehaviour
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
-                        UmaAssetManager.PreLoadAndRun(list, delegate { StartCoroutine(Builder.LoadUma(chara, costumeId, mini)); });
+                        UmaAssetManager.PreLoadAndRun(list, delegate { StartCoroutine(Builder.LoadUma(chara, costumeId, mini, CurrentHeadCostumeId)); });
                         //StartCoroutine(Builder.LoadUma(achara, costumeId, mini));
+                    }
+                });
+            }
+        }
+
+        if(!chara.IsMob && !mini)
+        {
+            for (int i = HeadCostumeList.content.childCount - 1; i >= 0; i--)
+            {
+                Destroy(HeadCostumeList.content.GetChild(i).gameObject);
+            }
+            CurrentHeadCostumeId = string.Empty;
+            nameVar = $"/pfb_chr{chara.Id}_";
+            foreach (var entry in Main.AbChara.Where(a => a.Name.StartsWith($"{UmaDatabaseController.HeadPath}chr{chara.Id}_") && !a.Name.Contains("clothes") && a.Name.Contains(nameVar)))
+            {
+                var container = Instantiate(UmaContainerCostumePrefab, HeadCostumeList.content).GetComponent<UmaUIContainer>();
+                string[] split = entry.Name.Split('_');
+                string head_costumeId = split[split.Length - 1];
+                var dressdata = Main.Costumes.FirstOrDefault(a => (a.CharaId == chara.Id && a.BodyTypeSub == int.Parse(head_costumeId)));
+                container.Name = container.name = GetCostumeName(head_costumeId, (dressdata == null ? head_costumeId : dressdata.DressName));
+                container.Image.sprite = (dressdata == null ? CostumeIconDefault : dressdata.Icon);
+                container.Image.enabled = true;
+                container.Id = head_costumeId;
+                container.Button.onClick.AddListener(() =>
+                {
+                    CurrentHeadCostumeId = head_costumeId;
+                    if (!LiveSelectPannel.activeInHierarchy || !CurrentSeletChara)
+                    {
+                        HighlightChildImage(HeadCostumeList.content, container);
+                    }
+                    bool hasBreak = false;
+                    foreach (var t in CostumeList.GetComponentsInChildren<UmaUIContainer>())
+                    {
+                        if (t.ToggleImage.enabled)
+                        {
+                            hasBreak = true;
+                            t.Button.onClick.Invoke();
+                            break;
+                        }
+                        else if(CurrentSeletChara && CurrentSeletChara.CostumeId == t.Id)
+                        {
+                            hasBreak = true;
+                            t.Button.onClick.Invoke();
+                            break;
+                        }
+                    }
+                    if (!hasBreak)
+                    {
+                        //if no costume selected, select first costume
+                        if (CostumeList.content.childCount > 0)
+                        {
+                            CostumeList.content.GetChild(0).GetComponent<UmaUIContainer>().Button.onClick.Invoke();
+                        }
                     }
                 });
             }
