@@ -66,5 +66,6 @@ public class UmaUIContainer : MonoBehaviour
     public Toggle Toggle;
     public Image Image;
     public Image ToggleImage;
+    public string Id;
 }
 

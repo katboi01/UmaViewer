@@ -45,7 +45,7 @@ public class UmaViewerBuilder : MonoBehaviour
         Instance = this;
     }
 
-    public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini)
+    public IEnumerator LoadUma(CharaEntry chara, string costumeId, bool mini, string haedCostumeId = "")
     {
         int id = chara.Id;
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
@@ -69,7 +69,7 @@ public class UmaViewerBuilder : MonoBehaviour
         else
         {
             umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadNormalUma(umaContainer, chara, costumeId, true);
+            LoadNormalUma(umaContainer, chara, costumeId, true, haedCostumeId);
         }
 
         yield break;
@@ -94,7 +94,7 @@ public class UmaViewerBuilder : MonoBehaviour
                 }
                 else
                 {
-                    LoadNormalUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId);
+                    LoadNormalUma(umaContainer, characters[i].CharaEntry, characters[i].CostumeId, false, characters[i].HeadCostumeId);
                 }
 
                 Gallop.Live.Director.instance.CharaContainerScript.Add(umaContainer);
@@ -102,7 +102,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
     }
 
-    private void LoadNormalUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, bool loadMotion = false)
+    private void LoadNormalUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, bool loadMotion = false, string haedCostumeId = "")
     {
         int id = chara.Id;
         umaContainer.CharaEntry = chara;
@@ -117,11 +117,12 @@ public class UmaViewerBuilder : MonoBehaviour
         shape = charaData["shape"].ToString();
 
         UmaDatabaseEntry asset = null;
+
+        umaContainer.VarCostumeIdLong = costumeId;
         if (genericCostume)
         {
             costumeIdShort = costumeId.Remove(costumeId.LastIndexOf('_'));
             umaContainer.VarCostumeIdShort = costumeIdShort;
-            umaContainer.VarCostumeIdLong = costumeId;
             umaContainer.VarBust = bust;
             umaContainer.VarSkin = skin;
             umaContainer.VarSocks = socks;
@@ -218,12 +219,12 @@ public class UmaViewerBuilder : MonoBehaviour
         else
         {
             head_id = id;
-            head_costumeId = costumeId;
+            head_costumeId = string.IsNullOrEmpty(haedCostumeId) ? costumeId  : haedCostumeId;
 
             CurrentHead = new UmaHeadData
             {
                 id = id,
-                costumeId = costumeId,
+                costumeId = head_costumeId,
                 tailId = tailId,
                 chara = chara
             };

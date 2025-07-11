@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 namespace Gallop.Live.Cutt
 {
     public enum LiveCharaPosition
@@ -27,5 +30,59 @@ namespace Gallop.Live.Cutt
         Left = 1,
         Right = 2,
         CharacterMax = 17
+    }
+
+    public enum AttachType
+    {
+        None = 0,
+        Camera = 1,
+        Character = 2,
+    }
+
+    public enum OffsetType
+    {
+        Direct = 0,
+        Add = 1,
+    }
+
+
+    public enum LayerType
+    {
+        None = 0,
+        Normal = 1,
+        NotReflect = 2,
+        Projector = 3,
+    }
+
+    [Serializable]
+    public class LiveTimelineKeyObjectDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyObjectData>
+    {
+
+    }
+
+    [Serializable]
+    public class LiveTimelineKeyObjectData : LiveTimelineKeyWithInterpolate
+    {
+        public Vector3 position;
+        public Vector3 rotate;
+        public Vector3 scale;
+        public bool renderEnable;
+        public AttachType AttachTarget;
+        public int CharacterPosition;
+        public int MultiCameraIndex;
+        public OffsetType OffsetValueType;
+        public LayerType LayerTypeValue;
+        public bool IsLayerTypeRecursively;
+    }
+
+    [Serializable]
+    public class LiveTimelineObjectData : ILiveTimelineGroupDataWithName
+    {
+        // Fields
+        private const string default_name = "Object";
+        public LiveTimelineKeyObjectDataList keys;
+        public bool enablePosition;
+        public bool enableRotate;
+        public bool enableScale;
     }
 }

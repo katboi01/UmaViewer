@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,7 +83,7 @@ namespace Gallop.Live.Cutt
             _tempAnim.enabled = false;
         }
 
-        public void AlterUpdate(float currentTime)
+        public void AlterUpdate(float currentTime, LiveTimelineKeyTimescaleDataList timescaleKeys)
         {
             var director = Director.instance;
             if (Director.instance.liveMode == 0)
@@ -122,7 +123,34 @@ namespace Gallop.Live.Cutt
                 {
                     start = (double)arg.motionHeadFrameSeparetes[charaIndex] / 60;
                 }
-                double interval = (currentTime - arg.FrameSecond) * arg.playSpeed;
+
+                double interval = 0;
+                double last_current_time = currentTime;
+                if (timescaleKeys.thisList.Count > 0)
+                {
+                    // apply timescale keys
+                    for (int i = timescaleKeys.thisList.Count - 1; i >= 0; i--)
+                    {
+                        var scaleKey = timescaleKeys.thisList[i];
+                        if (scaleKey.FrameSecond <= currentTime)
+                        {
+                            if (scaleKey.FrameSecond <= arg.FrameSecond)
+                            {
+                                interval += (last_current_time - arg.FrameSecond) * scaleKey.Timescale * arg.playSpeed;
+                                break;
+                            }
+                            else
+                            {
+                                interval += (last_current_time - scaleKey.FrameSecond) * scaleKey.Timescale * arg.playSpeed;
+                                last_current_time = scaleKey.FrameSecond;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    interval = (currentTime - arg.FrameSecond) * arg.playSpeed;
+                }
                 float currentAnimationTime = (float)(start + interval);
 
                 if (anim)

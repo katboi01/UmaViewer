@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static Gallop.Live.Cutt.LiveTimelineDefine;
 
 namespace Gallop.Live.Cutt
 {
@@ -603,6 +604,8 @@ namespace Gallop.Live.Cutt
         public int frame;
         public LiveTimelineKeyAttribute attribute;
 
+        public LiveTimelineKeyDataType dataType;
+
         private double _framesecond = -999;
 
         public double FrameSecond { 
@@ -625,9 +628,14 @@ namespace Gallop.Live.Cutt
         public LiveTimelineEasing.Type easingType;
     }
 
+    [Serializable]
+    public class LiveTimelineKeyTimescaleData : LiveTimelineKey
+    {
+        public float Timescale;
+    }
 
-    //正在处理这里
-    [System.Serializable]
+//正在处理这里
+[System.Serializable]
     public class LiveTimelineKeyCameraPositionData : LiveTimelineKeyWithInterpolate
     {
         public LiveCameraPositionType setType;
@@ -874,6 +882,12 @@ namespace Gallop.Live.Cutt
 
     public delegate void CameraPosUpdateInfoDelegate(ref CameraPosUpdateInfo updateInfo);
 
+    [Serializable]
+    public class LiveTimelineKeyTimescaleDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyTimescaleData>
+    {
+        public bool _isCheckSameFrame;
+    }
+
     [System.Serializable]
     public class LiveTimelineKeyCameraPositionDataList : LiveTimelineKeyDataListTemplate<LiveTimelineKeyCameraPositionData>
     {
@@ -896,6 +910,7 @@ namespace Gallop.Live.Cutt
         public float TotalTimeLength;
         public bool Lyrics;
         public LiveTimelineDefine.SheetIndex SheetType;
+        [SerializeField] public LiveTimelineKeyTimescaleDataList timescaleKeys;
         [SerializeField] public LiveTimelineKeyCameraPositionDataList cameraPosKeys;
         [SerializeField] public List<LiveTimelineMultiCameraPositionData> multiCameraPosKeys;
         [SerializeField] public List<LiveTimelineMultiCameraLookAtData> multiCameraLookAtKeys;
@@ -914,6 +929,13 @@ namespace Gallop.Live.Cutt
         [SerializeField] public LiveTimelineFacialData facial1Set;
         [SerializeField] public LiveTimelineFacialData[] other4FacialArray;
         [SerializeField] public LiveTimelineFormationOffsetData formationOffsetSet;
+
+        [SerializeField] public List<LiveTimelineGlobalLightData> globalLightDataLists;
+        [SerializeField] public List<LiveTimelineBgColor1Data> bgColor1List;
+        [SerializeField] public List<LiveTimelineBgColor2Data> bgColor2List;
+
+        [SerializeField] public List<LiveTimelineTransformData> transformList;
+        [SerializeField] public List<LiveTimelineObjectData> objectList;
 
         /*
 		//终于可以调用AB包了，虽然后面发现没什么用...说不定什么时候能用到

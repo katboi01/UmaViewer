@@ -1,6 +1,8 @@
 using Gallop.Live.Cutt;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Gallop.Live.Cutt
@@ -100,6 +102,22 @@ namespace Gallop.Live.Cutt
         private bool _isUpdatedParentObject;
         private Transform _parentObjectTransform;
         private int _parentObjectTargetCount;
+
+        public Transform GetParentObjectTransform(LiveTimelineControl liveTimelineControl)
+        {
+            if (_parentObjectTransform != null)
+            {
+                return _parentObjectTransform;
+            }
+
+            if (liveTimelineControl.StageObjectMap.TryGetValue(ParentObjectName, out GameObject gameObject))
+            {
+                _parentObjectTransform = gameObject.transform;
+                return _parentObjectTransform;
+            }
+
+            return null;
+        }
     }
 
 	[System.Serializable]

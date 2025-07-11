@@ -927,7 +927,7 @@ namespace Gallop
                         foreach (var part in updateInfo_.mouthPrev.facialPartsDataArray)
                         {
                             if (part.FacialPartsId == 0) { continue; }
-                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio)) * ((float)updateInfo_.mouthPrev.weight / 100);
+                            MouthMorphs[part.FacialPartsId - 1].weight = ((float)part.WeightPer / 100 * (1 - weightRatio));
                         }
                     }
                     else
@@ -943,7 +943,7 @@ namespace Gallop
                 foreach (var part in updateInfo_.mouthCur.facialPartsDataArray)
                 {
                     if (part.FacialPartsId == 0) { continue; }
-                    MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio) * ((float)updateInfo_.mouthCur.weight / 100);
+                    MouthMorphs[part.FacialPartsId - 1].weight += ((float)part.WeightPer / 100 * weightRatio);
                 }
 
                 ChangeMorphMouth();

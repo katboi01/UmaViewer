@@ -2,6 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
+.utmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -12,6 +13,8 @@
 /Assets/AmplifyShaderEditor/
 /Ignore/
 /Screenshots/
+/[Uu]ser[Ss]ettings/
+*.log
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
@@ -63,10 +66,10 @@ crashlytics-build.properties
 
 /Assets/Plugins/RootMotion/PuppetMaster/_Integration
 /VMDRecords
-/umamusume
 Config.json
 /gltf
 /Assets/Plugins/RootMotion/FinalIK/_Integration
 /Poses
 /Assets/AmplifyShaderEditor.meta
 /BuildDev
+/UserSettings/Layouts/default-2022.dwlt

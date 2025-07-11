@@ -104,6 +104,7 @@ namespace Gallop.Live
                 {
                     Debug.Log(live.BackGroundId);
                     Builder.LoadAssetPath(string.Format(STAGE_PATH, live.BackGroundId), transform);
+                    _liveTimelineControl.StageObjectMap = _stageController.StageObjectMap;
                 }
 
                 //Make CharacterObject
@@ -187,6 +188,7 @@ namespace Gallop.Live
                     }
                 }
             };
+
             _liveTimelineControl.OnUpdateFacial += delegate (FacialDataUpdateInfo updateInfo_, float liveTime_, int position)
             {
                 if (position < charaObjs.Count)
@@ -195,6 +197,71 @@ namespace Gallop.Live
                     container.FaceDrivenKeyTarget.AlterUpdateFacialNew(ref updateInfo_, liveTime_);
                 }
             };
+
+            _liveTimelineControl.OnUpdateGlobalLight += delegate (ref GlobalLightUpdateInfo updateInfo)
+            {
+                var tmpPos = -(updateInfo.lightRotation * Vector3.forward).normalized;
+                foreach (var locator in _liveTimelineControl.liveCharactorLocators)
+                {
+                    if (locator != null && updateInfo.flags.hasFlag(locator.liveCharaStandingPosition) && locator is LiveTimelineCharaLocator charaLocator)
+                    {
+                        var container = charaLocator.UmaContainer;
+                        if (container)
+                        {
+                            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+                            propertyBlock.SetFloat("_RimShadowRate", updateInfo.globalRimShadowRate);
+                            propertyBlock.SetColor("_RimColor", updateInfo.rimColor);
+                            propertyBlock.SetFloat("_RimStep", updateInfo.rimStep);
+                            propertyBlock.SetFloat("_RimFeather", updateInfo.rimFeather);
+                            propertyBlock.SetFloat("_RimSpecRate", updateInfo.rimSpecRate);
+                            propertyBlock.SetFloat("_RimHorizonOffset", updateInfo.RimHorizonOffset);
+                            propertyBlock.SetFloat("_RimVerticalOffset", updateInfo.RimVerticalOffset);
+                            propertyBlock.SetFloat("_RimHorizonOffset2", updateInfo.RimHorizonOffset2);
+                            propertyBlock.SetFloat("_RimVerticalOffset2", updateInfo.RimVerticalOffset2);
+                            propertyBlock.SetColor("_RimColor2", updateInfo.rimColor2);
+                            propertyBlock.SetFloat("_RimStep2", updateInfo.rimStep2);
+                            propertyBlock.SetFloat("_RimFeather2", updateInfo.rimFeather2);
+                            propertyBlock.SetFloat("_RimSpecRate2", updateInfo.rimSpecRate2);
+                            propertyBlock.SetFloat("_RimShadowRate2", updateInfo.globalRimShadowRate2);
+                            foreach (var renderer in container.Renderers)
+                            {
+                                renderer.SetPropertyBlock(propertyBlock);
+                                foreach(var mat in renderer.materials)
+                                {
+                                    mat.SetFloat("_UseOriginalDirectionalLight", 1);
+                                    mat.SetVector("_OriginalDirectionalLightDir", tmpPos);
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            _liveTimelineControl.OnUpdateBgColor1 += delegate (ref BgColor1UpdateInfo updateInfo)
+            {
+                foreach (var locator in _liveTimelineControl.liveCharactorLocators)
+                {
+                    var EFlags = (LiveCharaPositionFlag)updateInfo.flags;
+                    if (locator != null && (updateInfo.flags == 0 || EFlags.hasFlag(locator.liveCharaStandingPosition)) && locator is LiveTimelineCharaLocator charaLocator)
+                    {
+                        var container = charaLocator.UmaContainer;
+                        if (container)
+                        {
+                            MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+                            propertyBlock.SetColor("_CharaColor", updateInfo.color);
+                            propertyBlock.SetColor("_ToonDarkColor", updateInfo.toonDarkColor);
+                            propertyBlock.SetColor("_ToonBrightColor", updateInfo.toonBrightColor);
+                            propertyBlock.SetColor("_OutlineColor", updateInfo.outlineColor);
+                            propertyBlock.SetFloat("_Saturation", updateInfo.Saturation);
+                            foreach (var renderer in container.Renderers)
+                            {
+                                renderer.SetPropertyBlock(propertyBlock);
+                            }
+                        }
+                    }
+                }
+            };
+
             SetupCharacterLocator();
             InitializeCamera();
             UpdateMainCamera();
@@ -284,6 +351,7 @@ namespace Gallop.Live
             {
                 var container = CharaContainerScript[i];
                 container.LiveLocator = new LiveTimelineCharaLocator(container);
+                container.LiveLocator.liveCharaStandingPosition = (LiveCharaPosition)i;
                 _liveTimelineControl.liveCharactorLocators[i] = container.LiveLocator;
                 container.LiveLocator.liveCharaInitialPosition = container.transform.position;
             }
