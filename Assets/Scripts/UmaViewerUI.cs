@@ -47,7 +47,6 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
-    public ScrollRect MaterialsList;
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
@@ -108,6 +107,7 @@ public class UmaViewerUI : MonoBehaviour
 
     [Header("settings")]
     public UISettingsCamera CameraSettings;
+    public UISettingsModel ModelSettings;
     public TMP_InputField SSWidth;
     public TMP_InputField SSHeight;
     public Toggle SSTransparent;
@@ -139,11 +139,6 @@ public class UmaViewerUI : MonoBehaviour
 
     public Color UIColor1, UIColor2;
 
-    public bool isHeadFix = false;
-    public bool isTPose = false;
-    public bool DynamicBoneEnable = true;
-    public bool EnableEyeTracking = true;
-    public bool EnableFaceOverride = true;
     public string CurrentHeadCostumeId = string.Empty;
 
     [Header("Live")]
@@ -645,7 +640,7 @@ public class UmaViewerUI : MonoBehaviour
         if (selectlist != null)
         {
             LiveTime = true;
-            SetEyeTrackingEnable(false);
+            ModelSettings.SetEyeTrackingEnable(false);
             Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
             LiveSelectPannel.SetActive(false);
         }
@@ -801,7 +796,7 @@ public class UmaViewerUI : MonoBehaviour
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         var motion_path = $"3d/motion/event/body/chara/chr{chara.Id}_00/anm_eve_chr{chara.Id}_00_idle01_loop";
-                        if (!chara.IsMob && !isHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
+                        if (!chara.IsMob && !ModelSettings.IsHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
                         {
                             list.Add(motion_entry);
                         }
@@ -1027,16 +1022,6 @@ public class UmaViewerUI : MonoBehaviour
         BackGroundPageCtrl.Initialize(pageentrys, BackGroundList);
     }
 
-    public void SetHeadFix(bool value)
-    {
-        isHeadFix = value;
-    }
-
-    public void SetTPose(bool value)
-    {
-        isTPose = value;
-    }
-
     public void UpdateGifQualityLabel(float value)
     {
         GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
@@ -1154,24 +1139,6 @@ public class UmaViewerUI : MonoBehaviour
     public void ChangeBackgroundColor(Color color)
     {
         Camera.main.backgroundColor = color;
-    }
-
-    public void SetDynamicBoneEnable(bool isOn)
-    {
-        DynamicBoneEnable = isOn;
-        Builder.CurrentUMAContainer?.SetDynamicBoneEnable(isOn);
-    }
-
-    public void SetEyeTrackingEnable(bool isOn)
-    {
-        EnableEyeTracking = isOn;
-        Builder.CurrentUMAContainer?.SetEyeTracking(isOn);
-    }
-
-    public void SetFaceOverrideEnable(bool isOn)
-    {
-        EnableFaceOverride = isOn;
-        Builder.CurrentUMAContainer?.SetFaceOverrideData(isOn);
     }
 
     public void PauseAudio()
@@ -1509,11 +1476,6 @@ public class UmaViewerUI : MonoBehaviour
         #endif
     }
 
-    public void ChangeOutlineWidth(float val)
-    {
-        Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
-    }
-
     public void SetLiveRecordMode(bool val) { isRecordVMD = val; }
 
     public void SetLiveRequireStage(bool val) { isRequireStage = val; }
@@ -1531,22 +1493,6 @@ public class UmaViewerUI : MonoBehaviour
         };
         MessageScrollRect.gameObject.SetActive(type != UIMessageType.Close);
         MessageScrollRect.verticalNormalizedPosition = 0;
-    }
-
-    public void ExportModel()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        var container = Builder.CurrentUMAContainer;
-        if (container)
-        {
-            var entry = container.CharaEntry;
-            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{entry.Id}_{entry.GetName()}", "pmx");
-            if (!string.IsNullOrEmpty(path))
-            {
-                ModelExporter.ExportModel(container, path);
-            }
-        }
-        #endif
     }
 
     public void ToggleVisible(GameObject go)

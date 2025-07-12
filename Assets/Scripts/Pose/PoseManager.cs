@@ -116,8 +116,8 @@ public class PoseManager : MonoBehaviour
 
         var ui = UmaViewerUI.Instance;
         var builder = UmaViewerBuilder.Instance;
-        ui.SetEyeTrackingEnable(false);
-        ui.SetDynamicBoneEnable(false);
+        ui.ModelSettings.SetEyeTrackingEnable(false);
+        ui.ModelSettings.SetDynamicBoneEnable(false);
         HandleCanvas.SetActive(true);
 
         if (builder.CurrentUMAContainer && builder.CurrentUMAContainer.UmaAnimator)
@@ -137,8 +137,8 @@ public class PoseManager : MonoBehaviour
 
         var ui = UmaViewerUI.Instance;
         var builder = UmaViewerBuilder.Instance;
-        ui.SetEyeTrackingEnable(true);
-        ui.SetDynamicBoneEnable(true);
+        ui.ModelSettings.SetEyeTrackingEnable(true);
+        ui.ModelSettings.SetEyeTrackingEnable(true);
         HandleCanvas.SetActive(false);
 
         if (builder.CurrentUMAContainer != null && builder.CurrentUMAContainer.UmaAnimator != null)
