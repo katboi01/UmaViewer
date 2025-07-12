@@ -796,7 +796,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var tmp = CurrentAudioSources[0];
             CurrentAudioSources.Clear();
             Destroy(tmp.gameObject);
-            UI.ResetAudioPlayer();
+            UI.AudioSettings.ResetPlayer();
         }
         if (subindex == -1)
         {

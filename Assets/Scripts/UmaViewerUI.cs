@@ -71,13 +71,6 @@ public class UmaViewerUI : MonoBehaviour
     [Header("pose mode")]
     public Transform HandlesPanel;
 
-    [Header("audio")]
-    public Slider AudioSlider;
-    public Button AudioPlayButton;
-    public TextMeshProUGUI TitleText;
-    public TextMeshProUGUI ProgressText;
-    public Text LyricsText;
-
     [Header("animations")]
     public Slider AnimationSlider;
     public Slider AnimationSpeedSlider;
@@ -108,6 +101,7 @@ public class UmaViewerUI : MonoBehaviour
     [Header("settings")]
     public UISettingsCamera CameraSettings;
     public UISettingsModel ModelSettings;
+    public UISettingsSound AudioSettings;
     public TMP_InputField SSWidth;
     public TMP_InputField SSHeight;
     public Toggle SSTransparent;
@@ -155,8 +149,6 @@ public class UmaViewerUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        AudioPlayButton.onClick.AddListener(PauseAudio);
-        AudioSlider.onValueChanged.AddListener(AudioProgressChange);
         AnimationPlayButton.onClick.AddListener(AnimationPause);
         AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
         AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
@@ -193,11 +185,7 @@ public class UmaViewerUI : MonoBehaviour
             AudioSource MianSource = Builder.CurrentAudioSources[0];
             if (MianSource.clip)
             {
-                TitleText.text = MianSource.clip.name;
-                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
-                AudioSlider.SetValueWithoutNotify(MianSource.time / MianSource.clip.length);
-                LyricsText.text = UmaUtility.GetCurrentLyrics(MianSource.time, Builder.CurrentLyrics);
-                LyricsText.text = LyricsText.text;
+                AudioSettings.UpdateTrack(MianSource);
             }
         }
 
@@ -1141,55 +1129,6 @@ public class UmaViewerUI : MonoBehaviour
         Camera.main.backgroundColor = color;
     }
 
-    public void PauseAudio()
-    {
-        var sources = Builder.CurrentAudioSources;
-        if (sources.Count > 0)
-        {
-            AudioSource MainSource = sources[0];
-            var state = MainSource.isPlaying;
-            foreach (AudioSource source in sources)
-            {
-                if (state)
-                {
-                    source.Pause();
-                }
-                else if (source.clip)
-                {
-                    source.Play();
-                }
-                else
-                {
-                    source.Stop();
-                }
-            }
-        }
-    }
-
-    public void StopAudio()
-    {
-        var sources = Builder.CurrentAudioSources;
-        foreach (AudioSource source in sources)
-        {
-            source.Stop();
-        }
-    }
-
-    public void AudioProgressChange(float val)
-    {
-        if (Builder.CurrentAudioSources.Count > 0)
-        {
-            var time = Builder.CurrentAudioSources[0].clip.length * val;
-            foreach (AudioSource source in Builder.CurrentAudioSources)
-            {
-                if (source.clip)
-                {
-                    source.time = Mathf.Clamp(time, 0, source.clip.length);
-                }
-            }
-        }
-    }
-
     public void AnimationPause()
     {
         var container = Builder.CurrentUMAContainer;
@@ -1275,23 +1214,6 @@ public class UmaViewerUI : MonoBehaviour
         {
             container.UmaFaceAnimator.speed = val;
         }
-    }
-
-    public void ResetAudioPlayer()
-    {
-        TitleText.text = "No Audio";
-        ProgressText.text = "00:00:00 / 00:00:00";
-        AudioSlider.SetValueWithoutNotify(0);
-        LyricsText.text = "";
-    }
-
-    public static string ToTimeFormat(float time)
-    {
-        int seconds = (int)time;
-        int hour = seconds / 3600;
-        int minute = seconds % 3600 / 60;
-        seconds = seconds % 3600 % 60;
-        return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
     }
 
     public static string ToFrameFormat(float time, float frameRate)
