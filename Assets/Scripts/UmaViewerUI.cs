@@ -71,14 +71,6 @@ public class UmaViewerUI : MonoBehaviour
     [Header("pose mode")]
     public Transform HandlesPanel;
 
-    [Header("animations")]
-    public Slider AnimationSlider;
-    public Slider AnimationSpeedSlider;
-    public Button AnimationPlayButton;
-    public TextMeshProUGUI AnimationTitleText;
-    public TextMeshProUGUI AnimationSpeedText;
-    public TextMeshProUGUI AnimationProgressText;
-
     [Header("backgrounds")]
     public ScrollRect BackGroundList;
     public PageManager BackGroundPageCtrl;
@@ -102,6 +94,7 @@ public class UmaViewerUI : MonoBehaviour
     public UISettingsCamera CameraSettings;
     public UISettingsModel ModelSettings;
     public UISettingsSound AudioSettings;
+    public UISettingsAnimation AnimationSettings;
     public TMP_InputField SSWidth;
     public TMP_InputField SSHeight;
     public Toggle SSTransparent;
@@ -149,9 +142,6 @@ public class UmaViewerUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        AnimationPlayButton.onClick.AddListener(AnimationPause);
-        AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
-        AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
     }
 
     private void Start()
@@ -192,19 +182,7 @@ public class UmaViewerUI : MonoBehaviour
         var umaContainer = Builder.CurrentUMAContainer;
         if (umaContainer != null && umaContainer.OverrideController != null)
         {
-            if (umaContainer.OverrideController["clip_2"].name != "clip_2")
-            {
-                bool isLoop = umaContainer.OverrideController["clip_2"].name.Contains("_loop");
-                var AnimeState = umaContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-                var AnimeClip = umaContainer.OverrideController["clip_2"];
-                if (AnimeClip && umaContainer.UmaAnimator.speed != 0)
-                {
-                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
-                    AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
-                }
-            }
+            AnimationSettings.UpdateAnimationInfo(umaContainer);
         }
     }
 
@@ -1061,12 +1039,12 @@ public class UmaViewerUI : MonoBehaviour
     {
         var container = Builder.CurrentUMAContainer;
         if (!container || !container.UmaAnimator) return;
-        AnimationSlider.SetValueWithoutNotify(0);
+        AnimationSettings.ProgressSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
-        container.UmaAnimator.speed = AnimationSpeedSlider.value;
-        Builder.AnimationCameraAnimator.speed = AnimationSpeedSlider.value;
+        container.UmaAnimator.speed = AnimationSettings.SpeedSlider.value;
+        Builder.AnimationCameraAnimator.speed = AnimationSettings.SpeedSlider.value;
         if (container.UmaFaceAnimator)
-            container.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
+            container.UmaFaceAnimator.speed = AnimationSettings.SpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -1127,102 +1105,6 @@ public class UmaViewerUI : MonoBehaviour
     public void ChangeBackgroundColor(Color color)
     {
         Camera.main.backgroundColor = color;
-    }
-
-    public void AnimationPause()
-    {
-        var container = Builder.CurrentUMAContainer;
-        if (!container || !container.UmaAnimator) return;
-        if (Builder.OverrideController.animationClips.Length == 0) return;
-
-        var animator = container.UmaAnimator;
-        var animator_face = container.UmaFaceAnimator;
-        var animator_cam = Builder.AnimationCameraAnimator;
-        var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
-        var state = animator.speed > 0f;
-        if (state)
-        {
-            animator.speed = 0;
-            if (animator_face)
-                animator_face.speed = 0;
-            animator_cam.speed = 0;
-        }
-        else if (AnimeState.normalizedTime < 1f)
-        {
-            animator.speed = AnimationSpeedSlider.value;
-            animator_cam.speed = AnimationSpeedSlider.value;
-            if (animator_face)
-                animator_face.speed = AnimationSpeedSlider.value;
-        }
-        else
-        {
-            animator.speed = AnimationSpeedSlider.value;
-            animator.Play(0, 0, 0);
-            animator.Play(0, 2, 0);
-            animator_cam.speed = AnimationSpeedSlider.value;
-            animator_cam.Play(0, -1, 0);
-            if (animator_face)
-            {
-                animator_face.speed = AnimationSpeedSlider.value;
-                animator_face.Play(0, 0, 0);
-                animator_face.Play(0, 1, 0);
-            }
-        }
-    }
-
-    public void AnimationProgressChange(float val)
-    {
-        var container = Builder.CurrentUMAContainer;
-        if (!container) return;
-        var animator = container.UmaAnimator;
-        var animator_face = container.UmaFaceAnimator;
-        var animator_cam = Builder.AnimationCameraAnimator;
-        if (animator != null)
-        {
-            var AnimeClip = container.OverrideController["clip_2"];
-
-            // Pause and Seek;
-            animator.speed = 0;
-            animator.Play(0, 0, val);
-            animator.Play(0, 2, val);
-            if (animator_cam.runtimeAnimatorController)
-            {
-                animator_cam.speed = 0;
-                animator_cam.Play(0, -1, val);
-            }
-            if (animator_face)
-            {
-                animator_face.speed = 0;
-                animator_face.Play(0, 0, val);
-                animator_face.Play(0, 1, val);
-            }
-
-            AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-        }
-    }
-
-    public void AnimationSpeedChange(float val)
-    {
-        var container = Builder.CurrentUMAContainer;
-        AnimationSpeedText.text = string.Format("Speed: {0:F2}", val);
-
-        if (!container || !container.UmaAnimator) return;
-
-        container.UmaAnimator.speed = val;
-        Builder.AnimationCameraAnimator.speed = val;
-        if (container.UmaFaceAnimator)
-        {
-            container.UmaFaceAnimator.speed = val;
-        }
-    }
-
-    public static string ToFrameFormat(float time, float frameRate)
-    {
-        int frames = Mathf.FloorToInt(time % 1 * frameRate);
-        int seconds = (int)time;
-        int minute = seconds % 3600 / 60;
-        seconds = seconds % 3600 % 60;
-        return string.Format("{0:D2}m:{1:D2}s:{2:D2}f", minute, seconds, frames);
     }
 
     public void RecordVMD()

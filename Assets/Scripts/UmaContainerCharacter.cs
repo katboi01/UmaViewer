@@ -1340,7 +1340,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void SetEndAnimationCut()
     {
-        UmaViewerUI.Instance.AnimationPause();
+        UI.AnimationSettings.Pause();
     }
 
     public void LoadFaceMorph(int id, string costumeId)

@@ -8929,7 +8929,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 292348637}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 375781856}
+        m_TargetAssemblyTypeName: UISettingsAnimation, umamusume
+        m_MethodName: Pause
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &293213723
 GameObject:
   m_ObjectHideFlags: 0
@@ -11759,6 +11771,7 @@ GameObject:
   - component: {fileID: 375781853}
   - component: {fileID: 375781855}
   - component: {fileID: 375781854}
+  - component: {fileID: 375781856}
   m_Layer: 5
   m_Name: AnimationPlayer
   m_TagString: Untagged
@@ -11828,6 +11841,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 375781852}
   m_CullTransparentMesh: 1
+--- !u!114 &375781856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375781852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb219ac831519664dbea3c160315d0ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TitleText: {fileID: 1118881288}
+  ProgressText: {fileID: 1286450786}
+  ProgressSlider: {fileID: 1349413338}
+  PlayButton: {fileID: 292348639}
+  SpeedText: {fileID: 1623091784}
+  SpeedSlider: {fileID: 994851660}
 --- !u!1 &375965192
 GameObject:
   m_ObjectHideFlags: 0
@@ -34736,7 +34767,7 @@ GameObject:
   - component: {fileID: 994851659}
   - component: {fileID: 994851660}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: SpeedSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34815,7 +34846,19 @@ MonoBehaviour:
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 375781856}
+        m_TargetAssemblyTypeName: UISettingsAnimation, umamusume
+        m_MethodName: ChangeSpeed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &995526742
 GameObject:
   m_ObjectHideFlags: 0
@@ -38233,7 +38276,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1127600556
@@ -43421,7 +43464,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1286532568
@@ -45753,7 +45796,7 @@ GameObject:
   - component: {fileID: 1349413337}
   - component: {fileID: 1349413338}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: ProgressSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45832,7 +45875,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 375781856}
+        m_TargetAssemblyTypeName: UISettingsAnimation, umamusume
+        m_MethodName: ChangeProgress
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!224 &1351796501 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1608283224055752807, guid: 14d034506760e5049a12fd1cf057a8b3,
@@ -51847,12 +51902,6 @@ MonoBehaviour:
   NormalSubSoundList: {fileID: 2143388125}
   NormalSoundCtrl: {fileID: 1351796502}
   HandlesPanel: {fileID: 1242224847}
-  AnimationSlider: {fileID: 1349413338}
-  AnimationSpeedSlider: {fileID: 994851660}
-  AnimationPlayButton: {fileID: 292348639}
-  AnimationTitleText: {fileID: 1118881288}
-  AnimationSpeedText: {fileID: 1623091784}
-  AnimationProgressText: {fileID: 1286450786}
   BackGroundList: {fileID: 394733025}
   BackGroundPageCtrl: {fileID: 2093223150}
   BG_Canvas: {fileID: 1085021150}
@@ -51871,6 +51920,7 @@ MonoBehaviour:
   CameraSettings: {fileID: 6878219666121841228}
   ModelSettings: {fileID: 548276327}
   AudioSettings: {fileID: 1209823368}
+  AnimationSettings: {fileID: 375781856}
   SSWidth: {fileID: 1509789528}
   SSHeight: {fileID: 343750191}
   SSTransparent: {fileID: 1592069527}
@@ -53269,7 +53319,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1623614603

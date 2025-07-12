@@ -12,6 +12,8 @@ public class Screenshot : MonoBehaviour
     public static Screenshot Instance;
     bool recording = false;
 
+    static UmaViewerUI UI => UmaViewerUI.Instance;
+
     private void Awake()
     {
         Instance = this;
@@ -68,14 +70,15 @@ public class Screenshot : MonoBehaviour
         var clipFrameCount = Mathf.RoundToInt(animeClip.length * animeClip.frameRate);
         StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate, quality));
 
-        UmaViewerUI.Instance.AnimationSpeedChange(0);
-        UmaViewerUI.Instance.AnimationProgressChange(0);
+
+        UI.AnimationSettings.ChangeSpeed(0);
+        UI.AnimationSettings.ChangeProgress(0);
         yield return new WaitForSeconds(1); //wait for dynamicBone to settle;
 
         while (frame < clipFrameCount)
         {
             UmaViewerUI.Instance.GifSlider.value = (float)frame / clipFrameCount;
-            UmaViewerUI.Instance.AnimationProgressChange((float)frame / clipFrameCount);
+            UI.AnimationSettings.ChangeProgress((float)frame / clipFrameCount);
             yield return new WaitForEndOfFrame();
             var tex = GrabFrame(camera, width, height, transparent);
             CaptureToGIFCustom.Instance.Frames.Add(new Image(tex));
@@ -84,8 +87,8 @@ public class Screenshot : MonoBehaviour
         }
 
         recording = false;
-        UmaViewerUI.Instance.AnimationProgressChange(0);
-        UmaViewerUI.Instance.AnimationSpeedChange(1);
+        UI.AnimationSettings.ChangeProgress(0);
+        UI.AnimationSettings.ChangeSpeed(1);
         ppLayer.enabled = oldPpState;
         CaptureToGIFCustom.Instance.stop = true;
         UmaViewerUI.Instance.GifButton.interactable = true;
