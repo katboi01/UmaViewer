@@ -962,32 +962,6 @@ public class UmaViewerUI : MonoBehaviour
         });
     }
 
-    void ListBackgrounds()
-    {
-        var pageentrys = new List<PageManager.Entry>();
-        foreach (var entry in Main.AbList.Where(a => a.Key.StartsWith("bg/bg")))
-        {
-            var pageentry = new PageManager.Entry();
-            pageentry.Name = Path.GetFileName(entry.Key);
-            pageentry.Sprite = Builder.LoadSprite(entry.Value);
-            if (pageentry.Sprite == null) continue;
-            pageentry.OnClick = (container) =>
-            {
-                HighlightChildImage(BackGroundList.content, container);
-                BG_Image.sprite = pageentry.Sprite;
-                BG_Image.SetVerticesDirty();
-            };
-
-            if (BG_Image.sprite == null)
-            {
-                BG_Image.sprite = pageentry.Sprite;
-                BG_Image.SetVerticesDirty();
-            }
-            pageentrys.Add(pageentry);
-        }
-        BackGroundPageCtrl.Initialize(pageentrys, BackGroundList);
-    }
-
     public void UpdateGifQualityLabel(float value)
     {
         GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
@@ -1075,36 +1049,6 @@ public class UmaViewerUI : MonoBehaviour
         {
             panel.SetActive(panel == go);
         }
-    }
-
-    public void ChangeBackground(int index)
-    {
-        BackGroundPageCtrl.ResetCtrl();
-        switch (index)
-        {
-            case 0:
-                Camera.main.clearFlags = CameraClearFlags.Skybox;
-                break;
-            case 1:
-                Camera.main.clearFlags = CameraClearFlags.SolidColor;
-                break;
-            case 2:
-                Camera.main.clearFlags = CameraClearFlags.SolidColor;
-                ListBackgrounds();
-                break;
-            default:
-                Camera.main.clearFlags = CameraClearFlags.Skybox;
-                break;
-        }
-
-        BG_HSVPickerObj.SetActive(index != 2);
-        BG_Canvas.SetActive(index == 2);
-        BackGroundPageCtrl.transform.parent.gameObject.SetActive(index == 2);
-    }
-
-    public void ChangeBackgroundColor(Color color)
-    {
-        Camera.main.backgroundColor = color;
     }
 
     public void RecordVMD()
