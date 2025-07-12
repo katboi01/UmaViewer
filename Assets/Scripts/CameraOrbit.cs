@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class CameraOrbit : MonoBehaviour
 {
@@ -19,32 +18,20 @@ public class CameraOrbit : MonoBehaviour
     public EventSystem eventSystem;
     bool controlOn;
 
-
     [Header("Orbit Camera")]
-    public GameObject OrbitCamSettingsTab;
-    public Slider OrbitCamFovSlider;
-    public Slider OrbitCamZoomSlider;
-    public Slider OrbitCamZoomSpeedSlider;
-    public Slider OrbitCamTargetHeightSlider;
-    public Slider OrbitCamHeightSlider;
-    public Slider OrbitCamRotationSlider;
-    public Slider OrbitCamSpeedSlider;
     float camDistMin = 1, camDistMax = 15;
 
     [Header("Free Camera")]
-    public GameObject FreeCamSettingsTab;
-    public Slider FreeCamFovSlider;
-    public Slider FreeCamRotationSlider;
-    public Slider FreeCamMoveSpeedSlider;
-    public Slider FreeCamRotateSpeedSlider;
     bool FreeCamLeft = false;
     bool FreeCamRight = false;
     private Quaternion lookRotation;
 
+    private UISettingsCamera CameraSettings => UmaViewerUI.Instance.CameraSettings;
+
     void Start()
     {
-        OrbitCamZoomSlider.minValue = camDistMin;
-        OrbitCamZoomSlider.maxValue = camDistMax;
+        CameraSettings.CameraDistance.minValue = camDistMin;
+        CameraSettings.CameraDistance.maxValue = camDistMax;
 
         lookRotation = transform.localRotation;
         instance = this;
@@ -54,37 +41,25 @@ public class CameraOrbit : MonoBehaviour
     {
         if (HandleManager.InteractionInProgress) return;
 
-        if(CameraMode != CameraModeDropdown.value)
+        bool cameraModeChanged = CameraMode != CameraSettings.CameraMode;
+        if (cameraModeChanged)
         {
-            switch (CameraMode) //old
-            {
-                case 0:
-                    OrbitCamSettingsTab.SetActive(false);
-                    break;
-                case 1:
-                    FreeCamSettingsTab.SetActive(false);
-                    break;
-            }
-            switch (CameraModeDropdown.value) //new
-            {
-                case 0:
-                    OrbitCamSettingsTab.SetActive(true);
-                    break;
-                case 1:
-                    FreeCamSettingsTab.SetActive(true);
-                    lookRotation.y = transform.eulerAngles.y;
-                    break;
-            }
-            CameraMode = CameraModeDropdown.value;
+            CameraMode = CameraSettings.CameraMode;
         }
 
-        switch (CameraModeDropdown.value)
+        switch (CameraMode)
         {
             case 0:
                 OrbitAround();
                 OrbitLight();
                 break;
-            case 1: FreeCamera(); break;
+            case 1:
+                if (cameraModeChanged)
+                {
+                    lookRotation.y = transform.eulerAngles.y;
+                }
+                FreeCamera();
+                break;
         }
     }
 
@@ -108,7 +83,7 @@ public class CameraOrbit : MonoBehaviour
     {
         TargetCenter = Vector3.zero;
 
-        Camera.main.fieldOfView = OrbitCamFovSlider.value;
+        Camera.main.fieldOfView = CameraSettings.FOV;
         Vector3 position = transform.position;
 
         if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
@@ -117,8 +92,8 @@ public class CameraOrbit : MonoBehaviour
         }
         if (Input.GetMouseButton(0) && controlOn)
         {
-            position -= Input.GetAxis("Mouse X") * transform.right * OrbitCamSpeedSlider.value;
-            OrbitCamHeightSlider.value -= Input.GetAxis("Mouse Y") * OrbitCamSpeedSlider.value;
+            position -= Input.GetAxis("Mouse X") * transform.right * CameraSettings.MovementSpeed;
+            CameraSettings.CameraHeight -= Input.GetAxis("Mouse Y") * CameraSettings.MovementSpeed;
         }
         else
         {
@@ -127,7 +102,7 @@ public class CameraOrbit : MonoBehaviour
 
         if (!eventSystem.IsPointerOverGameObject())
         {
-            OrbitCamZoomSlider.value -= Input.mouseScrollDelta.y * OrbitCamZoomSpeedSlider.value;
+            CameraSettings.CameraDistance.value -= Input.mouseScrollDelta.y * CameraSettings.ZoomSpeed;
         }
 
         if ((Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.LeftControl)) && !eventSystem.IsPointerOverGameObject())
@@ -136,25 +111,24 @@ public class CameraOrbit : MonoBehaviour
         }
         if ((Input.GetMouseButton(2) || Input.GetKey(KeyCode.LeftControl)) && CameraTargetHelper.activeSelf)
         {
-            OrbitCamTargetHeightSlider.value -= Input.GetAxis("Mouse Y");
-            CameraTargetHelper.transform.position = OrbitCamTargetHeightSlider.value * Vector3.up;
+            CameraSettings.TargetHeight -= Input.GetAxis("Mouse Y");
+            CameraTargetHelper.transform.position = CameraSettings.TargetHeight * Vector3.up;
         }
         if (Input.GetMouseButtonUp(2) || Input.GetKeyUp(KeyCode.LeftControl))
         {
             CameraTargetHelper.SetActive(false);
         }
 
+        float camDist = CameraSettings.CameraDistance.value;
+        CameraSettings.CameraHeightSlider.maxValue = camDist + 1 - camDist * 0.2f;
+        CameraSettings.CameraHeightSlider.minValue = -camDist + 1 + camDist * 0.2f;
 
-        float camDist = OrbitCamZoomSlider.value;
-        OrbitCamHeightSlider.maxValue = camDist + 1 - camDist * 0.2f;
-        OrbitCamHeightSlider.minValue = -camDist + 1 + camDist * 0.2f;
+        Vector3 target = TargetCenter + CameraSettings.TargetHeight * Vector3.up; //set target offsets
 
-        Vector3 target = TargetCenter + OrbitCamTargetHeightSlider.value * Vector3.up; //set target offsets
-
-        position.y = TargetCenter.y + OrbitCamHeightSlider.value; //set camera height
+        position.y = TargetCenter.y + CameraSettings.CameraHeight; //set camera height
         transform.position = position;  //set final position of camera at target
         transform.LookAt(target); //look at target position
-        transform.Rotate(0,0,OrbitCamRotationSlider.value);
+        transform.Rotate(0,0, CameraSettings.CameraRotation);
         transform.position = target - transform.forward * camDist; //move away from target
     }
 
@@ -163,9 +137,9 @@ public class CameraOrbit : MonoBehaviour
     /// </summary>
     void FreeCamera()
     {
-        Camera.main.fieldOfView = FreeCamFovSlider.value;
-        float moveSpeed = FreeCamMoveSpeedSlider.value;
-        float rotateSpeed = FreeCamRotateSpeedSlider.value;
+        Camera.main.fieldOfView = CameraSettings.FOV;
+        float moveSpeed = CameraSettings.MovementSpeed;;
+        float rotateSpeed = CameraSettings.RotationSpeed;
 
         if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
         {
@@ -185,7 +159,7 @@ public class CameraOrbit : MonoBehaviour
         {
             FreeCamLeft = false;
         }
-        transform.localRotation = Quaternion.Euler(lookRotation.x, lookRotation.y, FreeCamRotationSlider.value);
+        transform.localRotation = Quaternion.Euler(lookRotation.x, lookRotation.y, CameraSettings.CameraRotation);
 
         if (Input.GetMouseButtonDown(1) && !eventSystem.IsPointerOverGameObject())
         {

@@ -18944,7 +18944,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 283, y: -902.18}
+  m_AnchoredPosition: {x: 283, y: -390}
   m_SizeDelta: {x: 283, y: 600}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &548276325
@@ -21336,7 +21336,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 116.5, y: -48.436043}
+  m_AnchoredPosition: {x: 116.5, y: -75.54505}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &640511296
@@ -27871,9 +27871,9 @@ RectTransform:
   - {fileID: 1871345305}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -152.01}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &800374507
@@ -33190,8 +33190,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564959567}
-        m_TargetAssemblyTypeName: UmaViewerUI, umamusume
+      - m_Target: {fileID: 6878219666121841228}
+        m_TargetAssemblyTypeName: UISettingsCamera, umamusume
         m_MethodName: ChangeAntiAliasing
         m_Mode: 0
         m_Arguments:
@@ -39773,7 +39773,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1882365343}
   m_HandleRect: {fileID: 1882365342}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -44934,7 +44934,19 @@ MonoBehaviour:
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6878219666121841228}
+        m_TargetAssemblyTypeName: UISettingsCamera, umamusume
+        m_MethodName: UpdateSettingsPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_AlphaFadeSpeed: 0.15
 --- !u!1 &1327085887
 GameObject:
@@ -51824,6 +51836,7 @@ MonoBehaviour:
   LiveSelectList: {fileID: 605931265}
   LiveSelectImage: {fileID: 1781049853}
   LiveSelectInfoText: {fileID: 116348346}
+  CameraSettings: {fileID: 6878219666121841228}
   SSWidth: {fileID: 1509789528}
   SSHeight: {fileID: 343750191}
   SSTransparent: {fileID: 1592069527}
@@ -51839,7 +51852,6 @@ MonoBehaviour:
   RegionDropdown: {fileID: 647681493}
   WorkModeDropdown: {fileID: 1909384047}
   LanguageDropdown: {fileID: 308207822}
-  AntialiasingDropdown: {fileID: 960194351}
   TogglablePanels:
   - {fileID: 1974252710}
   - {fileID: 87578738}
@@ -71488,9 +71500,9 @@ RectTransform:
   - {fileID: 1460100588}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -304.02}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6878219665895574065
@@ -71889,9 +71901,9 @@ RectTransform:
   - {fileID: 1838874680}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -50.67}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6878219666121841222
@@ -71967,6 +71979,7 @@ GameObject:
   - component: {fileID: 6878219666121841224}
   - component: {fileID: 6878219666121841222}
   - component: {fileID: 6878219666121841225}
+  - component: {fileID: 6878219666121841228}
   m_Layer: 5
   m_Name: CameraSettings
   m_TagString: Untagged
@@ -71974,6 +71987,34 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &6878219666121841228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6878219666121841227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d1f60c359f123945a317ebc3a71d7d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AAModeDropdown: {fileID: 960194351}
+  CameraModeDropdown: {fileID: 1326438621}
+  FreeCameraSettingsTab: {fileID: 6878219668012581469}
+  FOVFree: {fileID: 6878219666344224906}
+  CameraRotationFree: {fileID: 640511296}
+  MovementSpeedFree: {fileID: 6878219666699436343}
+  RotationSpeedSlider: {fileID: 6878219666687767556}
+  OrbitCameraSettingsTab: {fileID: 6878219667498913899}
+  FOVOrbit: {fileID: 6878219667749320559}
+  CameraDistance: {fileID: 6878219666060843938}
+  CameraHeightSlider: {fileID: 6878219667201417076}
+  CameraRotationOrbit: {fileID: 800374507}
+  TargetHeightSlider: {fileID: 6878219666814184522}
+  ZoomSpeedSlider: {fileID: 6878219667777225674}
+  MovementSpeedOrbit: {fileID: 6878219665895574065}
+  UseAnimationCamera: {fileID: 1436688548}
 --- !u!114 &6878219666163837328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73734,7 +73775,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 116.5, y: -145.30814}
+  m_AnchoredPosition: {x: 116.5, y: -226.63516}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &6878219666695190520
@@ -73834,7 +73875,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 116.5, y: -96.872086}
+  m_AnchoredPosition: {x: 116.5, y: -151.0901}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6878219666699436343
@@ -74017,9 +74058,9 @@ RectTransform:
   - {fileID: 880905949}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -202.68}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6878219666841734894
@@ -74663,9 +74704,9 @@ RectTransform:
   - {fileID: 681146706}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -101.34}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6878219667203546886
@@ -75087,19 +75128,6 @@ MonoBehaviour:
   CameraTargetHelper: {fileID: 1174230681}
   TargetCenter: {x: 0, y: 0, z: 0}
   eventSystem: {fileID: 859153091}
-  OrbitCamSettingsTab: {fileID: 6878219667498913899}
-  OrbitCamFovSlider: {fileID: 6878219667749320559}
-  OrbitCamZoomSlider: {fileID: 6878219666060843938}
-  OrbitCamZoomSpeedSlider: {fileID: 6878219667777225674}
-  OrbitCamTargetHeightSlider: {fileID: 6878219666814184522}
-  OrbitCamHeightSlider: {fileID: 6878219667201417076}
-  OrbitCamRotationSlider: {fileID: 800374507}
-  OrbitCamSpeedSlider: {fileID: 6878219665895574065}
-  FreeCamSettingsTab: {fileID: 6878219668012581469}
-  FreeCamFovSlider: {fileID: 6878219666344224906}
-  FreeCamRotationSlider: {fileID: 640511296}
-  FreeCamMoveSpeedSlider: {fileID: 6878219666699436343}
-  FreeCamRotateSpeedSlider: {fileID: 6878219666687767556}
 --- !u!222 &6878219667420713328
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -75939,9 +75967,9 @@ RectTransform:
   - {fileID: 1650889916}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: 0}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &6878219667749320559
@@ -76160,9 +76188,9 @@ RectTransform:
   - {fileID: 1685814398}
   m_Father: {fileID: 6878219667498913896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 116.5, y: -253.34999}
   m_SizeDelta: {x: 180, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &6878219667784581358
