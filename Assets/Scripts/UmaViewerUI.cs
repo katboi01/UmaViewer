@@ -129,8 +129,6 @@ public class UmaViewerUI : MonoBehaviour
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
-    private IEnumerator UpdateResVerCoroutine;
-
     private void Awake()
     {
         Instance = this;
@@ -179,7 +177,7 @@ public class UmaViewerUI : MonoBehaviour
     }
 
     /// <summary>Some settings may not be saved when set in Start()</summary>
-    private IEnumerator ApplyGraphicsSettings()
+    public IEnumerator ApplyGraphicsSettings()
     {
         yield return 0;
         CameraSettings.ChangeAntiAliasing(Config.Instance.AntiAliasing);
@@ -1100,72 +1098,6 @@ public class UmaViewerUI : MonoBehaviour
                     break;
             }
         }
-    }
-
-    public void UpdateGameDB()
-    {
-        if (UpdateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
-        UmaDatabaseController.Instance.CloseAllConnection();
-        ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { ShowMessage(msg, type); });
-        StartCoroutine(UpdateResVerCoroutine);
-    }
-
-    public void ChangeLanguage(int lang)
-    {
-        if ((int)Config.Instance.Language != lang)
-        {
-            Config.Instance.Language = (Language)lang;
-            Config.Instance.UpdateConfig(true);
-        }
-    }
-
-    public void ChangeRegion(int region)
-    {
-        if ((int)Config.Instance.Region != region)
-        {
-            Config.Instance.Region = (Region)region;
-            Config.Instance.UpdateConfig(false);
-            StartCoroutine(ApplyGraphicsSettings());
-        }
-    }
-
-    public void ChangeWorkMode(int mode)
-    {
-        if ((int)Config.Instance.WorkMode != mode)
-        {
-            Config.Instance.WorkMode = (WorkMode)mode;
-            Config.Instance.UpdateConfig(true);
-        }
-    }
-
-    public void ChangeDataPath()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", Config.Instance.MainPath, false);
-        if (path != null && path.Length > 0 && !string.IsNullOrEmpty(path[0]))
-        {
-            if (path[0] != Config.Instance.MainPath)
-            {
-                Config.Instance.MainPath = path[0];
-                Config.Instance.UpdateConfig(true);
-            }
-        }
-        #endif
-    }
-
-    public void OpenConfig()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        if (File.Exists(Config.configPath))
-        {
-            Process.Start(new ProcessStartInfo()
-            {
-                FileName = Config.configPath,
-                UseShellExecute = true
-            });
-        }
-        #endif
     }
 
     public void SetLiveRecordMode(bool val) { isRecordVMD = val; }
