@@ -18,9 +18,10 @@ public class UISettingsModel : MonoBehaviour
     private bool
         _isHeadFix,
         _isTPose,
-        _dynamicBoneEnable,
-        _enableEyeTracking,
-        _enableFaceOverride;
+        _dynamicBoneEnable = true,
+        _enableEyeTracking = true,
+        _enableFaceOverride = true;
+
     private float _outlineWidth;
 
     public bool IsHeadFix

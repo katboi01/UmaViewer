@@ -71,13 +71,6 @@ public class UmaViewerUI : MonoBehaviour
     [Header("pose mode")]
     public Transform HandlesPanel;
 
-    [Header("backgrounds")]
-    public ScrollRect BackGroundList;
-    public PageManager BackGroundPageCtrl;
-    public GameObject BG_Canvas;
-    public GameObject BG_HSVPickerObj;
-    public Image BG_Image;
-
     [Header("live settings")]
     public Sprite CharaIconDefault;
     public Sprite CostumeIconDefault;
@@ -111,10 +104,6 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerLivePrefab;
     public GameObject UmaContainerSliderPrefab;
     public UmaUIContainer UmaContainerTogglePrefab;
-
-    private Dictionary<string, Entry> LoadedAssetEntries = new Dictionary<string, Entry>();
-    public PageManager LoadedAssetPageCtrl;
-    public ScrollRect LoadedAssetScrollRect;
 
     public Color UIColor1, UIColor2;
 
