@@ -21634,8 +21634,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1564959567}
-        m_TargetAssemblyTypeName: UmaViewerUI, umamusume
+      - m_Target: {fileID: 2126459765}
+        m_TargetAssemblyTypeName: UISettingsAssets, umamusume
         m_MethodName: CopyAllLoadedAssetsPath
         m_Mode: 1
         m_Arguments:
@@ -51592,6 +51592,7 @@ MonoBehaviour:
   AudioSettings: {fileID: 1209823368}
   AnimationSettings: {fileID: 375781856}
   ScreenshotSettings: {fileID: 2134049663}
+  AssetSettings: {fileID: 0}
   VMDButton: {fileID: 668484488}
   UpdateDBButton: {fileID: 1516377151}
   RegionDropdown: {fileID: 647681493}
@@ -69429,6 +69430,7 @@ GameObject:
   - component: {fileID: 2126459763}
   - component: {fileID: 2126459762}
   - component: {fileID: 2126459764}
+  - component: {fileID: 2126459765}
   m_Layer: 5
   m_Name: AssetList
   m_TagString: Untagged
@@ -69522,6 +69524,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &2126459765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126459760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01ee252c6096dbc45a4d5bea9fc25274, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LoadedAssetPageCtrl: {fileID: 1913585099}
+  LoadedAssetScrollRect: {fileID: 910450304}
 --- !u!1 &2129326812
 GameObject:
   m_ObjectHideFlags: 0

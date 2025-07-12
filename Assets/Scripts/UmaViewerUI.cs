@@ -96,6 +96,7 @@ public class UmaViewerUI : MonoBehaviour
     public UISettingsSound AudioSettings;
     public UISettingsAnimation AnimationSettings;
     public UISettingsScreenshot ScreenshotSettings;
+    public UISettingsAssets AssetSettings;
     public Button VMDButton;
     public Button UpdateDBButton;
     public TMP_Dropdown RegionDropdown;
@@ -142,9 +143,9 @@ public class UmaViewerUI : MonoBehaviour
         LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
         CameraSettings.AAModeDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
         UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
-        LoadedAssetsClear();
-        UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
-        UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
+        AssetSettings.LoadedAssetsClear();
+        UmaAssetManager.OnLoadedBundleUpdate += AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear += AssetSettings.LoadedAssetsClear;
         
         PoseManager.LoadLocalPoseFiles();
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -155,8 +156,8 @@ public class UmaViewerUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        UmaAssetManager.OnLoadedBundleUpdate -= LoadedAssetsAdd;
-        UmaAssetManager.OnLoadedBundleClear -= LoadedAssetsClear;
+        UmaAssetManager.OnLoadedBundleUpdate -= AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear -= AssetSettings.LoadedAssetsClear;
     }
 
     private void Update()
@@ -192,49 +193,6 @@ public class UmaViewerUI : MonoBehaviour
             if (t.transform.parent != mainObject) continue;
             t.ToggleImage.enabled = (t == child);
         }
-    }
-
-    public void LoadedAssetsAdd(UmaDatabaseEntry entry)
-    {
-        if (!LoadedAssetPageCtrl) return;
-        if (LoadedAssetEntries.ContainsKey(entry.Name)) return;
-        var file_name = Path.GetFileName(entry.Name);
-        string filePath = entry.FilePath.Replace("/", "\\");
-        var assetentry = new Entry()
-        {
-            Name = file_name,
-            FontSize = 18,
-            OnClick = (container) =>
-            {
-                Process.Start("explorer.exe", "/select," + filePath);
-            }
-        };  
-        LoadedAssetEntries.Add(entry.Name, assetentry);
-        LoadedAssetPageCtrl.AddEntries(assetentry);
-    }
-
-    public void LoadedAssetsClear()
-    {
-        LoadedAssetEntries.Clear();
-        if (LoadedAssetPageCtrl)
-        {
-            LoadedAssetPageCtrl.ResetCtrl();
-            LoadedAssetPageCtrl.Initialize(LoadedAssetEntries.Values.ToList(), LoadedAssetScrollRect);
-        }
-    }
-
-    public void CopyAllLoadedAssetsPath()
-    {
-        StringBuilder sb = new StringBuilder();
-        foreach(var entry in LoadedAssetEntries.Keys)
-        {
-            if (Main.AbList.TryGetValue(entry, out var asset))
-            {
-                sb.AppendLine(asset.FilePath);
-            }
-        }
-        GUIUtility.systemCopyBuffer = sb.ToString();
-        ShowMessage($"{LoadedAssetEntries.Count} Path copied", UIMessageType.Success);
     }
 
     public void LoadModelPanels()
