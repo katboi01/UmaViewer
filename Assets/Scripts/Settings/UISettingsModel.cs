@@ -27,31 +27,31 @@ public class UISettingsModel : MonoBehaviour
     public bool IsHeadFix
     {
         get { return _isHeadFix; }
-        set { _lockCharacter.isOn = value; }
+        set { _lockCharacter.SetIsOnWithoutNotify(value); SetHeadFix(value); }
     }
 
     public bool IsTPose
     {
         get { return _isTPose; }
-        set { _openWithTPose.isOn = value; }
+        set { _openWithTPose.SetIsOnWithoutNotify(value); SetTPose(value); }
     }
 
     public bool DynamicBoneEnable
     {
         get { return _dynamicBoneEnable; }
-        set { _enablePhysics.isOn = value; }
+        set { _enablePhysics.SetIsOnWithoutNotify(value); SetDynamicBoneEnable(value); }
     }
 
     public bool EnableEyeTracking
     {
         get { return _enableEyeTracking; }
-        set { _lookAtCamera.isOn = value; }
+        set { _lookAtCamera.SetIsOnWithoutNotify(value); SetEyeTrackingEnable(value); }
     }
 
     public bool EnableFaceOverride
     {
         get { return _enableFaceOverride; }
-        set { _faceOverride.isOn = value; }
+        set { _faceOverride.SetIsOnWithoutNotify(value); SetFaceOverrideEnable(value); }
     }
 
     public float OutlineWidth

@@ -1,21 +1,14 @@
 using Gallop;
-#if !UNITY_ANDROID || UNITY_EDITOR
-using SFB;
-#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using static PageManager;
-using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -90,11 +83,7 @@ public class UmaViewerUI : MonoBehaviour
     public UISettingsAnimation AnimationSettings;
     public UISettingsScreenshot ScreenshotSettings;
     public UISettingsAssets AssetSettings;
-    public Button VMDButton;
-    public Button UpdateDBButton;
-    public TMP_Dropdown RegionDropdown;
-    public TMP_Dropdown WorkModeDropdown;
-    public TMP_Dropdown LanguageDropdown;
+    public UISettingsOther OtherSettings;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -125,11 +114,8 @@ public class UmaViewerUI : MonoBehaviour
 
     private void Start()
     {
-        WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
-        RegionDropdown.SetValueWithoutNotify((int)Config.Instance.Region);
-        LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
+        OtherSettings.ApplySettings();
         CameraSettings.AAModeDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
-        UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
         AssetSettings.LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += AssetSettings.LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleClear += AssetSettings.LoadedAssetsClear;
@@ -986,7 +972,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         var container = Builder.CurrentUMAContainer;
         var camera = Builder.AnimationCamera;
-        var buttonText = VMDButton.GetComponentInChildren<TextMeshProUGUI>();
+        var buttonText = AnimationSettings.VMDButton.GetComponentInChildren<TextMeshProUGUI>();
 
         if (!container || container.IsMini)
         {

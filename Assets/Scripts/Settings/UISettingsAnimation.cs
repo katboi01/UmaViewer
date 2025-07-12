@@ -12,6 +12,7 @@ public class UISettingsAnimation : MonoBehaviour
     public Button PlayButton;
     public TextMeshProUGUI SpeedText;
     public Slider SpeedSlider;
+    public Button VMDButton;
 
     internal void UpdateAnimationInfo(UmaContainerCharacter umaContainer)
     {

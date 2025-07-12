@@ -3459,6 +3459,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49e773074de12594e9980542be5a673b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UpdateDBButton: {fileID: 1516377151}
+  RegionDropdown: {fileID: 647681493}
+  WorkModeDropdown: {fileID: 1909384047}
+  LanguageDropdown: {fileID: 308207822}
 --- !u!1 &97643175
 GameObject:
   m_ObjectHideFlags: 0
@@ -11756,7 +11760,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 283, y: -300.065}
+  m_AnchoredPosition: {x: 283, y: -812.245}
   m_SizeDelta: {x: 283, y: 240.13}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &375781854
@@ -11815,6 +11819,7 @@ MonoBehaviour:
   PlayButton: {fileID: 292348639}
   SpeedText: {fileID: 1623091784}
   SpeedSlider: {fileID: 994851660}
+  VMDButton: {fileID: 668484488}
 --- !u!1 &375965192
 GameObject:
   m_ObjectHideFlags: 0
@@ -51601,11 +51606,7 @@ MonoBehaviour:
   AnimationSettings: {fileID: 375781856}
   ScreenshotSettings: {fileID: 2134049663}
   AssetSettings: {fileID: 2126459765}
-  VMDButton: {fileID: 668484488}
-  UpdateDBButton: {fileID: 1516377151}
-  RegionDropdown: {fileID: 647681493}
-  WorkModeDropdown: {fileID: 1909384047}
-  LanguageDropdown: {fileID: 308207822}
+  OtherSettings: {fileID: 93905318}
   TogglablePanels:
   - {fileID: 1974252710}
   - {fileID: 87578738}

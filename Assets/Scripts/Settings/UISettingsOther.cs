@@ -1,13 +1,29 @@
+#if !UNITY_ANDROID || UNITY_EDITOR
 using SFB;
+#endif
+
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UISettingsOther : MonoBehaviour
 {
+    public Button UpdateDBButton;
+    public TMP_Dropdown RegionDropdown;
+    public TMP_Dropdown WorkModeDropdown;
+    public TMP_Dropdown LanguageDropdown;
     private IEnumerator _updateResVerCoroutine;
+
+    public void ApplySettings()
+    {
+        WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
+        RegionDropdown.SetValueWithoutNotify((int)Config.Instance.Region);
+        LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
+        UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
+    }
 
     public void ChangeLanguage(int lang)
     {
