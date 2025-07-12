@@ -95,16 +95,7 @@ public class UmaViewerUI : MonoBehaviour
     public UISettingsModel ModelSettings;
     public UISettingsSound AudioSettings;
     public UISettingsAnimation AnimationSettings;
-    public TMP_InputField SSWidth;
-    public TMP_InputField SSHeight;
-    public Toggle SSTransparent;
-    public TMP_InputField GifWidth;
-    public TMP_InputField GifHeight;
-    public Toggle GifTransparent;
-    public Slider GifQuality;
-    public TextMeshProUGUI GifQualityLabel;
-    public Slider GifSlider;
-    public Button GifButton;
+    public UISettingsScreenshot ScreenshotSettings;
     public Button VMDButton;
     public Button UpdateDBButton;
     public TMP_Dropdown RegionDropdown;
@@ -960,11 +951,6 @@ public class UmaViewerUI : MonoBehaviour
             (Builder.CurrentUMAContainer)?.LoadAnimation(entry);
             LoadedAnimation();
         });
-    }
-
-    public void UpdateGifQualityLabel(float value)
-    {
-        GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
     }
 
     string getCharaName(string id)
