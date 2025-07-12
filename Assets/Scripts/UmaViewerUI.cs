@@ -1,21 +1,14 @@
 using Gallop;
-#if !UNITY_ANDROID || UNITY_EDITOR
-using SFB;
-#endif
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using static PageManager;
-using Debug = UnityEngine.Debug;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -47,7 +40,6 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect PropList;
     public PageManager PropPageCtrl;
     public ScrollRect SceneList;
-    public ScrollRect MaterialsList;
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
     public Text MessageText;
@@ -72,28 +64,6 @@ public class UmaViewerUI : MonoBehaviour
     [Header("pose mode")]
     public Transform HandlesPanel;
 
-    [Header("audio")]
-    public Slider AudioSlider;
-    public Button AudioPlayButton;
-    public TextMeshProUGUI TitleText;
-    public TextMeshProUGUI ProgressText;
-    public Text LyricsText;
-
-    [Header("animations")]
-    public Slider AnimationSlider;
-    public Slider AnimationSpeedSlider;
-    public Button AnimationPlayButton;
-    public TextMeshProUGUI AnimationTitleText;
-    public TextMeshProUGUI AnimationSpeedText;
-    public TextMeshProUGUI AnimationProgressText;
-
-    [Header("backgrounds")]
-    public ScrollRect BackGroundList;
-    public PageManager BackGroundPageCtrl;
-    public GameObject BG_Canvas;
-    public GameObject BG_HSVPickerObj;
-    public Image BG_Image;
-
     [Header("live settings")]
     public Sprite CharaIconDefault;
     public Sprite CostumeIconDefault;
@@ -107,22 +77,13 @@ public class UmaViewerUI : MonoBehaviour
     private LiveEntry currentLive;
 
     [Header("settings")]
-    public TMP_InputField SSWidth;
-    public TMP_InputField SSHeight;
-    public Toggle SSTransparent;
-    public TMP_InputField GifWidth;
-    public TMP_InputField GifHeight;
-    public Toggle GifTransparent;
-    public Slider GifQuality;
-    public TextMeshProUGUI GifQualityLabel;
-    public Slider GifSlider;
-    public Button GifButton;
-    public Button VMDButton;
-    public Button UpdateDBButton;
-    public TMP_Dropdown RegionDropdown;
-    public TMP_Dropdown WorkModeDropdown;
-    public TMP_Dropdown LanguageDropdown;
-    public TMP_Dropdown AntialiasingDropdown;
+    public UISettingsCamera CameraSettings;
+    public UISettingsModel ModelSettings;
+    public UISettingsSound AudioSettings;
+    public UISettingsAnimation AnimationSettings;
+    public UISettingsScreenshot ScreenshotSettings;
+    public UISettingsAssets AssetSettings;
+    public UISettingsOther OtherSettings;
     public List<GameObject> TogglablePanels = new List<GameObject>();
     public List<GameObject> TogglableFacials = new List<GameObject>();
 
@@ -133,17 +94,8 @@ public class UmaViewerUI : MonoBehaviour
     public GameObject UmaContainerSliderPrefab;
     public UmaUIContainer UmaContainerTogglePrefab;
 
-    private Dictionary<string, Entry> LoadedAssetEntries = new Dictionary<string, Entry>();
-    public PageManager LoadedAssetPageCtrl;
-    public ScrollRect LoadedAssetScrollRect;
-
     public Color UIColor1, UIColor2;
 
-    public bool isHeadFix = false;
-    public bool isTPose = false;
-    public bool DynamicBoneEnable = true;
-    public bool EnableEyeTracking = true;
-    public bool EnableFaceOverride = true;
     public string CurrentHeadCostumeId = string.Empty;
 
     [Header("Live")]
@@ -155,28 +107,18 @@ public class UmaViewerUI : MonoBehaviour
 
     public FaceDrivenKeyTarget currentFaceDrivenKeyTarget;
 
-    private IEnumerator UpdateResVerCoroutine;
-
     private void Awake()
     {
         Instance = this;
-        AudioPlayButton.onClick.AddListener(PauseAudio);
-        AudioSlider.onValueChanged.AddListener(AudioProgressChange);
-        AnimationPlayButton.onClick.AddListener(AnimationPause);
-        AnimationSlider.onValueChanged.AddListener(AnimationProgressChange);
-        AnimationSpeedSlider.onValueChanged.AddListener(AnimationSpeedChange);
     }
 
     private void Start()
     {
-        WorkModeDropdown.SetValueWithoutNotify((int)Config.Instance.WorkMode);
-        RegionDropdown.SetValueWithoutNotify((int)Config.Instance.Region);
-        LanguageDropdown.SetValueWithoutNotify((int)Config.Instance.Language);
-        AntialiasingDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
-        UpdateDBButton.interactable = (Config.Instance.WorkMode == WorkMode.Standalone);
-        LoadedAssetsClear();
-        UmaAssetManager.OnLoadedBundleUpdate += LoadedAssetsAdd;
-        UmaAssetManager.OnLoadedBundleClear += LoadedAssetsClear;
+        OtherSettings.ApplySettings();
+        CameraSettings.AAModeDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
+        AssetSettings.LoadedAssetsClear();
+        UmaAssetManager.OnLoadedBundleUpdate += AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear += AssetSettings.LoadedAssetsClear;
         
         PoseManager.LoadLocalPoseFiles();
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -187,8 +129,8 @@ public class UmaViewerUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        UmaAssetManager.OnLoadedBundleUpdate -= LoadedAssetsAdd;
-        UmaAssetManager.OnLoadedBundleClear -= LoadedAssetsClear;
+        UmaAssetManager.OnLoadedBundleUpdate -= AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleClear -= AssetSettings.LoadedAssetsClear;
     }
 
     private void Update()
@@ -198,38 +140,22 @@ public class UmaViewerUI : MonoBehaviour
             AudioSource MianSource = Builder.CurrentAudioSources[0];
             if (MianSource.clip)
             {
-                TitleText.text = MianSource.clip.name;
-                ProgressText.text = string.Format("{0} / {1}", ToTimeFormat(MianSource.time), ToTimeFormat(MianSource.clip.length));
-                AudioSlider.SetValueWithoutNotify(MianSource.time / MianSource.clip.length);
-                LyricsText.text = UmaUtility.GetCurrentLyrics(MianSource.time, Builder.CurrentLyrics);
-                LyricsText.text = LyricsText.text;
+                AudioSettings.UpdateTrack(MianSource);
             }
         }
 
         var umaContainer = Builder.CurrentUMAContainer;
         if (umaContainer != null && umaContainer.OverrideController != null)
         {
-            if (umaContainer.OverrideController["clip_2"].name != "clip_2")
-            {
-                bool isLoop = umaContainer.OverrideController["clip_2"].name.Contains("_loop");
-                var AnimeState = umaContainer.UmaAnimator.GetCurrentAnimatorStateInfo(0);
-                var AnimeClip = umaContainer.OverrideController["clip_2"];
-                if (AnimeClip && umaContainer.UmaAnimator.speed != 0)
-                {
-                    var normalizedTime = (isLoop) ? Mathf.Repeat(AnimeState.normalizedTime, 1) : Mathf.Min(AnimeState.normalizedTime, 1);
-                    AnimationTitleText.text = AnimeClip.name;
-                    AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(normalizedTime * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-                    AnimationSlider.SetValueWithoutNotify(normalizedTime);
-                }
-            }
+            AnimationSettings.UpdateAnimationInfo(umaContainer);
         }
     }
 
     /// <summary>Some settings may not be saved when set in Start()</summary>
-    private IEnumerator ApplyGraphicsSettings()
+    public IEnumerator ApplyGraphicsSettings()
     {
         yield return 0;
-        ChangeAntiAliasing(Config.Instance.AntiAliasing);
+        CameraSettings.ChangeAntiAliasing(Config.Instance.AntiAliasing);
         GraphicsSettings.renderPipelineAsset = Config.Instance.Region == Region.Global ? null : UmaViewerMain.Instance.DefaultRenderPipeline;
     }
 
@@ -240,49 +166,6 @@ public class UmaViewerUI : MonoBehaviour
             if (t.transform.parent != mainObject) continue;
             t.ToggleImage.enabled = (t == child);
         }
-    }
-
-    public void LoadedAssetsAdd(UmaDatabaseEntry entry)
-    {
-        if (!LoadedAssetPageCtrl) return;
-        if (LoadedAssetEntries.ContainsKey(entry.Name)) return;
-        var file_name = Path.GetFileName(entry.Name);
-        string filePath = entry.FilePath.Replace("/", "\\");
-        var assetentry = new Entry()
-        {
-            Name = file_name,
-            FontSize = 18,
-            OnClick = (container) =>
-            {
-                Process.Start("explorer.exe", "/select," + filePath);
-            }
-        };  
-        LoadedAssetEntries.Add(entry.Name, assetentry);
-        LoadedAssetPageCtrl.AddEntries(assetentry);
-    }
-
-    public void LoadedAssetsClear()
-    {
-        LoadedAssetEntries.Clear();
-        if (LoadedAssetPageCtrl)
-        {
-            LoadedAssetPageCtrl.ResetCtrl();
-            LoadedAssetPageCtrl.Initialize(LoadedAssetEntries.Values.ToList(), LoadedAssetScrollRect);
-        }
-    }
-
-    public void CopyAllLoadedAssetsPath()
-    {
-        StringBuilder sb = new StringBuilder();
-        foreach(var entry in LoadedAssetEntries.Keys)
-        {
-            if (Main.AbList.TryGetValue(entry, out var asset))
-            {
-                sb.AppendLine(asset.FilePath);
-            }
-        }
-        GUIUtility.systemCopyBuffer = sb.ToString();
-        ShowMessage($"{LoadedAssetEntries.Count} Path copied", UIMessageType.Success);
     }
 
     public void LoadModelPanels()
@@ -645,7 +528,7 @@ public class UmaViewerUI : MonoBehaviour
         if (selectlist != null)
         {
             LiveTime = true;
-            SetEyeTrackingEnable(false);
+            ModelSettings.SetEyeTrackingEnable(false);
             Builder.LoadLive(currentLive, new List<LiveCharacterSelect>(selectlist));
             LiveSelectPannel.SetActive(false);
         }
@@ -801,7 +684,7 @@ public class UmaViewerUI : MonoBehaviour
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         var motion_path = $"3d/motion/event/body/chara/chr{chara.Id}_00/anm_eve_chr{chara.Id}_00_idle01_loop";
-                        if (!chara.IsMob && !isHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
+                        if (!chara.IsMob && !ModelSettings.IsHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
                         {
                             list.Add(motion_entry);
                         }
@@ -1001,47 +884,6 @@ public class UmaViewerUI : MonoBehaviour
         });
     }
 
-    void ListBackgrounds()
-    {
-        var pageentrys = new List<PageManager.Entry>();
-        foreach (var entry in Main.AbList.Where(a => a.Key.StartsWith("bg/bg")))
-        {
-            var pageentry = new PageManager.Entry();
-            pageentry.Name = Path.GetFileName(entry.Key);
-            pageentry.Sprite = Builder.LoadSprite(entry.Value);
-            if (pageentry.Sprite == null) continue;
-            pageentry.OnClick = (container) =>
-            {
-                HighlightChildImage(BackGroundList.content, container);
-                BG_Image.sprite = pageentry.Sprite;
-                BG_Image.SetVerticesDirty();
-            };
-
-            if (BG_Image.sprite == null)
-            {
-                BG_Image.sprite = pageentry.Sprite;
-                BG_Image.SetVerticesDirty();
-            }
-            pageentrys.Add(pageentry);
-        }
-        BackGroundPageCtrl.Initialize(pageentrys, BackGroundList);
-    }
-
-    public void SetHeadFix(bool value)
-    {
-        isHeadFix = value;
-    }
-
-    public void SetTPose(bool value)
-    {
-        isTPose = value;
-    }
-
-    public void UpdateGifQualityLabel(float value)
-    {
-        GifQualityLabel.text = $"Quality: {(int)value} (default: 10)";
-    }
-
     string getCharaName(string id)
     {
         var entry = Main.Characters.FirstOrDefault(a => a.Id.ToString().Equals(id));
@@ -1088,12 +930,12 @@ public class UmaViewerUI : MonoBehaviour
     {
         var container = Builder.CurrentUMAContainer;
         if (!container || !container.UmaAnimator) return;
-        AnimationSlider.SetValueWithoutNotify(0);
+        AnimationSettings.ProgressSlider.SetValueWithoutNotify(0);
         // Reset settings by Panel
-        container.UmaAnimator.speed = AnimationSpeedSlider.value;
-        Builder.AnimationCameraAnimator.speed = AnimationSpeedSlider.value;
+        container.UmaAnimator.speed = AnimationSettings.SpeedSlider.value;
+        Builder.AnimationCameraAnimator.speed = AnimationSettings.SpeedSlider.value;
         if (container.UmaFaceAnimator)
-            container.UmaFaceAnimator.speed = AnimationSpeedSlider.value;
+            container.UmaFaceAnimator.speed = AnimationSettings.SpeedSlider.value;
     }
 
     /// <summary> Toggles one object ON and all others from UI.TogglablePanels list OFF </summary>
@@ -1126,221 +968,11 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    public void ChangeBackground(int index)
-    {
-        BackGroundPageCtrl.ResetCtrl();
-        switch (index)
-        {
-            case 0:
-                Camera.main.clearFlags = CameraClearFlags.Skybox;
-                break;
-            case 1:
-                Camera.main.clearFlags = CameraClearFlags.SolidColor;
-                break;
-            case 2:
-                Camera.main.clearFlags = CameraClearFlags.SolidColor;
-                ListBackgrounds();
-                break;
-            default:
-                Camera.main.clearFlags = CameraClearFlags.Skybox;
-                break;
-        }
-
-        BG_HSVPickerObj.SetActive(index != 2);
-        BG_Canvas.SetActive(index == 2);
-        BackGroundPageCtrl.transform.parent.gameObject.SetActive(index == 2);
-    }
-
-    public void ChangeBackgroundColor(Color color)
-    {
-        Camera.main.backgroundColor = color;
-    }
-
-    public void SetDynamicBoneEnable(bool isOn)
-    {
-        DynamicBoneEnable = isOn;
-        Builder.CurrentUMAContainer?.SetDynamicBoneEnable(isOn);
-    }
-
-    public void SetEyeTrackingEnable(bool isOn)
-    {
-        EnableEyeTracking = isOn;
-        Builder.CurrentUMAContainer?.SetEyeTracking(isOn);
-    }
-
-    public void SetFaceOverrideEnable(bool isOn)
-    {
-        EnableFaceOverride = isOn;
-        Builder.CurrentUMAContainer?.SetFaceOverrideData(isOn);
-    }
-
-    public void PauseAudio()
-    {
-        var sources = Builder.CurrentAudioSources;
-        if (sources.Count > 0)
-        {
-            AudioSource MainSource = sources[0];
-            var state = MainSource.isPlaying;
-            foreach (AudioSource source in sources)
-            {
-                if (state)
-                {
-                    source.Pause();
-                }
-                else if (source.clip)
-                {
-                    source.Play();
-                }
-                else
-                {
-                    source.Stop();
-                }
-            }
-        }
-    }
-
-    public void StopAudio()
-    {
-        var sources = Builder.CurrentAudioSources;
-        foreach (AudioSource source in sources)
-        {
-            source.Stop();
-        }
-    }
-
-    public void AudioProgressChange(float val)
-    {
-        if (Builder.CurrentAudioSources.Count > 0)
-        {
-            var time = Builder.CurrentAudioSources[0].clip.length * val;
-            foreach (AudioSource source in Builder.CurrentAudioSources)
-            {
-                if (source.clip)
-                {
-                    source.time = Mathf.Clamp(time, 0, source.clip.length);
-                }
-            }
-        }
-    }
-
-    public void AnimationPause()
-    {
-        var container = Builder.CurrentUMAContainer;
-        if (!container || !container.UmaAnimator) return;
-        if (Builder.OverrideController.animationClips.Length == 0) return;
-
-        var animator = container.UmaAnimator;
-        var animator_face = container.UmaFaceAnimator;
-        var animator_cam = Builder.AnimationCameraAnimator;
-        var AnimeState = animator.GetCurrentAnimatorStateInfo(0);
-        var state = animator.speed > 0f;
-        if (state)
-        {
-            animator.speed = 0;
-            if (animator_face)
-                animator_face.speed = 0;
-            animator_cam.speed = 0;
-        }
-        else if (AnimeState.normalizedTime < 1f)
-        {
-            animator.speed = AnimationSpeedSlider.value;
-            animator_cam.speed = AnimationSpeedSlider.value;
-            if (animator_face)
-                animator_face.speed = AnimationSpeedSlider.value;
-        }
-        else
-        {
-            animator.speed = AnimationSpeedSlider.value;
-            animator.Play(0, 0, 0);
-            animator.Play(0, 2, 0);
-            animator_cam.speed = AnimationSpeedSlider.value;
-            animator_cam.Play(0, -1, 0);
-            if (animator_face)
-            {
-                animator_face.speed = AnimationSpeedSlider.value;
-                animator_face.Play(0, 0, 0);
-                animator_face.Play(0, 1, 0);
-            }
-        }
-    }
-
-    public void AnimationProgressChange(float val)
-    {
-        var container = Builder.CurrentUMAContainer;
-        if (!container) return;
-        var animator = container.UmaAnimator;
-        var animator_face = container.UmaFaceAnimator;
-        var animator_cam = Builder.AnimationCameraAnimator;
-        if (animator != null)
-        {
-            var AnimeClip = container.OverrideController["clip_2"];
-
-            // Pause and Seek;
-            animator.speed = 0;
-            animator.Play(0, 0, val);
-            animator.Play(0, 2, val);
-            if (animator_cam.runtimeAnimatorController)
-            {
-                animator_cam.speed = 0;
-                animator_cam.Play(0, -1, val);
-            }
-            if (animator_face)
-            {
-                animator_face.speed = 0;
-                animator_face.Play(0, 0, val);
-                animator_face.Play(0, 1, val);
-            }
-
-            AnimationProgressText.text = string.Format("{0} / {1}", ToFrameFormat(val * AnimeClip.length, AnimeClip.frameRate), ToFrameFormat(AnimeClip.length, AnimeClip.frameRate));
-        }
-    }
-
-    public void AnimationSpeedChange(float val)
-    {
-        var container = Builder.CurrentUMAContainer;
-        AnimationSpeedText.text = string.Format("Speed: {0:F2}", val);
-
-        if (!container || !container.UmaAnimator) return;
-
-        container.UmaAnimator.speed = val;
-        Builder.AnimationCameraAnimator.speed = val;
-        if (container.UmaFaceAnimator)
-        {
-            container.UmaFaceAnimator.speed = val;
-        }
-    }
-
-    public void ResetAudioPlayer()
-    {
-        TitleText.text = "No Audio";
-        ProgressText.text = "00:00:00 / 00:00:00";
-        AudioSlider.SetValueWithoutNotify(0);
-        LyricsText.text = "";
-    }
-
-    public static string ToTimeFormat(float time)
-    {
-        int seconds = (int)time;
-        int hour = seconds / 3600;
-        int minute = seconds % 3600 / 60;
-        seconds = seconds % 3600 % 60;
-        return string.Format("{0:D2}:{1:D2}:{2:D2}", hour, minute, seconds);
-    }
-
-    public static string ToFrameFormat(float time, float frameRate)
-    {
-        int frames = Mathf.FloorToInt(time % 1 * frameRate);
-        int seconds = (int)time;
-        int minute = seconds % 3600 / 60;
-        seconds = seconds % 3600 % 60;
-        return string.Format("{0:D2}m:{1:D2}s:{2:D2}f", minute, seconds, frames);
-    }
-
     public void RecordVMD()
     {
         var container = Builder.CurrentUMAContainer;
         var camera = Builder.AnimationCamera;
-        var buttonText = VMDButton.GetComponentInChildren<TextMeshProUGUI>();
+        var buttonText = AnimationSettings.VMDButton.GetComponentInChildren<TextMeshProUGUI>();
 
         if (!container || container.IsMini)
         {
@@ -1443,91 +1075,6 @@ public class UmaViewerUI : MonoBehaviour
         }
     }
 
-    public void UpdateGameDB()
-    {
-        if (UpdateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
-        UmaDatabaseController.Instance.CloseAllConnection();
-        ManifestDB dB = new ManifestDB();
-        UpdateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { ShowMessage(msg, type); });
-        StartCoroutine(UpdateResVerCoroutine);
-    }
-
-    public void ChangeLanguage(int lang)
-    {
-        if ((int)Config.Instance.Language != lang)
-        {
-            Config.Instance.Language = (Language)lang;
-            Config.Instance.UpdateConfig(true);
-        }
-    }
-
-    public void ChangeRegion(int region)
-    {
-        if ((int)Config.Instance.Region != region)
-        {
-            Config.Instance.Region = (Region)region;
-            Config.Instance.UpdateConfig(false);
-            StartCoroutine(ApplyGraphicsSettings());
-        }
-    }
-
-    /// <summary> Converts values 1-4 to valid AA values </summary>
-    public void ChangeAntiAliasing(int value)
-    {
-        int[] aaValues = { 0, 2, 4, 8 };
-
-        QualitySettings.antiAliasing = aaValues[value];
-
-        if (Config.Instance.AntiAliasing != value)
-        {
-            Config.Instance.AntiAliasing = value;
-            Config.Instance.UpdateConfig(false);
-        }
-    }
-
-    public void ChangeWorkMode(int mode)
-    {
-        if ((int)Config.Instance.WorkMode != mode)
-        {
-            Config.Instance.WorkMode = (WorkMode)mode;
-            Config.Instance.UpdateConfig(true);
-        }
-    }
-
-    public void ChangeDataPath()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        var path = StandaloneFileBrowser.OpenFolderPanel("Select Folder", Config.Instance.MainPath, false);
-        if (path != null && path.Length > 0 && !string.IsNullOrEmpty(path[0]))
-        {
-            if (path[0] != Config.Instance.MainPath)
-            {
-                Config.Instance.MainPath = path[0];
-                Config.Instance.UpdateConfig(true);
-            }
-        }
-        #endif
-    }
-
-    public void OpenConfig()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        if (File.Exists(Config.configPath))
-        {
-            Process.Start(new ProcessStartInfo()
-            {
-                FileName = Config.configPath,
-                UseShellExecute = true
-            });
-        }
-        #endif
-    }
-
-    public void ChangeOutlineWidth(float val)
-    {
-        Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
-    }
-
     public void SetLiveRecordMode(bool val) { isRecordVMD = val; }
 
     public void SetLiveRequireStage(bool val) { isRequireStage = val; }
@@ -1545,22 +1092,6 @@ public class UmaViewerUI : MonoBehaviour
         };
         MessageScrollRect.gameObject.SetActive(type != UIMessageType.Close);
         MessageScrollRect.verticalNormalizedPosition = 0;
-    }
-
-    public void ExportModel()
-    {
-        #if !UNITY_ANDROID || UNITY_EDITOR
-        var container = Builder.CurrentUMAContainer;
-        if (container)
-        {
-            var entry = container.CharaEntry;
-            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{entry.Id}_{entry.GetName()}", "pmx");
-            if (!string.IsNullOrEmpty(path))
-            {
-                ModelExporter.ExportModel(container, path);
-            }
-        }
-        #endif
     }
 
     public void ToggleVisible(GameObject go)

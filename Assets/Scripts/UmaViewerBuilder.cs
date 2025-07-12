@@ -19,6 +19,7 @@ public class UmaViewerBuilder : MonoBehaviour
     public static UmaViewerBuilder Instance;
     static UmaViewerMain Main => UmaViewerMain.Instance;
     static UmaViewerUI UI => UmaViewerUI.Instance;
+    static UISettingsModel ModelSettings => UmaViewerUI.Instance.ModelSettings;
 
     public List<AssetBundle> Loaded;
     public List<Shader> ShaderList = new List<Shader>();
@@ -61,7 +62,7 @@ public class UmaViewerBuilder : MonoBehaviour
             umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
             LoadMobUma(umaContainer, chara, costumeId, loadMotion: true);
         }
-        else if (UI.isHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
+        else if (ModelSettings.IsHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
         {
             umaContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
             LoadMobUma(umaContainer, CurrentHead.chara, costumeId, chara.Id, true);
@@ -210,7 +211,7 @@ public class UmaViewerBuilder : MonoBehaviour
         string head_costumeId;
         int tailId = Convert.ToInt32(charaData["tail_model_id"]);
 
-        if (UI.isHeadFix && CurrentHead != null)
+        if (ModelSettings.IsHeadFix && CurrentHead != null)
         {
             head_id = CurrentHead.id;
             head_costumeId = CurrentHead.costumeId;
@@ -293,19 +294,19 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         umaContainer.LoadPhysics();
-        umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
+        umaContainer.SetDynamicBoneEnable(ModelSettings.DynamicBoneEnable);
         umaContainer.LoadFaceMorph(id, costumeId);
         umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
         umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
         umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         umaContainer.MergeModel();
         umaContainer.SetHeight(-1);
-        umaContainer.Initialize(!UI.isTPose);
+        umaContainer.Initialize(!ModelSettings.IsTPose);
 
         umaContainer.Position = umaContainer.transform.Find("Position");
         umaContainer.SetupBoneHandles();
 
-        if (!UI.isTPose && loadMotion)
+        if (!ModelSettings.IsTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/chara/chr{id}_00/anm_eve_chr{id}_00_idle01_loop", out UmaDatabaseEntry entry))
             {
@@ -512,7 +513,7 @@ public class UmaViewerBuilder : MonoBehaviour
         }
 
         umaContainer.LoadPhysics(); //Need to load physics before loading FacialMorph
-        umaContainer.SetDynamicBoneEnable(UI.DynamicBoneEnable);
+        umaContainer.SetDynamicBoneEnable(ModelSettings.DynamicBoneEnable);
 
         //Load FacialMorph
         umaContainer.LoadFaceMorph(id, costumeId);
@@ -522,12 +523,12 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
         umaContainer.MergeModel();
         umaContainer.SetHeight(-1);
-        umaContainer.Initialize(!UI.isTPose);
+        umaContainer.Initialize(!ModelSettings.IsTPose);
 
         umaContainer.Position = umaContainer.transform.Find("Position");
         umaContainer.SetupBoneHandles();
 
-        if (!UI.isTPose && loadMotion)
+        if (!ModelSettings.IsTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/type00/anm_eve_type00_homestand{personality.PadLeft(2, '0')}_loop", out UmaDatabaseEntry entry))
             {
@@ -795,7 +796,7 @@ public class UmaViewerBuilder : MonoBehaviour
             var tmp = CurrentAudioSources[0];
             CurrentAudioSources.Clear();
             Destroy(tmp.gameObject);
-            UI.ResetAudioPlayer();
+            UI.AudioSettings.ResetPlayer();
         }
         if (subindex == -1)
         {
@@ -994,11 +995,11 @@ public class UmaViewerBuilder : MonoBehaviour
         if (CurrentUMAContainer != null)
         {
             //It seems that OnDestroy will executed after new model loaded, which cause new FacialPanels empty...
-            UmaViewerUI.Instance.currentFaceDrivenKeyTarget = null;
-            UmaViewerUI.Instance.LoadEmotionPanels(null);
-            UmaViewerUI.Instance.LoadFacialPanels(null);
-            if (UmaViewerUI.Instance.MaterialsList)
-                foreach (Transform t in UmaViewerUI.Instance.MaterialsList.content)
+            UI.currentFaceDrivenKeyTarget = null;
+            UI.LoadEmotionPanels(null);
+            UI.LoadFacialPanels(null);
+            if (UI.ModelSettings.MaterialsList)
+                foreach (Transform t in UI.ModelSettings.MaterialsList.content)
                 {
                     Destroy(t.gameObject);
                 }
