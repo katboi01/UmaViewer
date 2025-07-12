@@ -1,4 +1,7 @@
+#if !UNITY_ANDROID || UNITY_EDITOR
 using SFB;
+#endif
+
 using UnityEngine;
 using UnityEngine.UI;
 
