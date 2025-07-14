@@ -26,7 +26,7 @@ public class AudioExporter
         IWaveProvider sourceProvider = new SampleToWaveProvider16(mixer);
 
 
-        using (var writer = new LameMP3FileWriter(path, new NAudio.Wave.WZT.WaveFormat(wf.SampleRate, wf.Channels), 128))
+        using (var writer = new LameMP3FileWriter(path, new NAudio.Wave.WZT.WaveFormat(wf.SampleRate, wf.Channels), 320))
         {
             byte[] buffer = new byte[wf.AverageBytesPerSecond]; // Read about 1 second of audio at a time
             int bytesRead;
