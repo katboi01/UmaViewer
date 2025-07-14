@@ -1,4 +1,5 @@
 using SFB;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -67,13 +68,20 @@ public class UISettingsSound : MonoBehaviour
     public void ExportAudio()
     {
 #if !UNITY_ANDROID || UNITY_EDITOR
-        var sources = Builder.CurrentAudioSources;
-        if (sources.Count > 0)
+
+
+
+        var LiveSources = Builder.CurrentLiveSoundAWB;
+        if (LiveSources.Count > 0)
         {
-            var path = StandaloneFileBrowser.SaveFilePanel("Save Music WAV File", Config.Instance.MainPath, $"{sources[0].clip.name}", "wav");
+            string nameVar = LiveSources[0].Name;
+            var firstStream = Builder.LoadAudioStreams(LiveSources[0]);
+
+            
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Music MP3 File", Config.Instance.MainPath, $"{nameVar}", "mp3");
             if (!string.IsNullOrEmpty(path))
             {
-                AudioExporter.ExportAudio(sources[0].clip, path);
+                AudioExporter.ExportAudio(firstStream, path);
             }
 
         }
