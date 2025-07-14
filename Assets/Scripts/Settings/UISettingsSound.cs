@@ -1,6 +1,8 @@
 using SFB;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UmaMusumeAudio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -74,14 +76,19 @@ public class UISettingsSound : MonoBehaviour
         var LiveSources = Builder.CurrentLiveSoundAWB;
         if (LiveSources.Count > 0)
         {
-            string nameVar = LiveSources[0].Name;
-            var firstStream = Builder.LoadAudioStreams(LiveSources[0]);
+            var lists = new List<UmaWaveStream>();
+            foreach (var source in LiveSources) {
+                var z = Builder.LoadAudioStreams(source);
+                foreach (var item in z)
+                {
+                    lists.Add(item);
+                }
+            }
 
-            
-            var path = StandaloneFileBrowser.SaveFilePanel("Save Music MP3 File", Config.Instance.MainPath, $"{nameVar}", "mp3");
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Music MP3 File", Config.Instance.MainPath, $"{TitleText.text}", "mp3");
             if (!string.IsNullOrEmpty(path))
             {
-                AudioExporter.ExportAudio(firstStream, path);
+                AudioExporter.ExportAudio(lists, path);
             }
 
         }
