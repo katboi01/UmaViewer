@@ -1,0 +1,3 @@
+[submodule "Assets/Plugins/Lame-For-Unity"]
+	path = Assets/Plugins/Lame-For-Unity
+	url = https://github.com/3wz/Lame-For-Unity.git

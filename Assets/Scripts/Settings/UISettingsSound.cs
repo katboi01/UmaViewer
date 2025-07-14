@@ -1,4 +1,8 @@
+using SFB;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using UmaMusumeAudio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -61,6 +65,34 @@ public class UISettingsSound : MonoBehaviour
         ProgressText.text = "00:00:00 / 00:00:00";
         ProgressSlider.SetValueWithoutNotify(0);
         LyricsText.text = "";
+    }
+
+    public void ExportAudio()
+    {
+#if !UNITY_ANDROID || UNITY_EDITOR
+
+
+
+        var LiveSources = Builder.CurrentLiveSoundAWB;
+        if (LiveSources.Count > 0)
+        {
+            var lists = new List<UmaWaveStream>();
+            foreach (var source in LiveSources) {
+                var z = Builder.LoadAudioStreams(source);
+                foreach (var item in z)
+                {
+                    lists.Add(item);
+                }
+            }
+
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Music MP3 File", Config.Instance.MainPath, $"{TitleText.text}", "mp3");
+            if (!string.IsNullOrEmpty(path))
+            {
+                AudioExporter.ExportAudio(lists, path, Builder.CurrentLiveSoundAWBIndex);
+            }
+
+        }
+#endif
     }
 
     public void AudioProgressChange(float val)

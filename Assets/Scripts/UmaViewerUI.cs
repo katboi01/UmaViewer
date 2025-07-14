@@ -798,6 +798,7 @@ public class UmaViewerUI : MonoBehaviour
             container.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(NormalSubSoundList.content, container);
+                Builder.SetLastAudio(awb, subSounds.IndexOf(sound));
                 Builder.PlaySound(awb, subSounds.IndexOf(sound));
             });
         }
