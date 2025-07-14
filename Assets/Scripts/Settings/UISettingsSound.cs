@@ -1,3 +1,4 @@
+using SFB;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -61,6 +62,22 @@ public class UISettingsSound : MonoBehaviour
         ProgressText.text = "00:00:00 / 00:00:00";
         ProgressSlider.SetValueWithoutNotify(0);
         LyricsText.text = "";
+    }
+
+    public void ExportAudio()
+    {
+#if !UNITY_ANDROID || UNITY_EDITOR
+        var sources = Builder.CurrentAudioSources;
+        if (sources.Count > 0)
+        {
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Music WAV File", Config.Instance.MainPath, $"{sources[0].clip.name}", "wav");
+            if (!string.IsNullOrEmpty(path))
+            {
+                AudioExporter.ExportAudio(sources[0].clip, path);
+            }
+
+        }
+#endif
     }
 
     public void AudioProgressChange(float val)
