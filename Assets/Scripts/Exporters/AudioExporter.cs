@@ -11,14 +11,22 @@ using NAudio.Wave;
 public class AudioExporter
 {
 
-    public static void ExportAudio(List<UmaWaveStream> a, string path) {
+    public static void ExportAudio(List<UmaWaveStream> a, string path, int index = -1) {
         
         var l = new List<ISampleProvider>();
-        foreach (var z in a)
+        if (index == -1)
         {
-            var blah = z.ToSampleProvider();
+            foreach (var z in a)
+            {
+                var blah = z.ToSampleProvider();
+                l.Add(blah);
+            }
+        } else
+        {
+            var blah = a[index].ToSampleProvider();
             l.Add(blah);
         }
+
 
         var wf = a[0].WaveFormat;
 

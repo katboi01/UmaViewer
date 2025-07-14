@@ -32,7 +32,10 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
-    public List<UmaDatabaseEntry> CurrentLiveSoundAWB = new List<UmaDatabaseEntry>(); // Used for keeping track for exports
+
+    // Used for keeping track for exports
+    public List<UmaDatabaseEntry> CurrentLiveSoundAWB = new List<UmaDatabaseEntry>();
+    public int CurrentLiveSoundAWBIndex = -1;
 
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
@@ -755,6 +758,7 @@ public class UmaViewerBuilder : MonoBehaviour
     //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
     {
+        CurrentLiveSoundAWBIndex = -1; // mix awb together
         CurrentLiveSoundAWB.Clear();
         //load character voice
         if (SongAwb != null)
@@ -814,6 +818,13 @@ public class UmaViewerBuilder : MonoBehaviour
             AddAudioSource(LoadAudio(SongAwb)[subindex], volume, loop);
         }
 
+    }
+
+    public void SetLastAudio(UmaDatabaseEntry AudioAwb, int index)
+    {
+        CurrentLiveSoundAWB.Clear();
+        CurrentLiveSoundAWB.Add(AudioAwb);
+        CurrentLiveSoundAWBIndex = index;
     }
 
     private void AddAudioSource(AudioClip clip, float volume = 1, bool loop = false)
