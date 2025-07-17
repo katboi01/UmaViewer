@@ -27,10 +27,10 @@ namespace uGIF
 		{
 			bytes = null;
 			stop = false;
-			UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
+			UmaViewerUI.Instance.ScreenshotSettings.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
 			yield return new WaitForSeconds(0.1f);
 			yield return _Encode(fps, quality);
-            UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Saving gif...";
+            UmaViewerUI.Instance.ScreenshotSettings.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Saving gif...";
 			yield return new WaitForSeconds(0.1f);
 			yield return WaitForBytes();
 		}
@@ -52,7 +52,7 @@ namespace uGIF
 			UmaViewerUI.Instance.ShowMessage($"GIF saved: {fullpath}", UIMessageType.Success);
 			Frames.Clear();
 			stop = false;
-            UmaViewerUI.Instance.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record GIF";
+            UmaViewerUI.Instance.ScreenshotSettings.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record GIF";
         }
 
 		public IEnumerator _Encode (float fps, int quality)

@@ -12,6 +12,9 @@ public class Screenshot : MonoBehaviour
     public static Screenshot Instance;
     bool recording = false;
 
+    static UISettingsAnimation AnimationSettings => UmaViewerUI.Instance.AnimationSettings;
+    static UISettingsScreenshot ScreenshotSettings => UmaViewerUI.Instance.ScreenshotSettings;
+
     private void Awake()
     {
         Instance = this;
@@ -20,11 +23,11 @@ public class Screenshot : MonoBehaviour
     public static void TakeScreenshot()
     {
         var camera = GetActiveCamera();
-        int width = int.Parse(UmaViewerUI.Instance.SSWidth.text);
-        int height = int.Parse(UmaViewerUI.Instance.SSHeight.text);
+        int width = ScreenshotSettings.Width;
+        int height = ScreenshotSettings.Height;
         width = width == -1 ? Screen.width : width;
         height = height == -1 ? Screen.height : height;
-        var image = GrabFrame(camera, width, height, UmaViewerUI.Instance.SSTransparent.isOn);
+        var image = GrabFrame(camera, width, height, ScreenshotSettings.Transparent);
 
 #if UNITY_ANDROID && !UNITY_EDITOR
         string fileDirectory = Application.persistentDataPath + "/../Screenshots/";
@@ -46,9 +49,8 @@ public class Screenshot : MonoBehaviour
     {
         if (recording || UmaViewerBuilder.Instance.CurrentUMAContainer == null) return;
         recording = true;
-        UmaViewerUI.Instance.GifButton.interactable = false;
-        UmaViewerUI.Instance.GifSlider.value = 0;
-        StartCoroutine(RecordGif(int.Parse(UmaViewerUI.Instance.GifWidth.text), int.Parse(UmaViewerUI.Instance.GifHeight.text), UmaViewerUI.Instance.GifTransparent.isOn, 10)); //(int)UmaViewerUI.Instance.GifQuality.value));
+        ScreenshotSettings.GifButton.interactable = false;
+        StartCoroutine(RecordGif(ScreenshotSettings.GifWidth, ScreenshotSettings.GifHeight, ScreenshotSettings.GifTransparent, 10)); //(int)UmaViewerUI.Instance.GifQuality.value));
     }
 
 
@@ -68,14 +70,14 @@ public class Screenshot : MonoBehaviour
         var clipFrameCount = Mathf.RoundToInt(animeClip.length * animeClip.frameRate);
         StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate, quality));
 
-        UmaViewerUI.Instance.AnimationSpeedChange(0);
-        UmaViewerUI.Instance.AnimationProgressChange(0);
+
+        AnimationSettings.ChangeSpeed(0);
+        AnimationSettings.ChangeProgress(0);
         yield return new WaitForSeconds(1); //wait for dynamicBone to settle;
 
         while (frame < clipFrameCount)
         {
-            UmaViewerUI.Instance.GifSlider.value = (float)frame / clipFrameCount;
-            UmaViewerUI.Instance.AnimationProgressChange((float)frame / clipFrameCount);
+            AnimationSettings.ChangeProgress((float)frame / clipFrameCount);
             yield return new WaitForEndOfFrame();
             var tex = GrabFrame(camera, width, height, transparent);
             CaptureToGIFCustom.Instance.Frames.Add(new Image(tex));
@@ -84,12 +86,11 @@ public class Screenshot : MonoBehaviour
         }
 
         recording = false;
-        UmaViewerUI.Instance.AnimationProgressChange(0);
-        UmaViewerUI.Instance.AnimationSpeedChange(1);
+        AnimationSettings.ChangeProgress(0);
+        AnimationSettings.ChangeSpeed(1);
         ppLayer.enabled = oldPpState;
         CaptureToGIFCustom.Instance.stop = true;
-        UmaViewerUI.Instance.GifButton.interactable = true;
-        UmaViewerUI.Instance.GifSlider.value = 1;
+        ScreenshotSettings.GifButton.interactable = true;
     }
 
     public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true)

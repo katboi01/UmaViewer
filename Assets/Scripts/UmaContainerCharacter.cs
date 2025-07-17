@@ -184,7 +184,7 @@ public class UmaContainerCharacter : UmaContainer
                     {
                         Mat = mat,
                         Renderers = new Dictionary<Renderer, List<int>>(),
-                        Toggle = Instantiate(UmaViewerUI.Instance.UmaContainerTogglePrefab, UmaViewerUI.Instance.MaterialsList.content)
+                        Toggle = Instantiate(UI.UmaContainerTogglePrefab, UI.ModelSettings.MaterialsList.content)
                     };
                     matHlp.Toggle.Name = mat.name;
                     matHlp.Toggle.Toggle.onValueChanged.AddListener((value) => { Debug.Log("e"); matHlp.ToggleMaterials(value); });
@@ -725,7 +725,7 @@ public class UmaContainerCharacter : UmaContainer
         }
 
         //Some setting for Head
-        EnableEyeTracking = UI.EnableEyeTracking;
+        EnableEyeTracking = UI.ModelSettings.EnableEyeTracking;
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
@@ -1340,7 +1340,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void SetEndAnimationCut()
     {
-        UmaViewerUI.Instance.AnimationPause();
+        UI.AnimationSettings.Pause();
     }
 
     public void LoadFaceMorph(int id, string costumeId)
@@ -1425,7 +1425,7 @@ public class UmaContainerCharacter : UmaContainer
         FaceDrivenKeyTarget = faceDriven;
         FaceDrivenKeyTarget.Container = this;
         FaceOverrideData = faceOverride;
-        faceOverride?.SetEnable(UI.EnableFaceOverride);
+        faceOverride?.SetEnable(UI.ModelSettings.EnableFaceOverride);
         faceDriven.DrivenKeyLocator = locator.transform;
         faceDriven.Initialize(UmaUtility.ConvertArrayToDictionary(firsehead.GetComponentsInChildren<Transform>()));
 
