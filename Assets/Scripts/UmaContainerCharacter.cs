@@ -81,7 +81,6 @@ public class UmaContainerCharacter : UmaContainer
     public float BodyScale = 1;
 
     private BipedIK IK;
-    private PuppetMaster PuppetMaster;
     private List<Transform> _humanoidBones;
     private UIHandleCharacterRoot handleRoot;
 
@@ -292,11 +291,6 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
-    public void SetPuppetMasterMode(PuppetMaster.Mode mode)
-    {
-        PuppetMaster.mode = mode;
-    }
-
     public void SetDynamicBoneEnable(bool isOn)
     {
         if (IsMini) return;
@@ -335,10 +329,6 @@ public class UmaContainerCharacter : UmaContainer
             if (IK && !IK.enabled)
             {
                 IK.enabled = true;
-                if (PuppetMaster.mode != PuppetMaster.Mode.Active)
-                {
-                    SetPuppetMasterMode(PuppetMaster.Mode.Active);
-                }
             }
 
             var finalRotation = FaceDrivenKeyTarget.GetEyeTrackRotation(TrackTarget.transform.position);
@@ -353,10 +343,6 @@ public class UmaContainerCharacter : UmaContainer
             if (IK && IK.enabled)
             {
                 IK.enabled = false;
-                if (PuppetMaster && PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
-                {
-                    SetPuppetMasterMode(PuppetMaster.Mode.Kinematic);
-                }
             }
         }
 
@@ -444,11 +430,6 @@ public class UmaContainerCharacter : UmaContainer
         ik.solvers.lookAt.target = TrackTarget.transform;
         ik.solvers.lookAt.spineWeightCurve = new AnimationCurve(new Keyframe[2] { new Keyframe(0f, 1f), new Keyframe(1f, 0.3f) });
         IK = ik;
-
-        BipedRagdollCreator.Create(r, options);
-        PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
-        PuppetMaster.solverIterationCount = 3;
-        PuppetMaster.FlattenHierarchy();
     }
 
     public FullBodyBipedIK CreatePoseIK()
