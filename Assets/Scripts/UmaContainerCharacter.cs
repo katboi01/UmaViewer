@@ -80,9 +80,6 @@ public class UmaContainerCharacter : UmaContainer
     public GameObject PhysicsContainer;
     public float BodyScale = 1;
 
-    private float dragdistance;
-    private Vector3 dragStartPos;
-    private Collider dragCollider;
     private BipedIK IK;
     private PuppetMaster PuppetMaster;
     private List<Transform> _humanoidBones;
@@ -348,49 +345,8 @@ public class UmaContainerCharacter : UmaContainer
             FaceDrivenKeyTarget.SetEyeTrack(finalRotation);
 
             var cam = Camera.main;
-            var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
-            var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
-            var worldPos = cam.ScreenToWorldPoint(mousePos);
-
-            //Hold D key to Drag Body
-            if (Input.GetKey(KeyCode.D))
-            {
-                if (dragCollider && dragCollider.attachedRigidbody)
-                {
-                    if (PuppetMaster)
-                    {
-                        PuppetMaster.pinWeight = 0.75f;
-                        PuppetMaster.muscleWeight = 0.25f;
-                    }
-                    dragCollider.attachedRigidbody.isKinematic = true;
-                    dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
-                    //LookAt Mouse when Dragging
-                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, dragCollider.transform.position, Time.fixedDeltaTime * 3);
-                }
-                else
-                {
-                    if (Physics.Raycast(cam.ScreenPointToRay(mousePos), out RaycastHit hit))
-                    {
-                        dragCollider = hit.collider;
-                        dragStartPos = (hit.point - hit.collider.transform.position);
-                        dragdistance = cam.transform.InverseTransformPoint(hit.point).magnitude;
-                    }
-                    //LookAt Camera
-                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                }
-            }
-            else
-            {
-                if (PuppetMaster)
-                {
-                    PuppetMaster.pinWeight = 1;
-                    PuppetMaster.muscleWeight = 1;
-                }
-                //LookAt Camera
-                TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
-                dragCollider = null;
-            }
+            //LookAt Camera
+            TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
         }
         else
         {
