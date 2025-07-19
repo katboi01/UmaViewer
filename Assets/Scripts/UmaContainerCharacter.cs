@@ -32,6 +32,7 @@ public class UmaContainerCharacter : UmaContainer
     public GameObject UpBodyBone;
     public Vector3 UpBodyPosition;
     public Quaternion UpBodyRotation;
+    public Dictionary<Transform, (Vector3 pos, Quaternion rot)> InitBoneTransform;
 
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
@@ -103,7 +104,8 @@ public class UmaContainerCharacter : UmaContainer
     public void MergeModel()
     {
         if (!Body) return;
-        var bodyBones = Body.GetComponentInChildren<SkinnedMeshRenderer>().bones.ToDictionary(bone => bone.name, bone => bone.transform);
+        var bodySkinnedMeshRenderer = Body.GetComponentInChildren<SkinnedMeshRenderer>();
+        var bodyBones = bodySkinnedMeshRenderer.bones.ToDictionary(bone => bone.name, bone => bone.transform);
         List<Transform> emptyBones = new List<Transform>();
         emptyBones.Add(Body.transform.Find("Position/Hip/Tail_Ctrl"));
         while (Body.transform.childCount > 0)
@@ -196,6 +198,12 @@ public class UmaContainerCharacter : UmaContainer
                     matHlp.Renderers[rend].Add(i);
                 }
             }
+        }
+
+        InitBoneTransform = new Dictionary<Transform, (Vector3 pos, Quaternion rot)>();
+        foreach (var bone in bodySkinnedMeshRenderer.bones)
+        {
+            InitBoneTransform[bone] = (bone.position, bone.rotation);
         }
     }
 
@@ -1578,5 +1586,17 @@ public class UmaContainerCharacter : UmaContainer
         this.FaceDrivenKeyTarget.ChangeMorph();
 
         return true;
+    }
+
+    public void ResetBodyPose()
+    {
+        if(InitBoneTransform == null)
+        {
+            return;
+        }
+        foreach (var pair in InitBoneTransform)
+        {
+            pair.Key.SetPositionAndRotation(pair.Value.pos, pair.Value.rot);
+        }
     }
 }

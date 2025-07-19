@@ -139,9 +139,14 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             transformDictionary.Add(pair.Key.ToString(), pair.Value);
         }
 
-        var animator = GetComponentInParent<UmaContainerCharacter>().UmaAnimator;
+        var characterContainer = GetComponentInParent<UmaContainerCharacter>();
+        var animator = characterContainer.UmaAnimator;
         var state = animator.GetCurrentAnimatorStateInfo(0);
-        animator.Rebind();
+        animator.enabled = false;
+
+        // Set to T-Pose
+        characterContainer.ResetBodyPose();
+        characterContainer.UpBodyReset();
 
         BoneDictionary[BoneNames.左腕].Rotate(0, 0, -aposeDegress);
         BoneDictionary[BoneNames.右腕].Rotate(0, 0, aposeDegress);
@@ -169,6 +174,9 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         boneGhost = new BoneGhost(BoneDictionary, UseBottomCenter);
         morphRecorder = new MorphRecorder(transform);
 
+        BoneDictionary[BoneNames.左腕].Rotate(0, 0, aposeDegress);
+        BoneDictionary[BoneNames.右腕].Rotate(0, 0, -aposeDegress);
+        animator.enabled = true;
         animator.Play(state.shortNameHash, 0, state.normalizedTime);
     }
 
@@ -600,6 +608,13 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             finally
             {
                 binaryWriter.Close();
+            }
+        }
+        if (boneGhost != null)
+        {
+            foreach(var pair in boneGhost.GhostDictionary)
+            {
+                Destroy(pair.Value.ghost.gameObject);
             }
         }
         Destroy(this);
