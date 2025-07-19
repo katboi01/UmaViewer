@@ -746,7 +746,6 @@ public class UmaViewerBuilder : MonoBehaviour
                 Director.instance.InitializeTimeline(characters, UI.LiveMode);
                 Director.instance.InitializeMusic(live.MusicId, characters);
                 Director.instance.Play();
-                LiveViewerUI.Instance.RecordingUI.SetActive(Gallop.Live.Director.instance.IsRecordVMD);
             });
         });
     }

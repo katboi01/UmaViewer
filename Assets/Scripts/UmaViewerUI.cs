@@ -995,6 +995,7 @@ public class UmaViewerUI : MonoBehaviour
                 buttonText.text = "Saving";
                 recorder.SaveVMD(container.name, Config.Instance.VmdKeyReductionLevel);
                 buttonText.text = "Record VMD";
+                ShowMessage($"VMD is saved in {Path.GetFullPath(Application.dataPath + UnityHumanoidVMDRecorder.FileSavePath)}", UIMessageType.Success);
             }
         }
         else

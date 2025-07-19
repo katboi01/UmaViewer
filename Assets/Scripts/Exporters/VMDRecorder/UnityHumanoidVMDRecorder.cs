@@ -8,6 +8,7 @@ using Gallop;
 //初期ポーズ(T,Aポーズ)の時点でアタッチ、有効化されている必要がある
 public class UnityHumanoidVMDRecorder : MonoBehaviour
 {
+    public const string FileSavePath = "/../VMDRecords";
     public bool UseParentOfAll = true;
     public bool UseCenterAsParentOfAll = true;
     /// <summary>
@@ -33,6 +34,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     const float FPSs = 0.03333f;
     const string CenterNameString = "センター";
     const string GrooveNameString = "グルーブ";
+
     public enum BoneNames
     {
         全ての親, センター, 左足ＩＫ, 右足ＩＫ, 上半身, 上半身2, 首, 頭,
@@ -612,15 +614,15 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     /// <param name="keyReductionLevel">キーの書き込み頻度を減らして容量を減らす</param>
     public void SaveVMD(string modelName, int keyReductionLevel = 3)
     {
-        string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
+        string fileName = $"{Application.dataPath}{FileSavePath}/{string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"))}";
+        Directory.CreateDirectory(Application.dataPath + FileSavePath);
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);
     }
 
     public void SaveLiveVMD(LiveEntry liveEntry, DateTime time ,string modelName, int keyReductionLevel = 3)
     {
-        string fileName = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
+        string fileName = $"{Application.dataPath}{FileSavePath}/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
         Directory.CreateDirectory(Path.GetDirectoryName(fileName));
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);
