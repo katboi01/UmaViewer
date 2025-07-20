@@ -1,4 +1,6 @@
+#if !UNITY_ANDROID || UNITY_EDITOR
 using SFB;
+#endif
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -70,9 +72,6 @@ public class UISettingsSound : MonoBehaviour
     public void ExportAudio()
     {
 #if !UNITY_ANDROID || UNITY_EDITOR
-
-
-
         var LiveSources = Builder.CurrentLiveSoundAWB;
         if (LiveSources.Count > 0)
         {
