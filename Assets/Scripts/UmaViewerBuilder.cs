@@ -33,6 +33,10 @@ public class UmaViewerBuilder : MonoBehaviour
     public List<AudioSource> CurrentAudioSources = new List<AudioSource>();
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();
 
+    // Used for keeping track for exports
+    public List<UmaDatabaseEntry> CurrentLiveSoundAWB = new List<UmaDatabaseEntry>();
+    public int CurrentLiveSoundAWBIndex = -1;
+
     public AnimatorOverrideController OverrideController;
     public AnimatorOverrideController FaceOverrideController;
     public AnimatorOverrideController CameraOverrideController;
@@ -753,10 +757,13 @@ public class UmaViewerBuilder : MonoBehaviour
     //Use decrypt function
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
     {
+        CurrentLiveSoundAWBIndex = -1; // mix awb together
+        CurrentLiveSoundAWB.Clear();
         //load character voice
         if (SongAwb != null)
         {
             PlaySound(SongAwb);
+            CurrentLiveSoundAWB.Add(SongAwb);
         }
 
         //load BG
@@ -768,6 +775,7 @@ public class UmaViewerBuilder : MonoBehaviour
             if (BGclip.Count > 0)
             {
                 AddAudioSource(BGclip[0]);
+                CurrentLiveSoundAWB.Add(BGawb);
             }
         }
 
@@ -811,6 +819,13 @@ public class UmaViewerBuilder : MonoBehaviour
 
     }
 
+    public void SetLastAudio(UmaDatabaseEntry AudioAwb, int index)
+    {
+        CurrentLiveSoundAWB.Clear();
+        CurrentLiveSoundAWB.Add(AudioAwb);
+        CurrentLiveSoundAWBIndex = index;
+    }
+
     private void AddAudioSource(AudioClip clip, float volume = 1, bool loop = false)
     {
         AudioSource source;
@@ -827,6 +842,27 @@ public class UmaViewerBuilder : MonoBehaviour
         source.volume = volume;
         source.loop = loop;
         source.Play();
+    }
+
+
+
+    public List<UmaWaveStream> LoadAudioStreams(UmaDatabaseEntry awb)
+    {
+        var streams = new List<UmaWaveStream>();
+        string awbPath = awb.FilePath;
+        if (!File.Exists(awbPath)) return streams;
+
+        FileStream awbFile = File.OpenRead(awbPath);
+        AwbReader awbReader = new AwbReader(awbFile);
+
+        foreach (Wave wave in awbReader.Waves)
+        {
+            var stream = new UmaWaveStream(awbReader, wave.WaveId);
+            streams.Add(stream);
+        }
+         
+
+       return streams;
     }
 
     public static List<AudioClip> LoadAudio(UmaDatabaseEntry awb)
