@@ -1131,6 +1131,10 @@ public class UmaContainerCharacter : UmaContainer
             {
                 LoadAnimation(posMotion);
             }
+            else
+            {
+                OverrideController["clip_p"] = null;
+            }
 
             if (IsMini)
             {
