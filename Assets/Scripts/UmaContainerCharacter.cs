@@ -531,7 +531,7 @@ public class UmaContainerCharacter : UmaContainer
 
             foreach (Renderer r in Body.GetComponentsInChildren<Renderer>())
             {
-                foreach (Material m in r.sharedMaterials)
+                foreach (Material m in r.materials)
                 {
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
 
@@ -674,7 +674,7 @@ public class UmaContainerCharacter : UmaContainer
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
                 //only for mini umas
                 if (head.name.Contains("mchr"))
@@ -823,7 +823,7 @@ public class UmaContainerCharacter : UmaContainer
         var textures = MobHeadTextures;
         foreach (Renderer r in hair.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
 
                 //Glasses's shader need to change manually.
@@ -873,7 +873,7 @@ public class UmaContainerCharacter : UmaContainer
         var textures = TailTextures;
         foreach (Renderer r in Tail.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
                 m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
                 m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
