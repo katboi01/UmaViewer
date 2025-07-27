@@ -533,6 +533,7 @@ public class UmaContainerCharacter : UmaContainer
             {
                 foreach (Material m in r.materials)
                 {
+                    m.name = m.name.Replace(" (Instance)", "");
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
 
                     if (IsMini)
@@ -676,6 +677,7 @@ public class UmaContainerCharacter : UmaContainer
         {
             foreach (Material m in r.materials)
             {
+                m.name = m.name.Replace(" (Instance)", "");
                 //only for mini umas
                 if (head.name.Contains("mchr"))
                 {
@@ -825,7 +827,7 @@ public class UmaContainerCharacter : UmaContainer
         {
             foreach (Material m in r.materials)
             {
-
+                m.name = m.name.Replace(" (Instance)", "");
                 //Glasses's shader need to change manually.
                 if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
                 {
@@ -875,6 +877,7 @@ public class UmaContainerCharacter : UmaContainer
         {
             foreach (Material m in r.materials)
             {
+                m.name = m.name.Replace(" (Instance)", "");
                 m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
                 m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
                 m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("base")));
