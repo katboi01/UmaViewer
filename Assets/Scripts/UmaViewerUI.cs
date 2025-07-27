@@ -625,7 +625,11 @@ public class UmaViewerUI : MonoBehaviour
                         var list = new List<UmaDatabaseEntry>();
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath) && a.Name.Contains(chara.Id.ToString())));
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.HeadPath) && a.Name.Contains(chara.Id.ToString())));
-                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
+                        var tail_path = getCharaTailPath(chara);
+                        if (!string.IsNullOrEmpty(tail_path))
+                        {
+                            list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(tail_path)));
+                        }
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         list.Add(Main.AbList[$"3d/motion/event/body/chara/chr{achara.Id}_00/anm_eve_chr{achara.Id}_00_idle01_loop"]);
 
@@ -681,7 +685,11 @@ public class UmaViewerUI : MonoBehaviour
                         var list = new List<UmaDatabaseEntry>();
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath) && a.Name.Contains(chara.Id.ToString())));
                         list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.HeadPath) && a.Name.Contains(chara.Id.ToString())));
-                        list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith("3d/chara/tail")));
+                        var tail_path = getCharaTailPath(chara);
+                        if (!string.IsNullOrEmpty(tail_path))
+                        {
+                            list.AddRange(Main.AbChara.Where(a => a.Name.StartsWith(tail_path)));
+                        }
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         var motion_path = $"3d/motion/event/body/chara/chr{chara.Id}_00/anm_eve_chr{chara.Id}_00_idle01_loop";
                         if (!chara.IsMob && !ModelSettings.IsHeadFix && Main.AbList.TryGetValue(motion_path, out var motion_entry))
@@ -889,6 +897,28 @@ public class UmaViewerUI : MonoBehaviour
     {
         var entry = Main.Characters.FirstOrDefault(a => a.Id.ToString().Equals(id));
         return (entry == null) ? id.ToString() : entry.GetName();
+    }
+
+    public string getCharaTailPath(CharaEntry chara)
+    {
+        int tailId = 0;
+        if (chara.IsMob)
+        {
+            tailId = 1;
+        }
+        else
+        {
+            var charaData = UmaDatabaseController.ReadCharaData(chara);
+            tailId = Convert.ToInt32(charaData["tail_model_id"]);
+        }
+        if (tailId <= 0)
+        {
+            return string.Empty;
+        }
+        var tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
+        var tailPath = $"3d/chara/tail/{tailName}/";
+        var tailPfb = tailPath + $"pfb_{tailName}";
+        return tailPfb;
     }
 
     public static string GetCostumeName(string costumeId, string defaultname)

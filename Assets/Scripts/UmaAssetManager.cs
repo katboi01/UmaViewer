@@ -72,7 +72,7 @@ public class UmaAssetManager : MonoBehaviour
             else
             {
                 var exist = LoadAB(result[i]);
-                if (!exist && i % percent_num == 0)
+                if (!exist && percent_num > 0 && i % percent_num == 0)
                 {
                     OnLoadProgressChange?.Invoke(i, result.Count, null);
                     yield return null;
