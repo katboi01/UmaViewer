@@ -42,7 +42,7 @@ public class UmaViewerUI : MonoBehaviour
     public ScrollRect SceneList;
     public PageManager ScenePageCtrl;
     public ScrollRect MessageScrollRect;
-    public Text MessageText;
+    public TextMeshProUGUI MessageText;
     public PoseManager PoseManager;
     public HandleManager HandleManager;
 
@@ -1123,6 +1123,7 @@ public class UmaViewerUI : MonoBehaviour
             _ => $"{msg}\n",
         };
         MessageScrollRect.gameObject.SetActive(type != UIMessageType.Close);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(MessageScrollRect.content);
         MessageScrollRect.verticalNormalizedPosition = 0;
     }
 
