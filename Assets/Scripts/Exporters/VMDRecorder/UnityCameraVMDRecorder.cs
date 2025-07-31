@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class UnityCameraVMDRecorder : MonoBehaviour
 {
+    public const string FileSavePath = "/../VMDRecords";
     const float WorldScaleFix = 12.5f;
     const float FPSs = 0.03333f;
 
@@ -209,8 +210,8 @@ public class UnityCameraVMDRecorder : MonoBehaviour
     /// <param name="filePath">保存先の絶対ファイルパス</param>
     public void SaveVMD()
     {
-        string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("Camera_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
+        string fileName = $"{Application.dataPath}{FileSavePath}/{string.Format("Camera_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"))}";
+        Directory.CreateDirectory(Application.dataPath + FileSavePath);
         if (IsRecording)
         {
             Debug.Log(targetCameraTransform.name + "VMD保存前にレコーディングをストップしてください。");
@@ -327,7 +328,7 @@ public class UnityCameraVMDRecorder : MonoBehaviour
 
     public static void SaveLiveCameraVMD(LiveEntry liveEntry,DateTime time, List<LiveCameraFrame> frames, int MultiCameraIndex = -1)
     {
-        string directory = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/";
+        string directory = $"{Application.dataPath}{FileSavePath}/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/";
         Directory.CreateDirectory(directory);
         string fileName = $"{directory}LiveCamera_POS.vmd";
         string fovFileName = $"{directory}LiveCamera_FOV.vmd";

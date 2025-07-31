@@ -150,6 +150,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (asset == null)
         {
             Debug.LogError("No body, can't load!");
+            UmaViewerUI.Instance?.ShowMessage("No body, can't load!", UIMessageType.Error);
             return;
         }
         else if (genericCostume)
@@ -271,7 +272,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        if (tailId != 0)
+        if (tailId > 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
             string tailPath = $"3d/chara/tail/{tailName}/";
@@ -373,6 +374,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (asset == null)
         {
             Debug.LogError("No body, can't load!");
+            UmaViewerUI.Instance?.ShowMessage("No body, can't load!", UIMessageType.Error);
             return;
         }
         else if (genericCostume)
@@ -489,7 +491,7 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
-        if (tailId != 0)
+        if (tailId > 0)
         {
             string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
             string tailPath = $"3d/chara/tail/{tailName}/";
@@ -568,6 +570,7 @@ public class UmaViewerBuilder : MonoBehaviour
         if (asset == null)
         {
             Debug.LogError("No body, can't load!");
+            UmaViewerUI.Instance?.ShowMessage("No body, can't load!", UIMessageType.Error);
             return;
         }
         else if (isGeneric)
@@ -636,7 +639,7 @@ public class UmaViewerBuilder : MonoBehaviour
             umaContainer.LoadHead(asset);
         }
 
-        if (tailId != 0)
+        if (tailId > 0)
         {
             string tailName = $"mtail{tailId.ToString().PadLeft(4, '0')}_00";
             string tailPath = $"3d/chara/mini/tail/{tailName}/";
@@ -750,7 +753,6 @@ public class UmaViewerBuilder : MonoBehaviour
                 Director.instance.InitializeTimeline(characters, UI.LiveMode);
                 Director.instance.InitializeMusic(live.MusicId, characters);
                 Director.instance.Play();
-                LiveViewerUI.Instance.RecordingUI.SetActive(Gallop.Live.Director.instance.IsRecordVMD);
             });
         });
     }

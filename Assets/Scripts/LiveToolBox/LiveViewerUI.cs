@@ -16,6 +16,8 @@ public class LiveViewerUI : MonoBehaviour
 
     public GameObject RecordingUI;
 
+    public Text RecordingText;
+
     public Text LyricsText;
 
     public List<UmaLyricsData> CurrentLyrics = new List<UmaLyricsData>();

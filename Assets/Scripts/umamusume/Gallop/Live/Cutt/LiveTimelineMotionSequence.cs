@@ -128,12 +128,15 @@ namespace Gallop.Live.Cutt
                 double last_current_time = currentTime;
                 if (timescaleKeys.thisList.Count > 0)
                 {
+                    var has_key = false;
                     // apply timescale keys
                     for (int i = timescaleKeys.thisList.Count - 1; i >= 0; i--)
                     {
+                        
                         var scaleKey = timescaleKeys.thisList[i];
                         if (scaleKey.FrameSecond <= currentTime)
                         {
+                            has_key = true;
                             if (scaleKey.FrameSecond <= arg.FrameSecond)
                             {
                                 interval += (last_current_time - arg.FrameSecond) * scaleKey.Timescale * arg.playSpeed;
@@ -145,6 +148,10 @@ namespace Gallop.Live.Cutt
                                 last_current_time = scaleKey.FrameSecond;
                             }
                         }
+                    }
+                    if (!has_key)
+                    {
+                        interval = (currentTime - arg.FrameSecond) * arg.playSpeed; // no timescale keys, use default speed
                     }
                 }
                 else

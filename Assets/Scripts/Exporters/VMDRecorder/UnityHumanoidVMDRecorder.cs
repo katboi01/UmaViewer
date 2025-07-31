@@ -8,6 +8,7 @@ using Gallop;
 //初期ポーズ(T,Aポーズ)の時点でアタッチ、有効化されている必要がある
 public class UnityHumanoidVMDRecorder : MonoBehaviour
 {
+    public const string FileSavePath = "/../VMDRecords";
     public bool UseParentOfAll = true;
     public bool UseCenterAsParentOfAll = true;
     /// <summary>
@@ -33,6 +34,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     const float FPSs = 0.03333f;
     const string CenterNameString = "センター";
     const string GrooveNameString = "グルーブ";
+
     public enum BoneNames
     {
         全ての親, センター, 左足ＩＫ, 右足ＩＫ, 上半身, 上半身2, 首, 頭,
@@ -41,8 +43,7 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         左薬指１, 左薬指２, 左薬指３, 左小指１, 左小指２, 左小指３, 右親指１, 右親指２,
         右人指１, 右人指２, 右人指３, 右中指１, 右中指２, 右中指３, 右薬指１, 右薬指２,
         右薬指３, 右小指１, 右小指２, 右小指３, 左足, 右足, 左ひざ, 右ひざ,
-        左足首, 右足首, None
-        //左つま先, 右つま先は情報付けると足首の回転、位置との矛盾が生じかねない
+        左足首, 右足首, 左足先EX, 右足先EX, None
     }
     //コンストラクタにて初期化
     //全てのボーンを名前で引く辞書
@@ -129,9 +130,8 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 { BoneNames.右ひざ,   objs.Find(a=>a.name.Equals("Knee_R"))},
                 { BoneNames.左足首,   objs.Find(a=>a.name.Equals("Ankle_L"))},
                 { BoneNames.右足首,   objs.Find(a=>a.name.Equals("Ankle_R"))},
-                //左つま先, 右つま先は情報付けると足首の回転、位置との矛盾が生じかねない
-                //{ BoneNames.左つま先,   (animator.GetBoneTransform(HumanBodyBones.LeftToes))},
-                //{ BoneNames.右つま先,   (animator.GetBoneTransform(HumanBodyBones.RightToes))}
+                { BoneNames.左足先EX, objs.Find(a=>a.name.Equals("Toe_L"))},
+                { BoneNames.右足先EX, objs.Find(a=>a.name.Equals("Toe_R"))}
         };
 
         foreach (KeyValuePair<BoneNames, Transform> pair in BoneDictionary)
@@ -139,9 +139,14 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
             transformDictionary.Add(pair.Key.ToString(), pair.Value);
         }
 
-        var animator = GetComponentInParent<UmaContainerCharacter>().UmaAnimator;
+        var characterContainer = GetComponentInParent<UmaContainerCharacter>();
+        var animator = characterContainer.UmaAnimator;
         var state = animator.GetCurrentAnimatorStateInfo(0);
-        animator.Rebind();
+        animator.enabled = false;
+
+        // Set to T-Pose
+        characterContainer.ResetBodyPose();
+        characterContainer.UpBodyReset();
 
         BoneDictionary[BoneNames.左腕].Rotate(0, 0, -aposeDegress);
         BoneDictionary[BoneNames.右腕].Rotate(0, 0, aposeDegress);
@@ -169,6 +174,9 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
         boneGhost = new BoneGhost(BoneDictionary, UseBottomCenter);
         morphRecorder = new MorphRecorder(transform);
 
+        BoneDictionary[BoneNames.左腕].Rotate(0, 0, aposeDegress);
+        BoneDictionary[BoneNames.右腕].Rotate(0, 0, -aposeDegress);
+        animator.enabled = true;
         animator.Play(state.shortNameHash, 0, state.normalizedTime);
     }
 
@@ -602,6 +610,13 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 binaryWriter.Close();
             }
         }
+        if (boneGhost != null)
+        {
+            foreach(var pair in boneGhost.GhostDictionary)
+            {
+                Destroy(pair.Value.ghost.gameObject);
+            }
+        }
         Destroy(this);
     }
 
@@ -614,15 +629,15 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
     /// <param name="keyReductionLevel">キーの書き込み頻度を減らして容量を減らす</param>
     public void SaveVMD(string modelName, int keyReductionLevel = 3)
     {
-        string fileName = Application.dataPath + "/../VMDRecords/" + string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-        Directory.CreateDirectory(Application.dataPath + "/../VMDRecords");
+        string fileName = $"{Application.dataPath}{FileSavePath}/{string.Format("UMA_{0}.vmd", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"))}";
+        Directory.CreateDirectory(Application.dataPath + FileSavePath);
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);
     }
 
     public void SaveLiveVMD(LiveEntry liveEntry, DateTime time ,string modelName, int keyReductionLevel = 3)
     {
-        string fileName = $"{Application.dataPath}/../VMDRecords/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
+        string fileName = $"{Application.dataPath}{FileSavePath}/Live{liveEntry.MusicId}_{time.ToString("yyyy-MM-dd_HH-mm-ss")}/{modelName}.vmd";
         Directory.CreateDirectory(Path.GetDirectoryName(fileName));
         KeyReductionLevel = keyReductionLevel;
         SaveVMD(modelName, fileName);
@@ -655,9 +670,11 @@ public class UnityHumanoidVMDRecorder : MonoBehaviour
                 { BoneNames.左足,     (BoneNames.None, BoneNames.None, BoneNames.センター) },
                 { BoneNames.左ひざ,   (BoneNames.None, BoneNames.None, BoneNames.左足) },
                 { BoneNames.左足首,   (BoneNames.None, BoneNames.None, BoneNames.左ひざ) },
+                { BoneNames.左足先EX,   (BoneNames.None, BoneNames.None, BoneNames.左足首) },
                 { BoneNames.右足,     (BoneNames.None, BoneNames.None, BoneNames.センター) },
                 { BoneNames.右ひざ,   (BoneNames.None, BoneNames.None, BoneNames.右足) },
                 { BoneNames.右足首,   (BoneNames.None, BoneNames.None, BoneNames.右ひざ) },
+                { BoneNames.右足先EX,   (BoneNames.None, BoneNames.None, BoneNames.右足首) },
                 { BoneNames.上半身,   (BoneNames.None, BoneNames.None, BoneNames.センター) },
                 { BoneNames.上半身2,  (BoneNames.None, BoneNames.None, BoneNames.上半身) },
                 { BoneNames.首,       (BoneNames.上半身2, BoneNames.None, BoneNames.上半身) },

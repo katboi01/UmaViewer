@@ -32,6 +32,7 @@ public class UmaContainerCharacter : UmaContainer
     public GameObject UpBodyBone;
     public Vector3 UpBodyPosition;
     public Quaternion UpBodyRotation;
+    public Dictionary<Transform, (Vector3 pos, Quaternion rot)> InitBoneTransform;
 
     [Header("Face")]
     public FaceDrivenKeyTarget FaceDrivenKeyTarget;
@@ -80,11 +81,7 @@ public class UmaContainerCharacter : UmaContainer
     public GameObject PhysicsContainer;
     public float BodyScale = 1;
 
-    private float dragdistance;
-    private Vector3 dragStartPos;
-    private Collider dragCollider;
     private BipedIK IK;
-    private PuppetMaster PuppetMaster;
     private List<Transform> _humanoidBones;
     private UIHandleCharacterRoot handleRoot;
 
@@ -107,7 +104,8 @@ public class UmaContainerCharacter : UmaContainer
     public void MergeModel()
     {
         if (!Body) return;
-        var bodyBones = Body.GetComponentInChildren<SkinnedMeshRenderer>().bones.ToDictionary(bone => bone.name, bone => bone.transform);
+        var bodySkinnedMeshRenderer = Body.GetComponentInChildren<SkinnedMeshRenderer>();
+        var bodyBones = bodySkinnedMeshRenderer.bones.ToDictionary(bone => bone.name, bone => bone.transform);
         List<Transform> emptyBones = new List<Transform>();
         emptyBones.Add(Body.transform.Find("Position/Hip/Tail_Ctrl"));
         while (Body.transform.childCount > 0)
@@ -200,6 +198,12 @@ public class UmaContainerCharacter : UmaContainer
                     matHlp.Renderers[rend].Add(i);
                 }
             }
+        }
+
+        InitBoneTransform = new Dictionary<Transform, (Vector3 pos, Quaternion rot)>();
+        foreach (var bone in bodySkinnedMeshRenderer.bones)
+        {
+            InitBoneTransform[bone] = (bone.position, bone.rotation);
         }
     }
 
@@ -295,11 +299,6 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
-    public void SetPuppetMasterMode(PuppetMaster.Mode mode)
-    {
-        PuppetMaster.mode = mode;
-    }
-
     public void SetDynamicBoneEnable(bool isOn)
     {
         if (IsMini) return;
@@ -338,69 +337,20 @@ public class UmaContainerCharacter : UmaContainer
             if (IK && !IK.enabled)
             {
                 IK.enabled = true;
-                if (PuppetMaster.mode != PuppetMaster.Mode.Active)
-                {
-                    SetPuppetMasterMode(PuppetMaster.Mode.Active);
-                }
             }
 
             var finalRotation = FaceDrivenKeyTarget.GetEyeTrackRotation(TrackTarget.transform.position);
             FaceDrivenKeyTarget.SetEyeTrack(finalRotation);
 
             var cam = Camera.main;
-            var distance = Mathf.Clamp(cam.transform.InverseTransformPoint(HeadBone.transform.position).magnitude - 0.1f, 0, 2);
-            var mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, distance);
-            var worldPos = cam.ScreenToWorldPoint(mousePos);
-
-            //Hold D key to Drag Body
-            if (Input.GetKey(KeyCode.D))
-            {
-                if (dragCollider && dragCollider.attachedRigidbody)
-                {
-                    if (PuppetMaster)
-                    {
-                        PuppetMaster.pinWeight = 0.75f;
-                        PuppetMaster.muscleWeight = 0.25f;
-                    }
-                    dragCollider.attachedRigidbody.isKinematic = true;
-                    dragCollider.transform.position = Vector3.Lerp(dragCollider.transform.position, cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, dragdistance)) - dragStartPos, Time.fixedDeltaTime * 4);
-                    //LookAt Mouse when Dragging
-                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, dragCollider.transform.position, Time.fixedDeltaTime * 3);
-                }
-                else
-                {
-                    if (Physics.Raycast(cam.ScreenPointToRay(mousePos), out RaycastHit hit))
-                    {
-                        dragCollider = hit.collider;
-                        dragStartPos = (hit.point - hit.collider.transform.position);
-                        dragdistance = cam.transform.InverseTransformPoint(hit.point).magnitude;
-                    }
-                    //LookAt Camera
-                    TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                }
-            }
-            else
-            {
-                if (PuppetMaster)
-                {
-                    PuppetMaster.pinWeight = 1;
-                    PuppetMaster.muscleWeight = 1;
-                }
-                //LookAt Camera
-                TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
-                if (dragCollider && dragCollider.attachedRigidbody) dragCollider.attachedRigidbody.isKinematic = false;
-                dragCollider = null;
-            }
+            //LookAt Camera
+            TrackTarget.position = Vector3.Lerp(TrackTarget.position, cam.transform.position, Time.fixedDeltaTime * 3);
         }
         else
         {
             if (IK && IK.enabled)
             {
                 IK.enabled = false;
-                if (PuppetMaster && PuppetMaster.mode != PuppetMaster.Mode.Kinematic)
-                {
-                    SetPuppetMasterMode(PuppetMaster.Mode.Kinematic);
-                }
             }
         }
 
@@ -488,11 +438,6 @@ public class UmaContainerCharacter : UmaContainer
         ik.solvers.lookAt.target = TrackTarget.transform;
         ik.solvers.lookAt.spineWeightCurve = new AnimationCurve(new Keyframe[2] { new Keyframe(0f, 1f), new Keyframe(1f, 0.3f) });
         IK = ik;
-
-        BipedRagdollCreator.Create(r, options);
-        PuppetMaster = PuppetMaster.SetUp(container.transform, 8, 9);
-        PuppetMaster.solverIterationCount = 3;
-        PuppetMaster.FlattenHierarchy();
     }
 
     public FullBodyBipedIK CreatePoseIK()
@@ -586,8 +531,9 @@ public class UmaContainerCharacter : UmaContainer
 
             foreach (Renderer r in Body.GetComponentsInChildren<Renderer>())
             {
-                foreach (Material m in r.sharedMaterials)
+                foreach (Material m in r.materials)
                 {
+                    m.name = m.name.Replace(" (Instance)", "");
                     string mainTex = "", toonMap = "", tripleMap = "", optionMap = "", zekkenNumberTex = "";
 
                     if (IsMini)
@@ -729,8 +675,9 @@ public class UmaContainerCharacter : UmaContainer
 
         foreach (Renderer r in head.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
+                m.name = m.name.Replace(" (Instance)", "");
                 //only for mini umas
                 if (head.name.Contains("mchr"))
                 {
@@ -878,9 +825,9 @@ public class UmaContainerCharacter : UmaContainer
         var textures = MobHeadTextures;
         foreach (Renderer r in hair.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
-
+                m.name = m.name.Replace(" (Instance)", "");
                 //Glasses's shader need to change manually.
                 if (r.name.Contains("Hair") && r.name.Contains("Alpha"))
                 {
@@ -928,8 +875,9 @@ public class UmaContainerCharacter : UmaContainer
         var textures = TailTextures;
         foreach (Renderer r in Tail.GetComponentsInChildren<Renderer>())
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material m in r.materials)
             {
+                m.name = m.name.Replace(" (Instance)", "");
                 m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
                 m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
                 m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("base")));
@@ -1185,6 +1133,10 @@ public class UmaContainerCharacter : UmaContainer
             if (Main.AbList.TryGetValue($"{clip.name.Replace("/body", "/position")}_pos", out UmaDatabaseEntry posMotion))
             {
                 LoadAnimation(posMotion);
+            }
+            else
+            {
+                OverrideController["clip_p"] = null;
             }
 
             if (IsMini)
@@ -1641,5 +1593,17 @@ public class UmaContainerCharacter : UmaContainer
         this.FaceDrivenKeyTarget.ChangeMorph();
 
         return true;
+    }
+
+    public void ResetBodyPose()
+    {
+        if(InitBoneTransform == null)
+        {
+            return;
+        }
+        foreach (var pair in InitBoneTransform)
+        {
+            pair.Key.SetPositionAndRotation(pair.Value.pos, pair.Value.rot);
+        }
     }
 }
