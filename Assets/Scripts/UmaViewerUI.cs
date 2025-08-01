@@ -118,6 +118,7 @@ public class UmaViewerUI : MonoBehaviour
         CameraSettings.AAModeDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
         AssetSettings.LoadedAssetsClear();
         UmaAssetManager.OnLoadedBundleUpdate += AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleRemove += AssetSettings.LoadedAssetsRemove;
         UmaAssetManager.OnLoadedBundleClear += AssetSettings.LoadedAssetsClear;
         
         PoseManager.LoadLocalPoseFiles();
@@ -130,6 +131,7 @@ public class UmaViewerUI : MonoBehaviour
     private void OnDestroy()
     {
         UmaAssetManager.OnLoadedBundleUpdate -= AssetSettings.LoadedAssetsAdd;
+        UmaAssetManager.OnLoadedBundleRemove -= AssetSettings.LoadedAssetsRemove;
         UmaAssetManager.OnLoadedBundleClear -= AssetSettings.LoadedAssetsClear;
     }
 

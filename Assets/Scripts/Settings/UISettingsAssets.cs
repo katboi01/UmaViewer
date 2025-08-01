@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,11 +24,20 @@ public class UISettingsAssets : MonoBehaviour
             FontSize = 18,
             OnClick = (container) =>
             {
-                Process.Start("explorer.exe", "/select," + filePath);
+                System.Diagnostics.Process.Start("explorer.exe", "/select," + filePath);
             }
         };
         LoadedAssetEntries.Add(entry.Name, assetentry);
         LoadedAssetPageCtrl.AddEntries(assetentry);
+    }
+
+    public void LoadedAssetsRemove(UmaDatabaseEntry entry)
+    {
+        if (!LoadedAssetPageCtrl) return;
+        if (!LoadedAssetEntries.ContainsKey(entry.Name)) return;
+        var pageEntry = LoadedAssetEntries[entry.Name];
+        LoadedAssetEntries.Remove(entry.Name);
+        LoadedAssetPageCtrl.RemoveEntry(pageEntry);
     }
 
     public void LoadedAssetsClear()

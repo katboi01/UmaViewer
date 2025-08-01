@@ -1,15 +1,7 @@
-﻿using Gallop;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 public class PageManager : MonoBehaviour
 {
@@ -53,6 +45,25 @@ public class PageManager : MonoBehaviour
         totalPage = Mathf.CeilToInt(Entries.Count / (float)ShowCount);
         if (currentPage == totalPage - 1)
         {
+            LoadPage(currentPage);
+        }
+        else
+        {
+            ((Text)PageText.placeholder).text = $"{currentPage + 1} / {totalPage}";
+        }
+    }
+
+    public void RemoveEntry(Entry entry)
+    {
+        if (!ScrollRect) return;
+
+        if (SearchText)
+            SearchText.text = "";
+        Entries.Remove(entry);
+        totalPage = Mathf.CeilToInt(Entries.Count / (float)ShowCount);
+        if (currentPage > totalPage - 1)
+        {
+            currentPage = Mathf.Max(totalPage - 1, 0);
             LoadPage(currentPage);
         }
         else

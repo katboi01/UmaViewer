@@ -23,6 +23,7 @@ public class UmaAssetManager : MonoBehaviour
         BodyBehindAlphaShader;
 
     public static event Action<UmaDatabaseEntry> OnLoadedBundleUpdate;
+    public static event Action<UmaDatabaseEntry> OnLoadedBundleRemove;
     public static event Action OnLoadedBundleClear;
     public static event Action<int, int, string> OnLoadProgressChange;
 
@@ -104,6 +105,18 @@ public class UmaAssetManager : MonoBehaviour
         return Get(entry);
     }
 
+    public static void UnloadAssetBundle(UmaDatabaseEntry entry, bool unloadAllObjects)
+    {
+        if (instance.NeverUnload.ContainsKey(entry.Name) || !instance.LoadedBundles.ContainsKey(entry.Name)) return;
+        var bundle = instance.LoadedBundles[entry.Name];
+        if(bundle != null)
+        {
+            bundle.Unload(unloadAllObjects);
+        }
+        instance.LoadedBundles.Remove(entry.Name);
+        OnLoadedBundleRemove.Invoke(entry);
+    }
+
     private static bool LoadAB(UmaDatabaseEntry entry, bool neverUnload = false)
     {
         string filePath = entry.FilePath; //downloads the file
@@ -113,28 +126,37 @@ public class UmaAssetManager : MonoBehaviour
         }
         else if (File.Exists(filePath))
         {
-            AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
-            if (!bundle)
+            if (!entry.IsAssetBundle)
             {
-                Debug.Log(filePath + " exists and doesn't work");
-                UmaViewerUI.Instance?.ShowMessage(filePath + " exists and doesn't work", UIMessageType.Error);
-            }
-            if (bundle.name == "shader.a")
-            {
-                neverUnload = true;
-                EyeShader       = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
-                FaceShader      = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
-                HairShader      = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
-                AlphaShader     = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
-                CheekShader     = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
-                EyebrowShader   = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
-                BodyAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
-                BodyBehindAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
-            }
-            AddOrUpdate(entry.Name, bundle, neverUnload);
-            if (!neverUnload)
-            {
+                //used for audio files
+                AddOrUpdate(entry.Name, null, neverUnload);
                 OnLoadedBundleUpdate?.Invoke(entry);
+            }
+            else
+            {
+                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                if (!bundle)
+                {
+                    Debug.Log(filePath + " exists and doesn't work");
+                    UmaViewerUI.Instance?.ShowMessage(filePath + " exists and doesn't work", UIMessageType.Error);
+                }
+                if (bundle.name == "shader.a")
+                {
+                    neverUnload = true;
+                    EyeShader       = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
+                    FaceShader      = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
+                    HairShader      = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
+                    AlphaShader     = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
+                    CheekShader     = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
+                    EyebrowShader   = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+                    BodyAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
+                    BodyBehindAlphaShader = (Shader)bundle.LoadAsset("assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
+                }
+                AddOrUpdate(entry.Name, bundle, neverUnload);
+                if (!neverUnload)
+                {
+                    OnLoadedBundleUpdate?.Invoke(entry);
+                }
             }
         }
         else
@@ -190,17 +212,6 @@ public class UmaAssetManager : MonoBehaviour
     public static bool Exist(UmaDatabaseEntry entry) => Exist(entry.Name);
 
     public static bool Exist(AssetBundle bundle) => instance.LoadedBundles.ContainsValue(bundle);
-
-    private static void UnloadBundle(AssetBundle bundle, bool unloadAllObjects)
-    {
-        if (instance.NeverUnload.ContainsValue(bundle)) return;
-        var entry = instance.LoadedBundles.FirstOrDefault(b => b.Value == bundle);
-        if (entry.Key != null)
-        {
-            instance.LoadedBundles.Remove(entry.Key);
-        }
-        bundle.Unload(unloadAllObjects);
-    }
 
     public static void UnloadAllBundle(bool unloadAllObjects = false)
     {

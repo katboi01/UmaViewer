@@ -21,10 +21,8 @@ public class UmaViewerBuilder : MonoBehaviour
     static UmaViewerUI UI => UmaViewerUI.Instance;
     static UISettingsModel ModelSettings => UmaViewerUI.Instance.ModelSettings;
 
-    public List<AssetBundle> Loaded;
     public List<Shader> ShaderList = new List<Shader>();
     public Material TransMaterialCharas;
-    public Material TransMaterialProps;
     public UmaContainerCharacter CurrentUMAContainer;
     public UmaContainer CurrentOtherContainer;
 
@@ -761,12 +759,12 @@ public class UmaViewerBuilder : MonoBehaviour
     public void LoadLiveSound(int songid, UmaDatabaseEntry SongAwb, bool needLyrics = true)
     {
         CurrentLiveSoundAWBIndex = -1; // mix awb together
-        CurrentLiveSoundAWB.Clear();
+        ClearLiveSounds();
         //load character voice
         if (SongAwb != null)
         {
             PlaySound(SongAwb);
-            CurrentLiveSoundAWB.Add(SongAwb);
+            AddLiveSound(SongAwb);
         }
 
         //load BG
@@ -778,7 +776,7 @@ public class UmaViewerBuilder : MonoBehaviour
             if (BGclip.Count > 0)
             {
                 AddAudioSource(BGclip[0]);
-                CurrentLiveSoundAWB.Add(BGawb);
+                AddLiveSound(BGawb);
             }
         }
 
@@ -824,8 +822,8 @@ public class UmaViewerBuilder : MonoBehaviour
 
     public void SetLastAudio(UmaDatabaseEntry AudioAwb, int index)
     {
-        CurrentLiveSoundAWB.Clear();
-        CurrentLiveSoundAWB.Add(AudioAwb);
+        ClearLiveSounds();
+        AddLiveSound(AudioAwb);
         CurrentLiveSoundAWBIndex = index;
     }
 
@@ -1085,5 +1083,20 @@ public class UmaViewerBuilder : MonoBehaviour
             var fov = AnimationCamera.gameObject.transform.parent.transform.localScale.x;
             AnimationCamera.fieldOfView = fov;
         }
+    }
+
+    private void AddLiveSound(UmaDatabaseEntry entry)
+    {
+        UmaAssetManager.LoadAssetBundle(entry, false, false);
+        CurrentLiveSoundAWB.Add(entry);
+    }
+
+    private void ClearLiveSounds()
+    {
+        foreach (var liveSound in CurrentLiveSoundAWB)
+        {
+            UmaAssetManager.UnloadAssetBundle(liveSound, true);
+        }
+        CurrentLiveSoundAWB.Clear();
     }
 }
