@@ -87,7 +87,7 @@ public class UISettingsSound : MonoBehaviour
             var path = StandaloneFileBrowser.SaveFilePanel("Save Music MP3 File", Config.Instance.MainPath, $"{TitleText.text}", "mp3");
             if (!string.IsNullOrEmpty(path))
             {
-                AudioExporter.ExportAudio(lists, path, Builder.CurrentLiveSoundAWBIndex);
+                StartCoroutine(AudioExporter.ExportAudio(lists, path, Builder.CurrentLiveSoundAWBIndex));
             }
 
         }
