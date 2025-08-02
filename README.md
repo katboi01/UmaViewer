@@ -2,6 +2,14 @@
 
 Unity application that makes it easy to view assets from Uma Musume: Pretty Derby.
 
+## ! EN/Global users !
+
+Currently only the default work mode is supported - you need to download assets using the Download All button in the game's settings for the viewer to work.
+
+In UmaViewer, set WorkMode to Default and Region to Global in the 'Other' Settings tab.
+
+------------
+
 ### Requirements/Installation
 - For Users:
 1. [Uma Musume: Pretty Derby DMM](https://dmg.umamusume.jp/) with full data download is required to run the viewer.
