@@ -13,6 +13,9 @@ public class UmaDatabaseEntry
     public string Checksum;
     public string Prerequisites;
 
+    [NonSerialized]
+    public List<UmaDatabaseEntry> CachedPrerequisites = null;
+
     public string FilePath
     {
         get
@@ -43,15 +46,15 @@ public class UmaDatabaseEntry
 
     public T Get<T>(bool withDependencies = true)
     {
-        UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
-        Object asset = UmaAssetManager.Get(this).LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
+        Object asset = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies)
+            .LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
         return (T)System.Convert.ChangeType(asset, typeof(T));
     }
 
     public IEnumerable<T> GetAll<T>(bool withDependencies = true)
     {
-        UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
-        IEnumerable<Object> assets = UmaAssetManager.Get(this).LoadAllAssets().Where(a => a.GetType() == typeof(T));
+        IEnumerable<Object> assets = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies)
+            .LoadAllAssets().Where(a => a.GetType() == typeof(T));
         return assets.Select(asset => (T)System.Convert.ChangeType(asset, typeof(T)));
     }
 

@@ -19,7 +19,7 @@ public class UmaContainerCharacter : UmaContainer
     public GameObject Head;
     public GameObject Hair;
 
-    public List<Texture2D> TailTextures = new List<Texture2D>();
+    public TextureList TailTextures = new TextureList();
 
     [Header("Animator")]
     public Animator UmaAnimator;
@@ -63,17 +63,17 @@ public class UmaContainerCharacter : UmaContainer
     [Header("Generic")]
     public bool IsGeneric = false;
     public string VarCostumeIdShort, VarCostumeIdLong, VarSkin, VarHeight, VarSocks, VarBust;
-    public List<Texture2D> GenericBodyTextures = new List<Texture2D>();
+    public TextureList GenericBodyTextures = new TextureList();
 
     [Header("Mini")]
     public bool IsMini = false;
-    public List<Texture2D> MiniHeadTextures = new List<Texture2D>();
+    public TextureList MiniHeadTextures = new TextureList();
 
     [Header("Mob")]
     public bool IsMob = false;
     public DataRow MobDressColor;
     public DataRow MobHeadColor;
-    public List<Texture2D> MobHeadTextures = new List<Texture2D>();
+    public TextureList MobHeadTextures = new TextureList();
 
     [Header("Physics")]
     public bool EnablePhysics = true;
@@ -84,6 +84,57 @@ public class UmaContainerCharacter : UmaContainer
     private BipedIK IK;
     private List<Transform> _humanoidBones;
     private UIHandleCharacterRoot handleRoot;
+
+    private List<UmaDatabaseEntry> LoadedAssets = new List<UmaDatabaseEntry>();
+
+    public class TextureList
+    {
+        public class TextureSource
+        {
+            public Texture2D Texture;
+            public UmaDatabaseEntry Entry;
+            public bool Used = false;
+
+            public TextureSource(Texture2D texture, UmaDatabaseEntry entry)
+            {
+                Texture = texture;
+                Entry = entry;
+            }
+        }
+
+        private List<TextureSource> _list = new List<TextureSource>();
+
+        public Texture2D Load(Func<Texture2D, bool> predicate)
+        {
+            var entry = _list.FirstOrDefault(t => predicate(t.Texture));
+            entry.Used = true;
+            return entry.Texture;
+        }
+
+        public Texture2D LoadLast(Func<Texture2D, bool> predicate)
+        {
+            var entry = _list.LastOrDefault(t => predicate(t.Texture));
+            entry.Used = true;
+            return entry.Texture;
+        }
+
+        public Texture2D Load(int index)
+        {
+            var entry = _list[index];
+            entry.Used = true;
+            return entry.Texture;
+        }
+
+        public void Add(Texture2D texture, UmaDatabaseEntry entry)
+        {
+            _list.Add(new TextureSource(texture, entry));
+        }
+
+        public IEnumerable<UmaDatabaseEntry> GetLoadedAssets()
+        {
+            return _list.Select(t=>t.Entry).Distinct();
+        }
+    }
 
     public void Initialize(bool smile)
     {
@@ -486,28 +537,27 @@ public class UmaContainerCharacter : UmaContainer
         {
             if (entry.Name.Contains("/mini/head"))
             {
-                MiniHeadTextures.Add(tex2D);
+                MiniHeadTextures.Add(tex2D, entry);
             }
             else if (entry.Name.Contains("/tail/"))
             {
-                TailTextures.Add(tex2D);
+                TailTextures.Add(tex2D, entry);
             }
             else if (entry.Name.Contains("bdy0"))
             {
-                GenericBodyTextures.Add(tex2D);
+                GenericBodyTextures.Add(tex2D, entry);
             }
             else if (entry.Name.Contains("_face") || entry.Name.Contains("_hair"))
             {
                 if (IsMob)
-                    MobHeadTextures.Add(tex2D);
+                    MobHeadTextures.Add(tex2D, entry);
             }
         }
     }
 
     public void LoadBody(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Get<GameObject>();
-        Body = Instantiate(go, transform);
+        Body = InstantiateEntry(entry, transform);
         UmaAnimator = Body.GetComponent<Animator>();
 
         if (IsMini)
@@ -521,7 +571,7 @@ public class UmaContainerCharacter : UmaContainer
 
         if (IsGeneric)
         {
-            List<Texture2D> textures = GenericBodyTextures;
+            TextureList textures = GenericBodyTextures;
             string costumeIdShort = VarCostumeIdShort,
                    costumeIdLong = VarCostumeIdLong,
                    height = VarHeight,
@@ -538,7 +588,7 @@ public class UmaContainerCharacter : UmaContainer
 
                     if (IsMini)
                     {
-                        m.SetTexture("_MainTex", textures[0]);
+                        m.SetTexture("_MainTex", textures.Load(0));
                     }
                     else
                     {
@@ -566,7 +616,7 @@ public class UmaContainerCharacter : UmaContainer
                                 if (areaTex != null)
                                 {
                                     LoadTextures(areaTex);
-                                    m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains(costumeIdShort) && t.name.EndsWith("area")));
+                                    m.SetTexture("_MaskColorTex", textures.Load(t => t.name.Contains(costumeIdShort) && t.name.EndsWith("area")));
                                     SetMaskColor(m, IsMob ? MobDressColor : CharaData, IsMob);
                                 }
                             }
@@ -620,13 +670,13 @@ public class UmaContainerCharacter : UmaContainer
                                 break;
                         }
                         Debug.Log("Looking for texture " + mainTex);
-                        m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name == mainTex));
-                        m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name == toonMap));
-                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name == tripleMap));
-                        m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name == optionMap));
+                        m.SetTexture("_MainTex", textures.Load(t => t.name == mainTex));
+                        m.SetTexture("_ToonMap", textures.Load(t => t.name == toonMap));
+                        m.SetTexture("_TripleMaskMap", textures.Load(t => t.name == tripleMap));
+                        m.SetTexture("_OptionMaskMap", textures.Load(t => t.name == optionMap));
 
                         if (!string.IsNullOrEmpty(zekkenNumberTex))
-                            m.SetTexture("_ZekkenNumberTex", textures.FirstOrDefault(t => t.name == zekkenNumberTex));
+                            m.SetTexture("_ZekkenNumberTex", textures.Load(t => t.name == zekkenNumberTex));
                     }
                 }
             }
@@ -659,9 +709,8 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadHead(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Get<GameObject>();
         var textures = MobHeadTextures;
-        GameObject head = Instantiate(go, transform);
+        GameObject head = InstantiateEntry(entry, transform);
         Head = head;
 
         AssetTable table = null;
@@ -687,24 +736,24 @@ public class UmaContainerCharacter : UmaContainer
                     }
                     if (r.name == "M_Face")
                     {
-                        m.SetTexture("_MainTex", MiniHeadTextures.First(t => t.name.Contains("face") && t.name.Contains("diff")));
+                        m.SetTexture("_MainTex", MiniHeadTextures.Load(t => t.name.Contains("face") && t.name.Contains("diff")));
                     }
                     if (r.name == "M_Cheek")
                     {
                         m.CopyPropertiesFromMaterial(Builder.TransMaterialCharas);
-                        m.SetTexture("_MainTex", MiniHeadTextures.First(t => t.name.Contains("cheek")));
+                        m.SetTexture("_MainTex", MiniHeadTextures.Load(t => t.name.Contains("cheek")));
                     }
                     if (r.name == "M_Mouth")
                     {
-                        m.SetTexture("_MainTex", MiniHeadTextures.First(t => t.name.Contains("mouth")));
+                        m.SetTexture("_MainTex", MiniHeadTextures.Load(t => t.name.Contains("mouth")));
                     }
                     if (r.name == "M_Eye")
                     {
-                        m.SetTexture("_MainTex", MiniHeadTextures.First(t => t.name.Contains("eye")));
+                        m.SetTexture("_MainTex", MiniHeadTextures.Load(t => t.name.Contains("eye")));
                     }
                     if (r.name.StartsWith("M_Mayu_"))
                     {
-                        m.SetTexture("_MainTex", MiniHeadTextures.First(t => t.name.Contains("mayu")));
+                        m.SetTexture("_MainTex", MiniHeadTextures.Load(t => t.name.Contains("mayu")));
                     }
                 }
                 else
@@ -713,26 +762,26 @@ public class UmaContainerCharacter : UmaContainer
                     {
                         if (m.name.EndsWith("eye"))
                         {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("eye0")));
-                            m.SetTexture("_High0Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi00")));
-                            m.SetTexture("_High1Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi01")));
-                            m.SetTexture("_High2Tex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("hi02")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_eye") && t.name.EndsWith("area")));
+                            m.SetTexture("_MainTex", textures.LoadLast(t => t.name.Contains("_eye") && t.name.EndsWith("eye0")));
+                            m.SetTexture("_High0Tex", textures.LoadLast(t => t.name.Contains("_eye") && t.name.EndsWith("hi00")));
+                            m.SetTexture("_High1Tex", textures.LoadLast(t => t.name.Contains("_eye") && t.name.EndsWith("hi01")));
+                            m.SetTexture("_High2Tex", textures.LoadLast(t => t.name.Contains("_eye") && t.name.EndsWith("hi02")));
+                            m.SetTexture("_MaskColorTex", textures.LoadLast(t => t.name.Contains("_eye") && t.name.EndsWith("area")));
                             SetMaskColor(m, MobHeadColor, "eye", false);
                         }
                         if (m.name.EndsWith("face"))
                         {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
-                            m.SetTexture("_ToonMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("shad_c")));
-                            m.SetTexture("_TripleMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("base")));
-                            m.SetTexture("_OptionMaskMap", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("ctrl")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
+                            m.SetTexture("_MainTex", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
+                            m.SetTexture("_ToonMap", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("shad_c")));
+                            m.SetTexture("_TripleMaskMap", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("base")));
+                            m.SetTexture("_OptionMaskMap", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("ctrl")));
+                            m.SetTexture("_MaskColorTex", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
                             SetMaskColor(m, MobHeadColor, "mayu", true);
                         }
                         if (m.name.EndsWith("mayu"))
                         {
-                            m.SetTexture("_MainTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
-                            m.SetTexture("_MaskColorTex", textures.LastOrDefault(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
+                            m.SetTexture("_MainTex", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("diff")));
+                            m.SetTexture("_MaskColorTex", textures.LoadLast(t => t.name.Contains("_face") && t.name.EndsWith("area") && !t.name.Contains("_eye")));
                             SetMaskColor(m, MobHeadColor, "mayu", true);
                         }
                     }
@@ -749,8 +798,8 @@ public class UmaContainerCharacter : UmaContainer
                         r.gameObject.SetActive(false);
                         if (IsMob)
                         {
-                            CheekTex_0 = MobHeadTextures.FindLast(a => a.name.Contains("cheek0"));
-                            CheekTex_1 = MobHeadTextures.FindLast(a => a.name.Contains("cheek1"));
+                            CheekTex_0 = MobHeadTextures.LoadLast(a => a.name.Contains("cheek0"));
+                            CheekTex_1 = MobHeadTextures.LoadLast(a => a.name.Contains("cheek1"));
                         }
                         else
                         {
@@ -761,15 +810,16 @@ public class UmaContainerCharacter : UmaContainer
 
                     if(Main.AbList.TryGetValue("3d/chara/common/textures/tex_chr_tear00", out var tearEntry))
                     {
-                       var ab =  UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
-                       var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
-                       StaticTear_L = table["tearmesh_l"] as GameObject;
-                       StaticTear_R = table["tearmesh_r"] as GameObject;
-                       if (StaticTear_L && StaticTear_R)
-                       {
+                        LoadedAssets.Add(tearEntry);
+                        var ab =  UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
+                        var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
+                        StaticTear_L = table["tearmesh_l"] as GameObject;
+                        StaticTear_R = table["tearmesh_r"] as GameObject;
+                        if (StaticTear_L && StaticTear_R)
+                        {
                             StaticTear_L.GetComponent<Renderer>().material.mainTexture = tex;
                             StaticTear_R.GetComponent<Renderer>().material.mainTexture = tex;
-                       }
+                        }
                     }
 
                     switch (m.shader.name)
@@ -819,8 +869,7 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadHair(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Get<GameObject>();
-        GameObject hair = Instantiate(go, transform);
+        GameObject hair = InstantiateEntry(entry, transform);
         Hair = hair;
         var textures = MobHeadTextures;
         foreach (Renderer r in hair.GetComponentsInChildren<Renderer>())
@@ -836,20 +885,20 @@ public class UmaContainerCharacter : UmaContainer
 
                 if (m.name.EndsWith("_hair"))
                 {
-                    m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("diff")));
-                    m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("shad_c")));
-                    m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("ctrl")));
-                    m.SetTexture("_MaskColorTex", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("area")));
+                    m.SetTexture("_MainTex", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith("diff")));
+                    m.SetTexture("_ToonMap", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith("shad_c")));
+                    m.SetTexture("_OptionMaskMap", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith("ctrl")));
+                    m.SetTexture("_MaskColorTex", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith("area")));
                     SetMaskColor(m, MobHeadColor, "hair", true);
                     if (IsMob)
                     {
                         var cutoff = CharaData["hair_cutoff"].ToString(); 
                         m.SetFloat("_Cutoff", int.Parse(cutoff) / 10000f); //Not entirely correct, but effective
-                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith(CharaData["sex"].ToString() + "_base")));
+                        m.SetTexture("_TripleMaskMap", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith(CharaData["sex"].ToString() + "_base")));
                     }
                     else
                     {
-                        m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("_hair") && t.name.EndsWith("base")));
+                        m.SetTexture("_TripleMaskMap", textures.Load(t => t.name.Contains("_hair") && t.name.EndsWith("base")));
                     }
                 }
 
@@ -870,18 +919,17 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadTail(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Get<GameObject>();
-        Tail = Instantiate(go, transform);
+        Tail = InstantiateEntry(entry, transform);
         var textures = TailTextures;
         foreach (Renderer r in Tail.GetComponentsInChildren<Renderer>())
         {
             foreach (Material m in r.materials)
             {
                 m.name = m.name.Replace(" (Instance)", "");
-                m.SetTexture("_MainTex", textures.FirstOrDefault(t => t.name.EndsWith("diff")));
-                m.SetTexture("_ToonMap", textures.FirstOrDefault(t => t.name.Contains("shad")));
-                m.SetTexture("_TripleMaskMap", textures.FirstOrDefault(t => t.name.Contains("base")));
-                m.SetTexture("_OptionMaskMap", textures.FirstOrDefault(t => t.name.Contains("ctrl")));
+                m.SetTexture("_MainTex", textures.Load(t => t.name.EndsWith("diff")));
+                m.SetTexture("_ToonMap", textures.Load(t => t.name.Contains("shad")));
+                m.SetTexture("_TripleMaskMap", textures.Load(t => t.name.Contains("base")));
+                m.SetTexture("_OptionMaskMap", textures.Load(t => t.name.Contains("ctrl")));
                 if (IsMob)
                 {
                     SetMaskColor(m, MobHeadColor, "tail", true);
@@ -988,13 +1036,12 @@ public class UmaContainerCharacter : UmaContainer
 
     public void LoadPhysics(UmaDatabaseEntry entry)
     {
-        GameObject go = entry.Get<GameObject>();
         if (!PhysicsContainer)
         {
             PhysicsContainer = new GameObject("PhysicsController");
             PhysicsContainer.transform.SetParent(transform);
         }
-        Instantiate(go, PhysicsContainer.transform);
+        InstantiateEntry(entry, PhysicsContainer.transform);
     }
 
     public void LoadAnimation(UmaDatabaseEntry entry)
@@ -1299,6 +1346,7 @@ public class UmaContainerCharacter : UmaContainer
     {
         if (!Head) return;
         var locatorEntry = Main.AbList["3d/animator/drivenkeylocator"];
+        LoadedAssets.Add(locatorEntry);
         var bundle = UmaAssetManager.LoadAssetBundle(locatorEntry);
         var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), transform) as GameObject;
         locator.name = "DrivenKeyLocator";
@@ -1317,6 +1365,7 @@ public class UmaContainerCharacter : UmaContainer
         var mangaObjects = new List<GameObject>();
         mangaEntry.ForEach(entry =>
         {
+            LoadedAssets.Add(entry);
             AssetBundle ab = UmaAssetManager.LoadAssetBundle(entry);
             var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
             obj.SetActive(false);
@@ -1605,5 +1654,30 @@ public class UmaContainerCharacter : UmaContainer
         {
             pair.Key.SetPositionAndRotation(pair.Value.pos, pair.Value.rot);
         }
+    }
+
+    public List<UmaDatabaseEntry> GetAssetsList()
+    {
+        return LoadedAssets
+            .Concat(TailTextures.GetLoadedAssets())
+            .Concat(GenericBodyTextures.GetLoadedAssets())
+            .Concat(MiniHeadTextures.GetLoadedAssets())
+            .Concat(MobHeadTextures.GetLoadedAssets())
+            .Distinct().ToList();
+    }
+
+    private GameObject InstantiateEntry(UmaDatabaseEntry entry, Transform parent)
+    {
+        if (!LoadedAssets.Contains(entry))
+        {
+            foreach (var asset in UmaAssetManager.SearchAB(UmaViewerMain.Instance, entry))
+            {
+                if (!LoadedAssets.Contains(asset))
+                {
+                    LoadedAssets.Add(asset);
+                }
+            }
+        }
+        return Instantiate(entry.Get<GameObject>());
     }
 }

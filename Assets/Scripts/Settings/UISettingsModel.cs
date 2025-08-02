@@ -110,6 +110,8 @@ public class UISettingsModel : MonoBehaviour
                 ModelExporter.ExportModel(container, path);
             }
         }
+#else
+        UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif
     }
 }

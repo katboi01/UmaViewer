@@ -52,7 +52,7 @@ public class UmaAssetManager : MonoBehaviour
         List<UmaDatabaseEntry> result = new List<UmaDatabaseEntry>();
         foreach (var entry in entries)
         {
-            SearchAB(Main, entry, ref result);
+            result.AddRange(SearchAB(Main, entry));
         }
 
         if (Config.Instance.WorkMode == WorkMode.Standalone)
@@ -92,13 +92,11 @@ public class UmaAssetManager : MonoBehaviour
         if (isRecursive)
         {
             var Main = UmaViewerMain.Instance;
-            List<UmaDatabaseEntry> result = new List<UmaDatabaseEntry>();
-            SearchAB(Main, entry, ref result);
-            foreach (var e in result)
+            foreach (var e in SearchAB(Main, entry))
             {
                 LoadAB(e, neverUnload);
             }
-            return Get(entry.Name);
+            return Get(entry);
         }
 
         LoadAB(entry, neverUnload);
@@ -167,16 +165,26 @@ public class UmaAssetManager : MonoBehaviour
         return false;
     }
 
-    private static void SearchAB(UmaViewerMain Main, UmaDatabaseEntry entry, ref List<UmaDatabaseEntry> result)
+    /// <summary> Returns entry with all dependencies </summary>
+    public static List<UmaDatabaseEntry> SearchAB(UmaViewerMain Main, UmaDatabaseEntry entry)
     {
         if (!string.IsNullOrEmpty(entry.Prerequisites))
         {
-            foreach (string prerequisite in entry.Prerequisites.Split(';'))
+            if (entry.CachedPrerequisites != null) { 
+                return new List<UmaDatabaseEntry>() { entry }.Concat(entry.CachedPrerequisites).ToList(); 
+            }
+            else
             {
-                SearchAB(Main, Main.AbList[prerequisite], ref result);
+                var prerequisites = new List<UmaDatabaseEntry>();
+                foreach (string prerequisite in entry.Prerequisites.Split(';'))
+                {
+                    prerequisites.AddRange(SearchAB(Main, Main.AbList[prerequisite]));
+                }
+                entry.CachedPrerequisites = prerequisites;
+                return new List<UmaDatabaseEntry>() { entry }.Concat(entry.CachedPrerequisites).ToList();
             }
         }
-        result.Add(entry);
+        return new List<UmaDatabaseEntry>() { entry };
     }
 
     public static AssetBundle Get(string name) => instance.LoadedBundles[name];

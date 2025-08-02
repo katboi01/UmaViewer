@@ -91,6 +91,8 @@ public class UISettingsSound : MonoBehaviour
             }
 
         }
+#else
+        UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif
     }
 

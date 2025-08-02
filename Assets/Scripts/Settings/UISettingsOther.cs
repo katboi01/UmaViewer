@@ -74,6 +74,8 @@ public class UISettingsOther : MonoBehaviour
                 Config.Instance.UpdateConfig(true);
             }
         }
+#else
+        UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif
     }
 
@@ -88,6 +90,8 @@ public class UISettingsOther : MonoBehaviour
                 UseShellExecute = true
             });
         }
+#else
+        UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif
     }
 
