@@ -107,6 +107,11 @@ public class UmaContainerCharacter : UmaContainer
         public Texture2D Load(Func<Texture2D, bool> predicate)
         {
             var entry = _list.FirstOrDefault(t => predicate(t.Texture));
+            if (entry == null)
+            {
+                Debug.LogWarning("Texture not found");
+                return null;
+            }
             entry.Used = true;
             return entry.Texture;
         }
