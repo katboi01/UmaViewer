@@ -103,9 +103,9 @@ public class ModelExporter
         SkinnedMeshRenderer earMesh = null;
         foreach (SkinnedMeshRenderer s in container.GetComponentsInChildren<SkinnedMeshRenderer>())
         {
-            if (s.name.Contains("M_Face")) faceMesh = s;
-            else if (s.name.Contains("M_Mayu")) eyebrowMesh = s;
-            else if (s.name.Contains("M_Hair")) earMesh = s;
+            if (s.name.Equals("M_Face")) faceMesh = s;
+            else if (s.name.Equals("M_Mayu")) eyebrowMesh = s;
+            else if (s.name.Equals("M_Hair")) earMesh = s;
         }
 
         var facial = container.FaceDrivenKeyTarget;
@@ -160,7 +160,7 @@ public class ModelExporter
         //assuming base meshes do not have any blend shapes
         foreach (SkinnedMeshRenderer s in container.GetComponentsInChildren<SkinnedMeshRenderer>())
         {
-            if (s.name.Contains("M_Face") || s.name.Contains("M_Mayu") || s.name.Contains("M_Hair"))
+            if (s.name.Equals("M_Face") || s.name.Equals("M_Mayu") || s.name.Equals("M_Hair"))
             {
                 s.sharedMesh.ClearBlendShapes();
             }
