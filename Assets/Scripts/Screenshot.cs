@@ -4,7 +4,6 @@ using System.IO;
 using uGIF;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
-using UnityEngine.UIElements;
 using Image = uGIF.Image;
 
 public class Screenshot : MonoBehaviour
@@ -53,7 +52,6 @@ public class Screenshot : MonoBehaviour
         StartCoroutine(RecordGif(ScreenshotSettings.GifWidth, ScreenshotSettings.GifHeight, ScreenshotSettings.GifTransparent, 10)); //(int)UmaViewerUI.Instance.GifQuality.value));
     }
 
-
     private IEnumerator RecordGif(int width, int height, bool transparent, int quality)
     {
         var camera = GetActiveCamera();
@@ -67,9 +65,11 @@ public class Screenshot : MonoBehaviour
 
         int frame = 0;
         var animeClip = uma.OverrideController["clip_2"];
-        var clipFrameCount = Mathf.RoundToInt(animeClip.length * animeClip.frameRate);
-        StartCoroutine(CaptureToGIFCustom.Instance.Encode(animeClip.frameRate, quality));
-
+        var clipLength = animeClip.length;
+        var frameRate = animeClip.frameRate;
+        var clipFrameCount = Mathf.RoundToInt(clipLength * frameRate);
+        
+        StartCoroutine(CaptureToGIFCustom.Instance.Encode(frameRate, quality));
 
         AnimationSettings.ChangeSpeed(0);
         AnimationSettings.ChangeProgress(0);
@@ -91,6 +91,70 @@ public class Screenshot : MonoBehaviour
         ppLayer.enabled = oldPpState;
         CaptureToGIFCustom.Instance.stop = true;
         ScreenshotSettings.GifButton.interactable = true;
+    }
+
+    public void BeginRecordImageSequence()
+    {
+        if (recording || UmaViewerBuilder.Instance.CurrentUMAContainer == null) return;
+        recording = true;
+        ScreenshotSettings.SequenceButton.interactable = false;
+        StartCoroutine(RecordSequence(ScreenshotSettings.GifWidth, ScreenshotSettings.GifHeight, ScreenshotSettings.GifTransparent, 10, ScreenshotSettings.GifFPS)); //(int)UmaViewerUI.Instance.GifQuality.value));
+    }
+
+    private IEnumerator RecordSequence(int width, int height, bool transparent, int quality, int frameRateOverride = -1)
+    {
+        ScreenshotSettings.SequenceButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
+        string folderName = string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string fileDirectory = Application.persistentDataPath + "/../Screenshots/" + folderName;
+#else
+        string fileDirectory = Application.dataPath + "/../Screenshots/" + folderName;
+#endif
+        Directory.CreateDirectory(fileDirectory);
+
+        var camera = GetActiveCamera();
+        var ppLayer = camera.GetComponent<PostProcessLayer>();
+        bool oldPpState = ppLayer.enabled;
+        ppLayer.enabled = false;
+
+        var uma = UmaViewerBuilder.Instance.CurrentUMAContainer;
+        var animator = uma.UmaAnimator;
+        if (animator == null) yield break;
+
+        int frame = 0;
+        var animeClip = uma.OverrideController["clip_2"];
+        var clipLength = animeClip.length;
+        var frameRate = animeClip.frameRate;
+        var clipFrameCount = Mathf.RoundToInt(clipLength * (frameRateOverride == -1? frameRate : frameRateOverride));
+        var maxNameLength = clipFrameCount.ToString().Length + 1;
+
+        AnimationSettings.ChangeSpeed(0);
+        AnimationSettings.ChangeProgress(0);
+        yield return new WaitForSeconds(1); //wait for dynamicBone to settle;
+
+        while (frame < clipFrameCount)
+        {
+            AnimationSettings.ChangeProgress((float)frame / clipFrameCount);
+            yield return new WaitForEndOfFrame();
+            var tex = GrabFrame(camera, width, height, transparent);
+            var bytes = tex.EncodeToPNG();
+
+            var fileName = $"{fileDirectory}/{frame.ToString().PadLeft(maxNameLength, '0')}.png";
+            File.WriteAllBytes(fileName, bytes);
+
+            Destroy(tex);
+            frame++;
+        }
+
+        recording = false;
+        AnimationSettings.ChangeProgress(0);
+        AnimationSettings.ChangeSpeed(1);
+        ppLayer.enabled = oldPpState;
+        ScreenshotSettings.SequenceButton.interactable = true;
+        ScreenshotSettings.SequenceButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record PNG Sequence";
+
+        var fullpath = Path.GetFullPath(folderName);
+        UmaViewerUI.Instance.ShowMessage($"PNG Sequence saved: {fullpath}", UIMessageType.Success);
     }
 
     public static Texture2D GrabFrame(Camera cam, int width, int height, bool transparent = true)

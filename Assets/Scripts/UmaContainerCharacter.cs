@@ -1055,7 +1055,7 @@ public class UmaContainerCharacter : UmaContainer
 
         if (UmaAnimator)
         {
-            Debug.Log("LiveTime" + UI.LiveTime.ToString());
+            //Debug.Log("LiveTime" + UI.LiveTime.ToString());
             aClip.name = entry.Name; // Need a complete path to find dependencies
             LoadAnimation(aClip);
             return;
