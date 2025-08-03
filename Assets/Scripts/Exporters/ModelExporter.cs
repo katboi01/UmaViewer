@@ -10,6 +10,8 @@ using System.IO;
 using UnityEngine;
 using static LibMMD.Model.Morph;
 using static LibMMD.Model.SkinningOperator;
+
+using static BillboardBuilder;
 //using UnityGLTF;
 
 
@@ -26,6 +28,7 @@ public class ModelExporter
         container.EnableEyeTracking = false;
         container.FaceDrivenKeyTarget?.FacialResetAll();
         AddBlendShape(container);
+        BuildBillboard(container);
 
         var textures = TextureExporter.ExportAllTexture(Path.GetDirectoryName(path), container.gameObject);
         var model = ReadPMXModel(container.CharaEntry, container, textures);
@@ -38,6 +41,7 @@ public class ModelExporter
         writer.Close();
         fileStream.Close();
 
+        RemoveBillboard(container);
         ClearBlendShape(container);
         UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
     }
