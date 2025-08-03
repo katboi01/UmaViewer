@@ -330,12 +330,12 @@ public class ModelExporter
                     Vertex vertex = new Vertex();
                     vertex.Coordinate = renderer.transform.TransformPoint(vertices[i]);
                     vertex.Normal = normals[i];
-                    vertex.UvCoordinate = uv[i];
+                    vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
 
                     vertex.ExtraUvCoordinate = new Vector4[3]
                     {
-                        uv1.Length > 0 ? uv1[i] : Vector2.zero,
-                        uv2.Length > 0 ? uv2[i] : Vector2.zero,
+                        uv1.Length > 0 ? new Vector2(uv1[i].x, 1 - uv1[i].y) : Vector2.zero,
+                        uv2.Length > 0 ? new Vector2(uv2[i].x, 1 - uv2[i].y) : Vector2.zero,
                         colors.Length > 0 ? colors[i] : Color.clear
                     };
 
