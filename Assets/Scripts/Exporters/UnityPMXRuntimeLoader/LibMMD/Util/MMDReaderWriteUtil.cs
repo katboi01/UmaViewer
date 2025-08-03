@@ -109,9 +109,9 @@ namespace LibMMD.Util
             return ret;
         }
 
-        public static void WriteVector3(BinaryWriter writer, Vector3 vector)
+        public static void WriteVector3(BinaryWriter writer, Vector3 vector, bool useSizeAmplifier = true)
         {
-            WriteAmpVector3(writer, vector, WorldSizeAmplifier);
+            WriteAmpVector3(writer, vector, useSizeAmplifier ? WorldSizeAmplifier : 1);
         }
 
         public static void WriteAmpVector3(BinaryWriter writer, Vector3 vector, float amp)

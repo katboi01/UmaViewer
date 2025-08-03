@@ -78,10 +78,10 @@ namespace LibMMD.Writer
                 MMDReaderWriteUtil.WriteAmpVector3(writer, joint.Rotation, Mathf.Rad2Deg);
                 MMDReaderWriteUtil.WriteVector3(writer, joint.PositionLowLimit);
                 MMDReaderWriteUtil.WriteVector3(writer, joint.PositionHiLimit);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationLowLimit);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationHiLimit);
+                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationLowLimit, false);
+                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationHiLimit, false);
                 MMDReaderWriteUtil.WriteVector3(writer, joint.SpringTranslate);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.SpringRotate);
+                MMDReaderWriteUtil.WriteVector3(writer, joint.SpringRotate, false);
             }
         }
 
@@ -286,7 +286,7 @@ namespace LibMMD.Writer
 
                 if (bone.RotAxisFixed)
                 {
-                    MMDReaderWriteUtil.WriteVector3(writer, bone.RotAxis);
+                    MMDReaderWriteUtil.WriteVector3(writer, bone.RotAxis, false);
                 }
 
                 if (bone.AppendRotate || bone.AppendTranslate)
@@ -297,8 +297,8 @@ namespace LibMMD.Writer
 
                 if (bone.UseLocalAxis)
                 {
-                    MMDReaderWriteUtil.WriteVector3(writer, bone.LocalAxisVal.AxisX);
-                    MMDReaderWriteUtil.WriteVector3(writer, bone.LocalAxisVal.AxisZ);
+                    MMDReaderWriteUtil.WriteVector3(writer, bone.LocalAxisVal.AxisX, false);
+                    MMDReaderWriteUtil.WriteVector3(writer, bone.LocalAxisVal.AxisZ, false);
                 }
 
                 if (bone.ReceiveTransform)
@@ -328,8 +328,8 @@ namespace LibMMD.Writer
                 writer.Write(link.HasLimit ? (byte)1 : (byte)0);
                 if (link.HasLimit)
                 {
-                    MMDReaderWriteUtil.WriteVector3(writer, link.LoLimit);
-                    MMDReaderWriteUtil.WriteVector3(writer, link.HiLimit);
+                    MMDReaderWriteUtil.WriteVector3(writer, link.LoLimit, false);
+                    MMDReaderWriteUtil.WriteVector3(writer, link.HiLimit, false);
                 }
             }
         }
@@ -529,7 +529,7 @@ namespace LibMMD.Writer
         private static void WriteVertexBasic(BinaryWriter writer, Vector3 coordinate, Vector3 normal, Vector2 uvCoordinate)
         {
             MMDReaderWriteUtil.WriteVector3(writer, coordinate);
-            MMDReaderWriteUtil.WriteVector3(writer, normal);
+            MMDReaderWriteUtil.WriteVector3(writer, normal, false);
             MMDReaderWriteUtil.WriteVector2(writer, uvCoordinate);
         }
 

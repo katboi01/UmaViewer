@@ -10,6 +10,8 @@ using System.IO;
 using UnityEngine;
 using static LibMMD.Model.Morph;
 using static LibMMD.Model.SkinningOperator;
+
+using static BillboardBuilder;
 //using UnityGLTF;
 
 
@@ -26,6 +28,7 @@ public class ModelExporter
         container.EnableEyeTracking = false;
         container.FaceDrivenKeyTarget?.FacialResetAll();
         AddBlendShape(container);
+        BuildBillboard(container);
 
         var textures = TextureExporter.ExportAllTexture(Path.GetDirectoryName(path), container.gameObject);
         var model = ReadPMXModel(container.CharaEntry, container, textures);
@@ -38,6 +41,7 @@ public class ModelExporter
         writer.Close();
         fileStream.Close();
 
+        RemoveBillboard(container);
         ClearBlendShape(container);
         UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
     }
@@ -326,12 +330,12 @@ public class ModelExporter
                     Vertex vertex = new Vertex();
                     vertex.Coordinate = renderer.transform.TransformPoint(vertices[i]);
                     vertex.Normal = normals[i];
-                    vertex.UvCoordinate = uv[i];
+                    vertex.UvCoordinate = new Vector2(uv[i].x, 1 - uv[i].y);
 
                     vertex.ExtraUvCoordinate = new Vector4[3]
                     {
-                        uv1.Length > 0 ? uv1[i] : Vector2.zero,
-                        uv2.Length > 0 ? uv2[i] : Vector2.zero,
+                        uv1.Length > 0 ? new Vector2(uv1[i].x, 1 - uv1[i].y) : Vector2.zero,
+                        uv2.Length > 0 ? new Vector2(uv2[i].x, 1 - uv2[i].y) : Vector2.zero,
                         colors.Length > 0 ? colors[i] : Color.clear
                     };
 
