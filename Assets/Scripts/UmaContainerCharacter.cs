@@ -1683,6 +1683,6 @@ public class UmaContainerCharacter : UmaContainer
                 }
             }
         }
-        return Instantiate(entry.Get<GameObject>());
+        return Instantiate(entry.Get<GameObject>(), parent.transform);
     }
 }
