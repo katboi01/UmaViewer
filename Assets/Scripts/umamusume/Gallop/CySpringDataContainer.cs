@@ -24,6 +24,7 @@ namespace Gallop
         public bool IsEnableHipMoveParam;
         public float HipMoveInfluenceDistance;
         public float HipMoveInfluenceMaxDistance;
+        public bool UseCorrectScaleCalc;
 
         public List<DynamicBone> DynamicBones = new List<DynamicBone>();
 
