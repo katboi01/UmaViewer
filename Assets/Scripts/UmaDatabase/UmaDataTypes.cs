@@ -181,7 +181,8 @@ public enum UmaFileType
     challengematch,
     collectevent,
     ratingrace,
-    jobs
+    jobs,
+    manualdownloadatlas,
 }
 
 public enum TranslationTables
