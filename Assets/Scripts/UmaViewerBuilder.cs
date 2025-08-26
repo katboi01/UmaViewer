@@ -309,6 +309,9 @@ public class UmaViewerBuilder : MonoBehaviour
         umaContainer.Position = umaContainer.transform.Find("Position");
         umaContainer.SetupBoneHandles();
 
+        var fbx = CurrentUMAContainer.gameObject.AddComponent<FBEx.ExportFBX>();
+        fbx.Skinned = true;
+
         if (!ModelSettings.IsTPose && loadMotion)
         {
             if (Main.AbList.TryGetValue($"3d/motion/event/body/chara/chr{id}_00/anm_eve_chr{id}_00_idle01_loop", out UmaDatabaseEntry entry))
