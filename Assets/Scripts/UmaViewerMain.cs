@@ -63,7 +63,7 @@ public class UmaViewerMain : MonoBehaviour
         loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
         if (Config.Instance.Language == Language.En)
         {
-            var translationsUrl = "https://raw.githubusercontent.com/Hachimi-Hachimi/tl-en/refs/heads/main/localized_data/text_data_dict.json";
+            var translationsUrl = "https://raw.githubusercontent.com/UmaTL/hachimi-tl-en/refs/heads/main/localized_data/text_data_dict.json";
             yield return UmaViewerDownload.DownloadText(translationsUrl, txt =>
             {
                 if (string.IsNullOrEmpty(txt)) return;

@@ -76,7 +76,12 @@ public class UmaDatabaseController
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
-                    
+#if UNITY_STANDALONE_WIN
+            if (!Config.Instance.RegionDetectionPassed)
+            {
+                SetDefaultGameRegion(masterDb);
+            }
+#endif
         }
         catch
         {
@@ -84,7 +89,14 @@ public class UmaDatabaseController
             var msg = $"Database not found at: {Config.Instance.MainPath}";
             if(Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                msg += "\nPlease update the database in the settings panel";
+                if(Config.Instance.Region == Region.Global)
+                {
+                    msg = "Only `Default` mode is supported for Global version. Please change Work Mode to Default in `Other` settings.";
+                }
+                else
+                {
+                    msg += "\nPlease update the database in the settings panel";
+                }
             }
             else
             {
@@ -141,6 +153,50 @@ public class UmaDatabaseController
             }
         }
         return meta;
+    }
+
+    static void SetDefaultGameRegion(SqliteConnection conn)
+    {
+        var str = ReadMaster(conn, "SELECT text FROM text_data LIMIT 1");
+        //check if first character of the first text_data entry is in English
+        bool isAscii = str[0][0].ToString()[0] < 128;
+        Region detectedRegion = isAscii? Region.Global : Region.Jp;
+
+        if (Config.Instance.Region != detectedRegion)
+        {
+            if (detectedRegion == Region.Global)
+                Popup.Create($"Different game region was detected. Current region is {Config.Instance.Region}.\nDo you want to change it? (It can be changed again in `Other` settings)", -1, 200,
+                    "Set to Global (Steam)", () =>
+                    {
+                        Config.Instance.RegionDetectionPassed = true;
+                        Config.Instance.Region = detectedRegion;
+                        Config.Instance.UpdateConfig(false);
+                        UmaViewerUI.Instance.OtherSettings.ApplySettings();
+                        UmaViewerUI.Instance.StartCoroutine(UmaViewerUI.Instance.ApplyGraphicsSettings());
+                    },
+                    "Keep Japan (DMM)", () =>
+                    {
+                        Config.Instance.RegionDetectionPassed = true;
+                        Config.Instance.UpdateConfig(false);
+                    });
+            else
+            {
+                Popup.Create($"Different game region was detected. Current region is {Config.Instance.Region}.\nDo you want to change it? (It can be changed again in `Other` settings)", -1, 200,
+                    "Set to Japan (DMM)", () =>
+                    {
+                        Config.Instance.RegionDetectionPassed = true;
+                        Config.Instance.Region = detectedRegion;
+                        Config.Instance.UpdateConfig(false);
+                        UmaViewerUI.Instance.OtherSettings.ApplySettings();
+                        UmaViewerUI.Instance.StartCoroutine(UmaViewerUI.Instance.ApplyGraphicsSettings());
+                    },
+                    "Keep Global (Steam)", () =>
+                    {
+                        Config.Instance.RegionDetectionPassed = true;
+                        Config.Instance.UpdateConfig(false);
+                    });
+            }
+        }
     }
 
     static List<DataRow> ReadCharaMaster(SqliteConnection conn)
