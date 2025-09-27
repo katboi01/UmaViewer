@@ -11,24 +11,14 @@ public class Config
     public static Config Instance;
     public string Version = "";
 
-    public string DBeKeyTip = "Key to read game database files";
-    public string DBeKeyText;
-    [NonSerialized]
-    public byte[] DBKey = new byte[32] 
-    {
-        0x9C, 0x2B, 0xAB, 0x97, 0xBC, 0xF8, 0xC0, 0xC4,
-        0xF1, 0xA9, 0xEA, 0x78, 0x81, 0xA2, 0x13, 0xF6,
-        0xC9, 0xEB, 0xF9, 0xD8, 0xD4, 0xC6, 0xA8, 0xE4,
-        0x3C, 0xE5, 0xA2, 0x59, 0xBD, 0xE7, 0xE9, 0xFD
-    };
+    public string DBBaseKeyTip = "Base key to read game database files";
+    public string DBBaseKeyText;
+
+    public string DBKeyTip = "Key to read game database files";
+    public string DBKeyText;
 
     public string ABKeyTip = "Key to read asset bundles";
     public string ABKeyText;
-    [NonSerialized]
-    public byte[] ABKey = new byte[]
-    {
-        0x53, 0x2B, 0x46, 0x31, 0xE4, 0xA7, 0xB9, 0x47, 0x3E, 0x7C, 0xFB
-    };
 
     public string LanguageTip = "Affects Uma names on the list. Language options: 0 - En, 1 - Jp";
     public Language Language = Language.En;
@@ -115,6 +105,29 @@ public class Config
         new MorphConvertConfig("口横狭い", new string[] { "Mouth_55_0" })
     };
 
+    [NonSerialized]
+    public byte[] DBBaseKey = new byte[]
+    {
+        0xF1, 0x70, 0xCE, 0xA4, 0xDF, 0xCE, 0xA3, 0xE1,
+        0xA5, 0xD8, 0xC7, 0x0B, 0xD1, 0x00, 0x00, 0x00
+    };
+
+    [NonSerialized]
+    public byte[] DBKey = new byte[]
+    {
+        0x6D, 0x5B, 0x65, 0x33, 0x63, 0x36,
+        0x63, 0x25, 0x54, 0x71, 0x2D, 0x73,
+        0x50, 0x53, 0x63, 0x38, 0x6D, 0x34,
+        0x37, 0x7B, 0x35, 0x63, 0x70, 0x23,
+        0x37, 0x34, 0x53, 0x29, 0x73, 0x43,
+        0x36, 0x33
+    };
+    [NonSerialized]
+    public byte[] ABKey = new byte[]
+    {
+        0x53, 0x2B, 0x46, 0x31, 0xE4, 0xA7, 0xB9, 0x47, 0x3E, 0x7C, 0xFB
+    };
+
 
     public Config()
     {
@@ -132,7 +145,8 @@ public class Config
 
         if (!File.Exists(configPath))
         {
-            DBeKeyText = ByteArrayToHex(DBKey);
+            DBBaseKeyText = ByteArrayToHex(DBBaseKey);
+            DBKeyText = ByteArrayToHex(DBKey);
             ABKeyText = ByteArrayToHex(ABKey);
             File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
         }
@@ -141,13 +155,22 @@ public class Config
             try
             {
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(configPath), this);
-                if (string.IsNullOrEmpty(DBeKeyText))
+
+                if (string.IsNullOrEmpty(DBBaseKeyText))
                 {
-                    DBeKeyText = ByteArrayToHex(DBKey);
+                    DBBaseKeyText = ByteArrayToHex(DBBaseKey);
                 }
                 else
                 {
-                    DBKey = HexToByteArray(DBeKeyText);
+                    DBBaseKey = HexToByteArray(DBBaseKeyText);
+                }
+                if (string.IsNullOrEmpty(DBKeyText))
+                {
+                    DBKeyText = ByteArrayToHex(DBKey);
+                }
+                else
+                {
+                    DBKey = HexToByteArray(DBKeyText);
                 }
                 if (string.IsNullOrEmpty(ABKeyText))
                 {

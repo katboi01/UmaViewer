@@ -77,7 +77,7 @@ public class UmaDatabaseController
                 try
                 {
                     var dbPath = $@"{Config.Instance.MainPath}/meta";
-                    var key = Config.Instance.DBKey;
+                    var key = GenFinalKey(Config.Instance.DBKey);
                     MetaEntries = ReadMetaFromEncryptedDb(dbPath, key, 3);
                 }
                 catch (Exception)
@@ -426,4 +426,15 @@ public class UmaDatabaseController
         GC.WaitForPendingFinalizers();
     }
 
+    public byte[] GenFinalKey(byte[] key)
+    {
+        var baseKey = Config.Instance.DBBaseKey;
+        if (baseKey.Length < 13)
+            throw new Exception("Invalid Base Key length");
+        for (int i = 0; i < key.Length; i++)
+        {
+            key[i] = (byte)(key[i] ^ baseKey[i % 13]);
+        }
+        return key;
+    }
 }
