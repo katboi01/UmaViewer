@@ -67,8 +67,25 @@ public class UmaDatabaseController
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master.mdb;");
             }
 
-            metaDb.Open();
-            MetaEntries = ReadMeta(metaDb);
+            try
+            {
+                metaDb.Open();
+                MetaEntries = ReadMeta(metaDb);
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    var dbPath = $@"{Config.Instance.MainPath}/meta";
+                    var key = Config.Instance.DBKey;
+                    MetaEntries = ReadMetaFromEncryptedDb(dbPath, key, 3);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+
 
             masterDb.Open();
             CharaData = ReadCharaMaster(masterDb);
@@ -100,7 +117,7 @@ public class UmaDatabaseController
             }
             else
             {
-                msg += "\nPlease install the dmm game client";
+                msg += "\nPlease install the dmm game client or check the key settings.";
             }
             UmaViewerUI.Instance.ShowMessage(msg, UIMessageType.Error);
         }
@@ -109,7 +126,7 @@ public class UmaDatabaseController
     static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL";
+        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL"; //filter out manifest entries, whitch have null prerequisites
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
         Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
@@ -143,8 +160,8 @@ public class UmaDatabaseController
                 }
             }
             catch(Exception e) 
-            { 
-                Debug.LogError($"Error caught while reading Entry : \n {e}"); 
+            {
+                Debug.LogError($"Error caught while reading Entry : \n {e}");
             }
             
             if (entry != null && !meta.ContainsKey(entry.Name)) {
@@ -152,6 +169,108 @@ public class UmaDatabaseController
                 meta.Add(entry.Name, entry);
             }
         }
+        return meta;
+    }
+
+    public static Dictionary<string, UmaDatabaseEntry> ReadMetaFromEncryptedDb(string dbPath, byte[] keyBytes, int cipherIndex = -1)
+    {
+        var meta = new Dictionary<string, UmaDatabaseEntry>(StringComparer.Ordinal);
+        IntPtr db = IntPtr.Zero;
+
+        try
+        {
+            db = Sqlite3MC.Open(dbPath);
+
+            if (cipherIndex >= 0)
+            {
+                try
+                {
+                    int cfgRc = Sqlite3MC.MC_Config(db, "cipher", cipherIndex);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"MC_Config thrown: {e}");
+                }
+            }
+
+            int rcKey = Sqlite3MC.Key_SetBytes(db, keyBytes);
+            if (rcKey != Sqlite3MC.SQLITE_OK)
+            {
+                string em = Sqlite3MC.GetErrMsg(db);
+                throw new InvalidOperationException($"sqlite3_key returned rc={rcKey}, errmsg={em}");
+            }
+
+            if (!Sqlite3MC.ValidateReadable(db, out string validateErr))
+            {
+                Debug.LogError($"DB validation after key failed: {validateErr}");
+                throw new InvalidOperationException("DB validation after key failed: " + validateErr);
+            }
+
+            string sql = "SELECT m,n,h,c,d,e FROM a";
+            Sqlite3MC.ForEachRow(sql, db, (stmt) =>
+            {
+                try
+                {
+                    string m = Sqlite3MC.ColumnText(stmt, 0);
+                    string n = Sqlite3MC.ColumnText(stmt, 1);
+                    string h = Sqlite3MC.ColumnText(stmt, 2);
+                    string c = Sqlite3MC.ColumnText(stmt, 3);
+                    string d = Sqlite3MC.ColumnText(stmt, 4);
+                    string e = Sqlite3MC.ColumnText(stmt, 5);
+
+                    if (string.IsNullOrEmpty(m))
+                    {
+                        Debug.LogWarning("Skipping row: empty type string (m).");
+                        return;
+                    }
+
+                    if (!Enum.TryParse<UmaFileType>(m, /*ignoreCase*/ false, out UmaFileType type))
+                    {
+                        Debug.LogWarning($"Unrecognized EntryType Enum Value :{m}");
+                        return;
+                    }
+
+                    if (string.IsNullOrEmpty(n))
+                    {
+                        Debug.LogError($"Invalid entry name '{n}' or URL '{h}'. Skipping row.");
+                        return;
+                    }
+
+                    var entry = new UmaDatabaseEntry
+                    {
+                        Type = type,
+                        Name = n,
+                        Url = h,
+                        Checksum = c,
+                        Prerequisites = d,
+                        Key = e
+                    };
+
+                    if (!meta.ContainsKey(entry.Name))
+                    {
+                        meta.Add(entry.Name, entry);
+                    }
+                }
+                catch (Exception exRow)
+                {
+                    Debug.LogError("Error caught while reading row: " + exRow);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("ReadMetaFromEncryptedDb failed: " + ex);
+            throw;
+        }
+        finally
+        {
+            if (db != IntPtr.Zero)
+            {
+                try { Sqlite3MC.Close(db); }
+                catch (Exception e) { Debug.LogError("Closing DB failed: " + e); }
+            }
+        }
+
         return meta;
     }
 

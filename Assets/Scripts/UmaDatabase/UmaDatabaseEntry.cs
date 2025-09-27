@@ -12,9 +12,40 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
+    public string Key;
+    private byte[] fKey;
 
     [NonSerialized]
     public List<UmaDatabaseEntry> CachedPrerequisites = null;
+
+    public byte[] FKey
+    {
+        get
+        {
+            if (fKey == null && !string.IsNullOrEmpty(Key))
+            {
+                var baseKeys = Config.Instance.ABKey;
+                int baseLen = baseKeys.Length;
+                int keysLen = baseLen * 8;
+                byte[] keys = new byte[keysLen];
+                for (int i = 0; i < baseLen; ++i)
+                {
+                    byte[] keyBytes = BitConverter.GetBytes(long.Parse(Key));
+                    if (!BitConverter.IsLittleEndian)
+                        Array.Reverse(keyBytes);
+
+                    byte b = baseKeys[i];
+                    int baseOffset = i << 3; // i * 8
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        keys[baseOffset + j] = (byte)(b ^ keyBytes[j]);
+                    }
+                }
+                fKey = keys;
+            }
+            return fKey;
+        }
+    }
 
     public string FilePath
     {

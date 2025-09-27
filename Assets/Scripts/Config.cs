@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public class Config
@@ -8,6 +10,25 @@ public class Config
     public static string configPath = Application.dataPath + "/../Config.json";
     public static Config Instance;
     public string Version = "";
+
+    public string DBeKeyTip = "Key to read game database files";
+    public string DBeKeyText;
+    [NonSerialized]
+    public byte[] DBKey = new byte[32] 
+    {
+        0x9C, 0x2B, 0xAB, 0x97, 0xBC, 0xF8, 0xC0, 0xC4,
+        0xF1, 0xA9, 0xEA, 0x78, 0x81, 0xA2, 0x13, 0xF6,
+        0xC9, 0xEB, 0xF9, 0xD8, 0xD4, 0xC6, 0xA8, 0xE4,
+        0x3C, 0xE5, 0xA2, 0x59, 0xBD, 0xE7, 0xE9, 0xFD
+    };
+
+    public string ABKeyTip = "Key to read asset bundles";
+    public string ABKeyText;
+    [NonSerialized]
+    public byte[] ABKey = new byte[]
+    {
+        0x53, 0x2B, 0x46, 0x31, 0xE4, 0xA7, 0xB9, 0x47, 0x3E, 0x7C, 0xFB
+    };
 
     public string LanguageTip = "Affects Uma names on the list. Language options: 0 - En, 1 - Jp";
     public Language Language = Language.En;
@@ -111,6 +132,8 @@ public class Config
 
         if (!File.Exists(configPath))
         {
+            DBeKeyText = ByteArrayToHex(DBKey);
+            ABKeyText = ByteArrayToHex(ABKey);
             File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
         }
         else
@@ -118,6 +141,22 @@ public class Config
             try
             {
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(configPath), this);
+                if (string.IsNullOrEmpty(DBeKeyText))
+                {
+                    DBeKeyText = ByteArrayToHex(DBKey);
+                }
+                else
+                {
+                    DBKey = HexToByteArray(DBeKeyText);
+                }
+                if (string.IsNullOrEmpty(ABKeyText))
+                {
+                    ABKeyText = ByteArrayToHex(ABKey);
+                }
+                else
+                {
+                    ABKey = HexToByteArray(ABKeyText);
+                }
                 File.WriteAllText(configPath, JsonUtility.ToJson(this, true));
             }
             catch (Exception ex)
@@ -126,7 +165,6 @@ public class Config
                 MainPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\Cygames\umamusume";
             }
         }
-
         Instance = this;
     }
 
@@ -137,6 +175,32 @@ public class Config
         {
             UmaViewerUI.Instance.ShowMessage("The configuration has changed. Please restart the application.", UIMessageType.Default);
         }
+    }
+
+    private string ByteArrayToHex(byte[] byteArray)
+    {
+        if (byteArray == null) return string.Empty;
+
+        StringBuilder sb = new StringBuilder(byteArray.Length * 2);
+        foreach (byte b in byteArray)
+        {
+            sb.AppendFormat("{0:X2}", b);
+        }
+        return sb.ToString();
+    }
+
+    private byte[] HexToByteArray(string hex)
+    {
+        if (string.IsNullOrEmpty(hex) || hex.Length % 2 != 0)
+            return new byte[0];
+
+        byte[] result = new byte[hex.Length / 2];
+        for (int i = 0; i < result.Length; i++)
+        {
+            string byteString = hex.Substring(i * 2, 2);
+            result[i] = byte.Parse(byteString, System.Globalization.NumberStyles.HexNumber);
+        }
+        return result;
     }
 }
 
