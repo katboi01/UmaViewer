@@ -132,7 +132,16 @@ public class UmaAssetManager : MonoBehaviour
             }
             else
             {
-                AssetBundle bundle = AssetBundle.LoadFromFile(filePath);
+                AssetBundle bundle;
+                if (long.Parse(entry.Key) == 0)
+                {
+                    bundle = AssetBundle.LoadFromFile(filePath);
+                }
+                else
+                {
+                    var data = AssetBundleDecryptor.DecryptFileToBytes(filePath, long.Parse(entry.Key));
+                    bundle = AssetBundle.LoadFromMemory(data);
+                }
                 if (!bundle)
                 {
                     Debug.Log(filePath + " exists and doesn't work");

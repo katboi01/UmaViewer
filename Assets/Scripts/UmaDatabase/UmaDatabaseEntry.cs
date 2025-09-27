@@ -12,6 +12,7 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
+    public string Key;
 
     [NonSerialized]
     public List<UmaDatabaseEntry> CachedPrerequisites = null;

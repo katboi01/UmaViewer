@@ -67,8 +67,23 @@ public class UmaDatabaseController
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master.mdb;");
             }
 
-            metaDb.Open();
-            MetaEntries = ReadMeta(metaDb);
+            try
+            {
+                metaDb.Open();
+                MetaEntries = ReadMeta(metaDb);
+            }
+            catch (Exception e)
+            {
+                string dbPath = $@"{Config.Instance.MainPath}/meta";
+                byte[] keyBytes = new byte[32] {
+                    0x9C, 0x2B, 0xAB, 0x97, 0xBC, 0xF8, 0xC0, 0xC4,
+                    0xF1, 0xA9, 0xEA, 0x78, 0x81, 0xA2, 0x13, 0xF6,
+                    0xC9, 0xEB, 0xF9, 0xD8, 0xD4, 0xC6, 0xA8, 0xE4,
+                    0x3C, 0xE5, 0xA2, 0x59, 0xBD, 0xE7, 0xE9, 0xFD
+                };
+                MetaEntries = ReadMetaFromEncryptedDb(dbPath, keyBytes, 3);
+            }
+
 
             masterDb.Open();
             CharaData = ReadCharaMaster(masterDb);
@@ -109,7 +124,8 @@ public class UmaDatabaseController
     static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL";
+        //sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL"; Why?
+        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
         Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
@@ -152,6 +168,119 @@ public class UmaDatabaseController
                 meta.Add(entry.Name, entry);
             }
         }
+        return meta;
+    }
+
+    public static Dictionary<string, UmaDatabaseEntry> ReadMetaFromEncryptedDb(string dbPath, byte[] keyBytes, int cipherIndex = -1)
+    {
+        var meta = new Dictionary<string, UmaDatabaseEntry>(StringComparer.Ordinal);
+        IntPtr db = IntPtr.Zero;
+
+        try
+        {
+            // 打开数据库
+            db = Sqlite3MC.Open(dbPath);
+
+            // 可选：设置 cipher index（如果你知道）
+            if (cipherIndex >= 0)
+            {
+                try
+                {
+                    int cfgRc = Sqlite3MC.MC_Config(db, "cipher", cipherIndex);
+                    // Debug.Log($"sqlite3mc_config(cipher,{cipherIndex}) returned {cfgRc}");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"MC_Config thrown: {e}");
+                }
+            }
+
+            // 设置 key（raw bytes）
+            int rcKey = Sqlite3MC.Key_SetBytes(db, keyBytes);
+            if (rcKey != Sqlite3MC.SQLITE_OK)
+            {
+                string em = Sqlite3MC.GetErrMsg(db);
+                throw new InvalidOperationException($"sqlite3_key returned rc={rcKey}, errmsg={em}");
+            }
+
+            // 验证能否读取（必须做）
+            if (!Sqlite3MC.ValidateReadable(db, out string validateErr))
+            {
+                Debug.LogError($"DB validation after key failed: {validateErr}");
+                return meta; // 返回空字典（与你之前选择一致）
+            }
+
+            // 查询并逐行处理： m(0), n(1), h(2), c(3), d(4), e(5)
+            string sql = "SELECT m,n,h,c,d,e FROM a";
+            Sqlite3MC.ForEachRow(sql, db, (stmt) =>
+            {
+                try
+                {
+                    // 读取列（可能为 null）
+                    string m = Sqlite3MC.ColumnText(stmt, 0);
+                    string n = Sqlite3MC.ColumnText(stmt, 1);
+                    string h = Sqlite3MC.ColumnText(stmt, 2);
+                    string c = Sqlite3MC.ColumnText(stmt, 3);
+                    string d = Sqlite3MC.ColumnText(stmt, 4);
+                    string e = Sqlite3MC.ColumnText(stmt, 5);
+
+                    // 解析 type 字符串（保持大小写敏感解析：TryParse(..., false, out type)）
+                    if (string.IsNullOrEmpty(m))
+                    {
+                        Debug.LogWarning("Skipping row: empty type string (m).");
+                        return;
+                    }
+
+                    if (!Enum.TryParse<UmaFileType>(m, /*ignoreCase*/ false, out UmaFileType type))
+                    {
+                        Debug.LogWarning($"Unrecognized EntryType Enum Value :{m}");
+                        return;
+                    }
+
+                    // 校验 name（不能为空）
+                    if (string.IsNullOrEmpty(n))
+                    {
+                        Debug.LogError($"Invalid entry name '{n}' or URL '{h}'. Skipping row.");
+                        return;
+                    }
+
+                    // 构建 entry（对可能为 null 的列做容错：使用 empty string）
+                    var entry = new UmaDatabaseEntry
+                    {
+                        Type = type,
+                        Name = n,
+                        Url = h,
+                        Checksum = c,
+                        Prerequisites = d,
+                        Key = e
+                    };
+
+                    // 去重：只有在不存在相同 name 时添加
+                    if (!meta.ContainsKey(entry.Name))
+                    {
+                        meta.Add(entry.Name, entry);
+                    }
+                    // 否则跳过（你原来的逻辑是这样）
+                }
+                catch (Exception exRow)
+                {
+                    Debug.LogError("Error caught while reading row: " + exRow);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("ReadMetaFromEncryptedDb failed: " + ex);
+        }
+        finally
+        {
+            if (db != IntPtr.Zero)
+            {
+                try { Sqlite3MC.Close(db); }
+                catch (Exception e) { Debug.LogError("Closing DB failed: " + e); }
+            }
+        }
+
         return meta;
     }
 
