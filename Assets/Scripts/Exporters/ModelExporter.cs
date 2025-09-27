@@ -31,7 +31,7 @@ public class ModelExporter
         BuildBillboard(container);
 
         var textures = TextureExporter.ExportAllTexture(Path.GetDirectoryName(path), container.gameObject);
-        var model = ReadPMXModel(container.CharaEntry, container, textures);
+        var model = ReadPMXModel(container, textures, container.CharaEntry);
 
         FileStream fileStream = new FileStream(path, FileMode.Create);
         BinaryWriter writer = new BinaryWriter(fileStream);
@@ -46,15 +46,45 @@ public class ModelExporter
         UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
     }
 
-    public static RawMMDModel ReadPMXModel(CharaEntry entry, UmaContainer container, string[] textures)
+    public static void ExportModel(UmaContainer container, string path)
+    {
+
+        var textures = TextureExporter.ExportAllTexture(Path.GetDirectoryName(path), container.gameObject);
+        var model = ReadPMXModel(container, textures);
+
+        FileStream fileStream = new FileStream(path, FileMode.Create);
+        BinaryWriter writer = new BinaryWriter(fileStream);
+        var config = new ModelConfig() { GlobalToonPath = "Toon" };
+        PMXWriter.Write(writer, model, config);
+
+        writer.Close();
+        fileStream.Close();
+
+        UmaViewerUI.Instance.ShowMessage($"PMX Save at {path}", UIMessageType.Success);
+    }
+
+    public static RawMMDModel ReadPMXModel(UmaContainer container, string[] textures, CharaEntry entry = null)
     {
         RawMMDModel model = new RawMMDModel();
-        model.Name = entry.Name;
-        model.NameEn = entry.GetName();
-        model.Description = model.DescriptionEn = $"{entry.GetName()}\n{modelInfo}";
+        if (entry != null)
+        {
+            model.Name = entry.Name;
+            model.NameEn = entry.GetName();
+            model.Description = model.DescriptionEn = $"{entry.GetName()}\n{modelInfo}";
+        }
+        else
+        {
+            model.Name = container.gameObject.name;
+            model.NameEn = container.gameObject.name;
+            model.Description = model.DescriptionEn = $"{container.gameObject.name}\n{modelInfo}";
+        }
 
         //Rean Bones
         var rootBone = container.transform.Find("Position");
+        if (rootBone == null)
+        {
+            rootBone = container.transform;
+        }
         List<Transform> bones = new List<Transform>(rootBone.GetComponentsInChildren<Transform>());
         bones.RemoveAll(o => o.name.Contains("Col_"));
 
@@ -275,7 +305,10 @@ public class ModelExporter
             {
                 mesh = ((SkinnedMeshRenderer)renderer).sharedMesh;
             }
-
+            if (!mesh.isReadable)
+            {
+                continue;
+            }
             var materials = new List<Material>(renderer.sharedMaterials);
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
@@ -293,8 +326,15 @@ public class ModelExporter
                 mat.DrawSelfShadow = true;
                 mat.EdgeColor = Color.black;
                 mat.EdgeSize = 0.4f;
-                var tex = model.TextureList.Find(t => t.TexturePath.Contains($"/{material.mainTexture.name}.png"));
-                mat.Texture = (tex ?? model.TextureList[0]);
+                if (material.HasProperty("_MainTex"))
+                {
+                    var tex = model.TextureList.Find(t => t.TexturePath.Contains($"/{material.mainTexture.name}.png"));
+                    mat.Texture = (tex ?? model.TextureList[0]);
+                }
+                else
+                {
+                    mat.Texture = model.TextureList[0];
+                }
                 mat.MetaInfo = "";
                 part.BaseShift = baseShift + mesh.GetSubMesh(i).indexStart;
                 part.TriangleIndexNum = mesh.GetSubMesh(i).indexCount;
@@ -317,6 +357,11 @@ public class ModelExporter
                 var meshfilter = mr.GetComponent<MeshFilter>();
                 //Cache this data to avoid copying arrays.
                 var mesh = meshfilter.mesh;
+                if (!mesh.isReadable)
+                {
+                    UmaViewerUI.Instance.ShowMessage($"Export {mesh.name} Failed : Mesh is not readable", UIMessageType.Error);
+                    continue;
+                }
                 var vertices = mesh.vertices;
                 var normals = mesh.normals;
                 var uv = mesh.uv;
@@ -355,6 +400,11 @@ public class ModelExporter
             else if (renderer is SkinnedMeshRenderer smr)
             {
                 var mesh = smr.sharedMesh;
+                if (!mesh.isReadable)
+                {
+                    UmaViewerUI.Instance.ShowMessage($"Export {mesh.name} Failed : Mesh is not readable", UIMessageType.Error);
+                    continue;
+                }
                 var vertices = mesh.vertices;
                 var normals = mesh.normals;
                 var uv = mesh.uv;
