@@ -1103,7 +1103,7 @@ public class UmaContainerCharacter : UmaContainer
         {
             if (IsMini) return;
             OverrideController["clip_p"] = clip;
-            UmaAnimator.Play("motion_1", 2, 0);
+            UmaAnimator.Play("motion_p", 2, 0);
         }
         else if (clip.name.EndsWith("_cam"))
         {
@@ -1148,7 +1148,7 @@ public class UmaContainerCharacter : UmaContainer
             Builder.SetPreviewCamera(null);
             OverrideController["clip_1"] = OverrideController["clip_2"];
             OverrideController["clip_2"] = clip;
-            UmaAnimator.Play("motion_1", -1, 0);
+            UmaAnimator.Play("motion_1", 0, 0);
             UmaAnimator.SetTrigger((motion_s != null && motion_e != null) ? "next_e" : ((motion_s != null) ? "next_s" : "next"));
         }
         else
@@ -1159,7 +1159,9 @@ public class UmaContainerCharacter : UmaContainer
                 isAnimatorControl = false;
             }
             UpBodyReset();
+            var pos_weight = UmaAnimator.GetLayerWeight(2);
             UmaAnimator.Rebind();
+            UmaAnimator.SetLayerWeight(2, pos_weight); //keep position layer weight
             OverrideController["clip_2"] = clip;
             // If Cut-in, play immediately without state interpolation
 
