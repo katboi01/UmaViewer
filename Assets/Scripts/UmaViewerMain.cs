@@ -59,6 +59,12 @@ public class UmaViewerMain : MonoBehaviour
         var MobCharaData = UmaDatabaseController.Instance.MobCharaData;
         var loadingUI = UmaSceneController.instance;
 
+
+        //修改(载入通用服装ColorSet相关)
+        var charaDressColor = UmaDatabaseController.Instance.CharaDressColor;
+
+
+
         //EN Translations
         loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
         if (Config.Instance.Language == Language.En)

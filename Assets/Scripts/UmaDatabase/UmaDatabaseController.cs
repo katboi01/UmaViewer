@@ -45,6 +45,11 @@ public class UmaDatabaseController
     public List<DataRow> LiveData;
     public List<DataRow> DressData;
 
+
+    //修改(载入通用服装ColorSet相关)
+    public List<DataRow> CharaDressColor;
+
+
     /// <summary> Meta Database Connection </summary>
     public SqliteConnection metaDb;
     /// <summary> Master Database Connection </summary>
@@ -93,6 +98,12 @@ public class UmaDatabaseController
             FaceTypeData = ReadFaceTypeData(masterDb);
             LiveData = ReadAllLiveData(masterDb);
             DressData = ReadAllDressData(masterDb);
+
+
+            //修改(载入通用服装ColorSet相关)
+            CharaDressColor = ReadAllCharaDressColor(masterDb);
+
+
 #if UNITY_STANDALONE_WIN
             if (!Config.Instance.RegionDetectionPassed)
             {
@@ -122,6 +133,16 @@ public class UmaDatabaseController
             UmaViewerUI.Instance.ShowMessage(msg, UIMessageType.Error);
         }
     }
+
+
+
+    //修改(载入通用服装ColorSet相关)
+    static List<DataRow> ReadAllCharaDressColor(SqliteConnection conn)
+    {
+        return ReadMaster(conn, "SELECT * FROM chara_dress_color_set");
+    }
+
+
 
     static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {

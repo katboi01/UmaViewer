@@ -44,6 +44,39 @@ namespace Gallop
                     child.transform.localScale = Vector3.one;
                     colliders.Add(child.name, child.transform);
 
+
+                    //修改(动骨与碰撞相关)
+                    if (collider._collisionName == "Col_B_Hip_Tail")
+                    {
+                        collider._radius *= 0.96f;
+                    }
+                    else if (collider._collisionName == "Col_B_Chest_Tail")
+                    {
+                        collider._radius *= 1.14f;
+                    }
+                    else if (collider._collisionName.Contains("Col_B_Hip_Skirt"))
+                    {
+                        collider._radius *= 0.8f;
+                    }
+                    else if (collider._collisionName.Contains("Col_B_Hip_Jacket"))
+                    {
+                        collider._radius *= 1f;
+                    }
+                    else if (collider._collisionName == "Col_Elbow_R_Hair")
+                    {
+                        collider._radius *= 0.3f;
+                    }
+                    else if (collider._collisionName == "Col_Elbow_L_Hair")
+                    {
+                        collider._radius *= 0.3f;
+                    }
+                    else
+                    {
+                        collider._radius *= 0.9f;
+                    }
+
+
+
                     switch (collider._type)
                     {
                         case CySpringCollisionData.CollisionType.Capsule:
@@ -78,78 +111,125 @@ namespace Gallop
             return colliders;
         }
 
+
+
+        //修改(动骨与碰撞相关)
         public void InitializePhysics(Dictionary<string, Transform> bones, Dictionary<string, Transform> colliders)
         {
             DynamicBones.Clear();
+        
+            // 获取对象名称并判断类型
+            string nameLower = gameObject.name.ToLower();
+            bool isTailObject = nameLower.Contains("tail"); // 判断是否为尾巴
+            bool isClothObject = !isTailObject && nameLower.Contains("chr"); // 判断是否为头发，排除尾巴避免重复匹配
+        
             foreach (CySpringParamDataElement spring in springParam)
             {
-                if (bones.TryGetValue(spring._boneName,out Transform bone))
+                if (!bones.TryGetValue(spring._boneName, out Transform bone)) continue;
+        
+                var dynamic = bone.gameObject.AddComponent<DynamicBone>();
+                dynamic.m_Root = bone;
+        
+                // 设置重力
+                dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30f / spring._gravity), 0);
+                dynamic.m_LimitAngel_Min = spring._limitAngleMin;
+                dynamic.m_LimitAngel_Max = spring._limitAngleMax;
+        
+                // 主参数设置
+                if (isTailObject)
                 {
-                    bool isTail = gameObject.name.Contains("tail");//The tail needs less traction
-                    var dynamic = bone.gameObject.AddComponent<DynamicBone>();
-                    dynamic.m_Root = bone;
-                    dynamic.m_Gravity = new Vector3(0, Mathf.Clamp01(-30 / spring._gravity), 0);
-                    dynamic.m_LimitAngel_Min = spring._limitAngleMin;
-                    dynamic.m_LimitAngel_Max = spring._limitAngleMax;
-                    if (isTail)
+                    // 尾巴主骨骼
+                    dynamic.m_Damping = 0.05f;
+                    dynamic.m_Stiffness = Mathf.Clamp01(20f / spring._stiffnessForce);
+                    dynamic.m_Elasticity = Mathf.Clamp01(20f / spring._dragForce);
+                    dynamic.m_Radius = spring._collisionRadius * 0.9f;
+                    dynamic.m_Inert = spring.MoveSpringApplyRate / 4f;
+                }
+                else if (isClothObject)
+                {
+                    // 头发主骨骼
+                    dynamic.m_Damping = 0.1f;
+                    dynamic.m_Stiffness = Mathf.Clamp01(15f / spring._stiffnessForce);
+                    dynamic.m_Elasticity = Mathf.Clamp01(20f / spring._dragForce);
+                    dynamic.m_Radius = spring._collisionRadius * 0.9f;
+                    dynamic.m_Inert = spring.MoveSpringApplyRate / 2.5f;
+                }
+                else
+                {
+                    // 衣服主骨骼
+                    dynamic.m_Damping = 0.1f;
+                    dynamic.m_Stiffness = Mathf.Clamp01(20f / spring._stiffnessForce);
+                    dynamic.m_Elasticity = Mathf.Clamp01(30f / spring._dragForce);
+                    dynamic.m_Radius = spring._collisionRadius * 0.8f;
+                    dynamic.m_Inert = spring.MoveSpringApplyRate / 3f;
+                }
+        
+                dynamic.SetupParticles();
+                DynamicBones.Add(dynamic);
+        
+                // 主碰撞器添加
+                foreach (string collisionName in spring._collisionNameList)
+                {
+                    if (colliders.TryGetValue(collisionName, out Transform tmp))
                     {
-                        dynamic.m_Damping = 0.1f;
-                        dynamic.m_Stiffness = Mathf.Clamp01(10 / spring._stiffnessForce);
-                        dynamic.m_Elasticity = Mathf.Clamp01(10 / spring._dragForce);
+                        dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
+                    }
+                }
+        
+                // 子参数设置
+                foreach (var child in spring._childElements)
+                {
+                    var tempParticle = dynamic.Particles.Find(p => p.m_Transform.gameObject.name == child._boneName);
+                    if (tempParticle == null) continue;
+        
+                    if (isTailObject)
+                    {
+                        // 尾巴子粒子
+                        tempParticle.m_Damping = 0.05f;
+                        tempParticle.m_Stiffness = Mathf.Clamp01(20f / child._stiffnessForce);
+                        tempParticle.m_Elasticity = Mathf.Clamp01(20f / child._dragForce);
+                        tempParticle.m_Radius = child._collisionRadius * 1f;
+                        tempParticle.m_Inert = child.MoveSpringApplyRate / 4f;
+                    }
+                    else if (isClothObject)
+                    {
+                        // 头发子粒子
+                        tempParticle.m_Damping = 0.1f;
+                        tempParticle.m_Stiffness = Mathf.Clamp01(15f / child._stiffnessForce);
+                        tempParticle.m_Elasticity = Mathf.Clamp01(20f / child._dragForce);
+                        tempParticle.m_Radius = child._collisionRadius * 1f;
+                        tempParticle.m_Inert = child.MoveSpringApplyRate / 2.5f;
                     }
                     else
                     {
-                        dynamic.m_Damping = 0.2f;
-                        dynamic.m_Stiffness = Mathf.Clamp01(45 / spring._stiffnessForce);
-                        dynamic.m_Elasticity = Mathf.Clamp01(45 / spring._dragForce);
-
+                        // 衣服子粒子
+                        tempParticle.m_Damping = 0.1f;
+                        tempParticle.m_Stiffness = Mathf.Clamp01(20f / child._stiffnessForce);
+                        tempParticle.m_Elasticity = Mathf.Clamp01(30f / child._dragForce);
+                        tempParticle.m_Radius = child._collisionRadius * 0.8f;
+                        tempParticle.m_Inert = child.MoveSpringApplyRate / 2f;
                     }
-                    dynamic.m_Radius = spring._collisionRadius;
-                    dynamic.m_Inert = spring.MoveSpringApplyRate / 3;
-                    dynamic.SetupParticles();
-                    DynamicBones.Add(dynamic);
-
-                    foreach (string collisionName in spring._collisionNameList)
+        
+                    tempParticle.m_LimitAngel_Min = child._limitAngleMin;
+                    tempParticle.m_LimitAngel_Max = child._limitAngleMax;
+        
+                    // 子碰撞器添加
+                    foreach (string collisionName in child._collisionNameList)
                     {
-                        if (colliders.TryGetValue(collisionName,out Transform tmp))
+                        if (colliders.TryGetValue(collisionName, out Transform tmp))
                         {
-                            dynamic.Particles[0].m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
-                        }
-                    }
-
-                    foreach (CySpringParamDataChildElement Childcollision in spring._childElements)
-                    {
-                        var tempParticle = dynamic.Particles.Find(a => { return a.m_Transform.gameObject.name == Childcollision._boneName; });
-                        if (tempParticle != null)
-                        {
-                            if (isTail)
+                            var collider = tmp.GetComponent<DynamicBoneColliderBase>();
+                            if (collider != null)
                             {
-                                tempParticle.m_Damping = 0.1f;
-                                tempParticle.m_Stiffness = Mathf.Clamp01(10 / Childcollision._stiffnessForce);
-                                tempParticle.m_Elasticity = Mathf.Clamp01(10 / Childcollision._dragForce);
-                            }
-                            else
-                            {
-                                tempParticle.m_Damping = 0.2f;
-                                tempParticle.m_Stiffness = Mathf.Clamp01(45 / Childcollision._stiffnessForce);
-                                tempParticle.m_Elasticity = Mathf.Clamp01(45 / Childcollision._dragForce);
-                            }
-                            tempParticle.m_Inert = Childcollision.MoveSpringApplyRate / 3;
-                            tempParticle.m_Radius = Childcollision._collisionRadius;
-                            tempParticle.m_LimitAngel_Min = Childcollision._limitAngleMin;
-                            tempParticle.m_LimitAngel_Max = Childcollision._limitAngleMax;
-                            foreach (string collisionName in Childcollision._collisionNameList)
-                            {
-                                if (colliders.TryGetValue(collisionName,out Transform tmp))
-                                {
-                                    tempParticle.m_Colliders.Add(tmp.GetComponent<DynamicBoneColliderBase>());
-                                }
+                                tempParticle.m_Colliders.Add(collider);
                             }
                         }
                     }
                 }
             }
         }
+
+
 
         public void EnablePhysics(bool isOn)
         {

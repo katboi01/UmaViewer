@@ -608,6 +608,9 @@ public class UmaContainerCharacter : UmaContainer
                         }
 
                         //BodyAlapha's shader need to change manually.
+
+
+                        //修改(载入通用服装ColorSet相关)
                         if (m.name.Contains("bdy"))
                         {
                             if (m.name.Contains("Alpha"))
@@ -616,16 +619,32 @@ public class UmaContainerCharacter : UmaContainer
                             }
                             else
                             {
-                                //some costume use area texture
-                                var areaTex = UmaViewerMain.Instance.AbChara.FirstOrDefault(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/textures") && a.Name.EndsWith("area"));
-                                if (areaTex != null)
+
+                                var areaTexCandidates = UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith(UmaDatabaseController.BodyPath + $"bdy{costumeIdShort}/textures") && a.Name.EndsWith("area")).ToList();
+                                if (areaTexCandidates.Count > 0)
                                 {
-                                    LoadTextures(areaTex);
-                                    m.SetTexture("_MaskColorTex", textures.Load(t => t.name.Contains(costumeIdShort) && t.name.EndsWith("area")));
-                                    SetMaskColor(m, IsMob ? MobDressColor : CharaData, IsMob);
+                                    foreach (var areaEntry in areaTexCandidates)
+                                    {
+                                        LoadTextures(areaEntry);
+                                    }
+                                    var defaultAreaTex = GenericBodyTextures.Load(t => t.name.Contains(costumeIdShort) && t.name.EndsWith("0_area"));
+                                    if (defaultAreaTex != null)
+                                    {
+                                        m.SetTexture("_MaskColorTex", defaultAreaTex);
+                                    }
+                                    if (IsMob)
+                                    {
+                                        SetMaskColor(m, MobDressColor, true);
+                                    }
+                                    else
+                                    {
+                                        ApplyDressColorAndArea(m);
+                                    }
                                 }
                             }
                         }
+
+
 
                         switch (costumeIdShort.Split('_')[0]) //costume ID
                         {
@@ -922,6 +941,17 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
+
+
+    //修改(载入专用尾巴相关)
+    public void LoadExclusiveTail(UmaDatabaseEntry entry)
+    {
+        GameObject go = entry.Get<GameObject>();
+        Tail = Instantiate(go, transform);
+    }
+
+
+
     public void LoadTail(UmaDatabaseEntry entry)
     {
         Tail = InstantiateEntry(entry, transform);
@@ -956,6 +986,92 @@ public class UmaContainerCharacter : UmaContainer
         }
     }
 
+
+
+    //修改(载入通用服装ColorSet相关)
+    public void RefreshDressColor()
+    {
+        foreach (var materialHelper in Materials)
+        {
+            var mat = materialHelper.Mat;
+            if (mat == null) continue;
+    
+            if (mat.name.Contains("bdy") && !mat.name.Contains("Alpha"))
+            {
+                if (mat.HasProperty("_MaskColorTex"))
+                {
+                    if (IsMob)
+                    {
+                        SetMaskColor(mat, MobDressColor, true);
+                    }
+                    else
+                    {
+                        ApplyDressColorAndArea(mat);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    //修改(载入通用服装ColorSet相关)
+    private void ApplyDressColorAndArea(Material mat)
+    {
+        var uma = Builder.CurrentUMAContainer;
+        if (uma == null || string.IsNullOrEmpty(uma.VarCostumeIdShort)) return;
+
+        string selectedId = UmaViewerUI.CurrentSelectedColorSetId;
+        var parts = uma.VarCostumeIdShort.Split('_');
+        if (parts.Length < 2) return;
+
+        if (!int.TryParse(parts[0], out int bodyType)) return;
+        if (!int.TryParse(parts[1], out int bodyTypeSub)) return;
+
+        DataRow charaColor = null;
+        var dressRow = UmaDatabaseController.Instance.DressData.FirstOrDefault(row =>
+            int.Parse(row["body_type"].ToString()) == bodyType &&
+            int.Parse(row["body_type_sub"].ToString()) == bodyTypeSub);
+
+        if (dressRow != null && dressRow["body_setting"].ToString() == "4")
+        {
+            string dressId = dressRow["id"].ToString();
+            var colorSetRows = UmaDatabaseController.Instance.CharaDressColor
+                .Where(row => row["dress_id"].ToString() == dressId).ToList();
+
+            charaColor = !string.IsNullOrEmpty(selectedId)
+                ? colorSetRows.FirstOrDefault(row => row["id"].ToString() == selectedId)
+                : null;
+            if (charaColor == null && colorSetRows.Count > 0) charaColor = colorSetRows.First();
+        }
+        else
+        {
+            charaColor = !string.IsNullOrEmpty(selectedId)
+                ? UmaDatabaseController.Instance.CharaDressColor.FirstOrDefault(row => row["id"].ToString() == selectedId)
+                : null;
+            if (charaColor == null) charaColor = UmaDatabaseController.Instance.CharaDressColor.FirstOrDefault();
+        }
+
+        if (charaColor == null) return;
+
+        Texture2D areaTex = null;
+        try
+        {
+            if (charaColor.Table.Columns.Contains("area_map_id"))
+            {
+                int areaMapId = Convert.ToInt32(charaColor["area_map_id"]);
+                string suffix = areaMapId.ToString("D2") + "_area";
+                areaTex = GenericBodyTextures.Load(t => t.name.EndsWith(suffix));
+            }
+        }
+        catch { }
+
+        if (areaTex != null) mat.SetTexture("_MaskColorTex", areaTex);
+        SetMaskColor(mat, charaColor, false);
+    }
+
+
+
     private void SetMaskColor(Material mat, DataRow colordata, bool IsMob)
     {
         mat.EnableKeyword("USE_MASK_COLOR");
@@ -977,19 +1093,23 @@ public class UmaContainerCharacter : UmaContainer
         }
         else
         {
-            ColorUtility.TryParseHtmlString("#" + colordata["image_color_main"].ToString(), out c1);
-            ColorUtility.TryParseHtmlString("#" + colordata["image_color_sub"].ToString(), out c2);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_color_sub"].ToString(), out c3);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_color_sub"].ToString(), out c4);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_training_color_1"].ToString(), out c5);
-            ColorUtility.TryParseHtmlString("#" + colordata["ui_training_color_2"].ToString(), out c6);
-            float toonstrength = 0.8f;
-            t1 = c1 * toonstrength;
-            t2 = c2 * toonstrength;
-            t3 = c3 * toonstrength;
-            t4 = c4 * toonstrength;
-            t5 = c5 * toonstrength;
-            t6 = c6 * toonstrength;
+
+
+            //修改(载入通用服装ColorSet相关)
+            ColorUtility.TryParseHtmlString(colordata["color_r1"].ToString(), out c1);
+            ColorUtility.TryParseHtmlString(colordata["color_r2"].ToString(), out c2);
+            ColorUtility.TryParseHtmlString(colordata["color_g1"].ToString(), out c3);
+            ColorUtility.TryParseHtmlString(colordata["color_g2"].ToString(), out c4);
+            ColorUtility.TryParseHtmlString(colordata["color_b1"].ToString(), out c5);
+            ColorUtility.TryParseHtmlString(colordata["color_b2"].ToString(), out c6);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_r1"].ToString(), out t1);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_r2"].ToString(), out t2);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_g1"].ToString(), out t3);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_g2"].ToString(), out t4);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_b1"].ToString(), out t5);
+            ColorUtility.TryParseHtmlString(colordata["toon_color_b2"].ToString(), out t6);
+
+
         }
 
         mat.SetColor("_MaskColorR1", c1);

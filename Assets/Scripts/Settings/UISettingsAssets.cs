@@ -66,7 +66,11 @@ public class UISettingsAssets : MonoBehaviour
                 if (File.Exists(asset.FilePath) && !File.Exists(outName))
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
-                    File.Copy(asset.FilePath, outName);
+
+                    //修改(导出解密ab包)
+                    var decryptedData = AssetBundleDecryptor.DecryptFileToBytes(asset.FilePath, asset.FKey);
+                    File.WriteAllBytes(outName, decryptedData);
+
                 }
             }
             UmaViewerUI.Instance.ShowMessage($"{LoadedAssetEntries.Count} files copied", UIMessageType.Success);
@@ -96,7 +100,11 @@ public class UISettingsAssets : MonoBehaviour
                 if (File.Exists(asset.FilePath) && !File.Exists(outName))
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
-                    File.Copy(asset.FilePath, outName);
+
+                    //修改(导出解密ab包)
+                    var decryptedData = AssetBundleDecryptor.DecryptFileToBytes(asset.FilePath, asset.FKey);
+                    File.WriteAllBytes(outName, decryptedData);
+
                 }
             }
             UmaViewerUI.Instance.ShowMessage($"{assets.Count} files copied", UIMessageType.Success);

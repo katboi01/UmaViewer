@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
+//修改(载入通用服装ColorSet相关)(保存当前选中的颜色配置到TXT文件)
+using System.Text;
 
 public class UmaViewerUI : MonoBehaviour
 {
@@ -45,6 +47,11 @@ public class UmaViewerUI : MonoBehaviour
     public TextMeshProUGUI MessageText;
     public PoseManager PoseManager;
     public HandleManager HandleManager;
+
+
+    //修改(载入通用服装ColorSet相关)
+    public ScrollRect DressColorSetList;
+
 
     [Header("lists")]
     public ScrollRect EmotionList;
@@ -102,6 +109,12 @@ public class UmaViewerUI : MonoBehaviour
     public bool LiveTime = false;
     public bool isRecordVMD;
     public bool isRequireStage = true;
+
+
+    //修改(Live演出的显隐控制和位置变换相关)
+    public bool isControlMode = true;
+
+
     public Dropdown LiveRecoedToggle;
     public int LiveMode = 1;
 
@@ -372,6 +385,9 @@ public class UmaViewerUI : MonoBehaviour
         action(UmaContainerSliderPrefab, target, targetMorph, OtherList);
     }
 
+
+
+    //修改(Mini角色表情滑条修复)
     public void LoadFacialPanelsMini(Material Eye, Material MayuL, Material MayuR, Material Mouth)
     {
         currentFaceDrivenKeyTarget = null;
@@ -387,24 +403,37 @@ public class UmaViewerUI : MonoBehaviour
             container.Name = name;
             container.Slider.wholeNumbers = true;
             container.Slider.value = 0;
-            container.Slider.maxValue = 15;
+
+            if (type == 0)
+                container.Slider.maxValue = 18;
+            else if (type == 1)
+                container.Slider.maxValue = 14;
+            else if (type == 2)
+                container.Slider.maxValue = 14;
+            else if (type == 3)
+                container.Slider.maxValue = 8;
+
             container.Slider.minValue = 0;
             container.Slider.onValueChanged.AddListener((a) =>
             {
                 var val = Convert.ToInt32(a);
                 if (type == 0)
                 {
-                    mat.mainTextureOffset = new Vector2(0.25f * (val % 4), -0.25f * (val / 4));
+                    mat.mainTextureOffset = new Vector2(0.25f * (val % 4), -0.125f * (val / 4));
                 }
                 else if (type == 1)
                 {
                     var vector = mat.GetVector("_UVOffset");
-                    mat.SetVector("_UVOffset", new Vector4(0.25f * (val % 4), -0.25f * (val / 4), vector.z, vector.w));
+                    mat.SetVector("_UVOffset", new Vector4(0.25f * (val % 4), -0.125f * (val / 4), vector.z, vector.w));
                 }
                 else if (type == 2)
                 {
                     var vector = mat.GetVector("_UVOffset");
-                    mat.SetVector("_UVOffset", new Vector4(vector.x, vector.y, 0.25f * (val % 4), -0.25f * (val / 4)));
+                    mat.SetVector("_UVOffset", new Vector4(vector.x, vector.y, 0.25f * (val % 4), -0.125f * (val / 4)));
+                }
+                else if (type == 3)
+                {
+                    mat.mainTextureOffset = new Vector2(0.25f * (val % 4), -0.25f * (val / 4));
                 }
             });
         });
@@ -412,9 +441,11 @@ public class UmaViewerUI : MonoBehaviour
         action(EyeList, "Eye_L_Select", Eye, 2);
         action(EyeList, "Eye_R_Select", Eye, 1);
         action(MouthList, "Mouth_Select", Mouth, 0);
-        action(EyeBrowList, "Mayu_L_Select", MayuL, 0);
-        action(EyeBrowList, "Mayu_R_Select", MayuR, 0);
+        action(EyeBrowList, "Mayu_L_Select", MayuL, 3);
+        action(EyeBrowList, "Mayu_R_Select", MayuR, 3);
     }
+
+
 
     public void UpdateFacialPanels()
     {
@@ -1113,6 +1144,12 @@ public class UmaViewerUI : MonoBehaviour
 
     public void SetLiveRequireStage(bool val) { isRequireStage = val; }
 
+
+    //修改(Live演出的显隐控制和位置变换相关)
+    public void SetLiveControlMode(bool val) { isControlMode = val; }
+
+
+
     public void ShowMessage(string msg, UIMessageType type)
     {
         if (!MessageText) return;
@@ -1133,4 +1170,181 @@ public class UmaViewerUI : MonoBehaviour
     {
         go.SetActive(!go.activeSelf);
     }
+
+
+
+
+    //修改(载入通用服装ColorSet相关)(颜色组UI)
+    public static string CurrentSelectedColorSetId;
+
+    public void LoadColorSetButtons()
+    {
+        ClearColorSetButtons();
+
+        var uma = Builder.CurrentUMAContainer;
+        if (uma == null || string.IsNullOrEmpty(uma.VarCostumeIdShort)) return;
+
+        var parts = uma.VarCostumeIdShort.Split('_');
+        if (parts.Length < 2) return;
+
+        if (!int.TryParse(parts[0], out int bodyType)) return;
+        if (!int.TryParse(parts[1], out int bodyTypeSub)) return;
+
+        if (bodyType == 7 || bodyType == 8)
+        {
+            var colorSetIds = UmaDatabaseController.Instance.CharaDressColor
+                .Select(row => row["id"].ToString());
+
+            foreach (var id in colorSetIds)
+            {
+                var buttonObj = Instantiate(UmaContainerPrefab, DressColorSetList.content);
+                var container = buttonObj.GetComponent<UmaUIContainer>();
+
+                container.Name = id;
+                var buttonText = buttonObj.GetComponentInChildren<Text>();
+                if (buttonText != null) buttonText.text = id;
+
+                container.Button.onClick.AddListener(() =>
+                {
+                    HighlightChildImage(DressColorSetList.content, container);
+                    CurrentSelectedColorSetId = id;
+                    Builder.CurrentUMAContainer?.RefreshDressColor();
+                });
+
+                if (container.ToggleImage != null)
+                    container.ToggleImage.enabled = (id == CurrentSelectedColorSetId);
+            }
+            return;
+        }
+
+        var dressRow = UmaDatabaseController.Instance.DressData.FirstOrDefault(row =>
+            int.Parse(row["body_type"].ToString()) == bodyType &&
+            int.Parse(row["body_type_sub"].ToString()) == bodyTypeSub);
+
+        if (dressRow == null || dressRow["body_setting"].ToString() != "4") return;
+
+        string dressId = dressRow["id"].ToString();
+
+        var colorSetRows = UmaDatabaseController.Instance.CharaDressColor
+            .Where(row => row["dress_id"].ToString() == dressId);
+
+        foreach (var row in colorSetRows)
+        {
+            string id = row["id"].ToString();
+
+            var buttonObj = Instantiate(UmaContainerPrefab, DressColorSetList.content);
+            var container = buttonObj.GetComponent<UmaUIContainer>();
+
+            container.Name = id;
+            var buttonText = buttonObj.GetComponentInChildren<Text>();
+            if (buttonText != null) buttonText.text = id;
+
+            container.Button.onClick.AddListener(() =>
+            {
+                HighlightChildImage(DressColorSetList.content, container);
+                CurrentSelectedColorSetId = id;
+                Builder.CurrentUMAContainer?.RefreshDressColor();
+            });
+
+            if (container.ToggleImage != null)
+                container.ToggleImage.enabled = (id == CurrentSelectedColorSetId);
+        }
+    }
+
+
+
+    //修改(载入通用服装ColorSet相关)(清理所有颜色组按钮)
+    public void ClearColorSetButtons()
+    {
+        foreach (Transform child in DressColorSetList.content)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
+    
+    //修改(载入通用服装ColorSet相关)(解析颜色字符串)
+    private static bool TryParseHexColor(
+        string hex,
+        out Tuple<byte, byte, byte> rgb255,
+        out Tuple<float, float, float> rgbNormalized)
+    {
+        rgb255 = null;
+        rgbNormalized = null;
+
+        if (string.IsNullOrWhiteSpace(hex) || !hex.StartsWith("#") || hex.Length != 7)
+            return false;
+
+        byte r, g, b;
+        bool okR = byte.TryParse(hex.Substring(1, 2), System.Globalization.NumberStyles.HexNumber, null, out r);
+        bool okG = byte.TryParse(hex.Substring(3, 2), System.Globalization.NumberStyles.HexNumber, null, out g);
+        bool okB = byte.TryParse(hex.Substring(5, 2), System.Globalization.NumberStyles.HexNumber, null, out b);
+
+        if (!okR || !okG || !okB)
+            return false;
+
+        rgb255 = Tuple.Create(r, g, b);
+        rgbNormalized = Tuple.Create(r / 255f, g / 255f, b / 255f);
+        return true;
+    }
+
+
+
+    //修改(载入通用服装ColorSet相关)(保存当前选中的颜色配置到TXT文件)
+    public static void SaveCurrentColorSetRow()
+    {
+        if (string.IsNullOrEmpty(CurrentSelectedColorSetId))
+        {
+            UmaViewerUI.Instance.ShowMessage("No color set ID selected!", UIMessageType.Error);
+            return;
+        }
+
+        var charaColor = UmaDatabaseController.Instance.CharaDressColor
+            .FirstOrDefault(row => row["id"].ToString() == CurrentSelectedColorSetId);
+
+        if (charaColor == null)
+        {
+            UmaViewerUI.Instance.ShowMessage($"Color set ID {CurrentSelectedColorSetId} not found!", UIMessageType.Error);
+            return;
+        }
+
+    #if UNITY_ANDROID && !UNITY_EDITOR
+        string fileDirectory = Application.persistentDataPath + "/../ColorCode/";
+    #else
+        string fileDirectory = Application.dataPath + "/../ColorCode/";
+    #endif
+        Directory.CreateDirectory(fileDirectory);
+
+        string idValue = charaColor["id"]?.ToString() ?? "unknown";
+        string fileName = $"{idValue}.txt";
+        string fullPath = Path.GetFullPath(Path.Combine(fileDirectory, fileName));
+
+        List<string> lines = new List<string>();
+        foreach (var column in charaColor.Table.Columns)
+        {
+            string columnName = column.ToString();
+            string value = charaColor[columnName]?.ToString() ?? "";
+
+            if (TryParseHexColor(value, out var rgb255, out var rgbNormalized))
+            {
+                string prefix = (columnName + ":").PadRight(17);
+                lines.Add(
+                    $"{prefix}\t{value}\t" +
+                    $"({rgb255.Item1,3}, {rgb255.Item2,3}, {rgb255.Item3,3})\t" +
+                    $"({rgbNormalized.Item1:0.####}, {rgbNormalized.Item2:0.####}, {rgbNormalized.Item3:0.####})"
+                );
+            }
+            else
+            {
+                lines.Add($"{columnName}: {value}");
+            }
+        }
+
+        string content = string.Join("\n", lines);
+        File.WriteAllText(fullPath, content, Encoding.UTF8);
+
+        UmaViewerUI.Instance.ShowMessage($"ColorSet data saved: {fullPath}", UIMessageType.Success);
+    }
+
 }
