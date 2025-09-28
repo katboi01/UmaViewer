@@ -56,10 +56,8 @@ public class UISettingsOther : MonoBehaviour
     public void UpdateGameDB()
     {
         if (_updateResVerCoroutine != null && Config.Instance.WorkMode != WorkMode.Standalone) return;
-        UmaDatabaseController.Instance.CloseAllConnection();
-        ManifestDB dB = new ManifestDB();
-        _updateResVerCoroutine = dB.UpdateResourceVersion(delegate (string msg, UIMessageType type) { UmaViewerUI.Instance.ShowMessage(msg, type); });
-        StartCoroutine(_updateResVerCoroutine);
+        Popup.Create($"Automatic database update is no longer supported until all issues with new files are resolved. Please run the game to obtain required files.", -1, 200,
+            "Ok", null, "Ok");
     }
 
     public void ChangeDataPath()
