@@ -616,71 +616,100 @@ namespace Gallop.Live.Cutt
             return LiveTimelineEasing.GetValue(liveTimelineKeyWithInterpolate2.easingType, curFrame - (float)from.frame, 0f, 1f, (float)num);
         }
 
+
+
+        //修改(Live演出的显隐控制和位置变换相关)
         public void LateUpdateFormationOffset_Transform(int targetIndex, LiveTimelineKeyIndex curKeyIndex, float time)
         {
+            bool ControlMode = UmaViewerUI.Instance != null && UmaViewerUI.Instance.isControlMode;
+
             LiveTimelineKeyFormationOffsetData curKey = curKeyIndex.key as LiveTimelineKeyFormationOffsetData;
             LiveTimelineKeyFormationOffsetData nextKey = curKeyIndex.nextKey as LiveTimelineKeyFormationOffsetData;
 
             var chara = Director.instance.CharaContainerScript[targetIndex];
             if (!chara) return;
 
-            if(chara.LiveVisible != curKey.visible)
-            {
-                chara.Materials.ForEach(m =>
-                {
-                    foreach (var key in m.Renderers.Keys)
-                    {
-                        if (key.gameObject.activeSelf != curKey.visible)
-                            key.gameObject.SetActive(curKey.visible);
-                    }
-                });
-                chara.LiveVisible = curKey.visible;
-            }
-            
 
-            if (curKey.visible || IsRecordVMD)
+            if (ControlMode)
             {
-                if (!string.IsNullOrEmpty(curKey.ParentObjectName))
+                if (chara.LiveVisible != curKey.visible)
                 {
-                    var parent_transform = curKey.GetParentObjectTransform(this);
-                    if (parent_transform)
+                    chara.Materials.ForEach(m =>
                     {
-                        if (chara.transform.parent != parent_transform)
+                        foreach (var key in m.Renderers.Keys)
+                        {
+                            if (key.gameObject.activeSelf != curKey.visible)
+                                key.gameObject.SetActive(curKey.visible);
+                        }
+                    });
+                    chara.LiveVisible = curKey.visible;
+                }
+                
+    
+                if (curKey.visible || IsRecordVMD)
+                {
+                    if (!string.IsNullOrEmpty(curKey.ParentObjectName))
+                    {
+                        var parent_transform = curKey.GetParentObjectTransform(this);
+                        if (parent_transform)
+                        {
+                            if (chara.transform.parent != parent_transform)
+                            {
+                                chara.transform.SetParent(parent_transform);
+                            }
+                        }
+                    }
+                    else if (chara.transform.parent)
+                    {
+                        chara.transform.SetParent(null);
+                    }
+    
+                    if (nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
+                    {
+                        float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
+                        chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
+                        var x = chara.transform.eulerAngles.x;
+                        var z = chara.transform.eulerAngles.z;
+                        chara.transform.eulerAngles = new Vector3(x, Mathf.Lerp(curKey.RotationY, nextKey.RotationY, ratio), z);
+    
+                        var local_x = chara.Position.localEulerAngles.x;
+                        var local_z = chara.Position.localEulerAngles.z;
+                        chara.Position.localEulerAngles = new Vector3(local_x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), local_z);
+                    }
+                    else
+                    {
+                        chara.transform.localPosition = curKey.Position;
+                        var x = chara.transform.eulerAngles.x;
+                        var z = chara.transform.eulerAngles.z;
+                        chara.transform.eulerAngles = new Vector3(x, curKey.RotationY, z);
+    
+                        var local_x = chara.Position.localEulerAngles.x;
+                        var local_z = chara.Position.localEulerAngles.z;
+                        chara.Position.localEulerAngles = new Vector3(local_x, curKey.LocalRotationY, local_z);
+                    }
+                }
+            }
+            else
+            {
+                if (curKey.visible || IsRecordVMD)
+                {
+                    if (!string.IsNullOrEmpty(curKey.ParentObjectName))
+                    {
+                        var parent_transform = curKey.GetParentObjectTransform(this);
+                        if (parent_transform && chara.transform.parent != parent_transform)
                         {
                             chara.transform.SetParent(parent_transform);
                         }
                     }
-                }
-                else if (chara.transform.parent)
-                {
-                    chara.transform.SetParent(null);
-                }
-
-                if (nextKey != null && nextKey.interpolateType != LiveCameraInterpolateType.None)
-                {
-                    float ratio = CalculateInterpolationValue(curKey, nextKey, time * 60);
-                    chara.transform.localPosition = Vector3.Lerp(curKey.Position, nextKey.Position, ratio);
-                    var x = chara.transform.eulerAngles.x;
-                    var z = chara.transform.eulerAngles.z;
-                    chara.transform.eulerAngles = new Vector3(x, Mathf.Lerp(curKey.RotationY, nextKey.RotationY, ratio), z);
-
-                    var local_x = chara.Position.localEulerAngles.x;
-                    var local_z = chara.Position.localEulerAngles.z;
-                    chara.Position.localEulerAngles = new Vector3(local_x, Mathf.Lerp(curKey.LocalRotationY, nextKey.LocalRotationY, ratio), local_z);
-                }
-                else
-                {
-                    chara.transform.localPosition = curKey.Position;
-                    var x = chara.transform.eulerAngles.x;
-                    var z = chara.transform.eulerAngles.z;
-                    chara.transform.eulerAngles = new Vector3(x, curKey.RotationY, z);
-
-                    var local_x = chara.Position.localEulerAngles.x;
-                    var local_z = chara.Position.localEulerAngles.z;
-                    chara.Position.localEulerAngles = new Vector3(local_x, curKey.LocalRotationY, local_z);
+                    else if (chara.transform.parent)
+                    {
+                        chara.transform.SetParent(null);
+                    }
                 }
             }
         }
+
+
 
         public static void FindTimelineKeyCurrent(out LiveTimelineKey curKey, ILiveTimelineKeyDataList keys, float curFrame)
         {

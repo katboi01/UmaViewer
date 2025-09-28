@@ -19,6 +19,9 @@ public class CySpringCollisionData
     public string _targetObjectName;
 
     [SerializeField]
+    public bool _isOtherTarget;
+
+    [SerializeField]
     public Vector3 _offset;
 
     [SerializeField]
@@ -28,11 +31,16 @@ public class CySpringCollisionData
     public float _radius;
 
     [SerializeField]
+    public float _distance;
+
+    [SerializeField]
+    public Vector3 _normal;
+
+    [SerializeField]
     public CollisionType _type;
 
-    public Transform _transform;
-
-    public float _distance;
-    public Vector3 _normal;
+    [SerializeField]
     public bool _isInner;
+
+    public Transform _transform;
 }

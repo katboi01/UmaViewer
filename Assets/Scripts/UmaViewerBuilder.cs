@@ -270,31 +270,56 @@ public class UmaViewerBuilder : MonoBehaviour
             }
         }
 
+
+
+        //修改(载入专用尾巴相关)
         if (tailId > 0)
         {
-            string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
-            string tailPath = $"3d/chara/tail/{tailName}/";
-            string tailPfb = tailPath + $"pfb_{tailName}";
-            asset = null;
-            Main.AbList.TryGetValue(tailPfb, out asset);
-            if (asset != null)
+            string costumePrefixForTail = $"{id}_{costumeId}";
+            string exclusiveTailName = $"tail{costumePrefixForTail}";
+            string exclusiveTailPath = $"3d/chara/tail/{exclusiveTailName}/";
+            string exclusiveTailPfb = $"{exclusiveTailPath}pfb_{exclusiveTailName}";
+
+            if (Main.AbList.TryGetValue(exclusiveTailPfb, out asset))
             {
-                foreach (var asset2 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
+                umaContainer.LoadExclusiveTail(asset);
+
+                string clothPath = $"{exclusiveTailPath}clothes/pfb_{exclusiveTailName}_cloth00";
+                if (Main.AbList.TryGetValue(clothPath, out var clothAsset))
                 {
-                    umaContainer.LoadTextures(asset2);
+                    umaContainer.LoadPhysics(clothAsset);
                 }
-
-                umaContainer.LoadTail(asset);
-
-                //Load Physics
-                var asset1 = Main.AbList[$"{tailPath}clothes/pfb_{tailName}_cloth00"];
-                umaContainer.LoadPhysics(asset1);
             }
             else
             {
-                Debug.Log("no tail");
+                string tailName = $"tail{tailId.ToString().PadLeft(4, '0')}_00";
+                string tailPath = $"3d/chara/tail/{tailName}/";
+                string tailPfb = $"{tailPath}pfb_{tailName}";
+                asset = null;
+
+                if (Main.AbList.TryGetValue(tailPfb, out asset) && asset != null)
+                {
+                    foreach (var asset2 in UmaViewerMain.Instance.AbChara.Where(a => a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_{head_id}") || a.Name.StartsWith($"{tailPath}textures/tex_{tailName}_0000")))
+                    {
+                        umaContainer.LoadTextures(asset2);
+                    }
+
+                    umaContainer.LoadTail(asset);
+
+                    string clothPath = $"{tailPath}clothes/pfb_{tailName}_cloth00";
+                    if (Main.AbList.TryGetValue(clothPath, out var clothAsset))
+                    {
+                        umaContainer.LoadPhysics(clothAsset);
+                    }
+                }
+                else
+                {
+                    Debug.Log("no tail");
+                }
             }
         }
+
+
 
         umaContainer.LoadPhysics();
         umaContainer.SetDynamicBoneEnable(ModelSettings.DynamicBoneEnable);
@@ -316,6 +341,13 @@ public class UmaViewerBuilder : MonoBehaviour
                 umaContainer.LoadAnimation(entry);
             }
         }
+
+
+        //修改(载入通用服装ColorSet相关)
+        UI.ClearColorSetButtons();
+        UI.LoadColorSetButtons();
+
+
     }
 
     private void LoadMobUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId, int bodyid = -1, bool loadMotion = false)
@@ -539,6 +571,12 @@ public class UmaViewerBuilder : MonoBehaviour
                 umaContainer.LoadAnimation(entry);
             }
         }
+
+
+        //修改(载入通用服装ColorSet相关)
+        UI.ClearColorSetButtons();
+
+
     }
 
     private void LoadMiniUma(UmaContainerCharacter umaContainer, CharaEntry chara, string costumeId)
@@ -678,6 +716,12 @@ public class UmaViewerBuilder : MonoBehaviour
         {
             umaContainer.LoadAnimation(asset);
         }
+
+
+        //修改(载入通用服装ColorSet相关)
+        UI.ClearColorSetButtons();
+
+
     }
 
     public void LoadProp(UmaDatabaseEntry entry)

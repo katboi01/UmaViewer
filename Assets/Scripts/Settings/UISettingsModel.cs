@@ -110,6 +110,17 @@ public class UISettingsModel : MonoBehaviour
                 ModelExporter.ExportModel(container, path);
             }
         }
+
+        var prop_container = Builder.CurrentOtherContainer;
+        if (prop_container)
+        {
+            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{prop_container}", "pmx");
+            if (!string.IsNullOrEmpty(path))
+            {
+                ModelExporter.ExportModel(prop_container, path);
+            }
+        }
+
 #else
         UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif

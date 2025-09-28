@@ -118,6 +118,13 @@ public class UISettingsAnimation : MonoBehaviour
         }
     }
 
+    public void EnableRootMotion(bool enable)
+    {
+        var container = Builder.CurrentUMAContainer;
+        if (!container || !container.UmaAnimator) return;
+        container.UmaAnimator.SetLayerWeight(2, enable ? 1 : 0);
+    }
+
     public static string ToFrameFormat(float time, float frameRate)
     {
         int frames = Mathf.FloorToInt(time % 1 * frameRate);
