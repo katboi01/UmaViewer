@@ -59,9 +59,9 @@ public class UmaDatabaseController
     {
         try
         {
-            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            if (Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                if(!File.Exists($@"{Config.Instance.MainPath}/meta_umaviewer")) throw new Exception();
+                if (!File.Exists($@"{Config.Instance.MainPath}/meta_umaviewer")) throw new Exception();
                 metaDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/meta_umaviewer;");
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master_umaviewer.mdb;");
             }
@@ -115,9 +115,9 @@ public class UmaDatabaseController
         {
             CloseAllConnection();
             var msg = $"Database not found at: {Config.Instance.MainPath}";
-            if(Config.Instance.WorkMode == WorkMode.Standalone)
+            if (Config.Instance.WorkMode == WorkMode.Standalone)
             {
-                if(Config.Instance.Region == Region.Global)
+                if (Config.Instance.Region == Region.Global)
                 {
                     msg = "Only `Default` mode is supported for Global version. Please change Work Mode to Default in `Other` settings.";
                 }
@@ -144,11 +144,24 @@ public class UmaDatabaseController
 
 
 
-    static Dictionary<string,UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
+    static Dictionary<string, UmaDatabaseEntry> ReadMeta(SqliteConnection conn)
     {
+        bool HasEncryption = false;
         SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL"; //filter out manifest entries, whitch have null prerequisites
+        sqlite_cmd.CommandText = "SELECT name FROM pragma_table_info('a') WHERE name = 'e'";
         SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        HasEncryption = sqlite_datareader.HasRows;
+
+        sqlite_cmd = conn.CreateCommand();
+        if (HasEncryption)
+        {
+            sqlite_cmd.CommandText = "SELECT m,n,h,d,e FROM a WHERE d IS NOT NULL";
+        }
+        else
+        {
+            sqlite_cmd.CommandText = "SELECT m,n,h,d FROM a WHERE d IS NOT NULL"; //filter out manifest entries, whitch have null prerequisites
+        }
+        sqlite_datareader = sqlite_cmd.ExecuteReader();
         Dictionary<string, UmaDatabaseEntry> meta = new Dictionary<string, UmaDatabaseEntry>();
         while (sqlite_datareader.Read())
         {
@@ -161,7 +174,13 @@ public class UmaDatabaseController
                     var name = sqlite_datareader.GetString(1);
                     var url = sqlite_datareader.GetString(2);
                     var prerequisites = sqlite_datareader.GetString(3);
-                    
+                    var key = 0L;
+
+                    if (HasEncryption)
+                    {
+                        key = sqlite_datareader.GetInt64(4);
+                    }
+
                     if (string.IsNullOrEmpty(name))
                     {
                         throw new Exception($"Invalid entry name {name} or URL {url}");
@@ -172,7 +191,8 @@ public class UmaDatabaseController
                         Type = type,
                         Name = name,
                         Url = url,
-                        Prerequisites = prerequisites
+                        Prerequisites = prerequisites,
+                        Key = key
                     };
                 }
                 else
@@ -180,12 +200,13 @@ public class UmaDatabaseController
                     Debug.LogWarning($"Unrecognized EntryType Enum Value :{typestr}");
                 }
             }
-            catch(Exception e) 
+            catch (Exception e)
             {
                 Debug.LogError($"Error caught while reading Entry : \n {e}");
             }
-            
-            if (entry != null && !meta.ContainsKey(entry.Name)) {
+
+            if (entry != null && !meta.ContainsKey(entry.Name))
+            {
 
                 meta.Add(entry.Name, entry);
             }
@@ -237,7 +258,7 @@ public class UmaDatabaseController
                     string h = Sqlite3MC.ColumnText(stmt, 2);
                     string c = Sqlite3MC.ColumnText(stmt, 3);
                     string d = Sqlite3MC.ColumnText(stmt, 4);
-                    string e = Sqlite3MC.ColumnText(stmt, 5);
+                    long e = Sqlite3MC.ColumnInt64(stmt, 5);
 
                     if (string.IsNullOrEmpty(m))
                     {
@@ -300,7 +321,7 @@ public class UmaDatabaseController
         var str = ReadMaster(conn, "SELECT text FROM text_data LIMIT 1");
         //check if first character of the first text_data entry is in English
         bool isAscii = str[0][0].ToString()[0] < 128;
-        Region detectedRegion = isAscii? Region.Global : Region.Jp;
+        Region detectedRegion = isAscii ? Region.Global : Region.Jp;
 
         if (Config.Instance.Region != detectedRegion)
         {
@@ -421,15 +442,15 @@ public class UmaDatabaseController
 
     public static DataRow ReadMobDressColor(string mobid)
     {
-        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
+        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
 
         return results.Count > 0 ? results[0] : null;
     }
 
     public static DataRow ReadMobHairColor(string colorid)
     {
-        var results= ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
-        foreach(var data in results)
+        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
+        foreach (var data in results)
         {
             return data;
         }

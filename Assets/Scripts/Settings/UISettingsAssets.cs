@@ -68,9 +68,9 @@ public class UISettingsAssets : MonoBehaviour
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
 
                     //修改(导出解密ab包)
-                    var decryptedData = AssetBundleDecryptor.DecryptFileToBytes(asset.FilePath, asset.FKey);
-                    File.WriteAllBytes(outName, decryptedData);
-
+                    using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
+                    using var outputStream = new FileStream(outName, FileMode.Create);
+                    assetStream.CopyTo(outputStream);
                 }
             }
             UmaViewerUI.Instance.ShowMessage($"{LoadedAssetEntries.Count} files copied", UIMessageType.Success);
@@ -102,8 +102,9 @@ public class UISettingsAssets : MonoBehaviour
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
 
                     //修改(导出解密ab包)
-                    var decryptedData = AssetBundleDecryptor.DecryptFileToBytes(asset.FilePath, asset.FKey);
-                    File.WriteAllBytes(outName, decryptedData);
+                    using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
+                    using var outputStream = new FileStream(outName, FileMode.Create);
+                    assetStream.CopyTo(outputStream);
 
                 }
             }
