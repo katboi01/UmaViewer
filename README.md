@@ -5,7 +5,8 @@ Unity application that makes it easy to view assets from Uma Musume: Pretty Derb
 | Version   | Supported |
 |-----------|-----------|
 | JP (DMM)  | ✅        |
-| JP (Steam)| ❓        |
+| JP (Steam)| ✅        |
+| KR        | ✅        |
 | Global    | ✅        |
 
 ------------
