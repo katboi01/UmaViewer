@@ -139,6 +139,16 @@ public class UmaDatabaseController
     //修改(载入通用服装ColorSet相关)
     static List<DataRow> ReadAllCharaDressColor(SqliteConnection conn)
     {
+        SqliteCommand sqlite_cmd = conn.CreateCommand();
+        sqlite_cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='chara_dress_color_set'";
+        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+        bool HasTable = sqlite_datareader.HasRows;
+
+        if (!HasTable)
+        {
+            return new List<DataRow>();
+        }
+
         return ReadMaster(conn, "SELECT * FROM chara_dress_color_set");
     }
 
