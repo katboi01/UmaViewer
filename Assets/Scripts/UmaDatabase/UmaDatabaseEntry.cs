@@ -1,8 +1,9 @@
-﻿using System.IO;
-using UnityEngine;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class UmaDatabaseEntry
@@ -12,7 +13,7 @@ public class UmaDatabaseEntry
     public string Url;
     public string Checksum;
     public string Prerequisites;
-    public string Key;
+    public long Key;
     private byte[] fKey;
 
     [NonSerialized]
@@ -22,25 +23,31 @@ public class UmaDatabaseEntry
     {
         get
         {
-            if (fKey == null && !string.IsNullOrEmpty(Key))
+            if (fKey == null && Key != 0)
             {
                 var baseKeys = Config.Instance.ABKey;
                 int baseLen = baseKeys.Length;
-                int keysLen = baseLen * 8;
-                byte[] keys = new byte[keysLen];
-                for (int i = 0; i < baseLen; ++i)
-                {
-                    byte[] keyBytes = BitConverter.GetBytes(long.Parse(Key));
-                    if (!BitConverter.IsLittleEndian)
-                        Array.Reverse(keyBytes);
 
-                    byte b = baseKeys[i];
-                    int baseOffset = i << 3; // i * 8
-                    for (int j = 0; j < 8; ++j)
+                var keys = new byte[baseLen * 8];
+
+                if (Key != 0)
+                {
+                    byte[] keyBytes = BitConverter.GetBytes(Key);
+                    if (!BitConverter.IsLittleEndian)
                     {
-                        keys[baseOffset + j] = (byte)(b ^ keyBytes[j]);
+                        Array.Reverse(keyBytes);
+                    }
+                    for (int i = 0; i < baseLen; ++i)
+                    {
+                        byte b = baseKeys[i];
+                        int baseOffset = i << 3; // i * 8
+                        for (int j = 0; j < 8; ++j)
+                        {
+                            keys[baseOffset + j] = (byte)(b ^ keyBytes[j]);
+                        }
                     }
                 }
+
                 fKey = keys;
             }
             return fKey;
