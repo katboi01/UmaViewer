@@ -67,10 +67,16 @@ public class UISettingsAssets : MonoBehaviour
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
 
-                    //修改(导出解密ab包)
-                    using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
-                    using var outputStream = new FileStream(outName, FileMode.Create);
-                    assetStream.CopyTo(outputStream);
+                    if (asset.IsEncrypted)
+                    {
+                        using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
+                        using var outputStream = new FileStream(outName, FileMode.Create);
+                        assetStream.CopyTo(outputStream);
+                    }
+                    else
+                    {
+                        File.Copy(asset.FilePath, outName);
+                    }
                 }
             }
             UmaViewerUI.Instance.ShowMessage($"{LoadedAssetEntries.Count} files copied", UIMessageType.Success);
@@ -101,11 +107,16 @@ public class UISettingsAssets : MonoBehaviour
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(outName));
 
-                    //修改(导出解密ab包)
-                    using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
-                    using var outputStream = new FileStream(outName, FileMode.Create);
-                    assetStream.CopyTo(outputStream);
-
+                    if (asset.IsEncrypted)
+                    {
+                        using var assetStream = new UmaAssetBundleStream(asset.FilePath, asset.FKey);
+                        using var outputStream = new FileStream(outName, FileMode.Create);
+                        assetStream.CopyTo(outputStream);
+                    }
+                    else
+                    {
+                        File.Copy(asset.FilePath, outName);
+                    }
                 }
             }
             UmaViewerUI.Instance.ShowMessage($"{assets.Count} files copied", UIMessageType.Success);

@@ -133,7 +133,7 @@ public class UmaAssetManager : MonoBehaviour
             else
             {
                 AssetBundle bundle;
-                if (entry.Key == 0)
+                if (!entry.IsEncrypted)
                 {
                     bundle = AssetBundle.LoadFromFile(filePath);
                 }

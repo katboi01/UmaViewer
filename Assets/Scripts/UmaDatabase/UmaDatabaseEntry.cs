@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class UmaDatabaseEntry
@@ -16,6 +14,8 @@ public class UmaDatabaseEntry
     public long Key;
     private byte[] fKey;
 
+    public bool IsEncrypted => Key != 0;
+
     [NonSerialized]
     public List<UmaDatabaseEntry> CachedPrerequisites = null;
 
@@ -23,28 +23,25 @@ public class UmaDatabaseEntry
     {
         get
         {
-            if (fKey == null && Key != 0)
+            if (fKey == null && IsEncrypted)
             {
                 var baseKeys = Config.Instance.ABKey;
                 int baseLen = baseKeys.Length;
 
                 var keys = new byte[baseLen * 8];
 
-                if (Key != 0)
+                byte[] keyBytes = BitConverter.GetBytes(Key);
+                if (!BitConverter.IsLittleEndian)
                 {
-                    byte[] keyBytes = BitConverter.GetBytes(Key);
-                    if (!BitConverter.IsLittleEndian)
+                    Array.Reverse(keyBytes);
+                }
+                for (int i = 0; i < baseLen; ++i)
+                {
+                    byte b = baseKeys[i];
+                    int baseOffset = i << 3; // i * 8
+                    for (int j = 0; j < 8; ++j)
                     {
-                        Array.Reverse(keyBytes);
-                    }
-                    for (int i = 0; i < baseLen; ++i)
-                    {
-                        byte b = baseKeys[i];
-                        int baseOffset = i << 3; // i * 8
-                        for (int j = 0; j < 8; ++j)
-                        {
-                            keys[baseOffset + j] = (byte)(b ^ keyBytes[j]);
-                        }
+                        keys[baseOffset + j] = (byte)(b ^ keyBytes[j]);
                     }
                 }
 
