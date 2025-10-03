@@ -2,19 +2,30 @@
 
 Unity application that makes it easy to view assets from Uma Musume: Pretty Derby.
 
-## ! EN/Global users !
+| Version   | Supported |
+|-----------|-----------|
+| JP (DMM)  | ✅        |
+| JP (Steam)| ✅        |
+| KR        | ✅        |
+| Global    | ✅        |
+
+------------
+
+## ⚠️ 🌍 EN/Global users ⚠️
+
+In UmaViewer, set **WorkMode** to **Default** and **Region** to **Global** in the **'Other'** Settings tab.
 
 Currently only the default work mode is supported - you need to download assets using the Download All button in the game's settings for the viewer to work.
-
-In UmaViewer, set WorkMode to Default and Region to Global in the 'Other' Settings tab.
 
 ------------
 
 ### Requirements/Installation
-- For Users:
-1. [Uma Musume: Pretty Derby DMM](https://dmg.umamusume.jp/) with full data download is required to run the viewer.
-1. Confirm your file listing in C:\\Users\\*you*\AppData\LocalLow\Cygames\umamusume\ looks like this:
-   * umamusume\
+1. [Uma Musume: Pretty Derby](https://dmg.umamusume.jp/) with full data download is required to run the viewer.
+2. Depending on your version and update status, the game stores its data in **different locations**
+ - **DMM/Steam Older installations :** C:\Users\\*your_username*\AppData\LocalLow\Cygames\umamusume(?)\
+ - **DMM/Steam Fresh installations :** ...\\*Umamusume installation directory*\Umamusume_Data\Persistent(?)\
+ - In any case，confirm your file listing in target folder looks like this
+   * Target Folder\
      * **meta**
      * master\
        * **master.mdb**
@@ -22,14 +33,16 @@ In UmaViewer, set WorkMode to Default and Region to Global in the 'Other' Settin
        - 2A\\...
        - 2B\\...
        - ...\\...
-1. Download the most recent UmaViewer.zip file from [Releases](https://github.com/katboi01/UmaViewer/releases/) tab.
-1. Extract the archive anywhere, can be extracted over previous version.
-1. Run the UmaViewer.exe
+3. Download the most recent UmaViewer.zip file from [Releases](https://github.com/katboi01/UmaViewer/releases/) tab.
+4. Extract the archive anywhere, can be extracted over previous version.
+5. Run the UmaViewer.exe. 
+6. UmaViewer will try to automatically detect the game data folder.  
+   - If it fails or shows an error, go to **Settings → Other → Change DataPath** and manually select target folder.
 
 ------------
 
 - For Developers/Contributors
-1. [Unity Hub](https://unity3d.com/get-unity/download) with [Unity Engine Version 2022.3.56f1](unityhub://2022.3.56f1/dd0c98481d00) is recommended. It should be possible to run it on newer 2022.3.X versions.
+1. [Unity Hub](https://unity3d.com/get-unity/download) with [Unity Engine Version 2022.3.62f1](https://unity.com/releases/editor/archive) is recommended. It should be possible to run it on newer 2022.3.X versions.
 1. Clone or download and extract this repository.
 1. Import and Open the project in Unity Hub, missing files should be automatically repaired.
 1. Open the Assets/Scenes/Version2 scene.

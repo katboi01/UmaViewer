@@ -119,16 +119,16 @@ public class UmaDatabaseController
             {
                 if(Config.Instance.Region == Region.Global)
                 {
-                    msg = "Only `Default` mode is supported for Global version. Please change Work Mode to Default in `Other` settings.";
+                    msg = "Only `Default` mode is supported for now. Please change Work Mode to Default in `Other` settings.";
                 }
                 else
                 {
-                    msg += "\nPlease update the database in the settings panel";
+                    msg = "\nOnly `Default` mode is supported for now. Please change Work Mode to Default in `Other` settings.";
                 }
             }
             else
             {
-                msg += "\nPlease install the dmm game client or check the key settings.";
+                msg += "\nPlease make sure the game client is installed and follow the instructions on GitHub.";
             }
             UmaViewerUI.Instance.ShowMessage(msg, UIMessageType.Error);
         }
