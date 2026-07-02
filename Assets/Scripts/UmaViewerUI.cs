@@ -127,6 +127,12 @@ public class UmaViewerUI : MonoBehaviour
 
     private void Start()
     {
+        // 初始化本地化系统
+        if (LocalizationManager.Instance != null)
+        {
+            LocalizationManager.Instance.SetLanguage(Config.Instance.Language);
+        }
+        
         OtherSettings.ApplySettings();
         CameraSettings.AAModeDropdown.SetValueWithoutNotify(Config.Instance.AntiAliasing);
         AssetSettings.LoadedAssetsClear();
@@ -139,6 +145,9 @@ public class UmaViewerUI : MonoBehaviour
         canvasScaler.referenceResolution = new Vector2(1280, 720);
 #endif
         StartCoroutine(ApplyGraphicsSettings());
+        
+        // 更新UI文字
+        UpdateUILocalization();
     }
 
     private void OnDestroy()
@@ -146,6 +155,156 @@ public class UmaViewerUI : MonoBehaviour
         UmaAssetManager.OnLoadedBundleUpdate -= AssetSettings.LoadedAssetsAdd;
         UmaAssetManager.OnLoadedBundleRemove -= AssetSettings.LoadedAssetsRemove;
         UmaAssetManager.OnLoadedBundleClear -= AssetSettings.LoadedAssetsClear;
+    }
+
+    // 更新UI本地化文字
+    public void UpdateUILocalization()
+    {
+        Debug.Log("[UI] 开始更新UI本地化文字...");
+        
+        // 强制刷新场景中所有 LocalizedLabel 组件
+        var allLabels = FindObjectsOfType<LocalizedLabel>(true);
+        int count = 0;
+        foreach (var label in allLabels)
+        {
+            if (label != null && !string.IsNullOrEmpty(label.key))
+            {
+                label.ForceRefresh();
+                count++;
+            }
+        }
+        
+        Debug.Log($"[UI] 刷新了 {count} 个 LocalizedLabel 组件");
+        
+        // 刷新角色名显示
+        RefreshCharacterNames();
+    }
+    
+    /// <summary>
+    /// 刷新角色名显示
+    /// </summary>
+    public void RefreshCharacterNames()
+    {
+        Debug.Log("[UI] 开始刷新角色名显示...");
+        
+        // 刷新普通角色列表
+        RefreshCharacterList(CharactersList.content);
+        
+        // 刷新迷你角色列表
+        RefreshCharacterList(MiniCharactersList.content);
+        
+        // 刷新动画集列表
+        RefreshCharacterList(AnimationSetList.content);
+        
+        // 刷新迷你动画集列表
+        RefreshCharacterList(MiniAnimationSetList.content);
+        
+        // 刷新Mob角色列表（分页管理器）
+        if (MobCharactersPageCtrl != null)
+        {
+            RefreshMobCharacterList();
+        }
+        
+        Debug.Log("[UI] 角色名刷新完成");
+    }
+    
+    /// <summary>
+    /// 刷新角色列表中的角色名
+    /// </summary>
+    private void RefreshCharacterList(Transform listContent)
+    {
+        if (listContent == null) return;
+        
+        Debug.Log($"[UI] RefreshCharacterList - 当前角色名语言设置: {Config.Instance.CharacterNameLanguage}");
+        
+        var containers = listContent.GetComponentsInChildren<UmaUIContainer>();
+        foreach (var container in containers)
+        {
+            if (container == null || string.IsNullOrEmpty(container.Name)) continue;
+            
+            // 解析角色ID
+            var parts = container.Name.Split(' ');
+            if (parts.Length >= 2 && int.TryParse(parts[0], out int charaId))
+            {
+                // 查找角色
+                var chara = Main.Characters.FirstOrDefault(c => c.Id == charaId);
+                if (chara != null)
+                {
+                    // 更新角色名（提供英文名参数）
+                    string newName = charaId + " " + LocalizationManager.GetCharacterName(charaId.ToString(), chara.Name, chara.EnName);
+                    container.Name = container.name = newName;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 刷新服装名显示
+    /// </summary>
+    public void RefreshCostumeNames()
+    {
+        Debug.Log("[UI] 开始刷新服装名显示...");
+        
+        // 刷新服装列表
+        RefreshCostumeList(CostumeList.content);
+        RefreshCostumeList(MobCostumeList.content);
+        RefreshCostumeList(HeadCostumeList.content);
+        
+        Debug.Log("[UI] 服装名刷新完成");
+    }
+    
+    /// <summary>
+    /// 刷新服装列表中的服装名
+    /// </summary>
+    private void RefreshCostumeList(Transform listContent)
+    {
+        if (listContent == null) return;
+        
+        var containers = listContent.GetComponentsInChildren<UmaUIContainer>();
+        foreach (var container in containers)
+        {
+            if (container == null || string.IsNullOrEmpty(container.Name)) continue;
+            
+            // 解析服装ID
+            var parts = container.Name.Split(' ');
+            if (parts.Length >= 2)
+            {
+                string costumeId = parts[0];
+                string defaultName = string.Join(" ", parts, 1, parts.Length - 1);
+                
+                // 更新服装名
+                string newName = costumeId + " " + GetCostumeName(costumeId, defaultName);
+                container.Name = container.name = newName;
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 刷新Mob角色列表
+    /// </summary>
+    private void RefreshMobCharacterList()
+    {
+        // 重新加载Mob角色列表
+        var pageentrys = new List<PageManager.Entry>();
+        foreach (var chara in Main.MobCharacters.OrderBy(c => c.Id))
+        {
+            var charaInstance = chara;
+            var pageentry = new PageManager.Entry();
+            
+            // 提供英文名参数
+            pageentry.Name = LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
+            pageentry.OnClick = (container) =>
+            {
+                HighlightChildImage(MobCharactersList.content, container);
+                ListCostumes(charaInstance, false);
+            };
+            if (chara.Icon)
+            {
+                pageentry.Sprite = chara.Icon;
+            }
+            pageentrys.Add(pageentry);
+        }
+        MobCharactersPageCtrl.Initialize(pageentrys, MobCharactersList);
     }
 
     private void Update()
@@ -186,7 +345,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadModelPanels()
     {
         var containerG = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        containerG.Name = containerG.name = "Generic";
+        containerG.Name = containerG.name = LocalizationManager.Get("ui.generic");
         containerG.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(AnimationSetList.content, containerG);
@@ -194,7 +353,7 @@ public class UmaViewerUI : MonoBehaviour
         });
 
         var containerT = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        containerT.Name = containerT.name = "Tail";
+        containerT.Name = containerT.name = LocalizationManager.Get("ui.tail");
         containerT.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(AnimationSetList.content, containerT);
@@ -202,7 +361,7 @@ public class UmaViewerUI : MonoBehaviour
         });
 
         var containerE = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-        containerE.Name = containerE.name = "Ear";
+        containerE.Name = containerE.name = LocalizationManager.Get("ui.ear");
         containerE.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(AnimationSetList.content, containerE);
@@ -214,7 +373,7 @@ public class UmaViewerUI : MonoBehaviour
             var charaInstance = chara;
 
             var container3 = Instantiate(UmaContainerPrefab, CharactersList.content).GetComponent<UmaUIContainer>();
-            container3.Name = container3.name = chara.Id + " " + chara.GetName();
+            container3.Name = container3.name = chara.Id + " " + LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
             container3.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(CharactersList.content, container3);
@@ -228,7 +387,7 @@ public class UmaViewerUI : MonoBehaviour
             }
 
             var container4 = Instantiate(UmaContainerPrefab, AnimationSetList.content).GetComponent<UmaUIContainer>();
-            container4.Name = container4.name = chara.Id + " " + chara.GetName();
+            container4.Name = container4.name = chara.Id + " " + LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
             container4.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(AnimationSetList.content, container4);
@@ -248,7 +407,7 @@ public class UmaViewerUI : MonoBehaviour
             var charaInstance = chara;
             var pageentry = new PageManager.Entry();
 
-            pageentry.Name = chara.GetName();
+            pageentry.Name = LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
             pageentry.OnClick = (container) =>
             {
                 HighlightChildImage(MobCharactersList.content, container);
@@ -266,7 +425,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadMiniModelPanels()
     {
         var container1 = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-        container1.Name = container1.name = "General";
+        container1.Name = container1.name = LocalizationManager.Get("ui.general");
         container1.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(MiniAnimationSetList.content, container1);
@@ -277,7 +436,7 @@ public class UmaViewerUI : MonoBehaviour
         {
             var charaInstance = chara;
             var container2 = Instantiate(UmaContainerPrefab, MiniCharactersList.content).GetComponent<UmaUIContainer>();
-            container2.Name = container2.name = chara.Id + " " + chara.GetName();
+            container2.Name = container2.name = chara.Id + " " + LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
             container2.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(MiniCharactersList.content, container2);
@@ -291,7 +450,7 @@ public class UmaViewerUI : MonoBehaviour
             }
 
             var container3 = Instantiate(UmaContainerPrefab, MiniAnimationSetList.content).GetComponent<UmaUIContainer>();
-            container3.Name = container3.name = chara.Id + " " + chara.GetName();
+            container3.Name = container3.name = chara.Id + " " + LocalizationManager.GetCharacterName(chara.Id.ToString(), chara.Name, chara.EnName);
             container3.Button.onClick.AddListener(() =>
             {
                 HighlightChildImage(MiniAnimationSetList.content, container3);
@@ -438,11 +597,11 @@ public class UmaViewerUI : MonoBehaviour
             });
         });
 
-        action(EyeList, "Eye_L_Select", Eye, 2);
-        action(EyeList, "Eye_R_Select", Eye, 1);
-        action(MouthList, "Mouth_Select", Mouth, 0);
-        action(EyeBrowList, "Mayu_L_Select", MayuL, 3);
-        action(EyeBrowList, "Mayu_R_Select", MayuR, 3);
+        action(EyeList, LocalizationManager.Get("ui.eye_l_select"), Eye, 2);
+        action(EyeList, LocalizationManager.Get("ui.eye_r_select"), Eye, 1);
+        action(MouthList, LocalizationManager.Get("ui.mouth_select"), Mouth, 0);
+        action(EyeBrowList, LocalizationManager.Get("ui.mayu_l_select"), MayuL, 3);
+        action(EyeBrowList, LocalizationManager.Get("ui.mayu_r_select"), MayuR, 3);
     }
 
 
@@ -929,7 +1088,9 @@ public class UmaViewerUI : MonoBehaviour
     string getCharaName(string id)
     {
         var entry = Main.Characters.FirstOrDefault(a => a.Id.ToString().Equals(id));
-        return (entry == null) ? id.ToString() : entry.GetName();
+        string defaultName = (entry == null) ? id.ToString() : entry.Name;
+        string enName = (entry == null) ? "" : entry.EnName;
+        return LocalizationManager.GetCharacterName(id, defaultName, enName);
     }
 
     public string getCharaTailPath(CharaEntry chara)
@@ -956,38 +1117,113 @@ public class UmaViewerUI : MonoBehaviour
 
     public static string GetCostumeName(string costumeId, string defaultname)
     {
-        switch (costumeId)
+        // 根据角色名语言设置返回对应的翻译
+        CharacterNameLanguage nameLang = CharacterNameLanguage.Japanese;
+        if (Config.Instance != null)
         {
-            // case "00":return "Default";
-            case "90":
-                return "Upgraded";
-            case "0001_00_01":
-                return "Race Shorts";
-            case "0001_00_02":
-                return "Race Bloomers";
-            case "0002_00_00":
-                return "School Short Sleeves";
-            case "0002_00_03":
-                return "School Short Sleeves Big Belly";
-            case "0002_01_00":
-                return "School Long Sleeves";
-            case "0002_01_03":
-                return "School Long Sleeves Big Belly";
-            case "0003_00_01":
-                return "Tracksuit Shorts";
-            case "0003_00_02":
-                return "Tracksuit Bloomers";
-            case "0003_01_01":
-                return "Tracksuit Long Pants";
-            case "0003_01_02":
-                return "Tracksuit Rolled Up Pants";
-            case "0004_00_00":
-                return "Swimsuit";
-            case "0004_01_00":
-                return "Towel";
-            default:
-                return (defaultname == "00") ? "Default" : defaultname;
+            nameLang = Config.Instance.CharacterNameLanguage;
         }
+        
+        // 日文模式：直接返回数据库中的日文名
+        if (nameLang == CharacterNameLanguage.Japanese)
+        {
+            return (defaultname == "00") ? "Default" : defaultname;
+        }
+        
+        // 英文和中文模式：使用翻译映射
+        var costumeTranslations = new Dictionary<string, Dictionary<CharacterNameLanguage, string>>
+        {
+            {"90", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Upgraded"},
+                    {CharacterNameLanguage.Chinese, "突破服装"}
+                }
+            },
+            {"0001_00_01", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Race Shorts"},
+                    {CharacterNameLanguage.Chinese, "比赛短裤"}
+                }
+            },
+            {"0001_00_02", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Race Bloomers"},
+                    {CharacterNameLanguage.Chinese, "比赛灯笼裤"}
+                }
+            },
+            {"0002_00_00", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "School Short Sleeves"},
+                    {CharacterNameLanguage.Chinese, "校服短袖"}
+                }
+            },
+            {"0002_00_03", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "School Short Sleeves Big Belly"},
+                    {CharacterNameLanguage.Chinese, "校服短袖（大肚）"}
+                }
+            },
+            {"0002_01_00", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "School Long Sleeves"},
+                    {CharacterNameLanguage.Chinese, "校服长袖"}
+                }
+            },
+            {"0002_01_03", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "School Long Sleeves Big Belly"},
+                    {CharacterNameLanguage.Chinese, "校服长袖（大肚）"}
+                }
+            },
+            {"0003_00_01", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Tracksuit Shorts"},
+                    {CharacterNameLanguage.Chinese, "运动服短裤"}
+                }
+            },
+            {"0003_00_02", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Tracksuit Bloomers"},
+                    {CharacterNameLanguage.Chinese, "运动服灯笼裤"}
+                }
+            },
+            {"0003_01_01", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Tracksuit Long Pants"},
+                    {CharacterNameLanguage.Chinese, "运动服长裤"}
+                }
+            },
+            {"0003_01_02", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Tracksuit Rolled Up Pants"},
+                    {CharacterNameLanguage.Chinese, "运动服卷裤腿"}
+                }
+            },
+            {"0004_00_00", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Swimsuit"},
+                    {CharacterNameLanguage.Chinese, "泳装"}
+                }
+            },
+            {"0004_01_00", new Dictionary<CharacterNameLanguage, string>
+                {
+                    {CharacterNameLanguage.English, "Towel"},
+                    {CharacterNameLanguage.Chinese, "毛巾"}
+                }
+            }
+        };
+        
+        // 检查是否有预定义的翻译
+        if (costumeTranslations.TryGetValue(costumeId, out var translations))
+        {
+            if (translations.TryGetValue(nameLang, out var translation))
+            {
+                return translation;
+            }
+        }
+        
+        // 默认返回日文名
+        return (defaultname == "00") ? "Default" : defaultname;
     }
 
     public void LoadedAnimation()
@@ -1040,7 +1276,7 @@ public class UmaViewerUI : MonoBehaviour
 
         if (!container || container.IsMini)
         {
-            buttonText.text = string.Format("<color=#FF0000>{0}</color>", "Need Normal UMA");
+            buttonText.text = string.Format("<color=#FF0000>{0}</color>", LocalizationManager.Get("ui.need_normal_uma"));
             return;
         }
 
@@ -1056,9 +1292,9 @@ public class UmaViewerUI : MonoBehaviour
                     cameraRecorder.SaveVMD();
                 }
                 recorder.StopRecording();
-                buttonText.text = "Saving";
+                buttonText.text = LocalizationManager.Get("ui.saving");
                 recorder.SaveVMD(container.name, Config.Instance.VmdKeyReductionLevel);
-                buttonText.text = "Record VMD";
+                buttonText.text = LocalizationManager.Get("ui.record_vmd");
                 ShowMessage($"VMD is saved in {Path.GetFullPath(Application.dataPath + UnityHumanoidVMDRecorder.FileSavePath)}", UIMessageType.Success);
             }
         }
@@ -1075,7 +1311,7 @@ public class UmaViewerUI : MonoBehaviour
                     cameraRecorder.StartRecording();
                 }
                 newRecorder.StartRecording();
-                buttonText.text = "Recording...";
+                buttonText.text = LocalizationManager.Get("ui.recording");
             }
         }
     }
@@ -1296,7 +1532,7 @@ public class UmaViewerUI : MonoBehaviour
     {
         if (string.IsNullOrEmpty(CurrentSelectedColorSetId))
         {
-            UmaViewerUI.Instance.ShowMessage("No color set ID selected!", UIMessageType.Error);
+            UmaViewerUI.Instance.ShowMessage(LocalizationManager.Get("ui.no_color_set_selected"), UIMessageType.Error);
             return;
         }
 
@@ -1305,7 +1541,7 @@ public class UmaViewerUI : MonoBehaviour
 
         if (charaColor == null)
         {
-            UmaViewerUI.Instance.ShowMessage($"Color set ID {CurrentSelectedColorSetId} not found!", UIMessageType.Error);
+            UmaViewerUI.Instance.ShowMessage(LocalizationManager.Get("ui.color_set_not_found", CurrentSelectedColorSetId), UIMessageType.Error);
             return;
         }
 
@@ -1344,7 +1580,7 @@ public class UmaViewerUI : MonoBehaviour
         string content = string.Join("\n", lines);
         File.WriteAllText(fullPath, content, Encoding.UTF8);
 
-        UmaViewerUI.Instance.ShowMessage($"ColorSet data saved: {fullPath}", UIMessageType.Success);
+        UmaViewerUI.Instance.ShowMessage(LocalizationManager.Get("ui.color_set_saved", fullPath), UIMessageType.Success);
     }
 
 }

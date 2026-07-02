@@ -52,6 +52,9 @@ public class UmaViewerMain : MonoBehaviour
 
     private IEnumerator Start()
     {
+        // 初始化本地化系统
+        LocalizationManager.Instance.SetLanguage(Config.Instance.Language);
+        
         if (AbList == null) yield break;
         int loadingStep = 0;
         int loadingStepsTotal = 10;
@@ -65,9 +68,31 @@ public class UmaViewerMain : MonoBehaviour
 
 
 
-        //EN Translations
-        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Downloading Translations");
-        if (Config.Instance.Language == Language.En)
+        //EN Translations (始终加载，供角色名语言切换使用)
+        loadingUI.LoadingProgressChange(loadingStep++, loadingStepsTotal, "Loading Translations");
+        
+        // 先尝试从本地文件加载
+        bool translationsLoaded = false;
+        var localTranslationsPath = Path.Combine(Application.streamingAssetsPath, "text_data_dict.json");
+        if (File.Exists(localTranslationsPath))
+        {
+            try
+            {
+                var txt = File.ReadAllText(localTranslationsPath);
+                var translations = JObject.Parse(txt);
+                Translations[TranslationTables.UmaNames] = translations[((int)TranslationTables.UmaNames).ToString()].ToObject<Dictionary<int, string>>();
+                Translations[TranslationTables.MobNames] = translations[((int)TranslationTables.MobNames).ToString()].ToObject<Dictionary<int, string>>();
+                Debug.Log($"[UmaViewerMain] 从本地文件加载了 {Translations[TranslationTables.UmaNames].Count} 个角色英文翻译");
+                translationsLoaded = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[UmaViewerMain] 从本地文件加载翻译失败: {e.Message}");
+            }
+        }
+        
+        // 如果本地文件不存在或加载失败，尝试从网络下载
+        if (!translationsLoaded)
         {
             var translationsUrl = "https://raw.githubusercontent.com/UmaTL/hachimi-tl-en/refs/heads/main/localized_data/text_data_dict.json";
             yield return UmaViewerDownload.DownloadText(translationsUrl, txt =>
@@ -76,13 +101,22 @@ public class UmaViewerMain : MonoBehaviour
                 try
                 {
                     var translations = JObject.Parse(txt);
-                    //Translations[TranslationTables.Costumes] = translations[((int)TranslationTables.Costumes).ToString()].ToObject<Dictionary<int, string>>();
                     Translations[TranslationTables.UmaNames] = translations[((int)TranslationTables.UmaNames).ToString()].ToObject<Dictionary<int, string>>();
                     Translations[TranslationTables.MobNames] = translations[((int)TranslationTables.MobNames).ToString()].ToObject<Dictionary<int, string>>();
+                    Debug.Log($"[UmaViewerMain] 从网络加载了 {Translations[TranslationTables.UmaNames].Count} 个角色英文翻译");
+                    
+                    // 保存到本地文件供下次使用
+                    try
+                    {
+                        Directory.CreateDirectory(Application.streamingAssetsPath);
+                        File.WriteAllText(localTranslationsPath, txt);
+                        Debug.Log("[UmaViewerMain] 翻译文件已保存到本地");
+                    }
+                    catch { }
                 }
-                catch
+                catch (Exception e)
                 {
-                    UI.ShowMessage("Loading Translations failed", UIMessageType.Error);
+                    Debug.LogError($"[UmaViewerMain] 加载翻译失败: {e.Message}");
                 }
             });
         }
