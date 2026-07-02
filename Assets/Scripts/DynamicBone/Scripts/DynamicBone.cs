@@ -174,6 +174,12 @@ public class DynamicBone : MonoBehaviour
 #else
             float dt = Time.deltaTime;
 #endif
+
+            if (dt > (1f / 30f))
+            {
+                dt = (1f / 30f);
+            }
+
             UpdateDynamicBones(dt);
         }
     }
@@ -287,11 +293,11 @@ public class DynamicBone : MonoBehaviour
         {
             if (m_UpdateRate > 0)
             {
-                timeVar = Time.deltaTime * m_UpdateRate;
+                timeVar = t * m_UpdateRate;
             }
             else
             {
-                timeVar = Time.deltaTime;
+                timeVar = t;
             }
         }
         else
