@@ -799,7 +799,7 @@ public class UmaViewerUI : MonoBehaviour
     public void LoadPropPanel()
     {
         var pageentrys = new List<PageManager.Entry>();
-        foreach (var prop in Main.AbList.Where(a => a.Key.Contains("pfb_chr_prop") && !a.Key.Contains("clothes")))
+        foreach (var prop in Main.AbList.Where(a => (a.Key.Contains("pfb_chr_prop") || a.Key.Contains("pfb_toon_prop")) && !a.Key.Contains("clothes")))
         {
             var pageentry = new PageManager.Entry();
             pageentry.Name = Path.GetFileName(prop.Key);
