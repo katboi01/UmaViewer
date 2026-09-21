@@ -16,8 +16,8 @@ public static class Sqlite3MC
 	private const string DLL = "sqlite3mc_mac";   // libsqlite3mc_mac.dylib
 	#elif UNITY_ANDROID
 	private const string DLL = "sqlite3mcandroid"; // libsqlite3mcandroid.so
-	#elif (UNITY_IOS || UNITY_IPHONE) && !UNITY_EDITOR
-	private const string DLL = "__Internal";      // libsqlite3mc_static.a
+	#elif (UNITY_IOS || UNITY_IPHONE || UNITY_WEBGL) && !UNITY_EDITOR
+	private const string DLL = "__Internal";      // static: iOS libsqlite3mc_static.a, WebGL sqlite3mc.wasm plugin
 	#else
 	private const string DLL = "sqlite3mc";
 	#endif
@@ -28,8 +28,15 @@ public static class Sqlite3MC
     public const int SQLITE_OK = 0;
     public const int SQLITE_ROW = 100;
     public const int SQLITE_DONE = 101;
+    public const int SQLITE_OPEN_READONLY = 0x00000001;
     public const int SQLITE_OPEN_READWRITE = 0x00000002;
     public const int SQLITE_OPEN_CREATE = 0x00000004;
+
+    public const int SQLITE_INTEGER = 1;
+    public const int SQLITE_FLOAT = 2;
+    public const int SQLITE_TEXT = 3;
+    public const int SQLITE_BLOB = 4;
+    public const int SQLITE_NULL = 5;
 
     // ---- Native Imports ----
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_open_v2")]
@@ -83,6 +90,18 @@ public static class Sqlite3MC
 
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_column_int64")]
     private static extern long sqlite3_column_int64(IntPtr stmt, int iCol);
+
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_column_double")]
+    private static extern double sqlite3_column_double(IntPtr stmt, int iCol);
+
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_column_count")]
+    private static extern int sqlite3_column_count(IntPtr stmt);
+
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_column_name")]
+    private static extern IntPtr sqlite3_column_name(IntPtr stmt, int iCol);
+
+    [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_column_type")]
+    private static extern int sqlite3_column_type(IntPtr stmt, int iCol);
 
     // Binders
     [DllImport(DLL, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_bind_text")]
@@ -269,6 +288,24 @@ public static class Sqlite3MC
 
     public static int ColumnInt(IntPtr stmt, int col) => sqlite3_column_int(stmt, col);
     public static long ColumnInt64(IntPtr stmt, int col) => sqlite3_column_int64(stmt, col);
+    public static double ColumnDouble(IntPtr stmt, int col) => sqlite3_column_double(stmt, col);
+    public static int ColumnCount(IntPtr stmt) => sqlite3_column_count(stmt);
+    public static int ColumnType(IntPtr stmt, int col) => sqlite3_column_type(stmt, col);
+    public static string ColumnName(IntPtr stmt, int col) => PtrToStringUTF8(sqlite3_column_name(stmt, col));
+
+    // Typed value mirroring what Mono.Data.Sqlite's SqliteDataReader[i] yields, so DataRow
+    // consumers behave the same on WebGL (long/double/string/byte[]/DBNull).
+    public static object ColumnValue(IntPtr stmt, int col)
+    {
+        switch (sqlite3_column_type(stmt, col))
+        {
+            case SQLITE_INTEGER: return sqlite3_column_int64(stmt, col);
+            case SQLITE_FLOAT: return sqlite3_column_double(stmt, col);
+            case SQLITE_TEXT: return ColumnText(stmt, col) ?? (object)DBNull.Value;
+            case SQLITE_BLOB: return (object)ColumnBlob(stmt, col) ?? DBNull.Value;
+            default: return DBNull.Value;
+        }
+    }
 
     // Bind helpers (use SQLITE_TRANSIENT to let sqlite copy data)
     private static readonly IntPtr SQLITE_TRANSIENT = new IntPtr(-1);

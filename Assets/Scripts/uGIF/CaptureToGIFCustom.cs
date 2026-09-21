@@ -39,12 +39,26 @@ namespace uGIF
 		IEnumerator WaitForBytes() {
 			while(bytes == null) yield return new WaitForEndOfFrame();
 
+            string baseName = string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+
+            if (WebDownload.Active)
+            {
+                // WebGL has no user-accessible filesystem; hand the GIF to the browser to save.
+                WebDownload.Save($"{baseName}.gif", bytes);
+                bytes = null;
+                UmaViewerUI.Instance.ShowMessage($"GIF downloaded: {baseName}.gif", UIMessageType.Success);
+                Frames.Clear();
+                stop = false;
+                UmaViewerUI.Instance.ScreenshotSettings.GifButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record GIF";
+                yield break;
+            }
+
 #if UNITY_ANDROID && !UNITY_EDITOR
             string fileDirectory = Application.persistentDataPath + "/../Screenshots/";
 #else
             string fileDirectory = Application.dataPath + "/../Screenshots/";
 #endif
-            string fileName = fileDirectory + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+            string fileName = fileDirectory + baseName;
             Directory.CreateDirectory(fileDirectory);
             //fixes "/../" in path
             var fullpath = Path.GetFullPath($"{fileName}.gif");

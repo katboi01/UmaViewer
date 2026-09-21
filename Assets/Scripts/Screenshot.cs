@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.IO.Compression;
 using uGIF;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
@@ -28,14 +29,25 @@ public class Screenshot : MonoBehaviour
         height = height == -1 ? Screen.height : height;
         var image = GrabFrame(camera, width, height, ScreenshotSettings.Transparent);
 
+        string baseName = string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+        byte[] pngShot = ImageConversion.EncodeToPNG(image);
+
+        if (WebDownload.Active)
+        {
+            // WebGL has no user-accessible filesystem; hand the PNG to the browser to save.
+            WebDownload.Save($"{baseName}.png", pngShot);
+            UmaViewerUI.Instance.ShowMessage($"Screenshot downloaded: {baseName}.png", UIMessageType.Success);
+            Destroy(image);
+            return;
+        }
+
 #if UNITY_ANDROID && !UNITY_EDITOR
         string fileDirectory = Application.persistentDataPath + "/../Screenshots/";
 #else
         string fileDirectory = Application.dataPath + "/../Screenshots/";
 #endif
 
-        string fileName = fileDirectory + string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
-        byte[] pngShot = ImageConversion.EncodeToPNG(image);
+        string fileName = fileDirectory + baseName;
         Directory.CreateDirectory(fileDirectory);
         //fixes "/../" in path
         var fullpath = Path.GetFullPath($"{fileName}.png");
@@ -122,12 +134,27 @@ public class Screenshot : MonoBehaviour
     {
         ScreenshotSettings.SequenceButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Recording...";
         string folderName = string.Format("UmaViewer_{0}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff"));
+
+        // WebGL has no user-accessible filesystem, so collect the frames into one in-memory zip
+        // and hand it to the browser at the end instead of writing a folder of loose PNGs (which
+        // would either vanish into MEMFS or spam one download prompt per frame).
+        MemoryStream zipStream = null;
+        ZipArchive zip = null;
+        string fileDirectory = null;
+        if (WebDownload.Active)
+        {
+            zipStream = new MemoryStream();
+            zip = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
+        }
+        else
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        string fileDirectory = Application.persistentDataPath + "/../Screenshots/" + folderName;
+            fileDirectory = Application.persistentDataPath + "/../Screenshots/" + folderName;
 #else
-        string fileDirectory = Application.dataPath + "/../Screenshots/" + folderName;
+            fileDirectory = Application.dataPath + "/../Screenshots/" + folderName;
 #endif
-        Directory.CreateDirectory(fileDirectory);
+            Directory.CreateDirectory(fileDirectory);
+        }
 
         var camera = GetActiveCamera();
         var ppLayer = camera.GetComponent<PostProcessLayer>();
@@ -156,8 +183,17 @@ public class Screenshot : MonoBehaviour
             var tex = GrabFrame(camera, width, height, transparent);
             var bytes = tex.EncodeToPNG();
 
-            var fileName = $"{fileDirectory}/{frame.ToString().PadLeft(maxNameLength, '0')}.png";
-            File.WriteAllBytes(fileName, bytes);
+            var entryName = $"{frame.ToString().PadLeft(maxNameLength, '0')}.png";
+            if (WebDownload.Active)
+            {
+                var zipEntry = zip.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Fastest);
+                using (var es = zipEntry.Open())
+                    es.Write(bytes, 0, bytes.Length);
+            }
+            else
+            {
+                File.WriteAllBytes($"{fileDirectory}/{entryName}", bytes);
+            }
 
             Destroy(tex);
             frame++;
@@ -167,6 +203,15 @@ public class Screenshot : MonoBehaviour
         AnimationSettings.ChangeProgress(0);
         AnimationSettings.ChangeSpeed(1);
         ppLayer.enabled = oldPpState;
+
+        if (WebDownload.Active)
+        {
+            zip.Dispose(); // flush the central directory before reading the stream
+            WebDownload.Save($"{folderName}.zip", zipStream.ToArray());
+            zipStream.Dispose();
+            UmaViewerUI.Instance.ShowMessage($"PNG sequence downloaded: {folderName}.zip", UIMessageType.Success);
+        }
+
         ScreenshotSettings.SequenceButton.interactable = true;
         ScreenshotSettings.SequenceButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = "Record PNG Sequence";
 

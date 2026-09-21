@@ -1,0 +1,7 @@
+.build/
+dxbc2hlsl
+dxbc.log
+*.decrypted
+dxbc/
+*.hlsl
+*.metal

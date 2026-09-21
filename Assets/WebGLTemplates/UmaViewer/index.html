@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+      #uma-gate {
+        position: fixed; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 16px;
+        background: #1b1b20; color: #eee; font: 15px/1.5 system-ui, sans-serif;
+        text-align: center; padding: 24px;
+      }
+      #uma-gate h1 { font-size: 20px; margin: 0; font-weight: 600; }
+      #uma-gate p { max-width: 460px; margin: 0; color: #aaa; }
+      #uma-pick {
+        padding: 10px 20px; font-size: 15px; border: 0; border-radius: 6px;
+        background: #4f6cff; color: #fff; cursor: pointer;
+      }
+      #uma-pick:disabled { background: #444; cursor: default; }
+      #uma-other {
+        padding: 4px 8px; font-size: 13px; border: 0; background: none;
+        color: #8ea0ff; cursor: pointer; text-decoration: underline;
+      }
+      #uma-gate small { color: #888; }
+      #uma-err { color: #ff6b6b; min-height: 1em; }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop" hidden>
+      <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+
+    <div id="uma-gate">
+      <h1>{{{ PRODUCT_NAME }}}</h1>
+      <p>Select your umamusume data folder (the one containing <code>meta</code> and <code>dat/</code>, e.g. <code>Cygames/umamusume</code>). Nothing is uploaded; files are read locally in your browser.</p>
+      <button id="uma-pick">Select data folder</button>
+      <button id="uma-other" hidden>Choose a different folder…</button>
+      <div id="uma-err"></div>
+      <small>Requires a Chromium browser (File System Access API).</small>
+    </div>
+
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: unityShowBanner,
+      };
+
+      // Canvas size is driven by CSS (fills the viewport); Unity matches the drawing buffer to
+      // the canvas client size, so don't pin it to the fixed build WIDTH/HEIGHT here.
+
+      function boot() {
+        // Keep the dark gate as a loading screen with a live percentage until Unity is ready.
+        // Otherwise the blank white canvas shows for the seconds it takes to fetch/decompress the
+        // data and instantiate the wasm, which reads as a long white hang on refresh.
+        var gate = document.querySelector("#uma-gate");
+        gate.innerHTML = '<h1>Loading…</h1><p id="uma-load-pct">0%</p>';
+        container.hidden = false;
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            var pct = document.getElementById("uma-load-pct");
+            if (pct) pct.textContent = Math.round(progress * 100) + "%";
+          }).then((unityInstance) => {
+            window.__umaUnity = unityInstance;
+            gate.remove();
+          }).catch((message) => {
+            unityShowBanner(message, 'error');
+          });
+        };
+        document.body.appendChild(script);
+      }
+
+      var pickBtn = document.querySelector("#uma-pick");
+      var otherBtn = document.querySelector("#uma-other");
+      var errBox = document.querySelector("#uma-err");
+
+      // Remember the picked data folder so return visits skip the folder navigation. A directory
+      // handle is a structured-cloneable object, so it lives in IndexedDB (a string path in a
+      // cookie/localStorage can't be reopened). Fully client-side, so it works on static hosting.
+      var IDB_NAME = "uma-fs", IDB_STORE = "handles", IDB_KEY = "dataDir";
+      function idb(run) {
+        return new Promise(function (resolve, reject) {
+          var open = indexedDB.open(IDB_NAME, 1);
+          open.onupgradeneeded = function () { open.result.createObjectStore(IDB_STORE); };
+          open.onerror = function () { reject(open.error); };
+          open.onsuccess = function () {
+            var db = open.result;
+            var tx = db.transaction(IDB_STORE, "readwrite");
+            var req = run(tx.objectStore(IDB_STORE));
+            tx.oncomplete = function () { db.close(); resolve(req ? req.result : undefined); };
+            tx.onerror = function () { db.close(); reject(tx.error); };
+          };
+        });
+      }
+      function saveHandle(h) { return idb(function (s) { return s.put(h, IDB_KEY); }); }
+      function loadHandle() { return idb(function (s) { return s.get(IDB_KEY); }); }
+
+      // Called from the running app's "Change DataPath" button (via UmaFS_ChangeFolder in the
+      // jslib): pick a new folder, remember it, and reload so the app re-inits on the new data.
+      window.umaPickAndReload = async function () {
+        if (!window.showDirectoryPicker) return;
+        try {
+          var root = await window.showDirectoryPicker({ id: 'uma-data', mode: 'read' });
+          try { await saveHandle(root); } catch (e) {}
+          location.reload();
+        } catch (e) { /* AbortError: user cancelled the picker */ }
+      };
+
+      function start(handle) {
+        window.__umaFS = { root: handle, rootPrefix: '/uma/', ready: true };
+        pickBtn.disabled = true;
+        pickBtn.textContent = "Loading...";
+        boot();
+      }
+
+      async function pickFresh() {
+        if (!window.showDirectoryPicker) {
+          errBox.textContent = "This browser has no File System Access API. Use Chrome, Edge, or another Chromium browser.";
+          return;
+        }
+        try {
+          var root = await window.showDirectoryPicker({ id: 'uma-data', mode: 'read' });
+          try { await saveHandle(root); } catch (e) {}
+          start(root);
+        } catch (e) {
+          if (e && e.name === 'AbortError') return;
+          errBox.textContent = "Could not open the folder: " + (e && e.message ? e.message : e);
+        }
+      }
+
+      pickBtn.onclick = pickFresh;
+      otherBtn.onclick = pickFresh;
+
+      // On load, reopen the last folder: boot straight in if permission survived, otherwise offer
+      // a one-click reopen (re-granting permission needs a user gesture).
+      (async function () {
+        var saved = null;
+        try { saved = await loadHandle(); } catch (e) {}
+        if (!saved) return;
+        var perm = "prompt";
+        try { perm = await saved.queryPermission({ mode: 'read' }); } catch (e) {}
+        if (perm === "granted") { start(saved); return; }
+        pickBtn.textContent = 'Reopen "' + saved.name + '"';
+        otherBtn.hidden = false;
+        pickBtn.onclick = async function () {
+          var granted = "denied";
+          try { granted = await saved.requestPermission({ mode: 'read' }); } catch (e) {}
+          if (granted === "granted") start(saved);
+          else errBox.textContent = "Permission denied. Pick the folder again.";
+        };
+      })();
+    </script>
+  </body>
+</html>

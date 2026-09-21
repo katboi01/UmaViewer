@@ -57,9 +57,12 @@ public class UmaDatabaseController
     public SqliteConnection metaDb;
     /// <summary> Master Database Connection </summary>
     private SqliteConnection masterDb;
+    /// <summary> WebGL master handle (Mono.Data.Sqlite's DllImport("sqlite3") can't link there). </summary>
+    private IntPtr masterNative = IntPtr.Zero;
     /// <summary> Loads the file database </summary>
     public UmaDatabaseController()
     {
+        string dbStep = "start";
         try
         {
             var dbKey = Config.Instance.DBKey;
@@ -94,6 +97,16 @@ public class UmaDatabaseController
                 masterDb = new SqliteConnection($@"Data Source={Config.Instance.MainPath}/master/master.mdb;");
             }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // Mono.Data.Sqlite's DllImport("sqlite3") can't dynamically link on WebGL, so read
+            // meta straight through the statically linked Sqlite3MC path instead of attempting
+            // metaDb.Open() (which only ever fails into this same fallback and logs a dlopen error).
+            {
+                var dbPath = $@"{Config.Instance.MainPath}/meta";
+                var key = GenFinalKey((byte[])dbKey.Clone());
+                MetaEntries = ReadMetaFromEncryptedDb(dbPath, key, 3);
+            }
+#else
             try
             {
                 metaDb.Open();
@@ -101,31 +114,30 @@ public class UmaDatabaseController
             }
             catch (Exception)
             {
-                try
-                {
-                    var dbPath = $@"{Config.Instance.MainPath}/meta";
-                    var key = GenFinalKey((byte[])dbKey.Clone());
-                    MetaEntries = ReadMetaFromEncryptedDb(dbPath, key, 3);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                var dbPath = $@"{Config.Instance.MainPath}/meta";
+                var key = GenFinalKey((byte[])dbKey.Clone());
+                MetaEntries = ReadMetaFromEncryptedDb(dbPath, key, 3);
             }
+#endif
 #endif
 
 
-            masterDb.Open();
-            CharaData = ReadCharaMaster(masterDb);
-            MobCharaData = ReadMobCharaMaster(masterDb);
-            FaceTypeData = ReadFaceTypeData(masterDb);
-            LiveData = ReadAllLiveData(masterDb);
-            DressData = ReadAllDressData(masterDb);
-            JukeboxMusicData = new Gallop.MasterJukeboxMusicData(masterDb);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            dbStep = "master.OpenNative";
+            masterNative = Sqlite3MC.Open($@"{Config.Instance.MainPath}/master/master.mdb", Sqlite3MC.SQLITE_OPEN_READONLY);
+#else
+            dbStep = "master.Open"; masterDb.Open();
+#endif
+            dbStep = "chara_data"; CharaData = ReadCharaMaster();
+            dbStep = "mob_data"; MobCharaData = ReadMobCharaMaster();
+            dbStep = "face_type_data"; FaceTypeData = ReadFaceTypeData();
+            dbStep = "live_data"; LiveData = ReadAllLiveData();
+            dbStep = "dress_data"; DressData = ReadAllDressData();
+            dbStep = "jukebox_music"; JukeboxMusicData = new Gallop.MasterJukeboxMusicData(QueryMaster);
 
 
             //修改(载入通用服装ColorSet相关)
-            CharaDressColor = ReadAllCharaDressColor(masterDb);
+            dbStep = "chara_dress_color"; CharaDressColor = ReadAllCharaDressColor();
 
 
 #if UNITY_STANDALONE_WIN
@@ -137,7 +149,7 @@ public class UmaDatabaseController
         }
         catch (Exception ex)
         {
-            Debug.LogError("Database initialization failed: " + ex);
+            Debug.LogError($"Database initialization failed at [{dbStep}]: {ex}");
             CloseAllConnection();
 #if UNITY_ANDROID || UNITY_IOS || UNITY_IPHONE
             var msg = $"Mobile database initialization failed at: {Config.Instance.MainPath}\n{ex.GetType().Name}: {ex.Message}";
@@ -159,6 +171,7 @@ public class UmaDatabaseController
             {
                 msg += "\nPlease make sure the game client is installed and follow the instructions on GitHub.";
             }
+            msg += $"\n[{dbStep}] {ex.GetType().Name}: {ex.Message}";
 #endif
             UmaViewerUI.Instance.ShowMessage(msg, UIMessageType.Error);
         }
@@ -239,20 +252,46 @@ public class UmaDatabaseController
 
 
 
-    //修改(载入通用服装ColorSet相关)
-    static List<DataRow> ReadAllCharaDressColor(SqliteConnection conn)
+    // Master queries go through here so WebGL (Sqlite3MC via __Internal) and desktop
+    // (Mono.Data.Sqlite) share one path; consumers see the same List<DataRow>.
+    public List<DataRow> QueryMaster(string sql)
     {
-        SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name='chara_dress_color_set'";
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        bool HasTable = sqlite_datareader.HasRows;
+        if (masterNative != IntPtr.Zero) return ReadMasterNative(masterNative, sql);
+        return ReadMaster(masterDb, sql);
+    }
 
-        if (!HasTable)
+    static List<DataRow> ReadMasterNative(IntPtr db, string sql)
+    {
+        var table = new DataTable();
+        var rows = new List<DataRow>();
+        bool built = false;
+        Sqlite3MC.ForEachRow(sql, db, (stmt) =>
         {
-            return new List<DataRow>();
-        }
+            int n = Sqlite3MC.ColumnCount(stmt);
+            if (!built)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    string name = Sqlite3MC.ColumnName(stmt, i);
+                    if (string.IsNullOrEmpty(name)) name = $"col{i}";
+                    if (table.Columns.Contains(name)) name = $"{name}_{i}";
+                    table.Columns.Add(name, typeof(object));
+                }
+                built = true;
+            }
+            var row = table.NewRow();
+            for (int i = 0; i < n; i++) row[i] = Sqlite3MC.ColumnValue(stmt, i);
+            rows.Add(row);
+        });
+        return rows;
+    }
 
-        return ReadMaster(conn, "SELECT * FROM chara_dress_color_set");
+    //修改(载入通用服装ColorSet相关)
+    List<DataRow> ReadAllCharaDressColor()
+    {
+        var check = QueryMaster("SELECT name FROM sqlite_master WHERE type='table' AND name='chara_dress_color_set'");
+        if (check.Count == 0) return new List<DataRow>();
+        return QueryMaster("SELECT * FROM chara_dress_color_set");
     }
 
 
@@ -473,14 +512,14 @@ public class UmaDatabaseController
         }
     }
 
-    static List<DataRow> ReadCharaMaster(SqliteConnection conn)
+    List<DataRow> ReadCharaMaster()
     {
-        return ReadMaster(conn, "SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid");
+        return QueryMaster("SELECT * FROM chara_data C,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 6) T WHERE C.id like T.charaid");
     }
 
-    static List<DataRow> ReadMobCharaMaster(SqliteConnection conn)
+    List<DataRow> ReadMobCharaMaster()
     {
-        return ReadMaster(conn, "SELECT * FROM mob_data M,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 59) T WHERE M.mob_id like T.charaid");
+        return QueryMaster("SELECT * FROM mob_data M,(SELECT D.'index' charaid,D.'text' charaname FROM text_data D WHERE id like 59) T WHERE M.mob_id like T.charaid");
     }
 
     static List<DataRow> ReadMaster(SqliteConnection conn, string sql)
@@ -509,39 +548,35 @@ public class UmaDatabaseController
         return dr;
     }
 
-    static List<FaceTypeData> ReadFaceTypeData(SqliteConnection conn)
+    List<FaceTypeData> ReadFaceTypeData()
     {
         List<FaceTypeData> data = new List<FaceTypeData>();
-        SqliteCommand sqlite_cmd = conn.CreateCommand();
-        sqlite_cmd.CommandText = "SELECT * FROM face_type_data";
-        SqliteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-        while (sqlite_datareader.Read())
+        foreach (var row in QueryMaster("SELECT * FROM face_type_data"))
         {
-            FaceTypeData entry = new FaceTypeData()
+            data.Add(new FaceTypeData()
             {
-                label = sqlite_datareader.GetString(0),
-                eyebrow_l = sqlite_datareader.GetString(1),
-                eyebrow_r = sqlite_datareader.GetString(2),
-                eye_l = sqlite_datareader.GetString(3),
-                eye_r = sqlite_datareader.GetString(4),
-                mouth = sqlite_datareader.GetString(5),
-                mouth_shape_type = sqlite_datareader.GetInt32(6),
-                inverce_face_type = sqlite_datareader.GetString(7),
-                set_face_group = sqlite_datareader.GetInt32(8),
-            };
-            data.Add(entry);
+                label = row[0].ToString(),
+                eyebrow_l = row[1].ToString(),
+                eyebrow_r = row[2].ToString(),
+                eye_l = row[3].ToString(),
+                eye_r = row[4].ToString(),
+                mouth = row[5].ToString(),
+                mouth_shape_type = Convert.ToInt32(row[6]),
+                inverce_face_type = row[7].ToString(),
+                set_face_group = Convert.ToInt32(row[8]),
+            });
         }
         return data;
     }
 
-    static List<DataRow> ReadAllLiveData(SqliteConnection conn)
+    List<DataRow> ReadAllLiveData()
     {
-        return ReadMaster(conn, $"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid");
+        return QueryMaster($"SELECT * FROM live_data L,(SELECT D.'index' songid,D.'text' songname FROM text_data D WHERE id like 16) T WHERE L.music_id like T.songid");
     }
 
-    static List<DataRow> ReadAllDressData(SqliteConnection conn)
+    List<DataRow> ReadAllDressData()
     {
-        return ReadMaster(conn, $"SELECT * FROM dress_data C,(SELECT D.'index' dressid,D.'text' dressname FROM text_data D WHERE id like 14) T WHERE C.id like T.dressid");
+        return QueryMaster($"SELECT * FROM dress_data C,(SELECT D.'index' dressid,D.'text' dressname FROM text_data D WHERE id like 14) T WHERE C.id like T.dressid");
     }
 
     public static DataRow ReadCharaData(CharaEntry chara)
@@ -555,14 +590,14 @@ public class UmaDatabaseController
 
     public static DataRow ReadMobDressColor(string mobid)
     {
-        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
+        var results = instance.QueryMaster($"SELECT * FROM mob_dress_color_set WHERE id LIKE {mobid}");
 
         return results.Count > 0 ? results[0] : null;
     }
 
     public static DataRow ReadMobHairColor(string colorid)
     {
-        var results = ReadMaster(instance.masterDb, $"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
+        var results = instance.QueryMaster($"SELECT * FROM mob_hair_color_set WHERE id LIKE {colorid}");
         foreach (var data in results)
         {
             return data;
@@ -578,6 +613,7 @@ public class UmaDatabaseController
         metaDb?.Close();
         masterDb?.Dispose();
         metaDb?.Dispose();
+        if (masterNative != IntPtr.Zero) { Sqlite3MC.Close(masterNative); masterNative = IntPtr.Zero; }
         SqliteConnection.ClearAllPools();
         GC.Collect();
         GC.WaitForPendingFinalizers();

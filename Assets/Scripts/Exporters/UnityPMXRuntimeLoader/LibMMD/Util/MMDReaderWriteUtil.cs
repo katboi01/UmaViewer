@@ -121,6 +121,17 @@ namespace LibMMD.Util
             writer.Write(-vector.z / amp);
         }
 
+        // Writes the components exactly as given. For values that are neither positions nor
+        // directions -- spring constants, angular limits -- the x/z negation that the
+        // handedness flip applies is simply wrong, and WriteVector3(..., false) still applies
+        // it (its flag only disables the size amplifier).
+        public static void WritePlainVector3(BinaryWriter writer, Vector3 vector)
+        {
+            writer.Write(vector.x);
+            writer.Write(vector.y);
+            writer.Write(vector.z);
+        }
+
 
         public static Vector3 ReadRawCoordinateVector3(BinaryReader reader)
         {

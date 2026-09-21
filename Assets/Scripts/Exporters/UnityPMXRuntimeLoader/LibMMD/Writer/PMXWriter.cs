@@ -78,10 +78,19 @@ namespace LibMMD.Writer
                 MMDReaderWriteUtil.WriteAmpVector3(writer, joint.Rotation, Mathf.Rad2Deg);
                 MMDReaderWriteUtil.WriteVector3(writer, joint.PositionLowLimit);
                 MMDReaderWriteUtil.WriteVector3(writer, joint.PositionHiLimit);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationLowLimit, false);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.RotationHiLimit, false);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.SpringTranslate);
-                MMDReaderWriteUtil.WriteVector3(writer, joint.SpringRotate, false);
+                // Angular limits follow the handedness flip, which negates x and z -- and
+                // negating an interval maps [lo, hi] to [-hi, -lo], so the two bounds must be
+                // swapped as well. Emitting them in place left lo > hi on x and z, and Bullet
+                // reads that as "no limit" (btRotationalLimitMotor::isLimited() is !(lo > hi)),
+                // so those axes span freely instead of being constrained.
+                var rotLo = joint.RotationLowLimit;
+                var rotHi = joint.RotationHiLimit;
+                MMDReaderWriteUtil.WritePlainVector3(writer, new Vector3(-rotHi.x, rotLo.y, -rotHi.z));
+                MMDReaderWriteUtil.WritePlainVector3(writer, new Vector3(-rotLo.x, rotHi.y, -rotLo.z));
+                // Spring stiffness is a magnitude, not a direction: it takes no flip and no
+                // size scaling. A negated constant is an anti-restoring force that diverges.
+                MMDReaderWriteUtil.WritePlainVector3(writer, joint.SpringTranslate);
+                MMDReaderWriteUtil.WritePlainVector3(writer, joint.SpringRotate);
             }
         }
 
@@ -93,12 +102,16 @@ namespace LibMMD.Writer
                 MMDReaderWriteUtil.WriteSizedString(writer, rigidBody.Name, pmxConfig.Encoding); // Name
                 MMDReaderWriteUtil.WriteSizedString(writer, rigidBody.NameEn, pmxConfig.Encoding); // NameEn
                 MMDReaderWriteUtil.WriteIndex(writer, rigidBody.AssociatedBoneIndex, pmxConfig.BoneIndexSize); // AssociatedBoneIndex
-                writer.Write(rigidBody.CollisionGroup); // CollisionGroup
+                writer.Write((byte)rigidBody.CollisionGroup); // CollisionGroup (1 byte; reader uses ReadByte)
                 writer.Write(rigidBody.CollisionMask); // CollisionMask
                 writer.Write((byte)rigidBody.Shape); // Shape
                 MMDReaderWriteUtil.WriteRawCoordinateVector3(writer, rigidBody.Dimemsions); // Dimemsions
                 MMDReaderWriteUtil.WriteVector3(writer, rigidBody.Position); // Position
-                MMDReaderWriteUtil.WriteAmpVector3(writer, rigidBody.Rotation, Mathf.Deg2Rad); // Rotation
+                // Rotation is held in degrees in memory (the reader multiplies by Rad2Deg) and PMX
+                // stores radians. WriteAmpVector3 divides by the amp, so the divisor is Rad2Deg --
+                // same as the joint rotation above. Deg2Rad here multiplied by 57.3 instead, which
+                // left every capsule collider with an arbitrary orientation.
+                MMDReaderWriteUtil.WriteAmpVector3(writer, rigidBody.Rotation, Mathf.Rad2Deg); // Rotation
                 writer.Write(rigidBody.Mass); // Mass
                 writer.Write(rigidBody.TranslateDamp); // TranslateDamp
                 writer.Write(rigidBody.RotateDamp); // RotateDamp
@@ -328,8 +341,13 @@ namespace LibMMD.Writer
                 writer.Write(link.HasLimit ? (byte)1 : (byte)0);
                 if (link.HasLimit)
                 {
-                    MMDReaderWriteUtil.WriteVector3(writer, link.LoLimit, false);
-                    MMDReaderWriteUtil.WriteVector3(writer, link.HiLimit, false);
+                    // Angle limits about the bone axes. Positions reach the PMX frame through a
+                    // half-turn about Y (x and z negated), which maps an interval on X or Z to its
+                    // negation, so those components negate AND swap between low and high -- the
+                    // same as joint limits.
+                    var lo = link.LoLimit; var hi = link.HiLimit;
+                    MMDReaderWriteUtil.WritePlainVector3(writer, new Vector3(-hi.x, lo.y, -hi.z));
+                    MMDReaderWriteUtil.WritePlainVector3(writer, new Vector3(-lo.x, hi.y, -lo.z));
                 }
             }
         }

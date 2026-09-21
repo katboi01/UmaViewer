@@ -28,6 +28,10 @@ public class UISettingsAssets : MonoBehaviour
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
                 string filePath = entry.FilePath.Replace("/", "\\");
                 System.Diagnostics.Process.Start("explorer.exe", "/select," + filePath);
+#elif UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+                System.Diagnostics.Process.Start("open", "-R \"" + entry.FilePath + "\"");
+#elif UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+                System.Diagnostics.Process.Start("xdg-open", "\"" + Path.GetDirectoryName(entry.FilePath) + "\"");
 #else
                 UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
 #endif

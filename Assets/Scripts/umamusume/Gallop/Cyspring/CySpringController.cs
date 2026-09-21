@@ -12,6 +12,16 @@ namespace Gallop
         public const float DEFAULT_WIND_POWERSCALE_RATE = 1f;
         private const int PARTS_NUM = 3;
         private int _targetCySpringFpsMode = 1;
+
+        /// Which step rate the solver is told to assume: 1 = 60fps, 0 = 30fps. This reaches the
+        /// native plugin as its is60FPS argument and changes how the Verlet carry-over is scaled,
+        /// so it has to match the rate the game is actually stepped at. Settable so a headless
+        /// capture, which forces its own fixed step, can keep the two in agreement.
+        public bool Is60FpsMode
+        {
+            get { return _targetCySpringFpsMode == 1; }
+            set { _targetCySpringFpsMode = value ? 1 : 0; }
+        }
         private static volatile bool _simulationTimeOutError;
 
         public enum Parts

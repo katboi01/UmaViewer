@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
-using Mono.Data.Sqlite;
 
 namespace Gallop
 {
     /// <summary>
     /// UmaViewer adapter for the official MasterJukeboxMusicData table.
-    /// The public API and row fields follow the official dummy class, while
-    /// the database backend uses the Mono.Data.Sqlite connection already used
-    /// by UmaDatabaseController.
+    /// The public API and row fields follow the official dummy class; rows come
+    /// from UmaDatabaseController.QueryMaster (Mono.Data.Sqlite on desktop,
+    /// Sqlite3MC on WebGL).
     /// </summary>
     public sealed class MasterJukeboxMusicData
     {
         public const string TABLE_NAME = "jukebox_music_data";
 
-        private readonly SqliteConnection _db;
+        private readonly Func<string, List<DataRow>> _query;
         private bool _preloaded;
         private readonly HashSet<int> _notFounds = new HashSet<int>();
         private readonly Dictionary<int, JukeboxMusicData> _lazyPrimaryKeyDictionary =
@@ -33,9 +33,9 @@ namespace Gallop
             }
         }
 
-        public MasterJukeboxMusicData(SqliteConnection db)
+        public MasterJukeboxMusicData(Func<string, List<DataRow>> query)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
+            _query = query ?? throw new ArgumentNullException(nameof(query));
         }
 
         public JukeboxMusicData Get(int musicId)
@@ -106,44 +106,22 @@ namespace Gallop
 
         private JukeboxMusicData SelectOne(int musicId)
         {
-            const string sql =
-                "SELECT * FROM jukebox_music_data WHERE music_id = @music_id LIMIT 1";
-
-            using (SqliteCommand command = _db.CreateCommand())
-            {
-                command.CommandText = sql;
-                command.Parameters.AddWithValue("@music_id", musicId);
-                using (SqliteDataReader reader = command.ExecuteReader())
-                {
-                    return reader.Read() ? CreateOrmByQueryResult(reader) : null;
-                }
-            }
+            var rows = _query($"SELECT * FROM jukebox_music_data WHERE music_id = {musicId} LIMIT 1");
+            return rows.Count > 0 ? CreateOrmByQueryResult(rows[0]) : null;
         }
 
         private List<JukeboxMusicData> ListSelectWithVersionType(int versionType)
         {
-            const string sql =
-                "SELECT * FROM jukebox_music_data " +
-                "WHERE version_type = @version_type ORDER BY sort, music_id";
-
             var list = new List<JukeboxMusicData>();
-            using (SqliteCommand command = _db.CreateCommand())
+            foreach (var row in _query($"SELECT * FROM jukebox_music_data WHERE version_type = {versionType} ORDER BY sort, music_id"))
             {
-                command.CommandText = sql;
-                command.Parameters.AddWithValue("@version_type", versionType);
-                using (SqliteDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        JukeboxMusicData item = CreateOrmByQueryResult(reader);
-                        if (_lazyPrimaryKeyDictionary.TryGetValue(item.MusicId, out JukeboxMusicData cached))
-                            item = cached;
-                        else
-                            _lazyPrimaryKeyDictionary.Add(item.MusicId, item);
+                JukeboxMusicData item = CreateOrmByQueryResult(row);
+                if (_lazyPrimaryKeyDictionary.TryGetValue(item.MusicId, out JukeboxMusicData cached))
+                    item = cached;
+                else
+                    _lazyPrimaryKeyDictionary.Add(item.MusicId, item);
 
-                        list.Add(item);
-                    }
-                }
+                list.Add(item);
             }
 
             return list;
@@ -155,95 +133,71 @@ namespace Gallop
                 return;
 
             _preloaded = true;
-            const string sql = "SELECT * FROM jukebox_music_data ORDER BY sort, music_id";
-
-            using (SqliteCommand command = _db.CreateCommand())
+            foreach (var row in _query("SELECT * FROM jukebox_music_data ORDER BY sort, music_id"))
             {
-                command.CommandText = sql;
-                using (SqliteDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        JukeboxMusicData item = CreateOrmByQueryResult(reader);
-                        if (!_lazyPrimaryKeyDictionary.ContainsKey(item.MusicId))
-                            _lazyPrimaryKeyDictionary.Add(item.MusicId, item);
-                    }
-                }
+                JukeboxMusicData item = CreateOrmByQueryResult(row);
+                if (!_lazyPrimaryKeyDictionary.ContainsKey(item.MusicId))
+                    _lazyPrimaryKeyDictionary.Add(item.MusicId, item);
             }
         }
 
-        private static JukeboxMusicData CreateOrmByQueryResult(SqliteDataReader reader)
+        private static JukeboxMusicData CreateOrmByQueryResult(DataRow row)
         {
             return new JukeboxMusicData(
-                musicId: ReadInt(reader, "music_id"),
-                sort: ReadInt(reader, "sort"),
-                conditionType: ReadInt(reader, "condition_type"),
-                isHidden: ReadInt(reader, "is_hidden"),
-                versionType: ReadInt(reader, "version_type"),
-                requestType: ReadInt(reader, "request_type"),
-                lampColor: ReadInt(reader, "lamp_color"),
-                lampAnimation: ReadInt(reader, "lamp_animation"),
-                nameTextureLength: ReadInt(reader, "name_texture_length"),
-                songType: (byte)ReadInt(reader, "song_type"),
-                bgmCueNameShort: ReadString(reader, "bgm_cue_name_short"),
-                bgmCuesheetNameShort: ReadString(reader, "bgm_cuesheet_name_short"),
-                bgmCueNameGamesize: ReadString(reader, "bgm_cue_name_gamesize"),
-                bgmCuesheetNameGamesize: ReadString(reader, "bgm_cuesheet_name_gamesize"),
-                shortLength: ReadInt(reader, "short_length"),
-                alterJacket: ReadInt(reader, "alter_jacket"),
-                startDate: ReadLong(reader, "start_date"),
-                endDate: ReadLong(reader, "end_date"));
+                musicId: ReadInt(row, "music_id"),
+                sort: ReadInt(row, "sort"),
+                conditionType: ReadInt(row, "condition_type"),
+                isHidden: ReadInt(row, "is_hidden"),
+                versionType: ReadInt(row, "version_type"),
+                requestType: ReadInt(row, "request_type"),
+                lampColor: ReadInt(row, "lamp_color"),
+                lampAnimation: ReadInt(row, "lamp_animation"),
+                nameTextureLength: ReadInt(row, "name_texture_length"),
+                songType: (byte)ReadInt(row, "song_type"),
+                bgmCueNameShort: ReadString(row, "bgm_cue_name_short"),
+                bgmCuesheetNameShort: ReadString(row, "bgm_cuesheet_name_short"),
+                bgmCueNameGamesize: ReadString(row, "bgm_cue_name_gamesize"),
+                bgmCuesheetNameGamesize: ReadString(row, "bgm_cuesheet_name_gamesize"),
+                shortLength: ReadInt(row, "short_length"),
+                alterJacket: ReadInt(row, "alter_jacket"),
+                startDate: ReadLong(row, "start_date"),
+                endDate: ReadLong(row, "end_date"));
         }
 
-        private static int ReadInt(SqliteDataReader reader, string name, int fallback = 0)
+        private static object ReadValue(DataRow row, string name)
         {
-            int ordinal = FindOrdinal(reader, name);
-            if (ordinal < 0 || reader.IsDBNull(ordinal))
-                return fallback;
-
-            try
+            foreach (DataColumn col in row.Table.Columns)
             {
-                return Convert.ToInt32(reader.GetValue(ordinal), CultureInfo.InvariantCulture);
+                if (string.Equals(col.ColumnName, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    object v = row[col];
+                    return v == DBNull.Value ? null : v;
+                }
             }
-            catch
-            {
-                return fallback;
-            }
+            return null;
         }
 
-        private static long ReadLong(SqliteDataReader reader, string name, long fallback = 0L)
+        private static int ReadInt(DataRow row, string name, int fallback = 0)
         {
-            int ordinal = FindOrdinal(reader, name);
-            if (ordinal < 0 || reader.IsDBNull(ordinal))
-                return fallback;
-
-            try
-            {
-                return Convert.ToInt64(reader.GetValue(ordinal), CultureInfo.InvariantCulture);
-            }
-            catch
-            {
-                return fallback;
-            }
+            object v = ReadValue(row, name);
+            if (v == null) return fallback;
+            try { return Convert.ToInt32(v, CultureInfo.InvariantCulture); }
+            catch { return fallback; }
         }
 
-        private static string ReadString(SqliteDataReader reader, string name)
+        private static long ReadLong(DataRow row, string name, long fallback = 0L)
         {
-            int ordinal = FindOrdinal(reader, name);
-            if (ordinal < 0 || reader.IsDBNull(ordinal))
-                return string.Empty;
-
-            return Convert.ToString(reader.GetValue(ordinal), CultureInfo.InvariantCulture) ?? string.Empty;
+            object v = ReadValue(row, name);
+            if (v == null) return fallback;
+            try { return Convert.ToInt64(v, CultureInfo.InvariantCulture); }
+            catch { return fallback; }
         }
 
-        private static int FindOrdinal(SqliteDataReader reader, string name)
+        private static string ReadString(DataRow row, string name)
         {
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                if (string.Equals(reader.GetName(i), name, StringComparison.OrdinalIgnoreCase))
-                    return i;
-            }
-            return -1;
+            object v = ReadValue(row, name);
+            if (v == null) return string.Empty;
+            return Convert.ToString(v, CultureInfo.InvariantCulture) ?? string.Empty;
         }
 
         public sealed class JukeboxMusicData

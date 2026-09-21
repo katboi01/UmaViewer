@@ -81,15 +81,18 @@ public class UmaDatabaseEntry
 
     public T Get<T>(bool withDependencies = true)
     {
-        Object asset = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies)
-            .LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
+        // WebGL can return a null bundle when a file isn't mounted; don't deref it.
+        var bundle = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
+        if (bundle == null) return default;
+        Object asset = bundle.LoadAllAssets().FirstOrDefault(a=>a.GetType() == typeof(T));
         return (T)System.Convert.ChangeType(asset, typeof(T));
     }
 
     public IEnumerable<T> GetAll<T>(bool withDependencies = true)
     {
-        IEnumerable<Object> assets = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies)
-            .LoadAllAssets().Where(a => a.GetType() == typeof(T));
+        var bundle = UmaAssetManager.LoadAssetBundle(this, isRecursive: withDependencies);
+        if (bundle == null) return Enumerable.Empty<T>();
+        IEnumerable<Object> assets = bundle.LoadAllAssets().Where(a => a.GetType() == typeof(T));
         return assets.Select(asset => (T)System.Convert.ChangeType(asset, typeof(T)));
     }
 

@@ -215,7 +215,15 @@ public class UISettingsOther : MonoBehaviour
             Config.Instance.UpdateConfig(true);
         }
 #else
-        UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
+        if (WebFileMount.Active)
+        {
+            // WebGL: the browser picks the folder, remembers it, and reloads.
+            WebFileMount.ChangeDataFolder();
+        }
+        else
+        {
+            UmaViewerUI.Instance.ShowMessage("Not supported on this platform", UIMessageType.Warning);
+        }
 #endif
     }
 

@@ -75,25 +75,32 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         var umaContainer = new GameObject($"Chara_{id}_{costumeId}").AddComponent<UmaContainerCharacter>();
         CurrentUMAContainer = umaContainer;
 
-        if (mini)
+        try
         {
-            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMiniUma(umaContainer, chara, costumeId);
+            if (mini)
+            {
+                umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+                LoadMiniUma(umaContainer, chara, costumeId);
+            }
+            else if (chara.IsMob)
+            {
+                umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+                LoadMobUma(umaContainer, chara, costumeId, loadMotion: true);
+            }
+            else if (ModelSettings.IsHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
+            {
+                umaContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
+                LoadMobUma(umaContainer, CurrentHead.chara, costumeId, chara.Id, true);
+            }
+            else
+            {
+                umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
+                LoadNormalUma(umaContainer, chara, costumeId, true, haedCostumeId);
+            }
         }
-        else if (chara.IsMob)
+        catch (Exception e)
         {
-            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadMobUma(umaContainer, chara, costumeId, loadMotion: true);
-        }
-        else if (ModelSettings.IsHeadFix && CurrentHead != null && CurrentHead.chara.IsMob)
-        {
-            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(CurrentHead.chara);
-            LoadMobUma(umaContainer, CurrentHead.chara, costumeId, chara.Id, true);
-        }
-        else
-        {
-            umaContainer.CharaData = UmaDatabaseController.ReadCharaData(chara);
-            LoadNormalUma(umaContainer, chara, costumeId, true, haedCostumeId);
+            Debug.LogError($"[LoadUma] aborted before finish: {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
         }
 
         yield break;
@@ -364,8 +371,12 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         umaContainer.SetDynamicBoneEnable(ModelSettings.DynamicBoneEnable);
         umaContainer.LoadFaceMorph(id, costumeId);
         umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
-        umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
-        umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        try
+        {
+            umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
+            umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        }
+        catch (Exception e) { Debug.LogWarning($"[PreMerge] head lookup failed, continuing: {e.GetType().Name}: {e.Message}"); }
         umaContainer.MergeModel();
         ApplyNormalCostumeVisibilityOptions(umaContainer);
         umaContainer.SetHeight(-1);
@@ -631,8 +642,12 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         umaContainer.LoadFaceMorph(id, costumeId);
 
         umaContainer.TearControllers.ForEach(a => a.SetDir(a.CurrentDir));
-        umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
-        umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        try
+        {
+            umaContainer.HeadBone = (GameObject)umaContainer.Body.GetComponent<AssetHolder>()._assetTable["head"];
+            umaContainer.EyeHeight = umaContainer.Head.GetComponent<AssetHolder>()._assetTableValue["head_center_offset_y"];
+        }
+        catch (Exception e) { Debug.LogWarning($"[PreMerge] head lookup failed, continuing: {e.GetType().Name}: {e.Message}"); }
         umaContainer.MergeModel();
         umaContainer.SetHeight(-1);
         umaContainer.Initialize(!ModelSettings.IsTPose);
@@ -1127,6 +1142,7 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         if (UmaViewerMain.Instance.AbList.TryGetValue(value, out UmaDatabaseEntry entry))
         {
             AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
+            if (assetBundle == null) return null;
             if (assetBundle.Contains($"chr_icon_{id}"))
             {
                 Texture2D texture = (Texture2D)assetBundle.LoadAsset($"chr_icon_{id}");
@@ -1145,6 +1161,7 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         {
             string path = entry.FilePath;
             AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
+            if (assetBundle == null) return null;
             if (assetBundle.Contains($"mob_chr_icon_{id}_000001_01"))
             {
                 Texture2D texture = (Texture2D)assetBundle.LoadAsset($"mob_chr_icon_{id}_000001_01");
@@ -1159,6 +1176,7 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
     public Sprite LoadSprite(UmaDatabaseEntry item)
     {
         AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(item, true);
+        if (assetBundle == null) return null;
         Texture2D texture = (Texture2D)assetBundle.LoadAsset(assetBundle.GetAllAssetNames()[0]);
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
         UmaAssetManager.UnloadAssetBundle(item, false);
@@ -1172,6 +1190,7 @@ public string[] NormalBodyKeywords  = new[] { "skin", "body", "bdy", "face", "he
         if (UmaViewerMain.Instance.AbList.TryGetValue(value, out UmaDatabaseEntry entry))
         {
             AssetBundle assetBundle = UmaAssetManager.LoadAssetBundle(entry, true);
+            if (assetBundle == null) return null;
             if (assetBundle.Contains($"jacket_icon_l_{musicid}"))
             {
                 Texture2D texture = (Texture2D)assetBundle.LoadAsset($"jacket_icon_l_{musicid}");

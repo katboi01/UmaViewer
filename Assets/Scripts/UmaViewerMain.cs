@@ -33,9 +33,20 @@ public class UmaViewerMain : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        new Config();
+        // Only build a Config if nothing has already supplied one. The constructor resets
+        // MainPath to the default game folder, so constructing unconditionally discarded
+        // anything set earlier -- notably CliExporter's --data-path/--region, which run at
+        // BeforeSceneLoad. LiveViewerUI.Awake already guards the same way.
+        if (Config.Instance == null) new Config();
         ApplyFrameRateLimit();
 
+        // On WebGL the meta/master DBs are faulted into MEMFS in Emscripten preRun
+        // (UmaDBPreload.jspre) before any script runs, so this open works here too.
+        InitDatabase();
+    }
+
+    private void InitDatabase()
+    {
         AbList = UmaDatabaseController.Instance.MetaEntries;
         if (AbList == null) return;
         var chara_3d = AbList.Where(ab => ab.Value.Type == UmaFileType._3d_cutt).Select(ab => ab.Value).ToList();
@@ -197,6 +208,7 @@ public class UmaViewerMain : MonoBehaviour
         var asset = AbList["livesettings"];
         if (asset != null)
         {
+            if (WebFileMount.Active) yield return UmaAssetManager.EnsureBundleFiles(asset);
             string filePath = asset.FilePath;
             if (File.Exists(filePath))
             {
@@ -246,10 +258,20 @@ public class UmaViewerMain : MonoBehaviour
         loadingUI.LoadingProgressChange(-1, -1);
 
         //Load Shader First
+        if (WebFileMount.Active) yield return UmaAssetManager.EnsureBundleFiles(AbList["shader"]);
         var shaders = UmaAssetManager.LoadAssetBundle(AbList["shader"], true);
-        Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>()); 
-        Gallop.ShaderManager.InitManager();
-        Gallop.ShaderManager.WarmupDofBloomShader();
+        if (shaders != null)
+        {
+            // The game's bundle shaders are DX-only. On WebGL (GLES3) they have no usable variant
+            // and are swapped to the in-project ports at merge, so don't LoadAllAssets them: that
+            // force-loads every shader in the bundle and logs "not supported on this GPU" once each
+            // (~491 errors). The bundle stays loaded, so the handful a costume actually uses still
+            // resolve lazily. ShaderList only feeds the generic-costume fixup, which no-ops empty.
+            if (Application.platform != RuntimePlatform.WebGLPlayer)
+                Builder.ShaderList = new List<Shader>(shaders.LoadAllAssets<Shader>());
+            Gallop.ShaderManager.InitManager();
+            Gallop.ShaderManager.WarmupDofBloomShader();
+        }
     }
 
     private static bool TryParseEnglishNames(

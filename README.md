@@ -96,6 +96,22 @@ and more
 
 <img src="https://user-images.githubusercontent.com/59540382/222422871-12e80e0b-778b-4f42-b581-5e4af5cd6df9.png" height="350" />
 
+### CySpring physics without the native plugin
+
+The upstream cloth/spring-bone plugin (`Assets/Plugins/CySpringPlugin.dll`) ships only as a
+Windows x64 DLL. `Assets/Scripts/umamusume/Gallop/Cyspring/CySpringSolver.cs` is a managed C#
+implementation of it, operating on the same native structs and exposing the same three entry
+points (`NativeClothUpdate`, `NativeClothSkirtUpdate`, `NativeSkirtUpdate`). It is used
+automatically on WebGL, and on any platform when `CySpringNative.UseNativePlugin` is false.
+
+It is verified against the DLL with `--solver-diff` (a single-step differential over every
+bone, with `--solver-diff-collide` to exercise the collision path) and `--solver-trace`
+(free-running, call-aligned); see `EXPORTING.md`. Both require the DLL, so run them on Windows.
+
+### Headless model/animation export
+
+Export a character as an MMD PMX (+ textures) and VMD motions for viewers like [babylon-mmd](https://github.com/noname0310/babylon-mmd) from the command line. See [EXPORTING.md](EXPORTING.md).
+
 ### Also check out:
 [UmaChat by kagari](https://github.com/kagari-bi/UmaChat) - model viewer fork that lets you chat with Umas using AI + TTS
 

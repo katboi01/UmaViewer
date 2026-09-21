@@ -162,6 +162,16 @@ public class Config
             return;
         }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // The data folder is faulted into MEMFS under WebFileMount.MountRoot from the picked
+        // File System Access handle; no local config file and no HTTP download fallback.
+        WorkMode = WorkMode.Default;
+        DownloadMissingResources = false;
+        MainPath = WebFileMount.MountRoot;
+        Instance = this;
+        return;
+#endif
+
         if (!File.Exists(configPath))
         {
             DBBaseKeyText = ByteArrayToHex(DBBaseKey);

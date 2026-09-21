@@ -1,0 +1,26 @@
+# Normalize line endings to LF in the repository AND in the working tree on every
+# platform. These attributes override each developer's core.autocrlf setting, so a
+# fresh clone is consistent on Windows and macOS alike.
+#
+# Unity serializes its YAML assets (.asset/.meta/.prefab/.unity/...) with LF on both
+# platforms. With a CRLF working tree, every file the editor rewrote showed up as
+# modified even though its content was byte-identical after normalization. Keeping the
+# working tree on LF removes that churn. It also keeps tools/*.sh runnable under Git
+# Bash/MSYS on Windows, which chokes on CRLF shell scripts.
+* text=auto eol=lf
+
+# Binary assets: exempt from EOL conversion and line-based diffing.
+*.png    binary
+*.bmp    binary
+*.jpg    binary
+*.pdf    binary
+*.otf    binary
+*.ttf    binary
+*.so     binary
+*.dylib  binary
+*.dll    binary
+*.a      binary
+*.bundle binary
+*.fbx    binary
+*.FBX    binary
+*.acf    binary

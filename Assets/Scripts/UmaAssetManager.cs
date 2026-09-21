@@ -133,6 +133,8 @@ public class UmaAssetManager : MonoBehaviour
         for (int i = 0; i < loadItems.Count; i++)
         {
             LoadItem item = loadItems[i];
+            if (WebFileMount.Active)
+                yield return WebFileMount.Ensure(item.Entry.Path);
             AcquireOne(item.Entry, item.NeverUnload);
 
             completed++;
@@ -145,6 +147,16 @@ public class UmaAssetManager : MonoBehaviour
         OnLoadProgressChange?.Invoke(-1, loadItems.Count, null);
         LoadCoroutine = null;
         onDone?.Invoke();
+    }
+
+    // WebGL: fault an entry and its transitive dependencies into MEMFS so a following
+    // synchronous LoadAssetBundle finds every file on disk. Call from a coroutine.
+    public static IEnumerator EnsureBundleFiles(UmaDatabaseEntry entry)
+    {
+        if (!WebFileMount.Active || entry == null || instance == null) yield break;
+        foreach (var request in SearchAB(UmaViewerMain.Instance, entry))
+            if (request != null)
+                yield return WebFileMount.Ensure(request.Path);
     }
 
     public static AssetBundle LoadAssetBundle(
@@ -217,6 +229,10 @@ public class UmaAssetManager : MonoBehaviour
 
         if (!File.Exists(filePath))
         {
+            // WebGL faults files in on the coroutine load paths; a synchronous miss here just
+            // means this bundle (e.g. a boot icon) was not pre-mounted. Skip it quietly.
+            if (WebFileMount.Active)
+                return false;
             Debug.LogError($"{entry.Name} - {filePath} does not exist");
             UmaViewerUI.Instance?.ShowMessage(
                 $"{entry.Name} - {filePath} does not exist",
@@ -240,7 +256,30 @@ public class UmaAssetManager : MonoBehaviour
 
         try
         {
-            if (!entry.IsEncrypted)
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+            {
+                // WebGL rejects Standalone-target bundles; patch the target byte and load from
+                // memory (the decrypt happens up front rather than through a stream).
+                byte[] raw;
+                if (!entry.IsEncrypted)
+                {
+                    raw = File.ReadAllBytes(filePath);
+                }
+                else
+                {
+                    using var s = new UmaAssetBundleStream(filePath, entry.FKey);
+                    raw = new byte[s.Length];
+                    int got = 0;
+                    while (got < raw.Length)
+                    {
+                        int n = s.Read(raw, got, raw.Length - got);
+                        if (n <= 0) break;
+                        got += n;
+                    }
+                }
+                bundle = AssetBundle.LoadFromMemory(WebGLBundlePatch.Patch(raw));
+            }
+            else if (!entry.IsEncrypted)
             {
                 bundle = AssetBundle.LoadFromFile(filePath);
             }
@@ -350,22 +389,39 @@ public class UmaAssetManager : MonoBehaviour
         {
             handle.NeverUnload = true;
 
-            EyeShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
-            FaceShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
-            HairShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
-            AlphaShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
-            CheekShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
-            EyebrowShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
-            BodyAlphaShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
-            BodyBehindAlphaShader = bundle.LoadAsset<Shader>(
-                "assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+            {
+                // The DX-only bundle shaders don't load on WebGL (they log "not supported on this
+                // GPU"). Bind the in-project ports by name instead, which is also what the merge
+                // swap would resolve them to, so nothing renders through the bundle shader.
+                EyeShader = Shader.Find("Gallop/3D/Chara/ToonEye/T");
+                FaceShader = Shader.Find("Gallop/3D/Chara/ToonFace/TSER");
+                HairShader = Shader.Find("Gallop/3D/Chara/ToonHair/TSER");
+                AlphaShader = Shader.Find("Gallop/3D/Chara/AlphaNolineToonHair/TSER");
+                CheekShader = Shader.Find("Gallop/3D/Chara/MultiplyCheek");
+                EyebrowShader = Shader.Find("Gallop/3D/Chara/ToonMayu");
+                BodyAlphaShader = Shader.Find("Gallop/3D/Chara/AlphaNolineToon/TSER");
+                BodyBehindAlphaShader = Shader.Find("Gallop/3D/Chara/AlphaNolineToonBehind/TSER");
+            }
+            else
+            {
+                EyeShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/charactertooneyet.shader");
+                FaceShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/charactertoonfacetser.shader");
+                HairShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/charactertoonhairtser.shader");
+                AlphaShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/characteralphanolinetoonhairtser.shader");
+                CheekShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/charactermultiplycheek.shader");
+                EyebrowShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/charactertoonmayu.shader");
+                BodyAlphaShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/characteralphanolinetoontser.shader");
+                BodyBehindAlphaShader = bundle.LoadAsset<Shader>(
+                    "assets/_gallop/resources/shader/3d/character/characteralphanolinetoonbehindtser.shader");
+            }
         }
 
         SyncLegacyDictionaries(handle);

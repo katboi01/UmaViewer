@@ -278,6 +278,25 @@ public class UmaContainerCharacter : UmaContainer
             {
                 Material mat = rend.sharedMaterials[i];
 
+                // On WebGL a bundle shader can report isSupported=true at merge time (async
+                // GLES3 compile) yet have no usable variant at render, so rebind by name
+                // unconditionally to the in-project shader.
+                bool needsSwap = mat != null && mat.shader != null &&
+                    (Application.platform == RuntimePlatform.WebGLPlayer || !mat.shader.isSupported);
+                if (needsSwap)
+                {
+                    var repl = Shader.Find(mat.shader.name);
+                    if (repl != null && repl != mat.shader)
+                    {
+                        Debug.Log($"[MetalShaderSwap] replaced {mat.shader.name}");
+                        mat.shader = repl;
+                    }
+                    else if (!mat.shader.isSupported)
+                    {
+                        Debug.LogWarning($"[MetalShaderSwap] no replacement for {mat.shader.name}");
+                    }
+                }
+
                 var matHlp = Materials.FirstOrDefault(m => m.Mat == mat);
                 if (matHlp == null)
                 {
@@ -303,10 +322,12 @@ public class UmaContainerCharacter : UmaContainer
             }
         }
 
+        // Local space: MergeModel runs before SetHeight scales Position, so world positions
+        // captured here would restore an unscaled skeleton under a scaled hierarchy.
         InitBoneTransform = new Dictionary<Transform, (Vector3 pos, Quaternion rot)>();
         foreach (var bone in bodySkinnedMeshRenderer.bones)
         {
-            InitBoneTransform[bone] = (bone.position, bone.rotation);
+            InitBoneTransform[bone] = (bone.localPosition, bone.localRotation);
         }
     }
 
@@ -950,6 +971,12 @@ public class UmaContainerCharacter : UmaContainer
         EnableEyeTracking = isOn;
     }
 
+    public void SetHeadTracking(bool isOn)
+    {
+        if (IK != null && IK.solvers != null && IK.solvers.lookAt != null)
+            IK.solvers.lookAt.IKPositionWeight = isOn ? 1f : 0f;
+    }
+
     public void SetFaceOverrideData(bool isOn)
     {
         FaceOverrideData?.SetEnable(isOn);
@@ -1578,7 +1605,9 @@ public class UmaContainerCharacter : UmaContainer
                     {
                         LoadedAssets.Add(tearEntry);
                         var ab = UmaAssetManager.LoadAssetBundle(tearEntry, true, false);
-                        var tex = ab.LoadAsset<Texture>("tex_chr_tear00");
+                        // WebGL faults shared common textures in asynchronously, so this
+                        // synchronous load can miss and return null; skip the tear setup then.
+                        var tex = ab ? ab.LoadAsset<Texture>("tex_chr_tear00") : null;
                         StaticTear_L = table["tearmesh_l"] as GameObject;
                         StaticTear_R = table["tearmesh_r"] as GameObject;
                         if (StaticTear_L && StaticTear_R)
@@ -1729,6 +1758,11 @@ public class UmaContainerCharacter : UmaContainer
     public void LoadTear(UmaDatabaseEntry entry)
     {
         GameObject go = entry.Get<GameObject>();
+        if (go == null)
+        {
+            Debug.LogWarning($"[LoadTear] null prefab for '{entry?.Name}'; skipping");
+            return;
+        }
         if (go.name.EndsWith("000"))
         {
             TearPrefab_0 = go;
@@ -1930,6 +1964,13 @@ public class UmaContainerCharacter : UmaContainer
         }
 
         var aClip = entry.Get<AnimationClip>();
+        // WebGL: the clip's bundle may not be faulted in yet (callers should mount it first).
+        // Skip rather than NRE if it's still missing.
+        if (aClip == null)
+        {
+            Debug.LogWarning($"[LoadAnimation] null clip for '{entry?.Name}'; skipping");
+            return;
+        }
 
         if (UmaAnimator)
         {
@@ -2228,6 +2269,13 @@ public class UmaContainerCharacter : UmaContainer
         var locatorEntry = Main.AbList["3d/animator/drivenkeylocator"];
         LoadedAssets.Add(locatorEntry);
         var bundle = UmaAssetManager.LoadAssetBundle(locatorEntry);
+        // WebGL: an unmounted common bundle loads as null. DrivenKeyLocator is required for the
+        // facial rig, so bail out of the face morph rather than NRE the whole load.
+        if (bundle == null)
+        {
+            Debug.LogWarning("[LoadFaceMorph] drivenkeylocator bundle null; skipping face morph");
+            return;
+        }
         var locator = Instantiate(bundle.LoadAsset("DrivenKeyLocator"), transform) as GameObject;
         locator.name = "DrivenKeyLocator";
 
@@ -2247,7 +2295,14 @@ public class UmaContainerCharacter : UmaContainer
         {
             LoadedAssets.Add(entry);
             AssetBundle ab = UmaAssetManager.LoadAssetBundle(entry);
-            var obj = ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject;
+            // WebGL faults shared emotion effect bundles in asynchronously; skip any that missed
+            // rather than NRE. The eye-emotion effect just won't show for this load.
+            var obj = ab ? ab.LoadAsset(Path.GetFileNameWithoutExtension(entry.Name)) as GameObject : null;
+            if (obj == null)
+            {
+                Debug.LogWarning($"[LoadFaceMorph] emotion bundle null for '{entry?.Name}'; skipping");
+                return;
+            }
             obj.SetActive(false);
 
             var leftObj = Instantiate(obj, eyeLocator_L.transform);
@@ -2532,7 +2587,8 @@ public class UmaContainerCharacter : UmaContainer
         }
         foreach (var pair in InitBoneTransform)
         {
-            pair.Key.SetPositionAndRotation(pair.Value.pos, pair.Value.rot);
+            pair.Key.localPosition = pair.Value.pos;
+            pair.Key.localRotation = pair.Value.rot;
         }
     }
 
@@ -2558,6 +2614,16 @@ public class UmaContainerCharacter : UmaContainer
                 }
             }
         }
-        return Instantiate(entry.Get<GameObject>(), parent.transform);
+
+        // On WebGL a bundle whose file was never faulted into MEMFS loads as null. Skip it with a
+        // diagnostic instead of throwing: a failed physics/cloth bundle must not abort the whole
+        // model load (which would leave it magenta and unposed).
+        var prefab = entry != null ? entry.Get<GameObject>() : null;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[InstantiateEntry] null prefab for '{entry?.Name}' ({entry?.Path}); skipping");
+            return null;
+        }
+        return Instantiate(prefab, parent.transform);
     }
 }

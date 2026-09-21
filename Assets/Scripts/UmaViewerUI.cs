@@ -944,6 +944,7 @@ public class UmaViewerUI : MonoBehaviour
                         }
                         list.Add(Main.AbList["3d/animator/drivenkeylocator"]);
                         list.Add(Main.AbList[$"3d/motion/event/body/chara/chr{achara.Id}_00/anm_eve_chr{achara.Id}_00_idle01_loop"]);
+                        AddCommonFaceBundles(list);
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
@@ -1009,6 +1010,7 @@ public class UmaViewerUI : MonoBehaviour
                         {
                             list.Add(motion_entry);
                         }
+                        AddCommonFaceBundles(list);
 
                         Builder.UnloadUma();
                         //UmaAssetManager.UnloadAllBundle(true);
@@ -1202,9 +1204,74 @@ public class UmaViewerUI : MonoBehaviour
         container.Button.onClick.AddListener(() =>
         {
             HighlightChildImage(parent, container);
-            (Builder.CurrentUMAContainer)?.LoadAnimation(entry);
-            LoadedAnimation();
+            StartCoroutine(LoadAnimationRoutine(entry));
         });
+    }
+
+    // Shared common bundles LoadFaceMorph always instantiates (eye-emotion effects and tears).
+    // They aren't part of any character's dependency graph, so mount them with the model or they
+    // load as null on WebGL and the effects get skipped.
+    static readonly string[] CommonFaceBundlePaths =
+    {
+        "3d/effect/charaemotion/pfb_eff_chr_emo_eye_000",
+        "3d/effect/charaemotion/pfb_eff_chr_emo_eye_001",
+        "3d/effect/charaemotion/pfb_eff_chr_emo_eye_002",
+        "3d/effect/charaemotion/pfb_eff_chr_emo_eye_003",
+        "3d/chara/common/tear/tear000/pfb_chr_tear000",
+        "3d/chara/common/tear/tear001/pfb_chr_tear001",
+    };
+
+    void AddCommonFaceBundles(List<UmaDatabaseEntry> list)
+    {
+        foreach (var path in CommonFaceBundlePaths)
+            if (Main.AbList.TryGetValue(path, out var entry) && entry != null)
+                list.Add(entry);
+    }
+
+    IEnumerator LoadAnimationRoutine(UmaDatabaseEntry entry)
+    {
+        // WebGL faults bundle files in on demand; mount the clip and its dependencies before the
+        // synchronous LoadAnimation reads them (instant no-op on other platforms). Show the shared
+        // loading panel across the mount so the model isn't a silent T-pose while it fetches.
+        if (WebFileMount.Active && entry != null)
+        {
+            var scene = UmaSceneController.instance;
+
+            // LoadAnimation pulls in sibling clips synchronously (intro _s, outro _e, facial, ear),
+            // which aren't dependencies of the clicked clip, so mount those bundles too or the
+            // build-up/wind-down loads null and the model just T-poses.
+            var roots = new List<UmaDatabaseEntry> { entry };
+            AddSiblingAnimations(roots, entry.Name);
+
+            var requests = new List<UmaDatabaseEntry>();
+            foreach (var root in roots)
+                requests.AddRange(UmaAssetManager.SearchAB(UmaViewerMain.Instance, root));
+
+            for (int i = 0; i < requests.Count; i++)
+            {
+                scene?.LoadingProgressChange(i, requests.Count, "Loading Animation");
+                if (requests[i] != null)
+                    yield return WebFileMount.Ensure(requests[i].Path);
+            }
+            scene?.LoadingProgressChange(-1, -1);
+        }
+        (Builder.CurrentUMAContainer)?.LoadAnimation(entry);
+        LoadedAnimation();
+    }
+
+    // Mirrors the sibling-clip lookups in UmaContainerCharacter.LoadAnimation(AnimationClip): the
+    // intro/outro and facial/ear clips a _loop motion loads alongside itself.
+    void AddSiblingAnimations(List<UmaDatabaseEntry> list, string name)
+    {
+        void Add(string key)
+        {
+            if (!string.IsNullOrEmpty(key) && Main.AbList.TryGetValue(key, out var e) && e != null && !list.Contains(e))
+                list.Add(e);
+        }
+        Add(name.Replace("_loop", "_s"));
+        Add(name.Replace("_loop", "_e"));
+        Add($"{name.Replace("/body", "/facial")}_face");
+        Add($"{name.Replace("/body", "/facial")}_ear");
     }
 
     string getCharaName(string id)

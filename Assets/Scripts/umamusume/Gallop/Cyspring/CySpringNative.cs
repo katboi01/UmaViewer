@@ -6,15 +6,63 @@ namespace Gallop
 {
     public struct CySpringNative
     {
-#if (UNITY_IOS || UNITY_IPHONE) && !UNITY_EDITOR
+#if (UNITY_IOS || UNITY_IPHONE || UNITY_WEBGL) && !UNITY_EDITOR
+        // WebGL never calls these (isNative is false there; the managed CySpringSolver runs),
+        // but the P/Invoke symbols must still resolve at link -- Assets/Plugins/WebGL/CySpring.jslib
+        // provides no-op stubs.
         private const string DLL_NAME = "__Internal";
 #else
         private const string DLL_NAME = "CySpringPlugin";
 #endif
 
-        public static bool isNative = true;
+        // When false, the managed CySpringSolver runs instead of the native plugin.
+        // WebGL has no native plugin, so default to managed there.
+        public static bool isNative =
+#if UNITY_WEBGL && !UNITY_EDITOR
+            false;
+#else
+            true;
+#endif
         public NativeClothWorking _clothWorking;
         public static float SpringRate = 1.0f;
+
+        // Probe the native plugin once at startup: a zero-work call (nCond = 0) forces the DLL
+        // to load without touching memory. If it can't load (missing/wrong-arch, e.g. no plugin
+        // outside Windows), fall back to the managed CySpringSolver for the rest of the session.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void ProbeNativePlugin()
+        {
+            if (!isNative) return; // already managed (WebGL, or set by the caller)
+            // One real, skipped bone. The plugin reads bone 0 and its root parent before it
+            // looks at the count (0x18000918a, 0x1800091ac), so null pointers are a fault, not
+            // a no-op.
+            var cloth = new NativeClothWorking[1];
+            cloth[0].IsSkip = 1;
+            cloth[0].InitLocalRotation = cloth[0].ParentRotation = cloth[0].AnimationRotation = cloth[0].FinalRotation = Quaternion.identity;
+            var parents = new NativeRootParentWork[1];
+            parents[0].WorldRotation = Quaternion.identity;
+            var colliders = new NativeClothCollision[1];
+            PinnedArray<NativeClothWorking> clothPin = null;
+            PinnedArray<NativeClothCollision> collPin = null;
+            PinnedArray<NativeRootParentWork> parentPin = null;
+            try
+            {
+                clothPin = new PinnedArray<NativeClothWorking>(cloth);
+                collPin = new PinnedArray<NativeClothCollision>(colliders);
+                parentPin = new PinnedArray<NativeRootParentWork>(parents);
+                NativeClothUpdate(clothPin.Ptr, 1, collPin.Ptr, parentPin.Ptr,
+                    0f, 0f, 0f, 0f, 0f, 0f, 0f, false, 1f, false, 1f, 1f, 1f);
+            }
+            catch (Exception e)
+            {
+                isNative = false;
+                Debug.LogWarning("[CySpring] native plugin not loadable (" + e.GetType().Name + "); using the managed C# solver.");
+            }
+            finally
+            {
+                parentPin?.Dispose(); collPin?.Dispose(); clothPin?.Dispose();
+            }
+        }
 
 
         public static bool UseNativePlugin
@@ -117,10 +165,6 @@ namespace Gallop
             if (clothWorkingCount > clothWorkingArray.Length)
                 clothWorkingCount = clothWorkingArray.Length;
 
-            if (!isNative)
-                return;
-                
-
             if (linkSkirtIndex >= 0 && skirtCtrl != null && skirtCtrl.IsEnableSkirt)
             {
                 NativeSkirtWorking[] skirtWorkingArray = skirtCtrl.NativeWorkingArray;
@@ -195,6 +239,33 @@ namespace Gallop
             float addMoveRate,
             float springRate)
         {
+            if (!isNative)
+            {
+                var tracePre = CySpringTrace.Armed ? CySpringDiff.Snapshot(clothWorkingArray) : null;
+                CySpringSolver.NativeClothUpdate(clothWorkingArray, nClothWorking, collisionArray,
+                    rootParentWorkArray, stiffnessForceRate, dragForceRate, gravityRate,
+                    windX, windY, windZ, windStrength, bCollisionSwitch, timescale, is60FPS,
+                    moveRate, addMoveRate, springRate);
+                CySpringTrace.Record(tracePre, clothWorkingArray, nClothWorking);
+                return;
+            }
+
+            // Differential: run the managed solver on a copy of the pre-step state, let the plugin
+            // advance the real state, compare. The simulation continues on the plugin's result.
+            NativeClothCollision[] savedRadii = CySpringDiff.ScaleColliders(collisionArray);
+            int[] savedChara = CySpringDiff.ScaleBones(clothWorkingArray, nClothWorking);
+            NativeClothWorking[] nativeTracePre = CySpringTrace.Armed ? CySpringDiff.Snapshot(clothWorkingArray) : null;
+            NativeClothWorking[] managedOut = null, preState = null;
+            if (CySpringDiff.Armed)
+            {
+                preState = CySpringDiff.Snapshot(clothWorkingArray);
+                managedOut = CySpringDiff.Snapshot(clothWorkingArray);
+                CySpringSolver.NativeClothUpdate(managedOut, nClothWorking, collisionArray,
+                    rootParentWorkArray, stiffnessForceRate, dragForceRate, gravityRate,
+                    windX, windY, windZ, windStrength, bCollisionSwitch, timescale, is60FPS,
+                    moveRate, addMoveRate, springRate);
+            }
+
             PinnedArray<NativeClothWorking> clothPin = null;
             PinnedArray<NativeClothCollision> collisionPin = null;
             PinnedArray<NativeRootParentWork> parentPin = null;
@@ -238,6 +309,13 @@ namespace Gallop
                 if (clothPin != null)
                     clothPin.Dispose();
             }
+
+            // Compare after the pin is released, so clothWorkingArray holds the plugin's output.
+            CySpringTrace.Record(nativeTracePre, clothWorkingArray, nClothWorking);
+            if (managedOut != null)
+                CySpringDiff.Compare(clothWorkingArray, managedOut, preState, nClothWorking);
+            CySpringDiff.RestoreColliders(collisionArray, savedRadii);
+            CySpringDiff.RestoreBones(clothWorkingArray, savedChara);
         }
 
         private static void UpdateNativeClothSkirtInternal(
@@ -270,6 +348,39 @@ namespace Gallop
 
             if ((uint)skirtWorkingIndex >= (uint)skirtWorkingArray.Length)
                 return;
+
+            if (!isNative)
+            {
+                var tracePre = CySpringTrace.Armed ? CySpringDiff.Snapshot(clothWorkingArray) : null;
+                CySpringSolver.NativeClothSkirtUpdate(clothWorkingArray, nClothWorking, collisionArray,
+                    skirtWorkingArray, skirtWorkingIndex, ref arg, rootParentWorkArray,
+                    stiffnessForceRate, dragForceRate, gravityRate, windX, windY, windZ, windStrength,
+                    bCollisionSwitch, timescale, is60FPS, moveRate, addMoveRate, springRate);
+                CySpringTrace.Record(tracePre, clothWorkingArray, nClothWorking);
+                return;
+            }
+
+            // Differential for the skirt-linked entry point, as above; the skirt working state is
+            // compared as well as the cloth bones.
+            NativeClothCollision[] skSavedRadii = CySpringDiff.ScaleColliders(collisionArray);
+            int[] skSavedChara = CySpringDiff.ScaleBones(clothWorkingArray, nClothWorking);
+            NativeClothWorking[] skClothPre = null, skClothMan = null, skTracePre = null;
+            NativeSkirtWorking skPre = default, skMan = default;
+            bool skArmed = CySpringDiff.Armed;
+            if (CySpringTrace.Armed) skTracePre = CySpringDiff.Snapshot(clothWorkingArray);
+            if (skArmed)
+            {
+                skClothPre = CySpringDiff.Snapshot(clothWorkingArray);
+                skClothMan = CySpringDiff.Snapshot(clothWorkingArray);
+                skPre = skirtWorkingArray[skirtWorkingIndex];
+                var skirtCopy = (NativeSkirtWorking[])skirtWorkingArray.Clone();
+                var argCopy = arg;
+                CySpringSolver.NativeClothSkirtUpdate(skClothMan, nClothWorking, collisionArray,
+                    skirtCopy, skirtWorkingIndex, ref argCopy, rootParentWorkArray,
+                    stiffnessForceRate, dragForceRate, gravityRate, windX, windY, windZ, windStrength,
+                    bCollisionSwitch, timescale, is60FPS, moveRate, addMoveRate, springRate);
+                skMan = skirtCopy[skirtWorkingIndex];
+            }
 
             PinnedArray<NativeClothWorking> clothPin = null;
             PinnedArray<NativeClothCollision> collisionPin = null;
@@ -316,6 +427,14 @@ namespace Gallop
                     springRate);
 
                 arg = argPin.Value;
+                CySpringTrace.Record(skTracePre, clothWorkingArray, nClothWorking);
+                if (skArmed)
+                {
+                    CySpringDiff.Compare(clothWorkingArray, skClothMan, skClothPre, nClothWorking);
+                    CySpringDiff.CompareSkirt(skPre, skirtWorkingArray[skirtWorkingIndex], skMan, arg);
+                }
+                CySpringDiff.RestoreColliders(collisionArray, skSavedRadii);
+                CySpringDiff.RestoreBones(clothWorkingArray, skSavedChara);
             }
             finally
             {
@@ -387,14 +506,28 @@ namespace Gallop
             int workingIndex,
             ref NativeSkirtArg arg)
         {
-            if (!isNative)
-                return;
-
             if (workingArray == null || workingArray.Length == 0)
                 return;
 
             if ((uint)workingIndex >= (uint)workingArray.Length)
                 return;
+
+            if (!isNative)
+            {
+                CySpringSolver.NativeSkirtUpdate(ref workingArray[workingIndex], ref arg);
+                return;
+            }
+
+            // Differential for the standalone skirt entry point.
+            NativeSkirtWorking skPre = default, skMan = default;
+            bool skArmed = CySpringDiff.Armed;
+            if (skArmed)
+            {
+                skPre = workingArray[workingIndex];
+                skMan = workingArray[workingIndex];
+                var argCopy = arg;
+                CySpringSolver.NativeSkirtUpdate(ref skMan, ref argCopy);
+            }
 
             PinnedArray<NativeSkirtWorking> workingPin = null;
             PinnedValue<NativeSkirtArg> argPin = null;
@@ -415,6 +548,7 @@ namespace Gallop
                     argPtr);
 
                 arg = argPin.Value;
+                if (skArmed) CySpringDiff.CompareSkirt(skPre, workingArray[workingIndex], skMan, arg);
             }
             finally
             {
@@ -435,9 +569,6 @@ namespace Gallop
             ref NativeSkirtWorking working,
             ref NativeSkirtArg arg)
         {
-            if (!isNative)
-                return;
-
             NativeSkirtWorking[] tempWorkingArray = new NativeSkirtWorking[1];
             tempWorkingArray[0] = working;
 
