@@ -21,6 +21,25 @@ public class TextureExporter
         return readableText;
     }
 
+    /// <summary>
+    /// Encode a texture to PNG the same way ExportAllTexture writes it
+    /// (eye atlases are clipped to their first column).
+    /// </summary>
+    static public byte[] EncodeTextureToPNG(Texture2D source)
+    {
+        var readable = duplicateTexture(source);
+        if (source.name.EndsWith("eye0"))
+        {
+            var pixels = readable.GetPixels(0, 0, readable.width / 4, readable.height);
+            readable.Reinitialize(readable.width / 4, readable.height);
+            readable.SetPixels(pixels);
+            readable.Apply();
+        }
+        var bytes = readable.EncodeToPNG();
+        UnityEngine.Object.Destroy(readable);
+        return bytes;
+    }
+
     static public string[] ExportAllTexture(string path, GameObject gameobj)
     {
         string savePath = path + "/Texture2D/";

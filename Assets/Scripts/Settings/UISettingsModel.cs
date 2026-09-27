@@ -97,6 +97,16 @@ public class UISettingsModel : MonoBehaviour
         Shader.SetGlobalFloat("_GlobalOutlineWidth", val);
     }
 
+#if UNITY_STANDALONE || UNITY_EDITOR
+    private static readonly ExtensionFilter[] ModelExportFilters =
+    {
+        new ExtensionFilter("PMX", "pmx"),
+        new ExtensionFilter("glTF", "gltf"),
+        new ExtensionFilter("glTF Binary", "glb"),
+        new ExtensionFilter("FBX", "fbx"),
+    };
+#endif
+
     public void ExportModel()
     {
 #if UNITY_STANDALONE || UNITY_EDITOR
@@ -104,7 +114,7 @@ public class UISettingsModel : MonoBehaviour
         if (container)
         {
             var entry = container.CharaEntry;
-            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{entry.Id}_{entry.GetName()}", "pmx");
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Model", Config.Instance.MainPath, $"{entry.Id}_{entry.GetName()}", ModelExportFilters);
             if (!string.IsNullOrEmpty(path))
             {
                 ModelExporter.ExportModel(container, path);
@@ -114,7 +124,7 @@ public class UISettingsModel : MonoBehaviour
         var prop_container = Builder.CurrentOtherContainer;
         if (prop_container)
         {
-            var path = StandaloneFileBrowser.SaveFilePanel("Save PMX File", Config.Instance.MainPath, $"{prop_container}", "pmx");
+            var path = StandaloneFileBrowser.SaveFilePanel("Save Model", Config.Instance.MainPath, $"{prop_container}", ModelExportFilters);
             if (!string.IsNullOrEmpty(path))
             {
                 ModelExporter.ExportModel(prop_container, path);
